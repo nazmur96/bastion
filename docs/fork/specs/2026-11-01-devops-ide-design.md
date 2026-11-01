@@ -37,6 +37,21 @@ editors leave to extensions.
    (virtualised lists for logs). A native helper is written only if a
    measurement shows a bottleneck.
 
+## Targets: local sandbox or real
+
+Every workspace points at a **local sandbox** or **real infrastructure**, and
+most features behave differently on each:
+
+|         | Local sandbox (free, safe)                         | Real (billed, careful)      |
+| ------- | -------------------------------------------------- | --------------------------- |
+| Cloud   | Floci (local AWS emulator)                         | the person's cloud account  |
+| Cluster | vind (Kubernetes in a container)                   | EKS or another real cluster |
+| Later   | vCluster (throwaway virtual cluster in a real one) |                             |
+
+The context bar (A1) shows the target, green for local and red for prod; the
+safety gate (A2) relaxes on local targets; cost (C1) only counts real ones.
+People practise locally and touch real infrastructure for the final checks.
+
 ## Foundation
 
 ### F1 — Project detection and the Toolbelt
@@ -88,6 +103,21 @@ DevPod can install it. Upstash Box (existing community plugin, free tier) is the
 documented cloud option. The fork reports the upstream version it is based on,
 so such plugins are not refused.
 
+### F4 — Local sandbox
+
+One-click Toolbelt actions **Start local AWS** (Floci) and **Start local
+cluster** (vind): start the container on Docker/Podman, then inject its
+settings (`floci env` endpoints, the vind kubeconfig context) into the
+workspace's terminals and Claude's commands. Stop/sleep/wake/delete from the
+same menu. Floci's dashboard opens in the browser pane. Before relying on
+Floci for a task, check its coverage of the services involved (EKS, IAM).
+
+### F5 — Inner-loop tools
+
+When the Toolbelt sees a `Tiltfile`, `skaffold.yaml` or `okteto.yml`, it
+offers up/down actions and opens the tool's web UI in the browser pane. Kept
+light: Tilt is in maintenance mode.
+
 ## Phase A — Safety (no cloud needed)
 
 ### A1 — Context bar
@@ -132,9 +162,11 @@ SOPS-encrypted files show a 🔒 badge.
 
 ## Phase B — Live state
 
-- **B1 Kubernetes panel:** resources of the current context, events, log tail
-  (virtualised), restart/rollout actions through the gate. A failing pod links
-  to the manifest that created it (labels/annotations ↔ files).
+- **B1 Kubernetes view = Radar:** instead of building a panel, open Radar
+  (open source, runs against the kubeconfig, nothing installed in the
+  cluster) in the browser pane beside the chat, and give Claude Radar's MCP
+  server, so the person and Claude see the same topology, logs, timeline and
+  Helm history. Headlamp is the fallback.
 - **B2 Drift:** `terraform plan -refresh-only`, `kubectl diff`, `argocd app
   diff`, summarised in a panel and as gutter marks on drifted manifests.
 - **B3 CI panel:** GitHub Actions runs for the branch, failed step logs,
@@ -150,6 +182,17 @@ SOPS-encrypted files show a 🔒 badge.
 - **C3 Project tracker:** optional checklist panel driven by a repo file (e.g.
   a DevSecOps template's phases and "Prove it" drills).
 - **C4 Policy checks:** checkov / trivy / kube-linter findings as diagnostics.
+
+## Build order
+
+1. F1 Toolbelt + F2 tool resolver (done)
+2. F4 Local sandbox (Floci, vind): every later feature is then built and
+   tested for free
+3. A1 Context bar (local vs real)
+4. A2 Safety gate (relaxed on local targets)
+5. B1 Radar embed + MCP for Claude
+6. A3 Plan viewer, A4 Secret masking
+7. F3 DevPod recipe, F5 inner-loop tools, B2 Drift, B3 CI, Phase C
 
 ## Later
 
