@@ -65,6 +65,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:claudeInlineEdit', request),
   writeReviewedClaudeEdit: (request: { workspacePath: string; path: string; content: string }) =>
     ipcRenderer.invoke('aiVault:writeReviewedClaudeEdit', request),
+  inspectDevops: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   listSubagentSessions: (args: AiVaultSubagentListArgs) =>
     ipcRenderer.invoke('aiVault:listSubagentSessions', args),
   getFirstUserPrompt: (args: AiVaultFirstUserPromptArgs) =>

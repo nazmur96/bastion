@@ -30,6 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
+import type { DevopsInspection } from '../../shared/fork-devops-inspection'
 import type {
   AiVaultScanProgress,
   AiVaultScanProgressUpdate
@@ -67,6 +68,8 @@ export type AiVaultApi = {
   resolveClaudeEdits: (request: ResolveClaudeEditsRequest) => Promise<void>
   /** Fork: Cmd+K, one quick Claude rewrite of a selection. */
   claudeInlineEdit: (request: ClaudeInlineEditRequest) => Promise<ClaudeInlineEditResult>
+  /** Fork: the Toolbelt's view of a workspace: stacks found and tools available. */
+  inspectDevops: (workspacePath: string) => Promise<DevopsInspection>
   /** Fork: save a file after undoing some of Claude's blocks in the review dialog. */
   writeReviewedClaudeEdit: (request: {
     workspacePath: string

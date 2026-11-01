@@ -5,6 +5,7 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import type { TabContentType } from '../../../../shared/tab-types'
 import { useClaudePanelState } from '../claude-panel/claude-panel-registry'
+import { DevopsToolbelt } from '../devops/DevopsToolbelt'
 import {
   WORKBENCH_SECTIONS,
   filterWorkbenchLists,
@@ -139,6 +140,7 @@ export function WorkbenchSectionBar({
           </button>
         )
       })}
+      <DevopsToolbelt worktreeId={worktreeId} />
     </div>
   )
 }

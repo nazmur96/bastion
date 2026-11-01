@@ -20646,6 +20646,11 @@
     },
     "claudeSuggest": {
       "thinking": " Claude is thinking…"
+    },
+    "devops": {
+      "toolbelt": {
+        "menu": "DevOps"
+      }
     }
   },
   "dashboardPopout": {

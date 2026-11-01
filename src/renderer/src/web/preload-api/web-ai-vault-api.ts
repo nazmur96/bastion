@@ -104,6 +104,13 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
     claudeInlineEdit: () =>
       Promise.resolve({ ok: false as const, error: 'Inline edit needs the desktop app.' }),
     writeReviewedClaudeEdit: () => Promise.resolve(false),
+    inspectDevops: () =>
+      Promise.resolve({
+        findings: [],
+        environment: 'path' as const,
+        shell: 'posix' as const,
+        tools: {}
+      }),
     // Why: no server-side RPC for subagent transcript listing yet, so report an empty (not erroring) result.
     listSubagentSessions: () => Promise.resolve({ sessions: [], issues: [] }),
     // Why: full first-prompt re-parse is local-FS only; web/runtime falls back to preview text.

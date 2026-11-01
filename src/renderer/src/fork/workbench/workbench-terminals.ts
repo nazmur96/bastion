@@ -47,3 +47,11 @@ export function showWorkbenchTerminals(worktreeId: string): void {
   state.activateTab(tabId, { worktreeId })
   focusTerminalTabSurface(tabId)
 }
+
+/** A new workbench terminal that starts by running `command` from the workspace root. */
+export function runInWorkbenchTerminal(worktreeId: string, command: string): void {
+  const groupId = workbenchGroupId(worktreeId)
+  useAppStore.getState().createTab(worktreeId, groupId ?? undefined, undefined, {
+    pendingStartup: { command }
+  })
+}
