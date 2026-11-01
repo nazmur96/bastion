@@ -13,3 +13,7 @@ Researched 2026-11-01. For the DevOps IDE spec (B1 Kubernetes panel and beyond).
 | Lens / Headlamp                             | Desktop / web K8s UIs (old Dashboard archived Jan 2026).                                                                                                                                             | Headlamp is an alternative to Radar for embedding.                                                                                                   |
 
 Pattern: detect the tool's config file → Toolbelt actions → if it has a web UI, open it in Orca's browser pane next to the chat → if it has an MCP server, give it to Claude.
+
+## Local cloud
+
+| **Floci** (floci.io, MIT, no sign-up) | Local emulators for AWS (126 services: S3, SQS, Lambda, DynamoDB, RDS…), Azure, GCP, OCI; containers on Docker/Podman; `eval $(floci env)` points `aws`/`terraform` at it; optional dashboard. | "Local AWS" Toolbelt mode: start Floci, inject its env into the workspace's terminals and Claude's commands; context bar shows "AWS: floci (local)" in green; the safety gate (A2) skips approvals for this unbilled context; dashboard in the browser pane. Check service fidelity (EKS, IAM) before relying on it per template phase. |
