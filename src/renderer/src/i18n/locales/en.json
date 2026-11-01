@@ -19477,7 +19477,9 @@
           "medium": "Med",
           "xhigh": "XHigh"
         },
-        "imageUnavailable": "Preview unavailable"
+        "imageUnavailable": "Preview unavailable",
+        "permissionPlan": "Plan mode",
+        "permissionPlanDescription": "Reads and plans first; you approve the plan before any edit"
       },
       "tool": {
         "exitCode": "exit {{value0}}",

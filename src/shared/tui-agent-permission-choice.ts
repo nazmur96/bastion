@@ -44,7 +44,14 @@ const ACCEPT_EDITS_TUI_AGENT_ARGS: Partial<Record<TuiAgent, string>> = {
   'claude-agent-teams': '--permission-mode acceptEdits'
 }
 
+// Fork: a Claude chat shown as its terminal keeps planning there.
+const PLAN_TUI_AGENT_ARGS: Partial<Record<TuiAgent, string>> = {
+  claude: '--permission-mode plan',
+  'claude-agent-teams': '--permission-mode plan'
+}
+
 const ARGS_BY_CHOICE: Record<AgentChatPermissionMode, Partial<Record<TuiAgent, string>>> = {
+  plan: PLAN_TUI_AGENT_ARGS,
   ask: ASK_TUI_AGENT_ARGS,
   'accept-edits': ACCEPT_EDITS_TUI_AGENT_ARGS,
   auto: AUTO_TUI_AGENT_ARGS,

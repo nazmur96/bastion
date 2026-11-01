@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import { FilePenLine, Hand, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { ClipboardList, FilePenLine, Hand, ShieldAlert, ShieldCheck } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import {
   AGENT_CHAT_PERMISSION_MODE_ICON_NAMES,
@@ -8,6 +8,7 @@ import {
 } from '../../../../shared/agent-chat-permission-mode'
 
 const ICONS_BY_NAME: Record<AgentChatPermissionModeIconName, LucideIcon> = {
+  ClipboardList,
   Hand,
   FilePenLine,
   ShieldCheck,
@@ -15,6 +16,7 @@ const ICONS_BY_NAME: Record<AgentChatPermissionModeIconName, LucideIcon> = {
 }
 
 export const NATIVE_CHAT_PERMISSION_MODE_ICONS = {
+  plan: ICONS_BY_NAME[AGENT_CHAT_PERMISSION_MODE_ICON_NAMES.plan],
   ask: ICONS_BY_NAME[AGENT_CHAT_PERMISSION_MODE_ICON_NAMES.ask],
   'accept-edits': ICONS_BY_NAME[AGENT_CHAT_PERMISSION_MODE_ICON_NAMES['accept-edits']],
   auto: ICONS_BY_NAME[AGENT_CHAT_PERMISSION_MODE_ICON_NAMES.auto],
@@ -23,6 +25,8 @@ export const NATIVE_CHAT_PERMISSION_MODE_ICONS = {
 
 export function nativeChatPermissionModeLabel(mode: AgentChatPermissionMode): string {
   switch (mode) {
+    case 'plan':
+      return translate('components.native-chat.composer.permissionPlan', 'Plan mode')
     case 'ask':
       return translate('components.native-chat.composer.permissionAsk', 'Ask for approval')
     case 'accept-edits':
@@ -40,6 +44,11 @@ export function nativeChatPermissionModeDescription(
   agent?: string | null
 ): string {
   switch (mode) {
+    case 'plan':
+      return translate(
+        'components.native-chat.composer.permissionPlanDescription',
+        'Reads and plans first; you approve the plan before any edit'
+      )
     case 'ask':
       if (agent !== 'claude') {
         return translate(

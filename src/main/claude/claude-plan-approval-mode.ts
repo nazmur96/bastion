@@ -1,11 +1,16 @@
 import type { PermissionMode, PermissionResult } from '@anthropic-ai/claude-agent-sdk'
 import type { ClaudePendingPrompt } from './claude-prompt-registry'
 import type { ClaudeSession } from './structured/claude-structured-session-state'
+import { readClaudeReportedPermissionMode } from './structured/claude-structured-init-proof'
 
 /** This process's requested mode, else its first init's; anything else asks for each edit. */
 export function claudePlanApprovalMode(
   session: Pick<ClaudeSession, 'launchIntent' | 'firstRootInit'>
 ): PermissionMode {
+  // Fork: a chat the person started in Plan builds the approved plan with edits accepted, as Claude's CLI offers.
+  if (session.launchIntent?.permissionMode === 'plan') {
+    return 'acceptEdits'
+  }
   const mode =
     session.launchIntent?.permissionMode ?? session.firstRootInit?.permissionMode ?? 'default'
   switch (mode) {
@@ -44,8 +49,23 @@ export function leaveClaudePlanModeOnApproval(
   ) {
     return
   }
+  const mode = claudePlanApprovalMode(session)
   try {
-    session.connection.setPermissionMode(claudePlanApprovalMode(session)).catch(logPlanExitFailure)
+    session.connection
+      .setPermissionMode(mode)
+      .then(() => {
+        // Fork: Claude sends no status frame for this switch, so record it as one; the turn's result
+        // then publishes it and the mode picker stops showing Plan.
+        const reported = readClaudeReportedPermissionMode({
+          type: 'system',
+          subtype: 'status',
+          permissionMode: mode
+        })
+        if (reported !== undefined) {
+          session.reportedOptions.reportedPermissionMode = reported
+        }
+      })
+      .catch(logPlanExitFailure)
   } catch (error) {
     logPlanExitFailure(error)
   }

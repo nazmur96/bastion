@@ -11,6 +11,10 @@ import type { SessionOptionDescriptor } from './native-chat/input/native-chat-se
 /** English names and descriptions for surfaces without a translation catalog. */
 const MODE_COPY: Readonly<Record<AgentChatPermissionMode, { label: string; description: string }>> =
   {
+    plan: {
+      label: 'Plan mode',
+      description: 'Reads and plans first; you approve the plan before any edit'
+    },
     ask: {
       label: 'Ask for approval',
       description: "Asks before edits and commands your settings don't allow"

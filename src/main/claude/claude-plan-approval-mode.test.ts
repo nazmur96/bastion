@@ -100,6 +100,8 @@ async function pendingPlanApproval(input: Record<string, unknown>, initPermissio
 describe('leaving Claude plan mode on an approved plan', () => {
   it.each<[Parameters<typeof claudePlanApprovalMode>[0], PermissionMode]>([
     [{ launchIntent: { permissionMode: 'acceptEdits' } }, 'acceptEdits'],
+    // Fork: the chat's own Plan mode builds the approved plan with edits accepted.
+    [{ launchIntent: { permissionMode: 'plan' } }, 'acceptEdits'],
     [{ launchIntent: { permissionMode: 'bypassPermissions' } }, 'bypassPermissions'],
     [{ launchIntent: {}, firstRootInit: { permissionMode: 'auto' } }, 'auto'],
     [{ launchIntent: {}, firstRootInit: { permissionMode: 'dontAsk' } }, 'dontAsk'],
@@ -109,6 +111,14 @@ describe('leaving Claude plan mode on an approved plan', () => {
     [{}, 'default']
   ])('returns to the chat’s own mode (%j)', (session, mode) => {
     expect(claudePlanApprovalMode(session)).toBe(mode)
+  })
+
+  it('records the new mode once Claude accepts it, so the picker leaves Plan (fork)', async () => {
+    const session = planSession(async () => {}, { launchIntent: { permissionMode: 'plan' } })
+    leaveClaudePlanModeOnApproval(session, PLAN_PROMPT, ALLOW)
+    await vi.waitFor(() =>
+      expect(session.reportedOptions.reportedPermissionMode).toBe('accept-edits')
+    )
   })
 
   it('changes nothing for Keep planning, other approvals, or a chat already out of plan', () => {

@@ -31,9 +31,10 @@ describe('resolveWindowShortcutAction', () => {
       expect(resolveWindowShortcutAction(input, 'linux')).toBeNull()
     }
 
+    // Fork: dictation moved to Ctrl+Shift+Space so Ctrl+E can switch the Agents and IDE views.
     expect(
       resolveWindowShortcutAction(
-        { code: 'KeyE', key: 'e', meta: false, control: true, alt: false, shift: false },
+        { code: 'Space', key: ' ', meta: false, control: true, alt: false, shift: true },
         'linux'
       )
     ).toEqual({ type: 'dictationKeyDown' })

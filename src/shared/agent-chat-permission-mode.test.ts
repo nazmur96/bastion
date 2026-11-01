@@ -13,7 +13,14 @@ const CODEX_CHAT_PERMISSION_MODES = agentChatPermissionModes('codex')!
 
 describe('agent chat permission modes', () => {
   it('orders the picker from least to most access', () => {
-    expect(AGENT_CHAT_PERMISSION_MODES).toEqual(['ask', 'accept-edits', 'auto', 'full-access'])
+    // Fork: Plan reads only until a plan is approved, so it sits before Ask.
+    expect(AGENT_CHAT_PERMISSION_MODES).toEqual([
+      'plan',
+      'ask',
+      'accept-edits',
+      'auto',
+      'full-access'
+    ])
   })
 
   it('offers Claude every mode, Codex no edits-only mode, ACP agents Ask and Full access', () => {

@@ -5,7 +5,7 @@ export type AgentChatPermissionModeSupport = {
 }
 
 const CLAUDE_CHAT_PERMISSION_MODES: AgentChatPermissionModeSupport = {
-  modes: ['ask', 'accept-edits', 'auto', 'full-access']
+  modes: ['plan', 'ask', 'accept-edits', 'auto', 'full-access']
 }
 
 const CODEX_CHAT_PERMISSION_MODES: AgentChatPermissionModeSupport = {

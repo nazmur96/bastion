@@ -76,6 +76,7 @@ export const CLAUDE_STRUCTURED_BASE_OPTIONS: ClaudeStructuredSdkOptions = {
 
 const CLAUDE_PERMISSION_MODES = {
   // Override settings defaultMode so the chat runs with its selected permission mode.
+  plan: 'plan',
   ask: 'default',
   'accept-edits': 'acceptEdits',
   auto: 'auto'
