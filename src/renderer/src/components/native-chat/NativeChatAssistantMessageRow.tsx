@@ -8,6 +8,7 @@ import { NativeChatToolRun } from './NativeChatToolRun'
 import { NativeChatCodeBlock, NativeChatPlainCodeBlock } from './NativeChatCodeBlock'
 import { NativeChatAgentControls, NativeChatImageAttachments } from './NativeChatTranscriptChrome'
 import type { useNativeChatWorkRun } from './use-native-chat-work-run'
+import { DevopsSuggestionChips } from '@/fork/devops/DevopsSuggestionChips'
 
 function messageIsStreaming(
   message: NativeChatMessage,
@@ -87,6 +88,7 @@ export function NativeChatAssistantMessageRow({
         />
       ) : null}
       {toolRun ? <NativeChatToolRun {...toolRun} /> : null}
+      {showControls && message.role === 'assistant' ? <DevopsSuggestionChips text={words} /> : null}
       {showControls ? (
         <NativeChatAgentControls
           markdown={words}
