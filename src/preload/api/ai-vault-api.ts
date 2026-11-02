@@ -32,6 +32,7 @@ import type {
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { DevopsInspection } from '../../shared/fork-devops-inspection'
 import type { DevopsContext } from '../../shared/fork-devops-context'
+import type { DevopsRadarResult } from '../../shared/fork-devops-radar'
 import type {
   DevopsSandboxRequest,
   DevopsSandboxResult,
@@ -84,6 +85,12 @@ export type AiVaultApi = {
     workspacePath: string
     terraformDir: string | null
   }) => Promise<DevopsContext>
+  /** Fork B1: the workspace's Radar cluster view, with its MCP server for Claude. */
+  readDevopsRadar: (workspacePath: string) => Promise<DevopsRadarResult>
+  runDevopsRadar: (request: {
+    workspacePath: string
+    action: 'start' | 'stop'
+  }) => Promise<DevopsRadarResult>
   /** Fork: save a file after undoing some of Claude's blocks in the review dialog. */
   writeReviewedClaudeEdit: (request: {
     workspacePath: string

@@ -20710,6 +20710,15 @@
         "delete": "Delete",
         "actions": "Actions",
         "actionsHint": "Read and plan only; each runs in a terminal beside you"
+      },
+      "radar": {
+        "starting": "Starting the cluster view (Radar)…",
+        "title": "Cluster",
+        "hint": "Live topology, health, events and Helm history from Radar. New Claude chats here can read it too (read-only).",
+        "show": "Show cluster view",
+        "stop": "Stop",
+        "claude": "Claude can see this cluster",
+        "open": "Open cluster view"
       }
     }
   },

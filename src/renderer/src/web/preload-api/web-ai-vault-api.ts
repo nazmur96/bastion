@@ -106,6 +106,9 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
     writeReviewedClaudeEdit: () => Promise.resolve(false),
     readDevopsSandbox: () => Promise.resolve({}),
     readDevopsContext: () => Promise.resolve({}),
+    readDevopsRadar: () => Promise.resolve({ ok: true as const }),
+    runDevopsRadar: () =>
+      Promise.resolve({ ok: false as const, error: 'Radar needs the desktop app.' }),
     runDevopsSandbox: () =>
       Promise.resolve({
         ok: false as const,

@@ -4,6 +4,7 @@ import { isAbsolute } from 'node:path'
 import { inspectDevopsWorkspace } from './devops-inspect'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
+import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
 import type { DevopsInspection } from '../../../shared/fork-devops-inspection'
 
 const EMPTY: DevopsInspection = { findings: [], environment: 'path', shell: 'posix', tools: {} }
@@ -74,5 +75,22 @@ export function registerDevopsContextHandlers(): void {
     return isLocalDirectory(workspacePath)
       ? readDevopsContext(workspacePath, typeof terraformDir === 'string' ? terraformDir : null)
       : {}
+  })
+}
+
+/** Fork B1: start, stop and read a workspace's Radar cluster view. */
+export function registerDevopsRadarHandlers(): void {
+  ipcMain.handle('aiVault:readDevopsRadar', (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath) ? readDevopsRadar(workspacePath) : { ok: true }
+  )
+  ipcMain.handle('aiVault:runDevopsRadar', async (_event, request: unknown) => {
+    const workspacePath: unknown =
+      request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
+    const action: unknown =
+      request && typeof request === 'object' ? Reflect.get(request, 'action') : null
+    if (!isLocalDirectory(workspacePath)) {
+      return { ok: false, error: 'Not a local workspace.' }
+    }
+    return action === 'stop' ? stopDevopsRadar(workspacePath) : startDevopsRadar(workspacePath)
   })
 }

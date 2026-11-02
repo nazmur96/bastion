@@ -18,6 +18,7 @@ import {
   SandboxCard,
   STACK_LABELS
 } from './InfraHomeCards'
+import { InfraClusterCard } from './InfraClusterCard'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -120,6 +121,12 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
               }
             />
             <ReadinessCard worktreeId={worktreeId} inspection={inspection} />
+            {offersCluster ? (
+              <InfraClusterCard
+                worktreeId={worktreeId}
+                usesMise={inspection.environment === 'mise'}
+              />
+            ) : null}
             {offersAws || offersCluster ? (
               <SandboxCard
                 worktreeId={worktreeId}

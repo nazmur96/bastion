@@ -5,6 +5,7 @@ import { loadOrcaDocs, searchOrcaDocs } from './orca-docs-search'
 import { toolText } from './orca-app-tool-text'
 import { withClaudeEditHooks } from '../claude-edits/claude-edit-hooks'
 import { withDevopsGateHooks } from '../devops/devops-command-gate-hook'
+import { devopsRadarMcpFor } from '../devops/devops-radar'
 import { buildOrcaSettingsTools } from './orca-app-settings-tools'
 import { buildOrcaWorkspaceTools } from './orca-app-workspace-tools'
 
@@ -125,9 +126,17 @@ export function orcaAppToolOptions(
 ): Pick<ClaudeAgentSdk.Options, 'mcpServers' | 'allowedTools' | 'hooks'> {
   // Edit snapshots for the Keep/Undo review do not depend on the CLI.
   const editHooks = withDevopsGateHooks(withClaudeEditHooks(undefined, cwd).hooks, cwd)
+  // B1: a workspace running Radar gives its chats Radar's read-only cluster tools.
+  const radarUrl = devopsRadarMcpFor(cwd)
+  const radar = radarUrl
+    ? {
+        mcpServers: { radar: { type: 'http' as const, url: radarUrl } },
+        allowedTools: ['mcp__radar']
+      }
+    : null
   const call = createOrcaCliCall(env, cwd)
   if (!call) {
-    return editHooks
+    return radar ? { ...radar, ...editHooks } : editHooks
   }
   const server = sdk.createSdkMcpServer({
     name: 'orca',
@@ -138,5 +147,9 @@ export function orcaAppToolOptions(
       ...buildOrcaSettingsTools(sdk)
     ]
   })
-  return { mcpServers: { orca: server }, allowedTools: ORCA_APP_READ_ONLY_TOOLS, ...editHooks }
+  return {
+    mcpServers: { orca: server, ...radar?.mcpServers },
+    allowedTools: [...ORCA_APP_READ_ONLY_TOOLS, ...(radar?.allowedTools ?? [])],
+    ...editHooks
+  }
 }

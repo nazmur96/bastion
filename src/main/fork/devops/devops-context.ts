@@ -23,7 +23,7 @@ function read(path: string): string | null {
 }
 
 /** The repo's own mise env (per-repo KUBECONFIG, AWS_PROFILE…), which its commands really use. */
-async function workspaceEnv(workspacePath: string): Promise<Record<string, string>> {
+export async function workspaceEnv(workspacePath: string): Promise<Record<string, string>> {
   if (!MISE_FILES.some((name) => existsSync(join(workspacePath, name)))) {
     return {}
   }

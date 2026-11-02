@@ -18,6 +18,7 @@ import { registerClaudeEditsHandlers } from '../fork/claude-edits/claude-edits-i
 import {
   registerDevopsContextHandlers,
   registerDevopsHandlers,
+  registerDevopsRadarHandlers,
   registerDevopsSandboxHandlers
 } from '../fork/devops/devops-ipc'
 
@@ -43,6 +44,7 @@ export function registerAiVaultResumeHandler(options: AiVaultResumeHandlerOption
   registerDevopsHandlers()
   registerDevopsSandboxHandlers()
   registerDevopsContextHandlers()
+  registerDevopsRadarHandlers()
 }
 
 export async function prepareAiVaultSessionResume(
