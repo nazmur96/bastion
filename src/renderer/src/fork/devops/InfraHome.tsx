@@ -23,6 +23,7 @@ import { InfraLaunchpad } from './InfraLaunchpad'
 import { InfraLocalRuns } from './InfraLocalRuns'
 import { InfraSystemMap } from './InfraSystemMap'
 import { InfraCommandDeck } from './InfraCommandDeck'
+import { useSystemMap } from './use-system-map'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -32,9 +33,8 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const sandbox = useDevopsSandbox(worktreeId)
   const editor = useEditorContextEntry(worktreeId)
   // The repo folder, not the branch a worktree is named after.
-  const name = useAppStore((state) =>
-    selectKnownWorktreeById(state, worktreeId)?.path.split(/[\\/]/).findLast(Boolean)
-  )
+  const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
+  const name = path?.split(/[\\/]/).findLast(Boolean)
   const findings = inspection?.findings ?? []
   const has = (...stacks: DevopsStack[]) =>
     findings.some((finding) => stacks.includes(finding.stack))
@@ -48,6 +48,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const ranked = rankDevopsActions({ findings, activeFile })
   const whoAmI = ranked.find((item) => item.action.id === 'aws.whoami')
   const [deckOpen, setDeckOpen] = useState(false)
+  const cluster = useSystemMap(context.kube ? path : undefined, context.kube?.context ?? '')
   return (
     <div
       className="scrollbar-sleek absolute inset-0 z-30 overflow-y-auto bg-background"
@@ -108,6 +109,8 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
         <InfraSystemMap
           worktreeId={worktreeId}
           context={context}
+          result={cluster.result}
+          refresh={cluster.refresh}
           kubectlPrefix={
             inspection?.tools.kubectl?.available && inspection.tools.kubectl.runner === 'mise'
               ? 'mise exec -- '
@@ -120,6 +123,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
           sandbox={sandbox}
           context={context}
           terraformDir={terraformDir}
+          clusterAnswers={cluster.result?.ok === true}
         />
         <InfraLocalRuns worktreeId={worktreeId} sandbox={sandbox} />
         {inspection && findings.length === 0 ? (

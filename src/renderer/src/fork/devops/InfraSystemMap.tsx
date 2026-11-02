@@ -1,9 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { FileCode, FileText, MessageSquare, RefreshCw, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useAppStore } from '@/store'
-import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
@@ -18,7 +16,6 @@ import {
   type SystemMapResult
 } from '../../../../shared/fork-devops-system-map'
 
-const REFRESH_MS = 15_000
 const NODE_W = 168
 const NODE_H = 44
 const GAP_X = 14
@@ -34,37 +31,6 @@ const HEALTH_CLASS: Record<MapHealth, string> = {
 
 type Lens = 'health' | 'blast' | 'security'
 
-function useSystemMap(
-  path: string | undefined,
-  contextKey: string
-): {
-  result: SystemMapResult | null
-  refresh: () => void
-} {
-  const [result, setResult] = useState<SystemMapResult | null>(null)
-  const [round, setRound] = useState(0)
-  useEffect(() => {
-    if (!path) {
-      return
-    }
-    let current = true
-    const load = (): void => {
-      void window.api.aiVault.readSystemMap(path).then((next) => {
-        if (current) {
-          setResult(next)
-        }
-      })
-    }
-    load()
-    const timer = window.setInterval(load, REFRESH_MS)
-    return () => {
-      current = false
-      window.clearInterval(timer)
-    }
-  }, [path, contextKey, round])
-  return { result, refresh: useCallback(() => setRound((value) => value + 1), []) }
-}
-
 function kubectlRef(node: MapNode): string {
   return `-n ${node.namespace} ${node.kind.toLowerCase()}/${node.name}`
 }
@@ -73,16 +39,18 @@ function kubectlRef(node: MapNode): string {
 export function InfraSystemMap({
   worktreeId,
   context,
-  kubectlPrefix
+  kubectlPrefix,
+  result,
+  refresh
 }: {
   worktreeId: string
   context: DevopsContext
+  result: SystemMapResult | null
+  refresh: () => void
   /** `mise exec -- ` when the repo pins kubectl, so terminals use the same one. */
   kubectlPrefix: string
 }): React.JSX.Element | null {
-  const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const kube = context.kube
-  const { result, refresh } = useSystemMap(path, kube?.context ?? '')
   const [selected, setSelected] = useState<string | null>(null)
   const [lens, setLens] = useState<Lens>('health')
   const map = result?.ok ? result.map : null

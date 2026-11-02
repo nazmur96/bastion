@@ -78,13 +78,16 @@ export function InfraLaunchpad({
   inspection,
   sandbox,
   context,
-  terraformDir
+  terraformDir,
+  clusterAnswers
 }: {
   worktreeId: string
   inspection: DevopsInspection | null
   sandbox: DevopsSandbox
   context: DevopsContext
   terraformDir: string | null
+  /** The current cluster's API answered the last map read. */
+  clusterAnswers: boolean
 }): React.JSX.Element {
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const { tools, recheck } = useLaunchpadTools(path)
@@ -98,6 +101,12 @@ export function InfraLaunchpad({
       return translate(
         'components.devops.launchpad.needsLocal',
         'Start a local cluster first; demos never install into a real one.'
+      )
+    }
+    if (tile.needsLocalCluster && !clusterAnswers) {
+      return translate(
+        'components.devops.launchpad.clusterDown',
+        'The current cluster is not answering. Check “Running on this machine”.'
       )
     }
     if (tile.id === 'terraform-plan' && terraformDir === null) {

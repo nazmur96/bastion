@@ -20735,7 +20735,8 @@
         "preview": "Preview",
         "launch": "Launch",
         "goal": "Describe it: “a local cluster with Argo CD and podinfo”, “an S3 bucket in Floci”…",
-        "askClaude": "Ask Claude"
+        "askClaude": "Ask Claude",
+        "clusterDown": "The current cluster is not answering. Check “Running on this machine”."
       },
       "runs": {
         "confirm": "Click again",
