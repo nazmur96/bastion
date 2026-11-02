@@ -41,7 +41,7 @@ const items = [
   { kind: 'ConfigMap', metadata: { name: 'podinfo', namespace: 'app' } },
   { kind: 'Deployment', metadata: { name: 'coredns', namespace: 'kube-system' }, spec: {} }
 ]
-const map = buildSystemMap(JSON.stringify({ items }))
+const map = buildSystemMap(JSON.stringify({ items }), new Set(['app/other']))
 const node = (id: string) => map.nodes.find((candidate) => candidate.id === id)
 
 describe('system map', () => {
@@ -60,6 +60,10 @@ describe('system map', () => {
     expect(node('Deployment/app/podinfo')).toMatchObject({ health: 'warn', detail: '1/2 ready' })
     expect(node('Service/app/orphan')?.health).toBe('warn')
     expect(node('ConfigMap/app/missing-cm')).toMatchObject({ health: 'bad', detail: 'missing' })
+    expect(node('Secret/app/db')).toMatchObject({ health: 'bad', detail: 'missing' })
+    expect(
+      buildSystemMap(JSON.stringify({ items })).nodes.find((n) => n.id === 'Secret/app/db')?.health
+    ).toBe('warn')
   })
 
   it('hides system namespaces and survives bad JSON', () => {

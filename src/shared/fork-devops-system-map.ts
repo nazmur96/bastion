@@ -105,7 +105,11 @@ function configRefs(podSpec: Obj): { kind: 'ConfigMap' | 'Secret'; name: string 
   return refs
 }
 
-export function buildSystemMap(json: string): SystemMap {
+/**
+ * `secrets` holds `namespace/name` of Secrets that exist (names only, values are never read);
+ * `null` when they could not be listed, so a referenced Secret is shown as unknown, not healthy.
+ */
+export function buildSystemMap(json: string, secrets: Set<string> | null = null): SystemMap {
   let items: Obj[]
   try {
     items = list(obj(JSON.parse(json)).items)
@@ -124,7 +128,12 @@ export function buildSystemMap(json: string): SystemMap {
     const meta = obj(item.metadata)
     const name = str(meta.name)
     const namespace = str(meta.namespace) ?? 'default'
-    if (!kind || !name || SYSTEM_NAMESPACE.test(namespace)) {
+    if (
+      !kind ||
+      !name ||
+      SYSTEM_NAMESPACE.test(namespace) ||
+      (kind === 'Service' && namespace === 'default' && name === 'kubernetes')
+    ) {
       continue
     }
     const id = mapNodeId(kind, namespace, name)
@@ -208,15 +217,21 @@ export function buildSystemMap(json: string): SystemMap {
   for (const workload of workloads) {
     for (const ref of configRefs(workload.podSpec)) {
       const id = mapNodeId(ref.kind, workload.namespace, ref.name)
-      const exists = ref.kind === 'Secret' || configMaps.has(id)
+      const exists =
+        ref.kind === 'Secret'
+          ? secrets === null
+            ? null
+            : secrets.has(`${workload.namespace}/${ref.name}`)
+          : configMaps.has(id)
       if (!nodes.has(id)) {
         nodes.set(id, {
           id,
           kind: ref.kind,
           name: ref.name,
           namespace: workload.namespace,
-          health: exists ? 'ok' : 'bad',
-          detail: exists ? ref.kind.toLowerCase() : 'missing',
+          health: exists === false ? 'bad' : exists === null ? 'warn' : 'ok',
+          detail:
+            exists === false ? 'missing' : exists === null ? 'not checked' : ref.kind.toLowerCase(),
           layer: 3
         })
       }
