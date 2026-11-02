@@ -339,3 +339,25 @@ below.
 3. Stage 2 (this app on a local cluster).
 4. The stepper.
 5. The EKS sequence (stage 5), then 6 and 7.
+
+### The path lives inside the full workbench (2026-11-02)
+
+The project path, map and plan sheet are views **inside** the Orca workbench
+built earlier in this fork, never a replacement for it. Every DevOps feature
+must keep these working around it:
+
+- **File explorer:** files Claude creates or changes (scaffolded Terraform,
+  manifest fixes, runbooks) are ordinary repo files, shown with added/modified
+  badges.
+- **Editor with pending-edit review:** Claude's changes appear as pending edits
+  with gutter marks; the person keeps or undoes each one. Secret masking applies.
+- **Claude panel:** a full chat (composer, attachments, Plan mode), not just
+  explanations. Every "Explain / Ask Claude" button only drafts into it.
+- **Side chat:** fork the conversation to ask something on the side.
+- **Terminals:** every command a step runs is in a normal workbench terminal
+  the person can watch and type into.
+- **Browser tabs:** Argo CD, Grafana, Floci, the app's own localhost open as
+  workbench browser tabs.
+- **Nothing hidden:** anything a step writes outside the repo (plan files in
+  the temp dir, the generated kind config in userData) is shown with an
+  "open file" link where it is used.
