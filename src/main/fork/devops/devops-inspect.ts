@@ -17,17 +17,23 @@ const HEAD_LIMIT = 400
 const HEAD_BYTES = 4096
 const TOOL_TIMEOUT_MS = 8_000
 
-function run(
+/** stdout on success; on failure stdout and stderr together, so callers can show why. */
+export function run(
   command: string,
   args: readonly string[],
-  cwd: string
+  cwd: string,
+  timeout = TOOL_TIMEOUT_MS
 ): Promise<{ ok: boolean; stdout: string }> {
   return new Promise((resolve) => {
     execFile(
       command,
       [...args],
-      { cwd, timeout: TOOL_TIMEOUT_MS, maxBuffer: 16 * 1024 * 1024 },
-      (error, stdout) => resolve({ ok: !error, stdout: String(stdout) })
+      { cwd, timeout, maxBuffer: 16 * 1024 * 1024 },
+      (error, stdout, stderr) =>
+        resolve({
+          ok: !error,
+          stdout: error ? `${String(stdout)}${String(stderr)}` : String(stdout)
+        })
     )
   })
 }
@@ -96,10 +102,10 @@ function readHead(path: string): string | null {
   }
 }
 
-const MISE_FILES = ['mise.toml', '.mise.toml', '.tool-versions']
+export const MISE_FILES = ['mise.toml', '.mise.toml', '.tool-versions']
 
 /** Principle 3: the repo's mise environment first, then PATH; never an install on the host. */
-async function resolveTool(
+export async function resolveTool(
   workspacePath: string,
   tool: string,
   usesMise: boolean

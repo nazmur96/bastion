@@ -104,6 +104,13 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
     claudeInlineEdit: () =>
       Promise.resolve({ ok: false as const, error: 'Inline edit needs the desktop app.' }),
     writeReviewedClaudeEdit: () => Promise.resolve(false),
+    readDevopsSandbox: () => Promise.resolve({}),
+    runDevopsSandbox: () =>
+      Promise.resolve({
+        ok: false as const,
+        error: 'The local sandbox needs the desktop app.',
+        state: {}
+      }),
     inspectDevops: () =>
       Promise.resolve({
         findings: [],

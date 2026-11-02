@@ -32,6 +32,11 @@ import type {
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { DevopsInspection } from '../../shared/fork-devops-inspection'
 import type {
+  DevopsSandboxRequest,
+  DevopsSandboxResult,
+  DevopsSandboxState
+} from '../../shared/fork-devops-sandbox'
+import type {
   AiVaultScanProgress,
   AiVaultScanProgressUpdate
 } from '../../shared/ai-vault-scan-progress'
@@ -70,6 +75,9 @@ export type AiVaultApi = {
   claudeInlineEdit: (request: ClaudeInlineEditRequest) => Promise<ClaudeInlineEditResult>
   /** Fork: the Toolbelt's view of a workspace: stacks found and tools available. */
   inspectDevops: (workspacePath: string) => Promise<DevopsInspection>
+  /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */
+  readDevopsSandbox: (workspacePath: string) => Promise<DevopsSandboxState>
+  runDevopsSandbox: (request: DevopsSandboxRequest) => Promise<DevopsSandboxResult>
   /** Fork: save a file after undoing some of Claude's blocks in the review dialog. */
   writeReviewedClaudeEdit: (request: {
     workspacePath: string

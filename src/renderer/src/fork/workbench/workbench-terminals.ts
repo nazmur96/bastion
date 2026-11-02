@@ -49,9 +49,21 @@ export function showWorkbenchTerminals(worktreeId: string): void {
 }
 
 /** A new workbench terminal that starts by running `command` from the workspace root. */
-export function runInWorkbenchTerminal(worktreeId: string, command: string): void {
+export function runInWorkbenchTerminal(
+  worktreeId: string,
+  command: string,
+  env?: Record<string, string>
+): void {
   const groupId = workbenchGroupId(worktreeId)
   useAppStore.getState().createTab(worktreeId, groupId ?? undefined, undefined, {
-    pendingStartup: { command }
+    pendingStartup: { command, ...(env && Object.keys(env).length > 0 ? { env } : {}) }
+  })
+}
+
+/** A browser tab in the workbench, e.g. a local tool's dashboard. */
+export function openInWorkbenchBrowser(worktreeId: string, url: string, title: string): void {
+  useAppStore.getState().createBrowserTab(worktreeId, url, {
+    title,
+    targetGroupId: workbenchGroupId(worktreeId) ?? undefined
   })
 }

@@ -15,7 +15,7 @@ import { wakeNativeChatTranscriptDistro } from '../native-chat/native-chat-open-
 import { wslDistroForPath } from '../wsl/wsl-unc-access-gate'
 import { copyChatForSideChat } from '../fork/side-chat-conversation-copy'
 import { registerClaudeEditsHandlers } from '../fork/claude-edits/claude-edits-ipc'
-import { registerDevopsHandlers } from '../fork/devops/devops-ipc'
+import { registerDevopsHandlers, registerDevopsSandboxHandlers } from '../fork/devops/devops-ipc'
 
 export type AiVaultResumeHandlerOptions = {
   ensureStructuredSessionOwnership?: () => Promise<void>
@@ -37,6 +37,7 @@ export function registerAiVaultResumeHandler(options: AiVaultResumeHandlerOption
   })
   registerClaudeEditsHandlers()
   registerDevopsHandlers()
+  registerDevopsSandboxHandlers()
 }
 
 export async function prepareAiVaultSessionResume(

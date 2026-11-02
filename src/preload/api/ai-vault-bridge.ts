@@ -4,6 +4,7 @@ import type {
 } from '../../shared/fork-claude-edits'
 import { createSessionSearchClient } from '../../shared/ai-vault-search-client'
 import type { AiVaultSearchRequest, AiVaultSearchStatus } from '../../shared/ai-vault-search-types'
+import type { DevopsSandboxRequest } from '../../shared/fork-devops-sandbox'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import { ipcRenderer } from 'electron'
 import type {
@@ -67,6 +68,10 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:writeReviewedClaudeEdit', request),
   inspectDevops: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
+  readDevopsSandbox: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:readDevopsSandbox', workspacePath),
+  runDevopsSandbox: (request: DevopsSandboxRequest) =>
+    ipcRenderer.invoke('aiVault:runDevopsSandbox', request),
   listSubagentSessions: (args: AiVaultSubagentListArgs) =>
     ipcRenderer.invoke('aiVault:listSubagentSessions', args),
   getFirstUserPrompt: (args: AiVaultFirstUserPromptArgs) =>

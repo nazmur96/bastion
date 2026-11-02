@@ -16,6 +16,7 @@ import { withTimeout } from '../../shared/promise-timeout-fallback'
 import type { DescendantTreeVerdict } from '../pty-descendant-exit-verification'
 import { claudeChildCloseProven } from './claude-child-exit-proof-ladder'
 import { createClaudeCodeProcessSpawn } from './claude-agent-sdk-process-spawn'
+import { withDevopsSandboxEnv } from '../fork/devops/devops-sandbox-env'
 import {
   claudeUnwrittenUserMessageError,
   createClaudeUserMessageQueue
@@ -103,13 +104,17 @@ export async function openClaudeStreamJsonConnection(
   const { query } = sdk
   const spawner = createClaudeCodeProcessSpawn(spawnImpl, process.platform, launch)
   // Always supply scrubbed env to prevent ambient auth leaks; only launch.env may pin CLAUDE_CONFIG_DIR.
-  const env = await withoutRejectedClaudeApiKey(
-    withoutKeys(
-      buildClaudeChildProcessEnv(launch.env, {
-        inheritedEnv: withoutInheritedClaudeConfigDir(process.env),
-        scrubConfiguredChildSessionStamps: true
-      }),
-      launch.envToDelete ?? []
+  // Fork F4: a sandboxed workspace's local AWS endpoints reach Claude's shell commands.
+  const env = withDevopsSandboxEnv(
+    launch.cwd,
+    await withoutRejectedClaudeApiKey(
+      withoutKeys(
+        buildClaudeChildProcessEnv(launch.env, {
+          inheritedEnv: withoutInheritedClaudeConfigDir(process.env),
+          scrubConfiguredChildSessionStamps: true
+        }),
+        launch.envToDelete ?? []
+      )
     )
   )
   const inbox = createClaudeUserMessageQueue()
