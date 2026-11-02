@@ -1,4 +1,4 @@
-import { Globe, FileText, GitCompare, SquareTerminal } from 'lucide-react'
+import { Globe, FileText, GitCompare, Server, SquareTerminal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
@@ -6,6 +6,7 @@ import { selectKnownWorktreeById } from '@/store/selectors'
 import type { TabContentType } from '../../../../shared/tab-types'
 import { useClaudePanelState } from '../claude-panel/claude-panel-registry'
 import { DevopsToolbelt } from '../devops/DevopsToolbelt'
+import { setInfraHomeOpen, useInfraHomeOpen } from '../devops/infra-home-store'
 import {
   WORKBENCH_SECTIONS,
   filterWorkbenchLists,
@@ -101,12 +102,14 @@ export function WorkbenchSectionBar({
   const recentTabIds = useAppStore(
     (s) => s.groupsByWorktree?.[worktreeId]?.find((group) => group.id === groupId)?.recentTabIds
   )
+  const infraOpen = useInfraHomeOpen(worktreeId)
   if (isPanel) {
     return null
   }
-  const active = currentSection(model)
+  const active = infraOpen ? null : currentSection(model)
   const counts = sectionCounts(model.groupTabs)
   const choose = (section: WorkbenchSection): void => {
+    setInfraHomeOpen(worktreeId, false)
     const tabId = latestTabInSection(model.groupTabs, recentTabIds ?? [], section)
     if (tabId) {
       useAppStore.getState().activateTab(tabId, { worktreeId })
@@ -119,6 +122,23 @@ export function WorkbenchSectionBar({
       className="flex h-full shrink-0 items-center gap-0.5 border-r border-border pr-1.5 pl-1"
       data-workbench-sections={groupId}
     >
+      <button
+        type="button"
+        aria-pressed={infraOpen}
+        onClick={() => setInfraHomeOpen(worktreeId, !infraOpen)}
+        title={translate(
+          'components.workbench.infraHint',
+          'Context, readiness, sandbox and actions for this repo'
+        )}
+        className={cn(
+          'flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground',
+          infraOpen && 'bg-accent text-primary'
+        )}
+        data-workbench-infra=""
+      >
+        <Server className="size-3.5" aria-hidden />
+        <span>{translate('components.workbench.infra', 'Infra')}</span>
+      </button>
       {WORKBENCH_SECTIONS.map((section) => {
         const Icon = ICONS[section]
         return (

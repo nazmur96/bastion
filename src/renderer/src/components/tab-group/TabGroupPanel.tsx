@@ -1,6 +1,7 @@
 import { ClaudeEditsBar } from '@/fork/claude-edits/ClaudeEditsBar'
 import { WorkbenchSectionBar, useWorkbenchSections } from '@/fork/workbench/WorkbenchSectionBar'
 import { ClaudePanelHeaderActions } from '@/fork/claude-panel/ClaudePanelHeaderActions'
+import { InfraHomeOverlay } from '@/fork/devops/InfraHome'
 import { Suspense, useCallback, useMemo } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { useDroppable } from '@dnd-kit/core'
@@ -338,6 +339,7 @@ export default function TabGroupPanel({
             data-contextual-tour-target="workspace-agent-terminal-tip"
           />
         ) : null}
+        <InfraHomeOverlay worktreeId={worktreeId} groupId={groupId} />
         {activeTab &&
           activeTab.contentType !== 'terminal' &&
           activeTab.contentType !== 'agent-session' &&

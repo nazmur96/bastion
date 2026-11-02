@@ -1,20 +1,16 @@
-import { useEffect, useState } from 'react'
 import { Cloud, Layers, Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAppStore } from '@/store'
-import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
-import type { DevopsContext, DevopsContextTone } from '../../../../shared/fork-devops-context'
+import type { DevopsContextTone } from '../../../../shared/fork-devops-context'
+import { useDevopsContext } from './use-devops-context'
 
-const REFRESH_MS = 10_000
-
-const TONE_CLASS: Record<DevopsContextTone, string> = {
+export const TONE_CLASS: Record<DevopsContextTone, string> = {
   local: 'text-status-success',
   prod: 'font-medium text-destructive',
   normal: 'text-muted-foreground'
 }
 
-function toneTitle(tone: DevopsContextTone): string {
+export function toneTitle(tone: DevopsContextTone): string {
   return tone === 'local'
     ? translate('components.devops.context.local', 'Local sandbox: free, nothing real is touched')
     : tone === 'prod'
@@ -58,31 +54,7 @@ export function DevopsContextBar({
   terraformDir: string | null
   refreshKey: string
 }): React.JSX.Element | null {
-  const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
-  const [context, setContext] = useState<DevopsContext>({})
-  useEffect(() => {
-    if (!path) {
-      return
-    }
-    let current = true
-    const load = (): void => {
-      void window.api.aiVault
-        .readDevopsContext({ workspacePath: path, terraformDir })
-        .then((next) => {
-          if (current) {
-            setContext(next)
-          }
-        })
-    }
-    load()
-    const timer = window.setInterval(load, REFRESH_MS)
-    window.addEventListener('focus', load)
-    return () => {
-      current = false
-      window.clearInterval(timer)
-      window.removeEventListener('focus', load)
-    }
-  }, [path, terraformDir, refreshKey])
+  const context = useDevopsContext(worktreeId, terraformDir, refreshKey)
   const { kube, aws, terraform } = context
   const chips = [
     show.kube && kube ? (

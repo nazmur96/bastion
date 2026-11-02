@@ -20618,7 +20618,9 @@
       "terminals": "Terminals",
       "files": "Files",
       "changes": "Changes",
-      "browser": "Browser"
+      "browser": "Browser",
+      "infraHint": "Context, readiness, sandbox and actions for this repo",
+      "infra": "Infra"
     },
     "claudeEdits": {
       "reviewTitle": "Review Claude’s changes",
@@ -20673,6 +20675,41 @@
         "local": "Local sandbox: free, nothing real is touched",
         "prod": "Looks like production: be careful",
         "normal": "Real infrastructure"
+      },
+      "home": {
+        "title": "Infra · {{name}}",
+        "noStacks": "No infrastructure code found yet",
+        "scanning": "Looking at this repo…",
+        "close": "Close Infra home",
+        "emptyTitle": "Start with infrastructure",
+        "emptyHint": "Add Terraform, Kubernetes manifests, a Helm chart or CI workflows and this page fills in. Ask Claude to scaffold one.",
+        "emptyExample": "For example: “Create a Terraform module for an S3 bucket with versioning, and a GitHub Actions workflow that runs terraform plan.”",
+        "local": "local",
+        "prod": "PRODUCTION",
+        "real": "real",
+        "none": "not set",
+        "context": "Where you are pointed",
+        "contextHint": "Commands from this workspace, yours and Claude’s, land here",
+        "noInit": "not initialised",
+        "whoami": "Who am I in AWS?",
+        "readiness": "Readiness",
+        "readinessMise": "Tools come from this repo’s mise.toml, never the machine",
+        "readinessPath": "Tools come from your PATH",
+        "noTools": "Nothing to check yet.",
+        "viaMise": "pinned in mise.toml",
+        "viaPath": "on PATH",
+        "pin": "Add to mise.toml",
+        "stopped": "stopped",
+        "sandbox": "Local sandbox",
+        "sandboxHint": "Practise for free: nothing here touches a real account. Claude may apply and destroy freely.",
+        "dashboard": "Dashboard",
+        "stop": "Stop",
+        "start": "Start",
+        "wake": "Wake",
+        "sleep": "Sleep",
+        "delete": "Delete",
+        "actions": "Actions",
+        "actionsHint": "Read and plan only; each runs in a terminal beside you"
       }
     }
   },

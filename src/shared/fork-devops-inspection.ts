@@ -31,3 +31,17 @@ export function devopsCommandLine(
     ? `mise exec -- ${command}`
     : `mise exec -- sh -c ${shellQuote(command)}`
 }
+
+/** How to pin a Toolbelt CLI in a repo's mise.toml; tools without an entry get an install hint only. */
+export const MISE_TOOL_SPECS: Readonly<Record<string, string>> = {
+  terraform: 'terraform',
+  kubectl: 'kubectl',
+  helm: 'helm',
+  argocd: 'argocd',
+  aws: 'aws-cli',
+  gh: 'gh',
+  'ansible-lint': 'pipx:ansible-lint',
+  floci: 'github:floci-io/floci-cli',
+  vcluster: 'vcluster',
+  'kubectl-radar': 'github:skyhook-io/radar'
+}
