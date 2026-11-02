@@ -48,5 +48,8 @@ export const MISE_TOOL_SPECS: Readonly<Record<string, string>> = {
   k3d: 'k3d',
   eksctl: 'eksctl',
   kops: 'kops',
-  devpod: 'devpod'
+  devpod: 'devpod',
+  trivy: 'trivy',
+  checkov: 'pipx:checkov',
+  'kube-linter': 'kube-linter'
 }

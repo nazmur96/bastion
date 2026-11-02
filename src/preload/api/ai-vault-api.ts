@@ -96,6 +96,8 @@ export type AiVaultApi = {
     name: string
   }) => Promise<{ path: string; line: number; kustomize: string | null } | null>
   listLocalRuns: (workspacePath: string) => Promise<LocalRun[]>
+  /** Fork: path of the Launchpad's 3-node kind config, written on demand. */
+  kindMultiNodeConfig: () => Promise<string>
   checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */
   readDevopsSandbox: (workspacePath: string) => Promise<DevopsSandboxState>

@@ -2,7 +2,7 @@ import type { DevopsSandboxKind } from './fork-devops-sandbox'
 import type { LocalRunKind } from './fork-devops-local-runs'
 
 /** Fork: the Launchpad — problems first ("give me a cluster"), each answered by one click. */
-export type LaunchpadGroup = 'local' | 'demo' | 'machine' | 'real'
+export type LaunchpadGroup = 'local' | 'demo' | 'machine' | 'scan' | 'real'
 
 export type LaunchpadTile = {
   id: string
@@ -23,7 +23,13 @@ export type LaunchpadTile = {
   creates?: { kind: LocalRunKind; name: string }
 }
 
-export const LAUNCHPAD_GROUPS: readonly LaunchpadGroup[] = ['local', 'demo', 'machine', 'real']
+export const LAUNCHPAD_GROUPS: readonly LaunchpadGroup[] = [
+  'local',
+  'demo',
+  'machine',
+  'scan',
+  'real'
+]
 
 export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
   {
@@ -37,6 +43,19 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     steps: [
       'kind create cluster --name {name}-dev',
       'kubectl cluster-info --context kind-{name}-dev'
+    ]
+  },
+  {
+    id: 'kind-multi',
+    group: 'local',
+    title: 'Local Kubernetes · kind, 3 nodes',
+    blurb: 'One control plane and two workers, for scheduling and failover drills.',
+    tool: 'kind',
+    cost: null,
+    creates: { kind: 'kind', name: '{name}-multi' },
+    steps: [
+      'kind create cluster --name {name}-multi --config "{kindConfig}"',
+      'kubectl get nodes --context kind-{name}-multi'
     ]
   },
   {
@@ -142,6 +161,33 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     steps: ['multipass launch --name {name}-vm --cpus 2 --memory 4G', 'multipass shell {name}-vm']
   },
   {
+    id: 'trivy',
+    group: 'scan',
+    title: 'Misconfigurations · Trivy',
+    blurb: 'Terraform, Kubernetes, Helm and Dockerfiles against Trivy’s policies.',
+    tool: 'trivy',
+    cost: null,
+    steps: ['trivy config --exit-code 0 .']
+  },
+  {
+    id: 'checkov',
+    group: 'scan',
+    title: 'Policy as code · Checkov',
+    blurb: 'Hundreds of CIS and cloud best-practice checks, compact output.',
+    tool: 'checkov',
+    cost: null,
+    steps: ['checkov -d . --compact --quiet --soft-fail']
+  },
+  {
+    id: 'kube-linter',
+    group: 'scan',
+    title: 'Kubernetes manifests · kube-linter',
+    blurb: 'Probes, limits, security contexts and labels in your YAML.',
+    tool: 'kube-linter',
+    cost: null,
+    steps: ['kube-linter lint .']
+  },
+  {
     id: 'terraform-plan',
     group: 'real',
     title: 'Terraform plan',
@@ -178,12 +224,32 @@ export const LAUNCHPAD_TOOLS: readonly string[] = [
 /** One terminal line: steps stop at the first failure. */
 export function launchpadScript(
   tile: LaunchpadTile,
-  values: { name: string; tfdir: string }
+  values: { name: string; tfdir: string; kindConfig?: string }
 ): string | null {
   if (!tile.steps || tile.steps.length === 0) {
     return null
   }
   return tile.steps
-    .map((step) => step.replaceAll('{name}', values.name).replaceAll('{tfdir}', values.tfdir))
+    .map((step) =>
+      step
+        .replaceAll('{name}', values.name)
+        .replaceAll('{tfdir}', values.tfdir)
+        .replaceAll('{kindConfig}', values.kindConfig ?? '')
+    )
     .join(' && ')
+}
+
+/** One control plane (multi-control-plane kind clusters do not survive a Docker restart) and two workers. */
+export const KIND_MULTI_NODE_CONFIG = [
+  'kind: Cluster',
+  'apiVersion: kind.x-k8s.io/v1alpha4',
+  'nodes:',
+  '  - role: control-plane',
+  '  - role: worker',
+  '  - role: worker',
+  ''
+].join('\n')
+
+export function launchpadNeedsKindConfig(tile: LaunchpadTile): boolean {
+  return tile.steps?.some((step) => step.includes('{kindConfig}')) ?? false
 }

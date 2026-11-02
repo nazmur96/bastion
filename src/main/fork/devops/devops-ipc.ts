@@ -1,11 +1,11 @@
-import { ipcMain } from 'electron'
-import { existsSync, statSync } from 'node:fs'
+import { app, ipcMain } from 'electron'
+import { existsSync, statSync, writeFileSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
-import { LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
+import { KIND_MULTI_NODE_CONFIG, LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
 import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
@@ -75,6 +75,12 @@ export function registerDevopsHandlers(): void {
   ipcMain.handle('aiVault:listLocalRuns', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? listLocalRuns(workspacePath) : []
   )
+  // A fixed file in userData: kind reads its node layout from a path on every OS.
+  ipcMain.handle('aiVault:kindMultiNodeConfig', () => {
+    const path = join(app.getPath('userData'), 'fork-kind-multi-node.yaml')
+    writeFileSync(path, KIND_MULTI_NODE_CONFIG)
+    return path
+  })
   // Only the Launchpad's own tool names reach the shell lookup.
   ipcMain.handle('aiVault:checkLaunchpadTools', async (_event, workspacePath: unknown) => {
     if (!isLocalDirectory(workspacePath)) {

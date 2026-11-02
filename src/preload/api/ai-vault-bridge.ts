@@ -76,6 +76,7 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:findManifest', request),
   listLocalRuns: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:listLocalRuns', workspacePath),
+  kindMultiNodeConfig: () => ipcRenderer.invoke('aiVault:kindMultiNodeConfig'),
   checkLaunchpadTools: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:checkLaunchpadTools', workspacePath),
   readDevopsSandbox: (workspacePath: string) =>

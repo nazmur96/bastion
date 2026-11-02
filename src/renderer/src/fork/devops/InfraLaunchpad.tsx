@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Cloud, FlaskConical, Monitor, Rocket, Ship, Sparkles, Wrench } from 'lucide-react'
+import {
+  Cloud,
+  FlaskConical,
+  Monitor,
+  Rocket,
+  ShieldCheck,
+  Ship,
+  Sparkles,
+  Wrench
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -21,6 +30,7 @@ import {
 import {
   LAUNCHPAD_GROUPS,
   LAUNCHPAD_TILES,
+  launchpadNeedsKindConfig,
   launchpadScript,
   type LaunchpadGroup,
   type LaunchpadTile
@@ -31,6 +41,7 @@ const GROUP_ICONS: Record<LaunchpadGroup, typeof Ship> = {
   local: Ship,
   demo: FlaskConical,
   machine: Monitor,
+  scan: ShieldCheck,
   real: Cloud
 }
 
@@ -42,6 +53,8 @@ function groupTitle(group: LaunchpadGroup): string {
       return translate('components.devops.launchpad.demo', 'Demos · into your local cluster')
     case 'machine':
       return translate('components.devops.launchpad.machine', 'A machine to work on')
+    case 'scan':
+      return translate('components.devops.launchpad.scan', 'Check it · security and policy scans')
     case 'real':
       return translate(
         'components.devops.launchpad.real',
@@ -121,7 +134,21 @@ export function InfraLaunchpad({
       sandbox.run(tile.sandbox, 'start')
       return
     }
-    const script = launchpadScript(tile, { name, tfdir: terraformDir ?? '.' })
+    if (launchpadNeedsKindConfig(tile)) {
+      void window.api.aiVault
+        .kindMultiNodeConfig()
+        .then((kindConfig) => run(tile, status, kindConfig))
+      return
+    }
+    run(tile, status, undefined)
+  }
+
+  const run = (
+    tile: LaunchpadTile,
+    status: DevopsToolStatus | undefined,
+    kindConfig: string | undefined
+  ): void => {
+    const script = launchpadScript(tile, { name, tfdir: terraformDir ?? '.', kindConfig })
     if (script) {
       if (tile.creates) {
         rememberLaunched({
