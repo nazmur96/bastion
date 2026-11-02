@@ -20719,6 +20719,21 @@
         "stop": "Stop",
         "claude": "Claude can see this cluster",
         "open": "Open cluster view"
+      },
+      "launchpad": {
+        "local": "Try it now · local and free",
+        "demo": "Demos · into your local cluster",
+        "machine": "A machine to work on",
+        "real": "Real infrastructure · plan and dry run only",
+        "needsLocal": "Start a local cluster first; demos never install into a real one.",
+        "noTerraform": "No Terraform in this repo yet.",
+        "title": "What do you want to do?",
+        "hint": "Each tile runs in a terminal you can watch. Nothing billed is created from here.",
+        "free": "free",
+        "add": "Add {{tool}}",
+        "missing": "not installed",
+        "preview": "Preview",
+        "launch": "Launch"
       }
     }
   },

@@ -68,6 +68,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:writeReviewedClaudeEdit', request),
   inspectDevops: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
+  checkLaunchpadTools: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:checkLaunchpadTools', workspacePath),
   readDevopsSandbox: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readDevopsSandbox', workspacePath),
   runDevopsSandbox: (request: DevopsSandboxRequest) =>

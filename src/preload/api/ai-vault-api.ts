@@ -30,7 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
-import type { DevopsInspection } from '../../shared/fork-devops-inspection'
+import type { DevopsInspection, DevopsToolStatus } from '../../shared/fork-devops-inspection'
 import type { DevopsContext } from '../../shared/fork-devops-context'
 import type { DevopsRadarResult } from '../../shared/fork-devops-radar'
 import type {
@@ -77,6 +77,8 @@ export type AiVaultApi = {
   claudeInlineEdit: (request: ClaudeInlineEditRequest) => Promise<ClaudeInlineEditResult>
   /** Fork: the Toolbelt's view of a workspace: stacks found and tools available. */
   inspectDevops: (workspacePath: string) => Promise<DevopsInspection>
+  /** Fork: which Launchpad CLIs this workspace can run, keyed by tool. */
+  checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */
   readDevopsSandbox: (workspacePath: string) => Promise<DevopsSandboxState>
   runDevopsSandbox: (request: DevopsSandboxRequest) => Promise<DevopsSandboxResult>

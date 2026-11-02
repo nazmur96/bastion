@@ -19,6 +19,7 @@ import {
   STACK_LABELS
 } from './InfraHomeCards'
 import { InfraClusterCard } from './InfraClusterCard'
+import { InfraLaunchpad } from './InfraLaunchpad'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -88,6 +89,13 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             <X aria-hidden />
           </Button>
         </header>
+        <InfraLaunchpad
+          worktreeId={worktreeId}
+          inspection={inspection}
+          sandbox={sandbox}
+          context={context}
+          terraformDir={terraformDir}
+        />
         {inspection && findings.length === 0 ? (
           <InfraCard
             title={translate('components.devops.home.emptyTitle', 'Start with infrastructure')}
@@ -165,7 +173,8 @@ export function InfraHomeOverlay({
   )
   const seenTab = useRef(activeTabId)
   useEffect(() => {
-    if (isWorkbench && inspection && inspection.findings.length > 0) {
+    // Every workspace starts here once, so the Launchpad is the first thing a new project shows.
+    if (isWorkbench && inspection) {
       openInfraHomeOnce(worktreeId)
     }
   }, [inspection, isWorkbench, worktreeId])

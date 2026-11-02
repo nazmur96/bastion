@@ -43,5 +43,10 @@ export const MISE_TOOL_SPECS: Readonly<Record<string, string>> = {
   'ansible-lint': 'pipx:ansible-lint',
   floci: 'github:floci-io/floci-cli',
   vcluster: 'vcluster',
-  'kubectl-radar': 'github:skyhook-io/radar'
+  'kubectl-radar': 'github:skyhook-io/radar',
+  kind: 'kind',
+  k3d: 'k3d',
+  eksctl: 'eksctl',
+  kops: 'kops',
+  devpod: 'devpod'
 }

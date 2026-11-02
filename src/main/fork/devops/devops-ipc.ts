@@ -1,7 +1,8 @@
 import { ipcMain } from 'electron'
-import { statSync } from 'node:fs'
-import { isAbsolute } from 'node:path'
-import { inspectDevopsWorkspace } from './devops-inspect'
+import { existsSync, statSync } from 'node:fs'
+import { isAbsolute, join } from 'node:path'
+import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
+import { LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
 import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
@@ -25,6 +26,17 @@ export function registerDevopsHandlers(): void {
   ipcMain.handle('aiVault:inspectDevops', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? inspectDevopsWorkspace(workspacePath) : EMPTY
   )
+  // Only the Launchpad's own tool names reach the shell lookup.
+  ipcMain.handle('aiVault:checkLaunchpadTools', async (_event, workspacePath: unknown) => {
+    if (!isLocalDirectory(workspacePath)) {
+      return {}
+    }
+    const usesMise = MISE_FILES.some((name) => existsSync(join(workspacePath, name)))
+    const statuses = await Promise.all(
+      LAUNCHPAD_TOOLS.map((tool) => resolveTool(workspacePath, tool, usesMise))
+    )
+    return Object.fromEntries(statuses.map((status) => [status.tool, status]))
+  })
 }
 
 const SANDBOX_KINDS = new Set(['aws', 'cluster'])
