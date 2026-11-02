@@ -20763,6 +20763,17 @@
         "security": "Security",
         "source": "Source",
         "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand."
+      },
+      "deck": {
+        "title": "Command deck",
+        "description": "Launch, inspect, or ask Claude",
+        "placeholder": "kind, logs web, describe, source… or anything for Claude",
+        "empty": "No command. Enter asks Claude.",
+        "ask": "Ask Claude: {{goal}}",
+        "open": "Command deck (press :)",
+        "button": "Commands",
+        "launch": "Launch",
+        "map": "Cluster"
       }
     }
   },

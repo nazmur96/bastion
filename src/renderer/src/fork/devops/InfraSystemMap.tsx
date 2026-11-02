@@ -8,6 +8,7 @@ import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
 import { openManifest } from './open-manifest'
+import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import { InfraCard } from './InfraHomeCards'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
@@ -114,6 +115,41 @@ export function InfraSystemMap({
     () => (map && node && lens === 'blast' ? upstreamOf(map, node.id) : null),
     [map, node, lens]
   )
+  const deck = useMemo((): DeckCommand[] => {
+    const group = translate('components.devops.deck.map', 'Cluster')
+    const inTerminal = (command: string) => () =>
+      runInWorkbenchTerminal(worktreeId, `${kubectlPrefix}${command}`)
+    return (map?.nodes ?? []).flatMap((item) => {
+      const ref = `${item.namespace}/${item.name}`
+      const base = { group, hint: item.kind, keywords: [item.kind, item.namespace] }
+      const workload = item.layer === 2
+      return [
+        ...(workload
+          ? [
+              {
+                ...base,
+                id: `logs:${item.id}`,
+                label: `logs ${ref}`,
+                run: inTerminal(`kubectl logs ${kubectlRef(item)} -f --tail=200`)
+              }
+            ]
+          : []),
+        {
+          ...base,
+          id: `describe:${item.id}`,
+          label: `describe ${ref}`,
+          run: inTerminal(`kubectl describe ${kubectlRef(item)}`)
+        },
+        {
+          ...base,
+          id: `source:${item.id}`,
+          label: `source ${ref}`,
+          run: () => void openManifest(worktreeId, item.kind, item.name)
+        }
+      ]
+    })
+  }, [map, kubectlPrefix, worktreeId])
+  useDeckCommands('system-map', deck)
   if (!kube) {
     return null
   }

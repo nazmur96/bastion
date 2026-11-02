@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { Server, X } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Command, Server, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
@@ -22,6 +22,7 @@ import { InfraClusterCard } from './InfraClusterCard'
 import { InfraLaunchpad } from './InfraLaunchpad'
 import { InfraLocalRuns } from './InfraLocalRuns'
 import { InfraSystemMap } from './InfraSystemMap'
+import { InfraCommandDeck } from './InfraCommandDeck'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -46,11 +47,13 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
     : undefined
   const ranked = rankDevopsActions({ findings, activeFile })
   const whoAmI = ranked.find((item) => item.action.id === 'aws.whoami')
+  const [deckOpen, setDeckOpen] = useState(false)
   return (
     <div
       className="scrollbar-sleek absolute inset-0 z-30 overflow-y-auto bg-background"
       data-infra-home=""
     >
+      <InfraCommandDeck worktreeId={worktreeId} open={deckOpen} onOpenChange={setDeckOpen} />
       <div className="mx-auto max-w-5xl p-5">
         <header className="mb-4 flex items-start gap-3">
           <Server className="mt-0.5 size-5 text-primary" aria-hidden />
@@ -81,6 +84,17 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
               )}
             </div>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            title={translate('components.devops.deck.open', 'Command deck (press :)')}
+            onClick={() => setDeckOpen(true)}
+          >
+            <Command aria-hidden />
+            {translate('components.devops.deck.button', 'Commands')}
+            <kbd className="text-muted-foreground">:</kbd>
+          </Button>
           <Button
             type="button"
             variant="ghost"

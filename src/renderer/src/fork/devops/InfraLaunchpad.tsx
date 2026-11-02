@@ -9,6 +9,7 @@ import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
 import { draftGoalForClaude } from './ask-claude'
+import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
   MISE_TOOL_SPECS,
@@ -125,6 +126,24 @@ export function InfraLaunchpad({
     // The terminal takes the screen; the check reruns for when the person comes back.
     window.setTimeout(recheck, 15_000)
   }
+
+  const deck: DeckCommand[] = LAUNCHPAD_TILES.flatMap((tile) => {
+    const status = tools?.[tile.tool]
+    if (!status?.available || blockedReason(tile)) {
+      return []
+    }
+    return [
+      {
+        id: `launch:${tile.id}`,
+        group: translate('components.devops.deck.launch', 'Launch'),
+        label: tile.title,
+        hint: tile.cost ?? translate('components.devops.launchpad.free', 'free'),
+        keywords: [tile.tool, tile.id],
+        run: () => launch(tile, status)
+      }
+    ]
+  })
+  useDeckCommands('launchpad', deck)
 
   return (
     <InfraCard
