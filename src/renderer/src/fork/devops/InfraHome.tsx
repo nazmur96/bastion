@@ -21,6 +21,7 @@ import {
 import { InfraClusterCard } from './InfraClusterCard'
 import { InfraLaunchpad } from './InfraLaunchpad'
 import { InfraLocalRuns } from './InfraLocalRuns'
+import { InfraSystemMap } from './InfraSystemMap'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -90,6 +91,15 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             <X aria-hidden />
           </Button>
         </header>
+        <InfraSystemMap
+          worktreeId={worktreeId}
+          context={context}
+          kubectlPrefix={
+            inspection?.tools.kubectl?.available && inspection.tools.kubectl.runner === 'mise'
+              ? 'mise exec -- '
+              : ''
+          }
+        />
         <InfraLaunchpad
           worktreeId={worktreeId}
           inspection={inspection}

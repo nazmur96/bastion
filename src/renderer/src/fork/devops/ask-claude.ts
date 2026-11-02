@@ -21,8 +21,13 @@ function panelChat(worktreeId: string): { tabId: string; sessionId: string } | n
   return tab ? { tabId: tab.id, sessionId: tab.entityId } : null
 }
 
-/** The goal lands in the Claude panel's composer as a draft: the person reads it and presses Enter. */
-export function draftGoalForClaude(worktreeId: string, goal: string, attempt = 0): void {
+/** A Launchpad goal, with the local-first and ask-before-billing rules in front. */
+export function draftGoalForClaude(worktreeId: string, goal: string): void {
+  draftForClaude(worktreeId, `${GOAL_PREAMBLE}${goal}`)
+}
+
+/** Text lands in the Claude panel's composer as a draft: the person reads it and presses Enter. */
+export function draftForClaude(worktreeId: string, text: string, attempt = 0): void {
   if (attempt === 0) {
     showClaudePanel(worktreeId)
   }
@@ -30,12 +35,12 @@ export function draftGoalForClaude(worktreeId: string, goal: string, attempt = 0
   if (!chat) {
     // A new panel starts its chat a moment later.
     if (attempt < 10) {
-      window.setTimeout(() => draftGoalForClaude(worktreeId, goal, attempt + 1), 300)
+      window.setTimeout(() => draftForClaude(worktreeId, text, attempt + 1), 300)
     }
     return
   }
   appendToNativeChatComposerDraft(structuredAgentSessionDraftScopeKey(chat.sessionId), {
-    text: `${GOAL_PREAMBLE}${goal}`
+    text
   })
   useAppStore.getState().activateTab(chat.tabId, { worktreeId })
 }

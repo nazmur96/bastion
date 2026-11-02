@@ -30,6 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
+import type { SystemMapResult } from '../../shared/fork-devops-system-map'
 import type { LocalRun } from '../../shared/fork-devops-local-runs'
 import type { DevopsInspection, DevopsToolStatus } from '../../shared/fork-devops-inspection'
 import type { DevopsContext } from '../../shared/fork-devops-context'
@@ -80,6 +81,8 @@ export type AiVaultApi = {
   inspectDevops: (workspacePath: string) => Promise<DevopsInspection>
   /** Fork: which Launchpad CLIs this workspace can run, keyed by tool. */
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
+  /** Fork: the cluster as a graph, read-only, for the system map. */
+  readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
   listLocalRuns: (workspacePath: string) => Promise<LocalRun[]>
   checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */

@@ -68,6 +68,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:writeReviewedClaudeEdit', request),
   inspectDevops: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
+  readSystemMap: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
   listLocalRuns: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:listLocalRuns', workspacePath),
   checkLaunchpadTools: (workspacePath: string) =>

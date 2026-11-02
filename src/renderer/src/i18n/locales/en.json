@@ -20746,6 +20746,18 @@
         "empty": "Nothing running. Launch something above.",
         "floci": "local AWS",
         "refresh": "Refresh"
+      },
+      "map": {
+        "title": "System map · {{context}}",
+        "hint": "Live from the cluster, read-only. Click a node to inspect it.",
+        "health": "Health",
+        "blast": "Blast radius",
+        "refresh": "Refresh",
+        "empty": "The cluster has nothing outside system namespaces yet. Try a demo below.",
+        "blastCount": "{{count}} things depend on this.",
+        "logs": "Logs",
+        "describe": "Describe",
+        "ask": "Ask Claude"
       }
     }
   },

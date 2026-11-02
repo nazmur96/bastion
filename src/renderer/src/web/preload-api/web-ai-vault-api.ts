@@ -115,6 +115,8 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
         error: 'The local sandbox needs the desktop app.',
         state: {}
       }),
+    readSystemMap: () =>
+      Promise.resolve({ ok: false as const, error: 'The system map needs the desktop app.' }),
     listLocalRuns: () => Promise.resolve([]),
     checkLaunchpadTools: () => Promise.resolve({}),
     inspectDevops: () =>
