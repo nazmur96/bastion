@@ -249,3 +249,93 @@ view, Radar topology as map feed, Upstash Box / Talos tiles, per-step
 Launchpad progress, C2 runbooks, C3 tracker, F3 DevPod recipe, Release flight /
 Time machine / Incident mode. A4 limit: Claude's own Read tool still sees raw
 files; masking covers what the editor sends.
+
+## Project path (2026-11-02) — supersedes "tool tiles" as the Infra home's centre
+
+People start from a project ("the team gave me this app"), not from a tool.
+The Infra home reads the workspace, works out how far the project has got,
+and offers the next step as one click. Generic tool tiles and demos move to a
+folded **Playground** section.
+
+### Repo layouts — both are first-class
+
+- **One repo:** app code, manifests/chart, Terraform and GitOps config together.
+- **Split repos:** sibling folders under one parent, e.g. `<project>/app`,
+  `<project>/<app>-gitops`, `<project>/platform`. The IDE finds siblings by
+  looking at the parent folder (git repos whose names share the app's name or
+  contain `gitops` / `platform` / `infra`, or that reference the app's repo URL)
+  and shows them as one project. The person can confirm or correct the
+  grouping; the choice is stored per project, never guessed silently.
+- Each stage below reads "the project", whichever repo holds the part it needs
+  (manifests from the app or gitops repo, Terraform from platform).
+
+### Stages
+
+| Stage              | One click does                                                                                                                                                                                       | Tools                                  |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| 0 Understand       | Claude summarises the app: what it is, what it needs (DB, cache, env, ports), what is missing (probes, limits, chart)                                                                                | detection, Claude                      |
+| 1 Run it           | build the image and run it, or open the dev container                                                                                                                                                | docker/podman, DevPod                  |
+| 2 Local cluster    | cluster named after the project; **this app's** image built and loaded; **its** manifests/chart deployed; appears on the map                                                                         | kind/k3d/vind, helm/kustomize          |
+| 3 GitOps           | **Deploy this repo with Argo CD**: reuse or install Argo CD (never overwrite an existing one), create an Application for the repo/branch/path, sync, wait for Synced/Healthy, open the UI on the app | Argo CD                                |
+| 4 Harden           | scan findings as problems on the files; Fix with Claude makes a reviewable branch                                                                                                                    | Trivy, Checkov, kube-linter            |
+| 5 Cloud infra      | the EKS sequence below                                                                                                                                                                               | Terraform, Infracost                   |
+| 6 Ship             | image to the registry via CI; Argo CD on the cloud cluster syncs the app                                                                                                                             | CI, ECR, Argo CD                       |
+| 7 Day 2 + teardown | monitoring for this app's namespace, drift, incidents; End session with destroy                                                                                                                      | Prometheus/Grafana, drift, plan viewer |
+
+GitOps limits the UI states plainly: Argo deploys **pushed** commits only (warn
+on unpushed work); private repos need a read credential (added only after
+asking); resources first applied by hand are adopted on sync (said before
+syncing); stages 2–3 target local clusters only.
+
+### EKS (stage 5) — a guided sequence, every billed step approved
+
+1. **Who and where:** detect the keyless login (SSO / federated profile, never
+   access keys), show account and region, "Who am I"; check a budget alert
+   exists and offer to create one.
+2. **Infrastructure code:** use the project's Terraform if it has some;
+   otherwise **Scaffold platform**: Claude writes VPC + EKS + node group from
+   pinned community modules, with remote state, into `platform/` or a new
+   sibling repo, on a branch, nothing applied.
+3. **Rehearse** what Floci emulates (state bucket, IAM, registry flows) for free.
+   EKS itself is not assumed to be emulated.
+4. **Plan → cost → policy → approve:** plan viewer, Infracost (monthly and
+   hourly), Checkov/Trivy on the Terraform, then a two-click approve showing
+   account, region and cost. Claude can explain, never apply (A2 gate).
+5. **After apply:** kube context added; context bar shows real/prod; the map
+   and Radar switch to the new cluster; a cost meter runs ("2h 10m, ≈ $0.65").
+6. **Bootstrap:** stage 3 on the cloud cluster, gated.
+7. **Teardown:** End session lists billed resources this session created;
+   Destroy goes through plan → approve; closing the app with billed resources
+   still up asks first.
+
+### Every tool, project-aware
+
+| Tool                          | Generic (Playground) | Project-aware (path)                                     |
+| ----------------------------- | -------------------- | -------------------------------------------------------- |
+| kind / k3d / vind             | empty cluster        | project cluster with this app deployed                   |
+| Floci                         | local AWS            | this project's Terraform planned and applied against it  |
+| Argo CD                       | — (removed)          | Deploy this repo                                         |
+| Monitoring                    | stack install        | plus dashboards/alerts for the app's namespace           |
+| Trivy / Checkov / kube-linter | terminal output      | problems on files + Fix with Claude                      |
+| DevPod                        | `devpod up`          | the repo's devcontainer, scaffolded by Claude if missing |
+| Multipass                     | blank VM             | VM for the repo's Ansible / install scripts              |
+| eksctl / kops dry runs        | removed              | replaced by the EKS sequence                             |
+
+### UI
+
+Top of the Infra home: a stepper (`✓ Understood · ✓ Runs locally · ● Local
+cluster · ○ GitOps · ○ Hardened · ○ Cloud · ○ Shipped`) with the next step as
+the primary button; the system map beneath; Playground and raw tools folded
+below.
+
+### Build order for this section
+
+1. Replace the Argo CD tile with **Deploy this repo**, with its fixes: detect
+   and reuse an existing Argo CD, stop on first failure, read the admin
+   password without `base64` (Windows), open the UI in a browser tab.
+   Re-check every remaining tile for the same faults and test each one live on
+   a throwaway cluster.
+2. Project detection, including sibling repos (both layouts).
+3. Stage 2 (this app on a local cluster).
+4. The stepper.
+5. The EKS sequence (stage 5), then 6 and 7.
