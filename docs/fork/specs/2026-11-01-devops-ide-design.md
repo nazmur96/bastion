@@ -229,5 +229,9 @@ VM", the map is where you land afterwards.
    radius, inspector with Logs / Describe / Ask Claude. Open: Source and Drift
    tabs (map node → manifest in the repo), Radar topology as a richer feed,
    Environments view (C).
-5. **Lenses** (health, blast radius, cost, security) and **command deck** (`:`).
+5. **Lenses and command deck** — done: health, blast radius and security
+   lenses (`562327bdc`), Source tab (`c065f322c`), `:` deck (`34b50c561`);
+   running list probes each local cluster's API. Open: cost lens (needs a
+   price source), Drift tab, demos should also require the cluster's API to
+   answer (today they only check the context is local).
 6. **Release flight**, **Time machine**, **Incident mode** — later.
