@@ -218,12 +218,16 @@ VM", the map is where you land afterwards.
 1. **Launchpad** — done (`379674924`): `src/shared/fork-devops-launchpad.ts`
    catalog + `InfraLaunchpad.tsx` on the Infra home; tool status via
    `aiVault:checkLaunchpadTools`. Real tiles are plan / dry-run only.
-2. **Launchpad v2** — "what do you want to do?" box that hands the goal to
+2. **Launchpad v2** — partly done (`768d8b682`): goal box drafts the ask for
+   Claude; Online Boutique demo. Still open: "what do you want to do?" box that hands the goal to
    Claude; multi-node kind config; Online Boutique demo; Upstash Box tile;
    Talos-on-Proxmox tile; per-tile progress instead of a bare terminal.
-3. **Running-locally rail** — list of what the Launchpad started (clusters,
+3. **Running-locally rail** — done (`768d8b682`): list of what the Launchpad started (clusters,
    VMs, Floci) with stop / delete, so nothing is left running.
-4. **System map** (direction A) as the Infra home's centre, fed by Radar
-   topology; Inspector (Live / Source / Logs / Drift / Cost).
+4. **System map** — v1 done (`c0a970267`, `b9e04aa2c`): one read-only
+   `kubectl get -o json` (+ Secret names only) → four lanes, health, blast
+   radius, inspector with Logs / Describe / Ask Claude. Open: Source and Drift
+   tabs (map node → manifest in the repo), Radar topology as a richer feed,
+   Environments view (C).
 5. **Lenses** (health, blast radius, cost, security) and **command deck** (`:`).
 6. **Release flight**, **Time machine**, **Incident mode** — later.
