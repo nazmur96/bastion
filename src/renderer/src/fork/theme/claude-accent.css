@@ -98,3 +98,13 @@
   font-style: italic;
   opacity: 0.7;
 }
+
+/* A4 secret masking (fork/devops/secret-mask-decorations). Shapes only, the text keeps its colour. */
+.fork-secret-masked {
+  -webkit-text-security: disc;
+}
+
+.fork-sops-badge {
+  color: var(--muted-foreground);
+  font-style: italic;
+}

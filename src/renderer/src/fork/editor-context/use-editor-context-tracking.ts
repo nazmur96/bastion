@@ -6,6 +6,8 @@ import { installAddSelectionToChatShortcut } from './editor-context-add-selectio
 import { installInlineEditShortcut } from '../inline-edit/inline-edit-shortcut'
 import { installClaudeSuggestShortcut } from '../inline-edit/claude-suggest'
 import { installClaudeEditGutter } from '../claude-edits/claude-edit-gutter'
+import { installSecretMask } from '../devops/secret-mask-decorations'
+import { maskSecrets } from '../../../../shared/fork-secret-mask'
 
 export function useEditorContextTracking({
   editor: codeEditor,
@@ -40,7 +42,8 @@ export function useEditorContextTracking({
           : {
               startLine: selection.startLineNumber,
               endLine: selection.endLineNumber,
-              text: model.getValueInRange(selection)
+              // A4: secrets never reach Claude, even when selected.
+              text: maskSecrets(model.getValueInRange(selection))
             },
         readMarkers: () => monaco.editor.getModelMarkers({ resource: model.uri })
       })
@@ -71,6 +74,7 @@ export function useEditorContextTracking({
       language
     })
     const removeGutter = installClaudeEditGutter(codeEditor, worktreeId, relativePath)
+    const removeSecretMask = installSecretMask(codeEditor)
     return () => {
       for (const subscription of subscriptions) {
         subscription.dispose()
@@ -79,6 +83,7 @@ export function useEditorContextTracking({
       removeInlineEdit()
       removeSuggest()
       removeGutter()
+      removeSecretMask()
       freezeEditorContextEntry(worktreeId, codeEditor.getId())
     }
   }, [codeEditor, worktreeId, relativePath, language, enabled])
