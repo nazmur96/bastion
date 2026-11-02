@@ -117,6 +117,8 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
       }),
     readSystemMap: () =>
       Promise.resolve({ ok: false as const, error: 'The system map needs the desktop app.' }),
+    terraformPlan: () =>
+      Promise.resolve({ ok: false as const, error: 'Terraform plan needs the desktop app.' }),
     findManifest: () => Promise.resolve(null),
     listLocalRuns: () => Promise.resolve([]),
     checkLaunchpadTools: () => Promise.resolve({}),

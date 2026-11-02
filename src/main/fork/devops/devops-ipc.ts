@@ -4,6 +4,7 @@ import { isAbsolute, join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
+import { runTerraformPlan } from './devops-terraform-plan'
 import { LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
@@ -43,6 +44,14 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
+  ipcMain.handle('aiVault:terraformPlan', async (_event, request: unknown) => {
+    const workspacePath: unknown =
+      request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
+    const dir: unknown = request && typeof request === 'object' ? Reflect.get(request, 'dir') : null
+    return isLocalDirectory(workspacePath) && typeof dir === 'string'
+      ? runTerraformPlan(workspacePath, dir)
+      : { ok: false, error: 'Terraform plan needs a local workspace.' }
+  })
   ipcMain.handle('aiVault:findManifest', async (_event, request: unknown) => {
     const field = (key: string): unknown =>
       request && typeof request === 'object' ? Reflect.get(request, key) : null

@@ -30,6 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
+import type { TerraformPlanResult } from '../../shared/fork-terraform-plan'
 import type { SystemMapResult } from '../../shared/fork-devops-system-map'
 import type { LocalRun } from '../../shared/fork-devops-local-runs'
 import type { DevopsInspection, DevopsToolStatus } from '../../shared/fork-devops-inspection'
@@ -83,6 +84,8 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork A3: plan only (init if needed, plan -out, show -json); never applies. */
+  terraformPlan: (request: { workspacePath: string; dir: string }) => Promise<TerraformPlanResult>
   findManifest: (request: {
     workspacePath: string
     kind: string

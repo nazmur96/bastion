@@ -20775,6 +20775,18 @@
         "button": "Commands",
         "launch": "Launch",
         "map": "Cluster"
+      },
+      "plan": {
+        "title": "Terraform plan · {{dir}}",
+        "hint": "Plan only. Applying is always yours, from a terminal you can see.",
+        "running": "Planning…",
+        "run": "Plan",
+        "target": "against {{target}}",
+        "outputs": "outputs: {{names}}",
+        "noChanges": "No changes. Infrastructure matches the code.",
+        "explain": "Explain with Claude",
+        "confirm": "Click again to apply to {{target}}",
+        "apply": "Apply this plan"
       }
     }
   },
