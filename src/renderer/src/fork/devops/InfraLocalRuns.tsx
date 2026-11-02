@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Monitor, RefreshCw, Ship, Trash2 } from 'lucide-react'
+import { LogOut, Monitor, RefreshCw, Ship, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -8,6 +8,7 @@ import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
+import { forgetLaunched, readLaunched } from './launched-store'
 import type { LocalRun } from '../../../../shared/fork-devops-local-runs'
 
 const REFRESH_MS = 20_000
@@ -110,6 +111,21 @@ export function InfraLocalRuns({
   const remove = translate('components.devops.runs.remove', 'Remove')
   const stop = translate('components.devops.runs.stop', 'Stop')
   const empty = runs !== null && runs.length === 0 && !awsEnv && !cluster
+  const launched = readLaunched()
+  const startedHere = (runs ?? []).filter((item) =>
+    launched.some((entry) => entry.kind === item.kind && entry.name === item.name)
+  )
+  const [ending, setEnding] = useState(false)
+  const endSession = (): void => {
+    if (!ending) {
+      setEnding(true)
+      return
+    }
+    setEnding(false)
+    runInWorkbenchTerminal(worktreeId, startedHere.map((item) => item.remove).join(' ; '))
+    startedHere.forEach((item) => forgetLaunched(item))
+    window.setTimeout(refresh, 15_000)
+  }
   return (
     <InfraCard
       className="mb-4"
@@ -149,9 +165,12 @@ export function InfraLocalRuns({
               icon={item.kind === 'multipass' ? Monitor : Ship}
               label={item.name}
               detail={
-                item.api === 'down'
+                (startedHere.includes(item)
+                  ? `${translate('components.devops.runs.here', 'from Launchpad')} · `
+                  : '') +
+                (item.api === 'down'
                   ? `${item.kind} · ${translate('components.devops.runs.apiDown', 'API not answering')}`
-                  : `${item.kind} · ${item.state}`
+                  : `${item.kind} · ${item.state}`)
               }
               down={item.api === 'down'}
               removeLabel={remove}
@@ -163,10 +182,33 @@ export function InfraLocalRuns({
           ))}
         </ul>
       )}
-      <Button type="button" variant="ghost" size="xs" className="mt-1" onClick={refresh}>
-        <RefreshCw aria-hidden />
-        {translate('components.devops.runs.refresh', 'Refresh')}
-      </Button>
+      <div className="mt-1 flex items-center gap-2">
+        <Button type="button" variant="ghost" size="xs" onClick={refresh}>
+          <RefreshCw aria-hidden />
+          {translate('components.devops.runs.refresh', 'Refresh')}
+        </Button>
+        {startedHere.length > 0 ? (
+          <Button
+            type="button"
+            variant={ending ? 'destructive' : 'outline'}
+            size="xs"
+            className="ml-auto"
+            onBlur={() => setEnding(false)}
+            onClick={endSession}
+            title={translate(
+              'components.devops.runs.endHint',
+              'Removes only the clusters and VMs the Launchpad started; stop Floci and vind on their rows.'
+            )}
+          >
+            <LogOut aria-hidden />
+            {ending
+              ? translate('components.devops.runs.endConfirm', 'Click again to remove {{count}}', {
+                  count: startedHere.length
+                })
+              : translate('components.devops.runs.end', 'End session')}
+          </Button>
+        ) : null}
+      </div>
     </InfraCard>
   )
 }

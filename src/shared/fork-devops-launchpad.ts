@@ -1,4 +1,5 @@
 import type { DevopsSandboxKind } from './fork-devops-sandbox'
+import type { LocalRunKind } from './fork-devops-local-runs'
 
 /** Fork: the Launchpad — problems first ("give me a cluster"), each answered by one click. */
 export type LaunchpadGroup = 'local' | 'demo' | 'machine' | 'real'
@@ -18,6 +19,8 @@ export type LaunchpadTile = {
   sandbox?: DevopsSandboxKind
   /** Commands run in order in one workbench terminal; `{name}` is the workspace slug. */
   steps?: string[]
+  /** What the tile leaves running, so End session can remove exactly that. */
+  creates?: { kind: LocalRunKind; name: string }
 }
 
 export const LAUNCHPAD_GROUPS: readonly LaunchpadGroup[] = ['local', 'demo', 'machine', 'real']
@@ -30,6 +33,7 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     blurb: 'A cluster in Docker or Podman, about 40 seconds.',
     tool: 'kind',
     cost: null,
+    creates: { kind: 'kind', name: '{name}-dev' },
     steps: [
       'kind create cluster --name {name}-dev',
       'kubectl cluster-info --context kind-{name}-dev'
@@ -42,6 +46,7 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     blurb: 'Lightweight k3s in containers, the fastest start.',
     tool: 'k3d',
     cost: null,
+    creates: { kind: 'k3d', name: '{name}-dev' },
     steps: ['k3d cluster create {name}-dev', 'kubectl cluster-info']
   },
   {
@@ -133,6 +138,7 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     blurb: 'A throwaway VM, 2 CPU / 4 GB, opened in a shell.',
     tool: 'multipass',
     cost: null,
+    creates: { kind: 'multipass', name: '{name}-vm' },
     steps: ['multipass launch --name {name}-vm --cpus 2 --memory 4G', 'multipass shell {name}-vm']
   },
   {

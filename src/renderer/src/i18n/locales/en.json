@@ -20748,7 +20748,11 @@
         "floci": "local AWS",
         "refresh": "Refresh",
         "downHint": "The containers run but the Kubernetes API does not answer. A Docker restart often breaks multi-control-plane kind clusters; remove it and launch again.",
-        "apiDown": "API not answering"
+        "apiDown": "API not answering",
+        "here": "from Launchpad",
+        "endHint": "Removes only the clusters and VMs the Launchpad started; stop Floci and vind on their rows.",
+        "endConfirm": "Click again to remove {{count}}",
+        "end": "End session"
       },
       "map": {
         "title": "System map · {{context}}",

@@ -9,6 +9,7 @@ import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
 import { draftGoalForClaude } from './ask-claude'
+import { rememberLaunched } from './launched-store'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
@@ -122,6 +123,12 @@ export function InfraLaunchpad({
     }
     const script = launchpadScript(tile, { name, tfdir: terraformDir ?? '.' })
     if (script) {
+      if (tile.creates) {
+        rememberLaunched({
+          kind: tile.creates.kind,
+          name: tile.creates.name.replaceAll('{name}', name)
+        })
+      }
       runInWorkbenchTerminal(
         worktreeId,
         devopsCommandLine(status, script, inspection?.shell),
