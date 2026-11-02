@@ -235,3 +235,17 @@ VM", the map is where you land afterwards.
    price source), Drift tab, demos should also require the cluster's API to
    answer (today they only check the context is local).
 6. **Release flight**, **Time machine**, **Incident mode** — later.
+
+### Progress 2026-11-02 (evening)
+
+Done: demos gated on a cluster that answers (`f1041923e`), A4 secret masking
+(`d2bd9c53c`), A3 plan viewer (`6411fea80`), B2 drift — refresh-only and
+`kubectl diff` (`d167a89eb`), B3 pipeline card over Orca's checks panel
+(`977e6e457`), C1 End session (`7d4825504`), C4 scan tiles + 3-node kind
+(`ba3452ebe`).
+
+Open: cost (Infracost in the plan viewer, needs a free API key), Environments
+view, Radar topology as map feed, Upstash Box / Talos tiles, per-step
+Launchpad progress, C2 runbooks, C3 tracker, F3 DevPod recipe, Release flight /
+Time machine / Incident mode. A4 limit: Claude's own Read tool still sees raw
+files; masking covers what the editor sends.
