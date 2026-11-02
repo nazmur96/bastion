@@ -1447,7 +1447,21 @@
     "devops": {
       "sandbox": {
         "awsBadge": "Local AWS",
-        "badgeHint": "This workspace runs against a local sandbox, not real infrastructure"
+        "awsDashboard": "Open AWS dashboard",
+        "awsStart": "Start local AWS (Floci)",
+        "awsStartHint": "New terminals and chats here then talk to the emulator, not your account",
+        "awsStop": "Stop local AWS",
+        "awsStopHint": "New terminals and chats use your real AWS settings again",
+        "badgeHint": "This workspace runs against a local sandbox, not real infrastructure",
+        "clusterDelete": "Delete local cluster",
+        "clusterSleep": "Sleep local cluster",
+        "clusterStart": "Start local cluster (vind)",
+        "clusterStartHint": "Kubernetes in a container; kubectl switches to it",
+        "clusterWake": "Wake local cluster",
+        "title": "Local sandbox (free, no cloud account)"
+      },
+      "toolbelt": {
+        "menu": "DevOps"
       }
     },
     "native-chat": {

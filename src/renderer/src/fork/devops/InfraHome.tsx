@@ -45,7 +45,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const whoAmI = ranked.find((item) => item.action.id === 'aws.whoami')
   return (
     <div
-      className="scrollbar-sleek absolute inset-0 z-10 overflow-y-auto bg-background"
+      className="scrollbar-sleek absolute inset-0 z-30 overflow-y-auto bg-background"
       data-infra-home=""
     >
       <div className="mx-auto max-w-5xl p-5">
