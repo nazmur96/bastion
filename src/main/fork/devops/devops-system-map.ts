@@ -1,13 +1,14 @@
 import { execFile } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { MISE_FILES, resolveTool } from './devops-inspect'
+import { MISE_FILES, listFiles, resolveTool } from './devops-inspect'
 import { workspaceEnv } from './devops-context'
 import {
   SYSTEM_MAP_KINDS,
   buildSystemMap,
   type SystemMapResult
 } from '../../../shared/fork-devops-system-map'
+import { manifestLine } from '../../../shared/fork-devops-manifest'
 
 const MAP_TIMEOUT_MS = 15_000
 
@@ -62,4 +63,33 @@ export async function readSystemMap(workspacePath: string): Promise<SystemMapRes
       )
     : null
   return { ok: true, map: buildSystemMap(resources.out, secrets) }
+}
+
+const MANIFEST_BYTES = 512 * 1024
+const MANIFEST_FILES = 3_000
+
+/** Where in the repo a resource is defined, if it is: plain manifests and kustomize bases, not Helm output. */
+export async function findManifest(
+  workspacePath: string,
+  kind: string,
+  name: string
+): Promise<{ path: string; line: number } | null> {
+  const files = (await listFiles(workspacePath))
+    .filter((file) => /\.ya?ml$/i.test(file) && !/(^|\/)templates\//.test(file))
+    .slice(0, MANIFEST_FILES)
+  for (const file of files) {
+    const full = join(workspacePath, file)
+    try {
+      if (statSync(full).size > MANIFEST_BYTES) {
+        continue
+      }
+      const line = manifestLine(readFileSync(full, 'utf8'), kind, name)
+      if (line !== null) {
+        return { path: file, line }
+      }
+    } catch {
+      // Unreadable files are simply not the source.
+    }
+  }
+  return null
 }

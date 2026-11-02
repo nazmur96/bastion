@@ -83,6 +83,11 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  findManifest: (request: {
+    workspacePath: string
+    kind: string
+    name: string
+  }) => Promise<{ path: string; line: number } | null>
   listLocalRuns: (workspacePath: string) => Promise<LocalRun[]>
   checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */

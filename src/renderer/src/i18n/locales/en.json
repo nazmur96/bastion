@@ -20760,7 +20760,9 @@
         "logs": "Logs",
         "describe": "Describe",
         "ask": "Ask Claude",
-        "security": "Security"
+        "security": "Security",
+        "source": "Source",
+        "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand."
       }
     }
   },

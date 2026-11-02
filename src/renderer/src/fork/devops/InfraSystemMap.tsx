@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { FileText, MessageSquare, RefreshCw, ScrollText } from 'lucide-react'
+import { FileCode, FileText, MessageSquare, RefreshCw, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -7,6 +7,7 @@ import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
+import { openManifest } from './open-manifest'
 import { InfraCard } from './InfraHomeCards'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
@@ -300,6 +301,15 @@ export function InfraSystemMap({
                     {translate('components.devops.map.logs', 'Logs')}
                   </Button>
                 ) : null}
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  onClick={() => void openManifest(worktreeId, node.kind, node.name)}
+                >
+                  <FileCode aria-hidden />
+                  {translate('components.devops.map.source', 'Source')}
+                </Button>
                 <Button
                   type="button"
                   size="xs"

@@ -75,7 +75,7 @@ function walkFiles(root: string): string[] {
 }
 
 /** Tracked and untracked-but-not-ignored files, so build output and vendored trees stay out. */
-async function listFiles(workspacePath: string): Promise<string[]> {
+export async function listFiles(workspacePath: string): Promise<string[]> {
   const listed = await run(
     'git',
     ['ls-files', '--cached', '--others', '--exclude-standard'],

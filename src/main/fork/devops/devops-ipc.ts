@@ -3,12 +3,22 @@ import { existsSync, statSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
 import { listLocalRuns } from './devops-local-runs'
-import { readSystemMap } from './devops-system-map'
+import { findManifest, readSystemMap } from './devops-system-map'
 import { LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
 import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
 import type { DevopsInspection } from '../../../shared/fork-devops-inspection'
+
+const MANIFEST_KINDS = new Set([
+  'Ingress',
+  'Service',
+  'Deployment',
+  'StatefulSet',
+  'DaemonSet',
+  'ConfigMap',
+  'Secret'
+])
 
 const EMPTY: DevopsInspection = { findings: [], environment: 'path', shell: 'posix', tools: {} }
 
@@ -33,6 +43,20 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
+  ipcMain.handle('aiVault:findManifest', async (_event, request: unknown) => {
+    const field = (key: string): unknown =>
+      request && typeof request === 'object' ? Reflect.get(request, key) : null
+    const workspacePath = field('workspacePath')
+    const kind = field('kind')
+    const name = field('name')
+    return isLocalDirectory(workspacePath) &&
+      typeof kind === 'string' &&
+      MANIFEST_KINDS.has(kind) &&
+      typeof name === 'string' &&
+      /^[a-z0-9][a-z0-9.-]{0,252}$/.test(name)
+      ? findManifest(workspacePath, kind, name)
+      : null
+  })
   ipcMain.handle('aiVault:listLocalRuns', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? listLocalRuns(workspacePath) : []
   )

@@ -70,6 +70,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  findManifest: (request: { workspacePath: string; kind: string; name: string }) =>
+    ipcRenderer.invoke('aiVault:findManifest', request),
   listLocalRuns: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:listLocalRuns', workspacePath),
   checkLaunchpadTools: (workspacePath: string) =>
