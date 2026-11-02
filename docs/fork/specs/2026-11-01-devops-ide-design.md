@@ -208,3 +208,22 @@ cloud credentials (the IDE uses the person's existing CLI logins).
 Each feature has unit tests for its pure parts (detector, classifier, plan
 JSON parsing, secret patterns) and a "Prove it" check in the running app on a
 real repo (Podinfo platform repo) without creating billed resources.
+
+## Whole-product build order (2026-11-02, from the full-product mockup)
+
+Mockup: `.superpowers/brainstorm/223626-1793614571/content/full-product.html`.
+Problems first, design second: the Launchpad answers "give me a cluster / demo /
+VM", the map is where you land afterwards.
+
+1. **Launchpad** — done (`379674924`): `src/shared/fork-devops-launchpad.ts`
+   catalog + `InfraLaunchpad.tsx` on the Infra home; tool status via
+   `aiVault:checkLaunchpadTools`. Real tiles are plan / dry-run only.
+2. **Launchpad v2** — "what do you want to do?" box that hands the goal to
+   Claude; multi-node kind config; Online Boutique demo; Upstash Box tile;
+   Talos-on-Proxmox tile; per-tile progress instead of a bare terminal.
+3. **Running-locally rail** — list of what the Launchpad started (clusters,
+   VMs, Floci) with stop / delete, so nothing is left running.
+4. **System map** (direction A) as the Infra home's centre, fed by Radar
+   topology; Inspector (Live / Source / Logs / Drift / Cost).
+5. **Lenses** (health, blast radius, cost, security) and **command deck** (`:`).
+6. **Release flight**, **Time machine**, **Incident mode** — later.
