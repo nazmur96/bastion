@@ -40,8 +40,9 @@ export function InfraCommandDeck({
         onOpenChange(true)
       }
     }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    // Capture: the app's own shortcut layer stops some keys before they bubble to window.
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
   }, [onOpenChange])
   const groups = [...new Set(commands.map((command) => command.group))]
   const close = (): void => {
