@@ -8,6 +8,17 @@ export type LocalRun = {
   state: string
   /** The command that removes it, ready for a workbench terminal. */
   remove: string
+  /** Clusters only: whether the Kubernetes API answered just now. */
+  api?: 'ready' | 'down'
+}
+
+/** The API server URL in a kubeconfig, when it is on this machine (the only kind we probe). */
+export function localApiServer(kubeconfig: string): string | null {
+  const match =
+    /^\s*server:\s*(https?:\/\/(?:127\.0\.0\.1|localhost|0\.0\.0\.0|\[::1\]):\d+)\s*$/m.exec(
+      kubeconfig
+    )
+  return match?.[1] ?? null
 }
 
 /** Names come from tool output and go back into a command line, so only plain names pass. */

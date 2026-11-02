@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildSystemMap, downstreamOf, upstreamOf } from './fork-devops-system-map'
+import { buildSystemMap, downstreamOf, podSpecRisks, upstreamOf } from './fork-devops-system-map'
 
 const items = [
   {
@@ -69,6 +69,34 @@ describe('system map', () => {
   it('hides system namespaces and survives bad JSON', () => {
     expect(node('Deployment/kube-system/coredns')).toBeUndefined()
     expect(buildSystemMap('nope')).toEqual({ nodes: [], edges: [] })
+  })
+
+  it('flags risky pod specs and passes a hardened one', () => {
+    expect(
+      podSpecRisks({
+        hostNetwork: true,
+        containers: [{ image: 'nginx', securityContext: { privileged: true } }]
+      })
+    ).toEqual([
+      'shares the host network or PID namespace',
+      'privileged container',
+      'may run as root (runAsNonRoot not set)',
+      'privilege escalation not disabled',
+      'no resource limits',
+      'image not pinned (latest or no tag)'
+    ])
+    expect(
+      podSpecRisks({
+        securityContext: { runAsNonRoot: true },
+        containers: [
+          {
+            image: 'ghcr.io/stefanprodan/podinfo:6.9.2',
+            securityContext: { allowPrivilegeEscalation: false },
+            resources: { limits: { memory: '128Mi' } }
+          }
+        ]
+      })
+    ).toEqual([])
   })
 
   it('walks blast radius both ways', () => {

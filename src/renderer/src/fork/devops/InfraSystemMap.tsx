@@ -30,7 +30,7 @@ const HEALTH_CLASS: Record<MapHealth, string> = {
   bad: 'text-destructive'
 }
 
-type Lens = 'health' | 'blast'
+type Lens = 'health' | 'blast' | 'security'
 
 function useSystemMap(
   path: string | undefined,
@@ -131,7 +131,7 @@ export function InfraSystemMap({
       )}
     >
       <div className="mb-2 flex items-center gap-1.5">
-        {(['health', 'blast'] as const).map((value) => (
+        {(['health', 'blast', 'security'] as const).map((value) => (
           <Button
             key={value}
             type="button"
@@ -141,7 +141,9 @@ export function InfraSystemMap({
           >
             {value === 'health'
               ? translate('components.devops.map.health', 'Health')
-              : translate('components.devops.map.blast', 'Blast radius')}
+              : value === 'blast'
+                ? translate('components.devops.map.blast', 'Blast radius')
+                : translate('components.devops.map.security', 'Security')}
           </Button>
         ))}
         <Button type="button" size="xs" variant="ghost" className="ml-auto" onClick={refresh}>
@@ -204,7 +206,17 @@ export function InfraSystemMap({
                 if (!at) {
                   return null
                 }
-                const dim = hit && item.id !== selected && !hit.has(item.id)
+                const dim =
+                  (hit && item.id !== selected && !hit.has(item.id)) ||
+                  (lens === 'security' && item.layer !== 2)
+                const dot =
+                  lens === 'security'
+                    ? item.risks.length === 0
+                      ? 'ok'
+                      : item.risks.length > 2
+                        ? 'bad'
+                        : 'warn'
+                    : item.health
                 return (
                   <g
                     key={item.id}
@@ -232,7 +244,7 @@ export function InfraSystemMap({
                       cy={11}
                       r={4}
                       fill="currentColor"
-                      className={HEALTH_CLASS[item.health]}
+                      className={HEALTH_CLASS[dot]}
                     />
                     <text x={9} y={15} className="fill-muted-foreground text-[9px] uppercase">
                       {item.kind} · {item.namespace}
@@ -255,6 +267,13 @@ export function InfraSystemMap({
               </div>
               <div className="truncate text-sm font-semibold">{node.name}</div>
               <div className={cn('mt-1 text-xs', HEALTH_CLASS[node.health])}>{node.detail}</div>
+              {lens === 'security' && node.risks.length > 0 ? (
+                <ul className="mt-2 space-y-0.5 text-xs text-status-warning">
+                  {node.risks.map((risk) => (
+                    <li key={risk}>• {risk}</li>
+                  ))}
+                </ul>
+              ) : null}
               {lens === 'blast' && hit ? (
                 <p className="mt-2 text-xs text-muted-foreground">
                   {translate(

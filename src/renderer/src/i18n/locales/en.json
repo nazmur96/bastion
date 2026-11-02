@@ -20745,7 +20745,9 @@
         "hint": "Clusters, VMs and local AWS from any workspace. Remove what you are done with.",
         "empty": "Nothing running. Launch something above.",
         "floci": "local AWS",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "downHint": "The containers run but the Kubernetes API does not answer. A Docker restart often breaks multi-control-plane kind clusters; remove it and launch again.",
+        "apiDown": "API not answering"
       },
       "map": {
         "title": "System map · {{context}}",
@@ -20757,7 +20759,8 @@
         "blastCount": "{{count}} things depend on this.",
         "logs": "Logs",
         "describe": "Describe",
-        "ask": "Ask Claude"
+        "ask": "Ask Claude",
+        "security": "Security"
       }
     }
   },

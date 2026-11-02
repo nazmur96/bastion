@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Monitor, RefreshCw, Ship, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
@@ -41,20 +42,38 @@ function Row({
   label,
   detail,
   onRemove,
-  removeLabel
+  removeLabel,
+  down = false
 }: {
   icon: typeof Ship
   label: string
   detail: string
+  /** The cluster exists but its API does not answer. */
+  down?: boolean
   onRemove: () => void
   removeLabel: string
 }): React.JSX.Element {
   const [armed, setArmed] = useState(false)
   return (
     <li className="flex items-center gap-2 py-1 text-sm">
-      <Icon className="size-4 shrink-0 text-status-success" aria-hidden />
+      <Icon
+        className={cn('size-4 shrink-0', down ? 'text-destructive' : 'text-status-success')}
+        aria-hidden
+      />
       <span className="min-w-0 truncate font-mono">{label}</span>
-      <span className="shrink-0 text-xs text-muted-foreground">{detail}</span>
+      <span
+        className={cn('shrink-0 text-xs', down ? 'text-destructive' : 'text-muted-foreground')}
+        title={
+          down
+            ? translate(
+                'components.devops.runs.downHint',
+                'The containers run but the Kubernetes API does not answer. A Docker restart often breaks multi-control-plane kind clusters; remove it and launch again.'
+              )
+            : undefined
+        }
+      >
+        {detail}
+      </span>
       <Button
         type="button"
         variant={armed ? 'destructive' : 'ghost'}
@@ -129,7 +148,12 @@ export function InfraLocalRuns({
               key={`${item.kind}:${item.name}`}
               icon={item.kind === 'multipass' ? Monitor : Ship}
               label={item.name}
-              detail={`${item.kind} · ${item.state}`}
+              detail={
+                item.api === 'down'
+                  ? `${item.kind} · ${translate('components.devops.runs.apiDown', 'API not answering')}`
+                  : `${item.kind} · ${item.state}`
+              }
+              down={item.api === 'down'}
               removeLabel={remove}
               onRemove={() => {
                 runInWorkbenchTerminal(worktreeId, item.remove)

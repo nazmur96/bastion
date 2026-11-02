@@ -20,6 +20,8 @@ export type MapNode = {
   detail: string
   /** 0 traffic in, 1 services, 2 workloads, 3 config. */
   layer: 0 | 1 | 2 | 3
+  /** Security findings from the pod spec; empty for non-workloads. */
+  risks: string[]
 }
 
 export type MapEdge = { from: string; to: string }
@@ -77,6 +79,36 @@ function workloadHealth(
   const ready = kind === 'DaemonSet' ? num(status.numberReady) : num(status.readyReplicas)
   const health: MapHealth = desired === 0 || ready >= desired ? 'ok' : ready === 0 ? 'bad' : 'warn'
   return { health, detail: `${ready}/${desired} ready` }
+}
+
+/** What a reviewer or Kyverno/Trivy baseline would flag in a pod spec. */
+export function podSpecRisks(podSpec: Obj): string[] {
+  const risks = new Set<string>()
+  const podSecurity = obj(podSpec.securityContext)
+  if (podSpec.hostNetwork === true || podSpec.hostPID === true) {
+    risks.add('shares the host network or PID namespace')
+  }
+  for (const container of list(podSpec.containers)) {
+    const security = obj(container.securityContext)
+    const image = str(container.image) ?? ''
+    if (security.privileged === true) {
+      risks.add('privileged container')
+    }
+    if (security.runAsNonRoot !== true && podSecurity.runAsNonRoot !== true) {
+      risks.add('may run as root (runAsNonRoot not set)')
+    }
+    if (security.allowPrivilegeEscalation !== false) {
+      risks.add('privilege escalation not disabled')
+    }
+    if (Object.keys(obj(obj(container.resources).limits)).length === 0) {
+      risks.add('no resource limits')
+    }
+    const tag = image.includes('@') ? 'digest' : image.split('/').at(-1)?.split(':')[1]
+    if (!tag || tag === 'latest') {
+      risks.add('image not pinned (latest or no tag)')
+    }
+  }
+  return [...risks]
 }
 
 /** Config a pod spec reads through env, envFrom and volumes. */
@@ -140,8 +172,17 @@ export function buildSystemMap(json: string, secrets: Set<string> | null = null)
     const spec = obj(item.spec)
     if (isWorkload(kind)) {
       const { health, detail } = workloadHealth(kind, obj(item.status), spec)
-      nodes.set(id, { id, kind, name, namespace, health, detail, layer: 2 })
       const template = obj(spec.template)
+      nodes.set(id, {
+        id,
+        kind,
+        name,
+        namespace,
+        health,
+        detail,
+        layer: 2,
+        risks: podSpecRisks(obj(template.spec))
+      })
       workloads.push({
         id,
         namespace,
@@ -159,7 +200,8 @@ export function buildSystemMap(json: string, secrets: Set<string> | null = null)
         namespace,
         health: 'ok',
         detail: `${str(spec.type) ?? 'ClusterIP'} :${ports.join(',')}`,
-        layer: 1
+        layer: 1,
+        risks: []
       })
       services.push({ id, namespace, selector: obj(spec.selector) })
     } else if (kind === 'Ingress') {
@@ -178,7 +220,8 @@ export function buildSystemMap(json: string, secrets: Set<string> | null = null)
         namespace,
         health: 'ok',
         detail: rules.map((rule) => str(rule.host) ?? '*').join(', ') || '*',
-        layer: 0
+        layer: 0,
+        risks: []
       })
       ingresses.push({
         id,
@@ -232,7 +275,8 @@ export function buildSystemMap(json: string, secrets: Set<string> | null = null)
           health: exists === false ? 'bad' : exists === null ? 'warn' : 'ok',
           detail:
             exists === false ? 'missing' : exists === null ? 'not checked' : ref.kind.toLowerCase(),
-          layer: 3
+          layer: 3,
+          risks: []
         })
       }
       edges.push({ from: workload.id, to: id })

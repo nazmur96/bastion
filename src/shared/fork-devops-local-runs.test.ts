@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { parseK3dClusters, parseKindClusters, parseMultipassList } from './fork-devops-local-runs'
+import {
+  localApiServer,
+  parseK3dClusters,
+  parseKindClusters,
+  parseMultipassList
+} from './fork-devops-local-runs'
 
 describe('local runs', () => {
   it('reads kind clusters, one per line', () => {
@@ -21,6 +26,13 @@ describe('local runs', () => {
       ])
     )
     expect(runs.map((run) => run.state)).toEqual(['running', 'stopped'])
+  })
+
+  it('finds a local API server and ignores remote ones', () => {
+    expect(localApiServer('clusters:\n- cluster:\n    server: https://127.0.0.1:38121\n')).toBe(
+      'https://127.0.0.1:38121'
+    )
+    expect(localApiServer('    server: https://abc.eks.amazonaws.com\n')).toBeNull()
   })
 
   it('reads multipass VMs and survives bad JSON', () => {
