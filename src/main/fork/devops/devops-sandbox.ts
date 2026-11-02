@@ -46,6 +46,16 @@ function save(workspacePath: string, state: DevopsSandboxState): DevopsSandboxSt
   return state
 }
 
+/** Floci is one emulator per machine, so stopping it ends local AWS for every workspace. */
+function forgetLocalAwsEverywhere(workspacePath: string): DevopsSandboxState {
+  for (const [path, state] of Object.entries(load())) {
+    if (state.awsEnv) {
+      save(path, { ...state, awsEnv: undefined })
+    }
+  }
+  return readDevopsSandbox(workspacePath)
+}
+
 export function readDevopsSandbox(workspacePath: string): DevopsSandboxState {
   return load()[workspacePath] ?? {}
 }
@@ -101,11 +111,12 @@ export async function runDevopsSandbox(
       const stopped = await cli(workspacePath, 'aws', ['stop'])
       // Without the CLI nothing of ours can still be running; forget the endpoints either way.
       return stopped.ok || stopped.missing !== undefined
-        ? { ok: true, state: save(workspacePath, { ...state, awsEnv: undefined }) }
+        ? { ok: true, state: forgetLocalAwsEverywhere(workspacePath) }
         : failed(state, 'Stopping Floci', stopped)
     }
     const started = await cli(workspacePath, 'aws', ['start'])
-    if (!started.ok) {
+    // One emulator serves every workspace: already running (from another one) is a start.
+    if (!started.ok && !/already running/i.test(started.stdout)) {
       return failed(state, 'Starting Floci', started)
     }
     const env = await cli(workspacePath, 'aws', ['env'], 30_000)

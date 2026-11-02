@@ -28,6 +28,9 @@
             pkg-config
             git
 
+            # CLIs the DevOps Toolbelt runs (e.g. floci) link against zlib
+            zlib
+
             # Electron runtime
             glib
             nss
