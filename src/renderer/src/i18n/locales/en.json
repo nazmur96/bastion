@@ -20792,6 +20792,17 @@
         "driftHint": "terraform plan -refresh-only: what changed outside Terraform",
         "drift": "Check drift",
         "driftCount": "{{count}} drifted outside Terraform"
+      },
+      "ci": {
+        "success": "All checks passed",
+        "failure": "Checks failing",
+        "pending": "Checks running",
+        "neutral": "No result yet",
+        "title": "Pipeline",
+        "hint": "CI on this branch’s pull request. Failed steps open with their logs and a fix.",
+        "noPr": "No pull request for this branch yet",
+        "fix": "See failures and fix",
+        "open": "Open checks"
       }
     }
   },
