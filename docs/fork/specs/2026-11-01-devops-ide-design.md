@@ -361,3 +361,13 @@ must keep these working around it:
 - **Nothing hidden:** anything a step writes outside the repo (plan files in
   the temp dir, the generated kind config in userData) is shown with an
   "open file" link where it is used.
+
+### Observability (added along the way, 2026-11-03)
+
+Part of the path, not a separate step: deploying to a local cluster can bring
+up Prometheus + Grafana (+ Loki, Tempo when the app sends OTel), auto-create a
+ServiceMonitor when the app exposes `/metrics`, and open a per-app Grafana
+dashboard (rate, errors, p95, restarts) as a workbench browser tab. The map
+gains a **Metrics lens** (req/s, error %, p95 per node). Starter SLO alerts feed
+Incident mode; Claude reads metrics read-only. On EKS: the same stack via Argo
+CD, or AMP/AMG/Container Insights through plan → approve. End session removes it.
