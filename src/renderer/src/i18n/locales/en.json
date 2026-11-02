@@ -20733,7 +20733,19 @@
         "add": "Add {{tool}}",
         "missing": "not installed",
         "preview": "Preview",
-        "launch": "Launch"
+        "launch": "Launch",
+        "goal": "Describe it: “a local cluster with Argo CD and podinfo”, “an S3 bucket in Floci”…",
+        "askClaude": "Ask Claude"
+      },
+      "runs": {
+        "confirm": "Click again",
+        "remove": "Remove",
+        "stop": "Stop",
+        "title": "Running on this machine",
+        "hint": "Clusters, VMs and local AWS from any workspace. Remove what you are done with.",
+        "empty": "Nothing running. Launch something above.",
+        "floci": "local AWS",
+        "refresh": "Refresh"
       }
     }
   },

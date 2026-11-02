@@ -103,6 +103,21 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     ]
   },
   {
+    id: 'boutique',
+    group: 'demo',
+    title: 'Microservices · Online Boutique',
+    blurb: 'Google’s 11-service shop with a load generator, on localhost:8081.',
+    tool: 'kubectl',
+    cost: null,
+    needsLocalCluster: true,
+    steps: [
+      'kubectl create namespace boutique --dry-run=client -o yaml | kubectl apply -f -',
+      'kubectl -n boutique apply -f https://raw.githubusercontent.com/GoogleCloudPlatform/microservices-demo/main/release/kubernetes-manifests.yaml',
+      'kubectl -n boutique rollout status deploy/frontend --timeout=300s',
+      'kubectl -n boutique port-forward svc/frontend 8081:80'
+    ]
+  },
+  {
     id: 'devpod',
     group: 'machine',
     title: 'Dev container · DevPod',

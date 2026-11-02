@@ -2,6 +2,7 @@ import { ipcMain } from 'electron'
 import { existsSync, statSync } from 'node:fs'
 import { isAbsolute, join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
+import { listLocalRuns } from './devops-local-runs'
 import { LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
@@ -25,6 +26,9 @@ function isLocalDirectory(path: unknown): path is string {
 export function registerDevopsHandlers(): void {
   ipcMain.handle('aiVault:inspectDevops', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? inspectDevopsWorkspace(workspacePath) : EMPTY
+  )
+  ipcMain.handle('aiVault:listLocalRuns', async (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath) ? listLocalRuns(workspacePath) : []
   )
   // Only the Launchpad's own tool names reach the shell lookup.
   ipcMain.handle('aiVault:checkLaunchpadTools', async (_event, workspacePath: unknown) => {

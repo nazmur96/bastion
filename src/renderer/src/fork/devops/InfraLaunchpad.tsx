@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Cloud, FlaskConical, Monitor, Rocket, Ship, Wrench } from 'lucide-react'
+import { Cloud, FlaskConical, Monitor, Rocket, Ship, Sparkles, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -8,6 +8,7 @@ import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
+import { draftGoalForClaude } from './ask-claude'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
   MISE_TOOL_SPECS,
@@ -86,6 +87,7 @@ export function InfraLaunchpad({
 }): React.JSX.Element {
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const { tools, recheck } = useLaunchpadTools(path)
+  const [goal, setGoal] = useState('')
   const usesMise = inspection?.environment === 'mise'
   const name = path ? sandboxClusterName(path).replace(/-dev$/, '') : 'workspace'
   const localCluster = context.kube?.tone === 'local'
@@ -133,6 +135,30 @@ export function InfraLaunchpad({
         'Each tile runs in a terminal you can watch. Nothing billed is created from here.'
       )}
     >
+      <form
+        className="mb-4 flex items-center gap-2 rounded-md border border-border bg-background px-3 py-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (goal.trim()) {
+            draftGoalForClaude(worktreeId, goal.trim())
+            setGoal('')
+          }
+        }}
+      >
+        <Sparkles className="size-4 shrink-0 text-primary" aria-hidden />
+        <input
+          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          value={goal}
+          onChange={(event) => setGoal(event.target.value)}
+          placeholder={translate(
+            'components.devops.launchpad.goal',
+            'Describe it: “a local cluster with Argo CD and podinfo”, “an S3 bucket in Floci”…'
+          )}
+        />
+        <Button type="submit" size="xs" disabled={!goal.trim()}>
+          {translate('components.devops.launchpad.askClaude', 'Ask Claude')}
+        </Button>
+      </form>
       <div className="space-y-4">
         {LAUNCHPAD_GROUPS.map((group) => {
           const Icon = GROUP_ICONS[group]

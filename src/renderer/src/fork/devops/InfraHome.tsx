@@ -20,6 +20,7 @@ import {
 } from './InfraHomeCards'
 import { InfraClusterCard } from './InfraClusterCard'
 import { InfraLaunchpad } from './InfraLaunchpad'
+import { InfraLocalRuns } from './InfraLocalRuns'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -96,6 +97,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
           context={context}
           terraformDir={terraformDir}
         />
+        <InfraLocalRuns worktreeId={worktreeId} sandbox={sandbox} />
         {inspection && findings.length === 0 ? (
           <InfraCard
             title={translate('components.devops.home.emptyTitle', 'Start with infrastructure')}
