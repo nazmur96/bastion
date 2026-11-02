@@ -30,6 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
+import type { ArgoDeployPlan } from '../../shared/fork-devops-argo-deploy'
 import type { TerraformPlanResult } from '../../shared/fork-terraform-plan'
 import type { SystemMapResult } from '../../shared/fork-devops-system-map'
 import type { LocalRun } from '../../shared/fork-devops-local-runs'
@@ -84,6 +85,10 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork path stage 3: deploy this repo with Argo CD. */
+  argoDeployPlan: (workspacePath: string) => Promise<ArgoDeployPlan>
+  writeArgoApplication: (request: { name: string; yaml: string }) => Promise<string | null>
+  probeArgoUi: () => Promise<boolean>
   /** Fork A3: plan only (init if needed, plan -out, show -json); never applies. */
   terraformPlan: (request: {
     workspacePath: string

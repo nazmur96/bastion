@@ -26,6 +26,7 @@ import { InfraCommandDeck } from './InfraCommandDeck'
 import { useSystemMap } from './use-system-map'
 import { InfraTerraformPlan } from './InfraTerraformPlan'
 import { InfraCiCard } from './InfraCiCard'
+import { InfraArgoDeploy } from './InfraArgoDeploy'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -119,6 +120,14 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
               : ''
           }
         />
+        {offersCluster ? (
+          <InfraArgoDeploy
+            worktreeId={worktreeId}
+            inspection={inspection}
+            context={context}
+            clusterAnswers={cluster.result?.ok === true}
+          />
+        ) : null}
         {terraformDir !== null ? (
           <InfraTerraformPlan
             worktreeId={worktreeId}

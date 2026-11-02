@@ -70,6 +70,11 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  argoDeployPlan: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:argoDeployPlan', workspacePath),
+  writeArgoApplication: (request: { name: string; yaml: string }) =>
+    ipcRenderer.invoke('aiVault:writeArgoApplication', request),
+  probeArgoUi: () => ipcRenderer.invoke('aiVault:probeArgoUi'),
   terraformPlan: (request: { workspacePath: string; dir: string; refreshOnly?: boolean }) =>
     ipcRenderer.invoke('aiVault:terraformPlan', request),
   findManifest: (request: { workspacePath: string; kind: string; name: string }) =>

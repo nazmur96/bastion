@@ -5,6 +5,7 @@ import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspec
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
+import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import { KIND_MULTI_NODE_CONFIG, LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
@@ -44,6 +45,29 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
+  ipcMain.handle('aiVault:argoDeployPlan', async (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath)
+      ? readArgoDeployPlan(workspacePath)
+      : { ok: false, error: 'Argo CD deploy needs a local workspace.' }
+  )
+  ipcMain.handle('aiVault:writeArgoApplication', (_event, request: unknown) => {
+    const name: unknown =
+      typeof request === 'object' && request !== null ? Reflect.get(request, 'name') : null
+    const yaml: unknown =
+      typeof request === 'object' && request !== null ? Reflect.get(request, 'yaml') : null
+    // Only an Argo Application manifest with a Kubernetes-safe name is written.
+    if (
+      typeof name !== 'string' ||
+      !/^[a-z0-9][a-z0-9-]{0,52}$/.test(name) ||
+      typeof yaml !== 'string' ||
+      yaml.length > 16_384 ||
+      !yaml.startsWith('apiVersion: argoproj.io/v1alpha1\nkind: Application\n')
+    ) {
+      return null
+    }
+    return writeArgoApplication(name, yaml)
+  })
+  ipcMain.handle('aiVault:probeArgoUi', () => probeArgoUi())
   ipcMain.handle('aiVault:terraformPlan', async (_event, request: unknown) => {
     const workspacePath: unknown =
       request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null

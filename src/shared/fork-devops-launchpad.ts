@@ -100,20 +100,6 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     ]
   },
   {
-    id: 'argocd',
-    group: 'demo',
-    title: 'GitOps · Argo CD',
-    blurb: 'Argo CD in the cluster, its UI on localhost:8080.',
-    tool: 'helm',
-    cost: null,
-    needsLocalCluster: true,
-    steps: [
-      'helm upgrade --install argocd oci://ghcr.io/argoproj/argo-helm/argo-cd -n argocd --create-namespace --wait',
-      'kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo',
-      'kubectl -n argocd port-forward svc/argocd-server 8080:443'
-    ]
-  },
-  {
     id: 'monitoring',
     group: 'demo',
     title: 'Observability · Prometheus + Grafana',

@@ -20808,6 +20808,26 @@
         "noPr": "No pull request for this branch yet",
         "fix": "See failures and fix",
         "open": "Open checks"
+      },
+      "argo": {
+        "noCluster": "Start a local cluster first.",
+        "notLocal": "This deploys to local clusters only. {{context}} is not one.",
+        "down": "The cluster is not answering.",
+        "writeFailed": "Could not write the Application file.",
+        "waiting": "Deploying… the Argo CD UI opens when it answers.",
+        "open": "Argo CD is up. Log in as admin; the password is in the deploy terminal.",
+        "timeout": "Argo CD did not come up. Check the terminals.",
+        "title": "Deploy this repo with Argo CD",
+        "hint": "Argo CD watches the pushed repo and keeps the cluster in sync with it.",
+        "reading": "Reading the repo and the cluster…",
+        "path": "Deploy",
+        "into": "into namespace {{name}}",
+        "reuse": "Argo CD is already in the cluster: it is reused, never reinstalled.",
+        "install": "Argo CD is not in the cluster: it will be installed.",
+        "noUpstream": "This branch is not pushed. Argo CD only sees what is on the remote.",
+        "unpushed": "{{count}} commits are not pushed; Argo CD will not see them.",
+        "adopt": "Anything already applied by hand with the same names is taken over by Argo CD. Private repos need Argo CD read access (not set up by this button yet).",
+        "deploy": "Deploy with Argo CD"
       }
     }
   },
