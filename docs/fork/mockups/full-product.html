@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Full product mockup — problems first</title>
+<style>
+  :root { --bg:#0b0d12; --panel:#11141b; --panel2:#161a23; --line:#232937; --text:#d8dee9; --muted:#7d8699; --faint:#4b5366;
+          --accent:#d97757; --ok:#3fb68b; --warn:#e2b340; --bad:#e5534b; --info:#5b9cf6; --ghost:#a78bfa; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:#07080b; color:var(--text); font:13px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; }
+  .note { padding:10px 18px; color:var(--muted); border-bottom:1px solid var(--line); background:#0a0c10; }
+  .note b { color:var(--text); }
+  .app { margin:14px; height:720px; border:2px solid var(--line); border-radius:12px; overflow:hidden; display:grid;
+         grid-template-columns:52px 1fr; grid-template-rows:34px 1fr 26px; background:var(--bg); transition:border-color .2s, box-shadow .2s; }
+  .app.prod { border-color:var(--bad); box-shadow:0 0 0 4px rgba(229,83,75,.15); }
+  .title { grid-column:1/-1; display:flex; align-items:center; gap:10px; padding:0 12px; border-bottom:1px solid var(--line); background:#0d1016; color:var(--muted); font-size:12px; }
+  .title .dots span { display:inline-block; width:10px; height:10px; border-radius:50%; background:#2a2f3c; margin-right:5px; }
+  .title strong { color:var(--text); }
+  .chip { padding:2px 8px; border-radius:999px; border:1px solid var(--line); font:11px ui-monospace, monospace; }
+  .chip.local { color:var(--ok); border-color:rgba(63,182,139,.4); } .chip.real { color:var(--warn); border-color:rgba(226,179,64,.4); }
+  .deckhint { margin-left:auto; border:1px solid var(--line); border-radius:7px; padding:2px 8px; cursor:pointer; }
+  .deckhint:hover { border-color:var(--accent); color:var(--text); }
+  .nav { border-right:1px solid var(--line); background:#0a0c10; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 0; }
+  .nav button { width:38px; height:38px; border-radius:9px; border:0; background:none; color:var(--muted); font-size:17px; cursor:pointer; position:relative; }
+  .nav button:hover { background:var(--panel); color:var(--text); }
+  .nav button.on { background:var(--panel2); color:var(--accent); box-shadow:inset 0 0 0 1px var(--line); }
+  .nav button::after { content:attr(data-tip); position:absolute; left:46px; top:9px; background:#1b2130; color:var(--text); font-size:11px; padding:3px 7px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; }
+  .nav button:hover::after { opacity:1; }
+  .nav .sep { flex:1; }
+  .main { position:relative; overflow:hidden; min-width:0; }
+  .screen { display:none; height:100%; } .screen.on { display:flex; }
+  .status { grid-column:1/-1; border-top:1px solid var(--line); background:#0a0c10; display:flex; gap:14px; align-items:center; padding:0 12px; font-size:11px; color:var(--faint); }
+  .status .g { color:var(--ok); }
+  .btn { background:var(--panel2); border:1px solid var(--line); color:var(--text); padding:6px 11px; border-radius:8px; cursor:pointer; font:inherit; font-size:12px; }
+  .btn:hover { border-color:var(--accent); }
+  .btn.primary { background:var(--accent); border-color:var(--accent); color:#1a0d07; font-weight:600; }
+  .btn.small { padding:3px 8px; font-size:11px; }
+  .mono { font-family:ui-monospace, monospace; }
+  .muted { color:var(--muted); } .faint { color:var(--faint); }
+
+  /* launchpad */
+  .lp { flex:1; overflow:auto; padding:26px 30px; }
+  .lp h2 { margin:0; font-size:20px; } .lp .sub { margin:4px 0 18px; color:var(--muted); }
+  .ask { display:flex; gap:10px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:22px; }
+  .ask input { flex:1; background:none; border:0; outline:none; color:var(--text); font:14px Inter, sans-serif; }
+  .group { margin-bottom:20px; }
+  .group h3 { margin:0 0 10px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:10px; }
+  .tile { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:13px; cursor:pointer; display:flex; flex-direction:column; gap:6px; transition:border-color .15s, transform .15s; }
+  .tile:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .tile .h { display:flex; align-items:center; gap:8px; font-weight:600; }
+  .tile .ic { width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--panel2); font-size:15px; }
+  .tile .meta { display:flex; gap:6px; flex-wrap:wrap; margin-top:auto; }
+  .tag { padding:1px 7px; border-radius:999px; font-size:10.5px; border:1px solid var(--line); color:var(--muted); }
+  .tag.free { color:var(--ok); border-color:rgba(63,182,139,.35); } .tag.cost { color:var(--warn); border-color:rgba(226,179,64,.35); }
+  .tag.miss { color:var(--bad); border-color:rgba(229,83,75,.35); }
+
+  /* provision */
+  .prov { flex:1; display:grid; grid-template-columns:1fr 340px; min-width:0; }
+  .prov-main { padding:24px 28px; overflow:auto; }
+  .steps { margin-top:16px; display:flex; flex-direction:column; gap:8px; }
+  .step { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:var(--panel); }
+  .step .s { width:18px; text-align:center; } .step.wait { opacity:.45; } .step.run { border-color:var(--accent); } .step.done .s { color:var(--ok); }
+  .step .cmd { margin-top:3px; font:11px ui-monospace, monospace; color:var(--faint); }
+  .term { background:#07090c; border-left:1px solid var(--line); padding:12px; font:11.5px/1.6 ui-monospace, monospace; color:#9aa5b8; overflow:auto; }
+  .term .p { color:var(--ok); }
+
+  /* workspace */
+  .ws { flex:1; display:grid; grid-template-columns:200px 270px 1fr 290px; min-width:0; }
+  .rail { border-right:1px solid var(--line); background:#0c0f14; padding:10px; overflow:auto; }
+  .rail h4 { margin:12px 4px 6px; font-size:10px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+  .env { display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; color:var(--muted); cursor:pointer; }
+  .env:hover { background:var(--panel); } .env.on { background:var(--panel2); color:var(--text); }
+  .dot { width:8px; height:8px; border-radius:50%; flex:none; }
+  .env small { margin-left:auto; font:10px ui-monospace, monospace; color:var(--faint); }
+  .addenv { margin:8px 4px; font-size:12px; color:var(--accent); cursor:pointer; }
+  .claude { border-right:1px solid var(--line); background:#0d1016; display:flex; flex-direction:column; min-width:0; }
+  .msgs { flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:9px; }
+  .msg { padding:9px 11px; border-radius:10px; background:var(--panel); border:1px solid var(--line); }
+  .msg.me { align-self:flex-end; background:#1b2130; max-width:88%; }
+  .msg b { color:var(--accent); }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:7px; }
+  .composer { margin:10px; border:1px solid var(--line); border-radius:10px; padding:9px; color:var(--faint); background:var(--panel); }
+  .mapwrap { position:relative; display:flex; flex-direction:column; min-width:0;
+    background: radial-gradient(circle at 1px 1px, #1a1f2b 1px, transparent 0) 0 0 / 22px 22px, var(--bg); }
+  .lensbar { display:flex; gap:6px; padding:8px 10px; border-bottom:1px solid var(--line); background:rgba(10,12,16,.85); align-items:center; flex-wrap:wrap; }
+  .lens { padding:3px 9px; border:1px solid var(--line); border-radius:999px; color:var(--muted); cursor:pointer; font-size:12px; user-select:none; }
+  .lens.on { color:var(--text); border-color:var(--accent); background:rgba(217,119,87,.08); }
+  .viewsel { margin-left:auto; display:flex; gap:2px; background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:2px; }
+  .viewsel button { background:none; border:0; color:var(--muted); padding:3px 9px; border-radius:6px; cursor:pointer; font:inherit; font-size:12px; }
+  .viewsel button.on { background:var(--panel2); color:var(--text); }
+  .mapwrap svg { flex:1; width:100%; }
+  .node { cursor:pointer; } .node rect { fill:var(--panel); stroke:var(--line); }
+  .node.sel rect { stroke:var(--accent); stroke-width:2; }
+  .node text { fill:var(--text); font-size:11px; } .node text.k { fill:var(--muted); font-size:9px; letter-spacing:.05em; text-transform:uppercase; }
+  .edge { stroke:#2b3242; stroke-width:1.4; fill:none; }
+  .lane rect { fill:rgba(255,255,255,.015); stroke:var(--line); stroke-dasharray:3 4; } .lane text { fill:var(--faint); font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+  .insp { border-left:1px solid var(--line); background:#0d1016; display:flex; flex-direction:column; min-width:0; }
+  .insp header { padding:12px; border-bottom:1px solid var(--line); }
+  .insp .k { font-size:10px; color:var(--faint); text-transform:uppercase; letter-spacing:.08em; } .insp .n { font-size:14px; font-weight:600; margin-top:2px; }
+  .tabs { display:flex; gap:2px; padding:6px 8px; border-bottom:1px solid var(--line); }
+  .tabs button { background:none; border:0; color:var(--muted); font:inherit; font-size:12px; padding:4px 8px; border-radius:6px; cursor:pointer; }
+  .tabs button.on { background:var(--panel2); color:var(--text); }
+  .pane { padding:12px; overflow:auto; flex:1; font-size:12px; }
+  pre { margin:0; font:11px/1.55 ui-monospace, monospace; color:#b8c2d6; white-space:pre-wrap; }
+  .kv { display:grid; grid-template-columns:86px 1fr; gap:6px 10px; } .kv span:nth-child(odd) { color:var(--faint); }
+  .acts { display:flex; gap:6px; flex-wrap:wrap; padding:10px 12px; border-top:1px solid var(--line); }
+
+  /* release + time + incidents (compact) */
+  .mode { flex:1; padding:22px 26px; overflow:auto; }
+  .flight { display:flex; gap:0; margin-top:14px; }
+  .stg { flex:1; border:1px solid var(--line); background:var(--panel); border-radius:10px; padding:11px; min-width:0; position:relative; }
+  .stg.cur { border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .arrow { width:22px; display:grid; place-items:center; color:var(--faint); }
+  .ck { font-size:11.5px; color:var(--muted); } .ck::before { content:'● '; color:var(--c); }
+  .plane { position:absolute; top:-10px; right:8px; background:var(--accent); color:#1a0d07; font-size:10px; font-weight:700; padding:0 7px; border-radius:999px; }
+  .tl { display:flex; gap:16px; margin-top:16px; overflow:auto; padding-bottom:6px; }
+  .ev { min-width:190px; border-left:2px solid var(--c); padding-left:10px; }
+  .ev .t { font:11px ui-monospace, monospace; color:var(--faint); }
+
+  /* command deck */
+  .deck { position:absolute; inset:0; background:rgba(5,6,9,.55); display:none; align-items:flex-start; justify-content:center; z-index:20; padding-top:70px; }
+  .deck.on { display:flex; }
+  .palette { width:620px; background:#10131a; border:1px solid #2c3446; border-radius:12px; box-shadow:0 24px 60px rgba(0,0,0,.6); overflow:hidden; }
+  .palette input { width:100%; background:none; border:0; border-bottom:1px solid var(--line); color:var(--text); padding:13px 15px; font:14px ui-monospace, monospace; outline:none; }
+  .r { display:flex; gap:10px; align-items:center; padding:8px 12px; cursor:pointer; } .r:hover, .r.on { background:var(--panel2); }
+  .r .sub { margin-left:auto; color:var(--faint); font-size:11px; }
+</style>
+</head>
+<body>
+<div class="note"><b>Whole product, problems first.</b> Start on the Launchpad → click a tile (try <b>“Local Kubernetes · kind”</b>) → watch it build → land on the map. Left icons switch screens; press <span class="mono">:</span> or click “⌘ :” for the command deck.</div>
+
+<div class="app" id="app">
+  <div class="title">
+    <span class="dots"><span></span><span></span><span></span></span>
+    <strong id="tname">Conn</strong><span id="tctx"></span>
+    <span class="deckhint" id="deckBtn">⌘ : command deck</span>
+  </div>
+  <nav class="nav" id="nav">
+    <button data-s="launch" data-tip="Launchpad" class="on">🚀</button>
+    <button data-s="map" data-tip="System map">🗺</button>
+    <button data-s="release" data-tip="Releases">✈</button>
+    <button data-s="time" data-tip="Time machine">⏱</button>
+    <button data-s="incident" data-tip="Incidents">🚨</button>
+    <span class="sep"></span>
+    <button data-s="code" data-tip="Code (files, terminals)">{ }</button>
+    <button data-tip="Settings">⚙</button>
+  </nav>
+  <main class="main">
+    <!-- LAUNCHPAD -->
+    <section class="screen on" id="s-launch">
+      <div class="lp">
+        <h2>What do you want to do?</h2>
+        <p class="sub">Everything below runs locally for free unless marked with a cost. Tools come from the repo (mise) or your PATH; missing ones install with one click.</p>
+        <div class="ask"><span>✦</span><input value="Spin up a 3-node local cluster with Argo CD and deploy podinfo" spellcheck="false"><button class="btn primary" onclick="provision('kind')">Do it</button></div>
+
+        <div class="group"><h3>Try something now · local & free</h3><div class="tiles">
+          <div class="tile" onclick="provision('kind')"><div class="h"><span class="ic">☸</span>Local Kubernetes · kind</div><div class="muted">Multi-node cluster in Docker/Podman, ingress ready.</div><div class="meta"><span class="tag free">free</span><span class="tag">~40 s</span><span class="tag">kind 0.27</span></div></div>
+          <div class="tile" onclick="provision('vind')"><div class="h"><span class="ic">◐</span>Local Kubernetes · vind</div><div class="muted">vCluster in Docker: sleep/wake, LoadBalancers.</div><div class="meta"><span class="tag free">free</span><span class="tag">~90 s</span><span class="tag">vcluster 0.34</span></div></div>
+          <div class="tile" onclick="provision('k3d')"><div class="h"><span class="ic">⬡</span>Local Kubernetes · k3d</div><div class="muted">Lightweight k3s, fastest start.</div><div class="meta"><span class="tag free">free</span><span class="tag">~20 s</span><span class="tag miss">not installed · add</span></div></div>
+          <div class="tile" onclick="provision('floci')"><div class="h"><span class="ic">☁</span>Local AWS · Floci</div><div class="muted">S3, SQS, Lambda, DynamoDB, RDS… point Terraform at it.</div><div class="meta"><span class="tag free">free</span><span class="tag">~15 s</span><span class="tag">126 services</span></div></div>
+        </div></div>
+
+        <div class="group"><h3>Demos · one click into your local cluster</h3><div class="tiles">
+          <div class="tile" onclick="provision('kind')"><div class="h"><span class="ic">🐙</span>podinfo + Argo CD</div><div class="muted">GitOps demo: Argo CD syncs podinfo from Git.</div><div class="meta"><span class="tag free">free</span><span class="tag">GitOps</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">🛍</span>Online Boutique</div><div class="muted">11-service microservices shop with load generator.</div><div class="meta"><span class="tag free">free</span><span class="tag">microservices</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">📈</span>Observability stack</div><div class="muted">Prometheus, Grafana, Loki pre-wired to the cluster.</div><div class="meta"><span class="tag free">free</span><span class="tag">monitoring</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">🔐</span>Secure baseline</div><div class="muted">Kyverno policies, Trivy operator, SOPS-encrypted secrets.</div><div class="meta"><span class="tag free">free</span><span class="tag">security</span></div></div>
+        </div></div>
+
+        <div class="group"><h3>A machine to work on</h3><div class="tiles">
+          <div class="tile"><div class="h"><span class="ic">🖥</span>Dev container · DevPod</div><div class="muted">This repo’s devcontainer.json on Podman or your Proxmox.</div><div class="meta"><span class="tag free">free</span><span class="tag">devcontainer</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">💠</span>Ubuntu VM · Multipass</div><div class="muted">Throwaway VM, 4 CPU / 8 GB, SSH in Orca.</div><div class="meta"><span class="tag free">free</span><span class="tag">~60 s</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">📦</span>Cloud sandbox · Upstash Box</div><div class="muted">Fresh box per workspace, pauses when idle.</div><div class="meta"><span class="tag free">free tier · 5 CPU-h/mo</span></div></div>
+        </div></div>
+
+        <div class="group"><h3>Real infrastructure · plan first, you approve</h3><div class="tiles">
+          <div class="tile" onclick="provision('eks')"><div class="h"><span class="ic">◆</span>EKS cluster · Terraform</div><div class="muted">VPC + EKS + node group from a golden module.</div><div class="meta"><span class="tag cost">≈ $219/mo</span><span class="tag">approval</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">◇</span>EKS cluster · eksctl</div><div class="muted">Quick cluster from one config file.</div><div class="meta"><span class="tag cost">≈ $205/mo</span><span class="tag">approval</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">▣</span>Kubernetes on EC2 · kops</div><div class="muted">Full control of the control plane.</div><div class="meta"><span class="tag cost">≈ $160/mo</span><span class="tag">approval</span></div></div>
+          <div class="tile"><div class="h"><span class="ic">🏗</span>Talos on Proxmox</div><div class="muted">Your homelab: VMs on Proxmox, Talos nodes.</div><div class="meta"><span class="tag free">your hardware</span></div></div>
+        </div></div>
+
+        <div class="group"><h3>Start a project from a golden path</h3><div class="tiles">
+          <div class="tile"><div class="h"><span class="ic">🧭</span>Platform repo</div><div class="muted">Terraform + mise + pre-commit + CI plan on PR.</div></div>
+          <div class="tile"><div class="h"><span class="ic">🔁</span>GitOps repo</div><div class="muted">Argo CD app-of-apps, envs/staging & prod.</div></div>
+          <div class="tile"><div class="h"><span class="ic">⎈</span>Helm chart</div><div class="muted">Chart + values per env + chart-testing in CI.</div></div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- PROVISIONING -->
+    <section class="screen" id="s-prov">
+      <div class="prov">
+        <div class="prov-main">
+          <div class="muted" id="pv-kicker">Building</div>
+          <h2 style="margin:2px 0 0;font-size:19px" id="pv-title"></h2>
+          <p class="muted" id="pv-sub" style="margin:6px 0 0"></p>
+          <div class="steps" id="pv-steps"></div>
+          <div style="margin-top:16px;display:flex;gap:8px" id="pv-actions"></div>
+        </div>
+        <div class="term" id="pv-term"></div>
+      </div>
+    </section>
+
+    <!-- MAP -->
+    <section class="screen" id="s-map">
+      <div class="ws">
+        <aside class="rail">
+          <h4>Environments</h4>
+          <div class="env on"><span class="dot" style="background:var(--ok)"></span>local · kind <small>new</small></div>
+          <div class="env"><span class="dot" style="background:var(--bad)"></span>staging <small>6.9.2</small></div>
+          <div class="env"><span class="dot" style="background:var(--ok)"></span>prod <small>6.9.1</small></div>
+          <div class="addenv" onclick="show('launch')">+ new environment</div>
+          <h4>Running locally</h4>
+          <div class="env"><span class="dot" style="background:var(--ok)"></span>kind · podinfo-dev <small>3 nodes</small></div>
+          <div class="env"><span class="dot" style="background:var(--faint)"></span>Floci <small>stopped</small></div>
+          <h4>Agents</h4>
+          <div class="env"><span class="dot" style="background:var(--accent)"></span>Claude <small>idle</small></div>
+          <h4>Pipeline</h4>
+          <div class="env"><span class="dot" style="background:var(--ok)"></span>CI · main <small>#418 ✓</small></div>
+          <div class="env"><span class="dot" style="background:var(--ok)"></span>Argo CD <small>Synced</small></div>
+        </aside>
+        <section class="claude">
+          <div class="msgs" id="cmsgs">
+            <div class="msg"><b>Ready.</b> Your local cluster <span class="mono">podinfo-dev</span> is up with Argo CD and podinfo synced from Git. Everything here is local, so I can apply and destroy freely.<div class="chips"><button class="btn small" onclick="lens('cost')">What would this cost on EKS?</button><button class="btn small" onclick="lens('security')">Scan for risks</button><button class="btn small">Break something (chaos demo)</button></div></div>
+          </div>
+          <div class="composer">Ask about any node… <span style="float:right">⌘K</span></div>
+        </section>
+        <section class="mapwrap">
+          <div class="lensbar">
+            <span class="faint">Lens</span>
+            <span class="lens on" data-l="health">❤ Health</span><span class="lens" data-l="blast">💥 Blast radius</span><span class="lens" data-l="cost">$ Cost</span><span class="lens" data-l="security">🛡 Security</span>
+            <div class="viewsel"><button class="on">Topology</button><button>Layers</button><button>Environments</button></div>
+          </div>
+          <svg id="map" viewBox="0 0 640 470" preserveAspectRatio="xMidYMid meet"></svg>
+        </section>
+        <aside class="insp">
+          <header><div class="k" id="ik"></div><div class="n" id="in"></div></header>
+          <div class="tabs" id="tabs"></div>
+          <div class="pane" id="pane"></div>
+          <div class="acts" id="acts"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- RELEASE -->
+    <section class="screen" id="s-release"><div class="mode">
+      <div style="display:flex;gap:10px;align-items:center"><strong style="font-size:15px">Change #57 · “bump cache port”</strong><span class="tag">PR #57</span><span class="tag mono">a1b2c3</span><span class="muted" style="margin-left:auto">Claude is flying this change with you</span></div>
+      <div class="flight" id="flight"></div>
+      <p class="muted" style="margin-top:18px">Every hop shows its evidence (tests, Trivy, Checkov, Terraform plan, Infracost, Argo CD health, canary error budget). Risky hops wait for you; the safety gate enforces it for Claude too.</p>
+    </div></section>
+
+    <!-- TIME -->
+    <section class="screen" id="s-time"><div class="mode">
+      <strong style="font-size:15px">Time machine · staging</strong>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:12px"><span class="mono muted">09:00</span><input type="range" min="0" max="4" value="4" style="flex:1;accent-color:var(--accent)"><span class="mono muted">now</span><button class="btn">Compare with now</button></div>
+      <div class="tl">
+        <div class="ev" style="--c:var(--info)"><div class="t">09:40</div>terraform apply · RDS t4g.micro → small</div>
+        <div class="ev" style="--c:var(--info)"><div class="t">10:15</div>helm upgrade · HPA added</div>
+        <div class="ev" style="--c:var(--info)"><div class="t">10:41</div>commit a1b2c3 · cache port 6380</div>
+        <div class="ev" style="--c:var(--bad)"><div class="t">10:43</div>CrashLoopBackOff · podinfo</div>
+      </div>
+      <p class="muted" style="margin-top:14px">Drag back and the map redraws the platform as it was. Built from Radar’s timeline, git history and Terraform state.</p>
+    </div></section>
+
+    <!-- INCIDENT -->
+    <section class="screen" id="s-incident"><div class="mode">
+      <div style="display:flex;align-items:center;gap:10px"><span class="tag" style="color:#fff;background:var(--bad);border-color:var(--bad)">SEV-2</span><strong style="font-size:15px">staging 5xx 38%</strong><span class="muted">started 10:43 · 12 min</span></div>
+      <div class="tl">
+        <div class="ev" style="--c:var(--info)"><div class="t">10:41:58</div>commit a1b2c3 “bump cache port”</div>
+        <div class="ev" style="--c:var(--info)"><div class="t">10:42:20</div>Argo CD sync → staging</div>
+        <div class="ev" style="--c:var(--bad)"><div class="t">10:43:05</div>podinfo CrashLoopBackOff</div>
+        <div class="ev" style="--c:var(--bad)"><div class="t">10:43:40</div>Alert fired</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+        <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel)"><b style="color:var(--accent)">Claude · diagnosis</b><p class="muted" style="margin:6px 0 0">Commit a1b2c3 points the cache at port 6380; redis listens on 6379. Fix: revert the ConfigMap, or roll back to 6.9.1.</p><div class="chips"><button class="btn small primary">Roll back (approval)</button><button class="btn small">Show on map</button><button class="btn small">Draft RCA</button></div></div>
+        <div style="border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel)"><b>Runbook · podinfo cache</b><pre style="margin-top:6px">1. kubectl -n podinfo logs deploy/podinfo
+2. Check PODINFO_CACHE_SERVER
+3. kubectl -n podinfo get svc redis</pre></div>
+      </div>
+    </div></section>
+
+    <!-- CODE -->
+    <section class="screen" id="s-code"><div class="mode"><strong style="font-size:15px">Code stays one click away</strong><p class="muted">Files, terminals, diffs and the browser are today’s workbench. The difference: you usually arrive here from a node (“Source” in the Inspector), with the file opened at the right line and terminals already scoped to that node’s cluster and namespace.</p></div></section>
+
+    <div class="deck" id="deck"><div class="palette">
+      <input id="q" value=":" spellcheck="false">
+      <div id="res"></div>
+    </div></div>
+  </main>
+  <div class="status"><span class="g">● local · free</span><span id="st-env">no environment yet</span><span>Claude · Opus</span><span style="margin-left:auto">safety gate on</span></div>
+</div>
+
+<script>
+const PLANS = {
+  kind: { title: 'Local Kubernetes · kind + Argo CD + podinfo', sub: 'Three nodes in Docker/Podman. Free, about 40 seconds.', steps: [
+    ['Check tools', 'kind 0.27, kubectl 1.33, helm 3.17 · pinned in mise.toml', 'mise install'],
+    ['Create cluster podinfo-dev (3 nodes)', 'control-plane + 2 workers', 'kind create cluster --name podinfo-dev --config kind.yaml'],
+    ['Install ingress-nginx', 'LoadBalancer via cloud-provider-kind', 'helm upgrade --install ingress-nginx …'],
+    ['Install Argo CD', 'argocd namespace, admin password in SOPS', 'helm upgrade --install argocd argo/argo-cd -n argocd'],
+    ['Deploy podinfo from Git', 'Argo CD Application → k8s/overlays/dev', 'kubectl apply -f apps/podinfo-dev.yaml'],
+    ['Start Radar + give Claude the cluster', 'read-only MCP on :9280', 'kubectl-radar --no-browser --mcp-read-only']] },
+  vind: { title: 'Local Kubernetes · vind', sub: 'vCluster in Docker with sleep/wake.', steps: [['Check tools', 'vcluster 0.34', 'mise install'], ['Create cluster', 'docker driver', 'vcluster create podinfo-dev'], ['Start Radar', 'read-only MCP', 'kubectl-radar --no-browser']] },
+  k3d: { title: 'Local Kubernetes · k3d', sub: 'k3d is not in this repo yet; one click adds it.', steps: [['Add k3d to mise.toml', 'pinned version', 'mise use k3d@latest'], ['Create cluster', '', 'k3d cluster create podinfo-dev'], ['Start Radar', '', 'kubectl-radar --no-browser']] },
+  floci: { title: 'Local AWS · Floci', sub: 'Terraform and the aws CLI in this workspace now talk to Floci.', steps: [['Start Floci', 'port 4566', 'floci start'], ['Wire this workspace', 'AWS_ENDPOINT_URL for terminals and Claude', 'floci env'], ['Open dashboard', 'localhost:4500', '']] },
+  eks: { title: 'EKS cluster · Terraform (real, billed)', sub: 'Nothing is created until you approve the plan.', real: true, steps: [['Plan', 'VPC, 3 subnets, EKS 1.33, 3 × t3.large', 'terraform plan -out=tfplan'], ['Cost', 'Infracost ≈ $219 / month', 'infracost breakdown --path .'], ['Policy', 'Checkov 0 failed · OPA pass', 'checkov -d .'], ['Your approval', 'account 750702271569 · eu-central-1', ''], ['Apply the reviewed plan', '~14 min', 'terraform apply tfplan']] }
+}
+const screens = ['launch', 'prov', 'map', 'release', 'time', 'incident', 'code']
+function show(s) {
+  screens.forEach(x => document.getElementById('s-' + x).classList.toggle('on', x === s))
+  document.querySelectorAll('#nav button[data-s]').forEach(b => b.classList.toggle('on', b.dataset.s === s || (s === 'prov' && b.dataset.s === 'launch')))
+}
+document.querySelectorAll('#nav button[data-s]').forEach(b => b.onclick = () => show(b.dataset.s))
+let timer
+function provision(id) {
+  const p = PLANS[id]; show('prov'); clearInterval(timer)
+  document.getElementById('pv-title').textContent = p.title
+  document.getElementById('pv-sub').textContent = p.sub
+  document.getElementById('pv-kicker').textContent = p.real ? 'Planning · real infrastructure' : 'Building · local & free'
+  const term = document.getElementById('pv-term'); term.innerHTML = ''
+  let i = 0
+  const draw = () => {
+    document.getElementById('pv-steps').innerHTML = p.steps.map((s, j) => {
+      const st = j < i ? 'done' : j === i ? 'run' : 'wait'
+      return `<div class="step ${st}"><span class="s">${st === 'done' ? '✓' : st === 'run' ? '◌' : '○'}</span><div><div>${s[0]}</div><div class="muted" style="font-size:12px">${s[1]}</div>${s[2] ? `<div class="cmd">$ ${s[2]}</div>` : ''}</div></div>`
+    }).join('')
+    const acts = document.getElementById('pv-actions')
+    if (p.real && i === 3) { clearInterval(timer); acts.innerHTML = '<button class="btn primary" id="appr">Approve & apply ($219/mo)</button><button class="btn">Open plan</button><button class="btn" onclick="show(\'launch\')">Cancel</button>'; document.getElementById('appr').onclick = () => { i++; acts.innerHTML = ''; timer = setInterval(tick, 700) } }
+    else if (i >= p.steps.length) { acts.innerHTML = '<button class="btn primary" onclick="land()">Open the map</button><button class="btn">Open in terminal</button>' }
+    else acts.innerHTML = '<button class="btn">Cancel</button>'
+  }
+  const tick = () => {
+    if (i < p.steps.length) { if (p.steps[i][2]) term.innerHTML += `<div><span class="p">❯</span> ${p.steps[i][2]}</div><div>  ✓ done</div>`; i++; draw() }
+    if (i >= p.steps.length || (p.real && i === 3)) { clearInterval(timer); draw() }
+  }
+  draw(); timer = setInterval(tick, 650)
+}
+function land() {
+  show('map')
+  document.getElementById('tctx').innerHTML = ' <span class="chip local">☸ kind-podinfo-dev / podinfo</span> <span class="chip local">☁ floci (local)</span>'
+  document.getElementById('st-env').textContent = 'kind-podinfo-dev · 3 nodes · Argo CD synced'
+}
+
+/* map */
+const W = 118, H = 44
+const NODES = {
+  git: [40, 60, 'Git', 'podinfo · main', 'ok'], argo: [190, 60, 'Argo CD', 'podinfo-dev', 'ok'], helm: [340, 60, 'Helm', 'ingress-nginx', 'ok'], radar: [490, 60, 'Radar', 'MCP :9280', 'ok'],
+  ing: [40, 200, 'Ingress', 'podinfo.localhost', 'ok'], svc: [190, 200, 'Service', 'podinfo :9898', 'ok'], dep: [340, 200, 'Deployment', 'podinfo 2/2', 'ok'], hpa: [490, 200, 'HPA', '2→4', 'ok'],
+  cm: [340, 290, 'ConfigMap', 'podinfo', 'ok'], redis: [490, 290, 'StatefulSet', 'redis', 'ok'],
+  n1: [40, 390, 'Node', 'control-plane', 'ok'], n2: [190, 390, 'Node', 'worker-1', 'ok'], n3: [340, 390, 'Node', 'worker-2', 'ok'], floci: [490, 390, 'Floci', 's3 · sqs (local)', 'ok']
+}
+const EDGES = [['git','argo'],['argo','dep'],['helm','ing'],['ing','svc'],['svc','dep'],['dep','hpa'],['dep','cm'],['dep','redis'],['n2','dep'],['n3','redis'],['radar','dep']]
+const COST = { n1: 73, n2: 73, n3: 73, dep: 0, redis: 0, ing: 18, floci: 0 }
+const RISK = { ing: 'warn', dep: 'warn', cm: 'ok' }
+const COLORS = { ok: 'var(--ok)', warn: 'var(--warn)', bad: 'var(--bad)' }
+let sel = 'dep', lensMode = 'health', tab = 'Live'
+function drawMap() {
+  let s = ''
+  for (const [x, y, w, h, t] of [[20, 30, 600, 90, 'delivery · gitops'], [20, 170, 600, 180, 'cluster · kind-podinfo-dev'], [20, 360, 600, 90, 'nodes & local cloud']])
+    s += `<g class="lane"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10"/><text x="${x + 10}" y="${y + 16}">${t}</text></g>`
+  const blast = new Set(); if (lensMode === 'blast') { const walk = id => EDGES.forEach(([a, b]) => { if (a === id && !blast.has(b)) { blast.add(b); walk(b) } }); walk(sel) }
+  for (const [a, b] of EDGES) { const A = NODES[a], B = NODES[b]; const on = lensMode === 'blast' && (a === sel || blast.has(a)) && blast.has(b)
+    s += `<path class="edge" style="${on ? 'stroke:var(--bad);stroke-width:2' : lensMode === 'blast' ? 'opacity:.25' : ''}" d="M${A[0] + W / 2},${A[1] + H / 2} C${(A[0] + B[0]) / 2 + W / 2},${A[1] + H / 2} ${(A[0] + B[0]) / 2 + W / 2},${B[1] + H / 2} ${B[0] + W / 2},${B[1] + H / 2}"/>` }
+  for (const [id, [x, y, k, n, st]] of Object.entries(NODES)) {
+    let c = COLORS[st], op = 1, label = n
+    if (lensMode === 'blast') { c = id === sel ? 'var(--accent)' : blast.has(id) ? 'var(--bad)' : 'var(--faint)'; op = id === sel || blast.has(id) ? 1 : .3 }
+    if (lensMode === 'cost') { const v = COST[id]; c = v > 50 ? 'var(--warn)' : 'var(--ok)'; label = v !== undefined ? `${n.split(' ')[0]} · $${v}` : n }
+    if (lensMode === 'security') { c = RISK[id] ? COLORS[RISK[id]] : 'var(--faint)'; op = RISK[id] ? 1 : .45 }
+    s += `<g class="node ${id === sel ? 'sel' : ''}" style="opacity:${op}" data-id="${id}" transform="translate(${x},${y})"><rect width="${W}" height="${H}" rx="9"/><circle cx="${W - 12}" cy="12" r="4" fill="${c}"/><text class="k" x="10" y="16">${k}</text><text x="10" y="33">${label.length > 18 ? label.slice(0, 17) + '…' : label}</text></g>`
+  }
+  const svg = document.getElementById('map'); svg.innerHTML = s
+  svg.querySelectorAll('.node').forEach(g => g.onclick = () => { sel = g.dataset.id; drawMap(); insp() })
+}
+const INFO = {
+  dep: { live: [['Ready', '2 / 2 pods'], ['Image', 'podinfo:6.9.2'], ['Node', 'worker-1']], src: 'k8s/overlays/dev/deployment.yaml:1\n\nkind: Deployment\nmetadata: { name: podinfo }\nspec:\n  replicas: 2', acts: ['Logs', 'Shell', 'Restart', 'Scale'] },
+  n1: { live: [['Role', 'control-plane'], ['CPU', '18%'], ['Mem', '1.1 / 4 GiB']], src: 'kind.yaml\n\nnodes:\n  - role: control-plane\n  - role: worker\n  - role: worker', acts: ['Shell', 'Cordon'] },
+  floci: { live: [['Endpoint', 'localhost.floci.io:4566'], ['Services', 's3, sqs'], ['Buckets', 'artifacts']], src: 'terraform: aws provider → AWS_ENDPOINT_URL (set by Conn)', acts: ['Dashboard', 'Stop'] }
+}
+function insp() {
+  const [, , k, n] = NODES[sel], info = INFO[sel] ?? { live: [['Status', 'healthy']], src: '—', acts: ['Open source'] }
+  document.getElementById('ik').textContent = k; document.getElementById('in').textContent = n
+  document.getElementById('tabs').innerHTML = ['Live', 'Source', 'Logs', 'Drift', 'Cost'].map(t => `<button class="${t === tab ? 'on' : ''}">${t}</button>`).join('')
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { tab = b.textContent; insp() })
+  document.getElementById('pane').innerHTML = tab === 'Live' ? `<div class="kv">${info.live.map(([a, b]) => `<span>${a}</span><span>${b}</span>`).join('')}</div>` : tab === 'Source' ? `<pre>${info.src}</pre>` : tab === 'Cost' ? `<pre>Local: $0\nSame on EKS: ≈ $${COST[sel] ?? 0} / month</pre>` : `<pre>${tab === 'Logs' ? '10:52:01 GET /healthz 200\n10:52:03 GET / 200' : 'In sync with Git.'}</pre>`
+  document.getElementById('acts').innerHTML = info.acts.map(a => `<button class="btn small">${a}</button>`).join('')
+}
+function lens(l) { lensMode = l; document.querySelectorAll('.lens').forEach(e => e.classList.toggle('on', e.dataset.l === l)); drawMap() }
+document.querySelectorAll('.lens').forEach(e => e.onclick = () => lens(e.dataset.l))
+drawMap(); insp()
+
+/* release */
+const ST = [['PR #57', [['Review', 'approved', 'ok']]], ['CI', [['Tests', '214 ✓', 'ok'], ['Trivy', '0 critical', 'ok'], ['Checkov', '0 failed', 'ok']]], ['Plan', [['Terraform', 'no changes', 'ok'], ['Infracost', '+$0', 'ok']]], ['Staging', [['Argo CD', 'synced', 'ok'], ['Smoke', '12/12', 'ok']]], ['Canary', [['Traffic', '10%', 'info'], ['Errors', '0.4%', 'ok']]], ['Prod', [['Approval', 'you', 'warn']]]]
+document.getElementById('flight').innerHTML = ST.map((s, i) => `${i ? '<div class="arrow">›</div>' : ''}<div class="stg ${i === 4 ? 'cur' : ''}">${i === 4 ? '<span class="plane">✈ here</span>' : ''}<div style="font-weight:600;margin-bottom:5px">${i < 4 ? '<span style="color:var(--ok)">✓</span> ' : ''}${s[0]}</div>${s[1].map(c => `<div class="ck" style="--c:var(--${c[2]})">${c[0]} · <span style="color:var(--text)">${c[1]}</span></div>`).join('')}</div>`).join('')
+
+/* command deck */
+const CMDS = [[':cluster up kind', '☸', 'Create a local kind cluster', 'free · ~40 s', () => provision('kind')], [':aws local', '☁', 'Start Floci and point this workspace at it', 'free', () => provision('floci')], [':logs podinfo', '📜', 'Tail logs · deployment/podinfo', 'kind-podinfo-dev', () => show('map')], [':plan staging', '🧭', 'Terraform plan · envs/staging', 'real · read-only', () => show('release')], [':incident', '🚨', 'Open the active incident', 'SEV-2 staging', () => show('incident')], [':time staging', '⏱', 'Time machine for staging', '', () => show('time')], [':eks new', '◆', 'Plan a real EKS cluster', '≈ $219/mo · approval', () => provision('eks')], [':demo boutique', '🛍', 'Deploy Online Boutique locally', 'free', () => provision('kind')]]
+let ci = 0
+const deck = document.getElementById('deck'), q = document.getElementById('q')
+function drawDeck() { const t = q.value.toLowerCase().replace(/^:/, ''); const hits = CMDS.filter(c => c[0].includes(t) || c[2].toLowerCase().includes(t)); ci = Math.min(ci, Math.max(0, hits.length - 1))
+  document.getElementById('res').innerHTML = hits.map((c, i) => `<div class="r ${i === ci ? 'on' : ''}" data-i="${CMDS.indexOf(c)}"><span>${c[1]}</span><span><span class="mono">${c[0]}</span><br><span class="muted" style="font-size:12px">${c[2]}</span></span><span class="sub">${c[3]}</span></div>`).join('')
+  document.querySelectorAll('.r').forEach(r => r.onclick = () => { deck.classList.remove('on'); CMDS[+r.dataset.i][4]() }) }
+function openDeck() { deck.classList.add('on'); q.value = ':'; ci = 0; drawDeck(); q.focus() }
+document.getElementById('deckBtn').onclick = openDeck
+document.addEventListener('keydown', e => { if (e.key === ':' && document.activeElement !== q) { e.preventDefault(); openDeck() } if (e.key === 'Escape') deck.classList.remove('on') })
+deck.onclick = e => { if (e.target === deck) deck.classList.remove('on') }
+q.oninput = () => { ci = 0; drawDeck() }
+q.onkeydown = e => { if (e.key === 'Enter') { const r = document.querySelectorAll('.r')[ci]; r?.click() } if (e.key === 'ArrowDown') { ci++; drawDeck() } if (e.key === 'ArrowUp') { ci = Math.max(0, ci - 1); drawDeck() } }
+</script>
+</body>
+</html>

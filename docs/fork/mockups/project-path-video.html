@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project path demo</title>
+<style>
+  :root { --bg:#0b0d12; --panel:#11141b; --panel2:#171b25; --line:#242a38; --text:#e3e8f1; --muted:#8a93a6; --faint:#4e566a;
+          --accent:#d97757; --ok:#3fb68b; --warn:#e2b340; --bad:#e5534b; --info:#5b9cf6; --ghost:#a78bfa; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; width:1920px; height:1080px; overflow:hidden; background:#06070a; color:var(--text);
+    font:22px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; }
+  .mono { font-family: ui-monospace, 'JetBrains Mono', monospace; }
+  .muted { color:var(--muted); }
+  /* stage backdrop */
+  body::before { content:''; position:fixed; inset:0; background:
+    radial-gradient(900px 500px at 15% 10%, rgba(217,119,87,.16), transparent 60%),
+    radial-gradient(900px 600px at 90% 90%, rgba(91,156,246,.12), transparent 60%); }
+  .scene { position:absolute; inset:0; opacity:0; transition:opacity .7s ease; pointer-events:none; }
+  .scene.on { opacity:1; }
+  /* title cards */
+  .card-title { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; }
+  .card-title h1 { font-size:96px; margin:0; letter-spacing:-.03em; }
+  .card-title h1 b { color:var(--accent); }
+  .card-title p { font-size:34px; color:var(--muted); margin:18px 0 0; }
+  .pill { display:inline-block; margin-top:34px; padding:10px 22px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:22px; }
+  /* app window */
+  .win { position:absolute; left:90px; top:60px; width:1740px; height:880px; border-radius:18px; overflow:hidden;
+    background:var(--bg); border:2px solid var(--line); box-shadow:0 40px 120px rgba(0,0,0,.6);
+    display:grid; grid-template-rows:52px 1fr; transition:border-color .5s, box-shadow .5s; }
+  .win.real { border-color:var(--warn); box-shadow:0 0 0 6px rgba(226,179,64,.15), 0 40px 120px rgba(0,0,0,.6); }
+  .bar { display:flex; align-items:center; gap:14px; padding:0 18px; border-bottom:1px solid var(--line); background:#0d1016; font-size:19px; color:var(--muted); }
+  .dots span { display:inline-block; width:13px; height:13px; border-radius:50%; background:#2a2f3c; margin-right:7px; }
+  .chip { padding:3px 12px; border-radius:999px; border:1px solid var(--line); font:17px ui-monospace, monospace; transition:all .4s; }
+  .chip.local { color:var(--ok); border-color:rgba(63,182,139,.45); }
+  .chip.real { color:var(--warn); border-color:rgba(226,179,64,.55); }
+  .body { display:grid; grid-template-columns:1fr 470px; min-height:0; }
+  .main { padding:26px 30px; overflow:hidden; position:relative; }
+  .claude { border-left:1px solid var(--line); background:#0d1016; padding:20px; display:flex; flex-direction:column; gap:14px; }
+  .claude h4 { margin:0; font-size:17px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+  .msg { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px 16px; font-size:19px; min-height:20px; }
+  .msg b { color:var(--accent); }
+  .msg ul { margin:8px 0 0; padding-left:22px; } .msg li { margin:3px 0; }
+  /* stepper */
+  .stepper { display:flex; gap:8px; margin-bottom:22px; }
+  .step { flex:1; padding:12px 12px; border-radius:12px; border:1px solid var(--line); background:var(--panel); font-size:18px; color:var(--faint); transition:all .4s; display:flex; gap:8px; align-items:center; }
+  .step .i { width:22px; height:22px; border-radius:50%; border:2px solid var(--faint); display:grid; place-items:center; font-size:13px; flex:none; transition:all .4s; }
+  .step.done { color:var(--text); } .step.done .i { background:var(--ok); border-color:var(--ok); color:#06120d; }
+  .step.active { color:var(--text); border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .step.active .i { border-color:var(--accent); }
+  .row { display:flex; gap:22px; height:calc(100% - 80px); }
+  .col { flex:1; display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .next { display:flex; align-items:center; gap:18px; padding:20px 22px; border-radius:16px; background:linear-gradient(135deg, rgba(217,119,87,.16), rgba(217,119,87,.04)); border:1px solid rgba(217,119,87,.45); }
+  .next .t { font-size:15px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+  .next .h { font-size:28px; font-weight:650; margin-top:2px; }
+  .next .s { color:var(--muted); font-size:18px; }
+  .btn { margin-left:auto; background:var(--accent); color:#1a0d07; font-weight:700; border:0; border-radius:12px; padding:14px 22px; font:inherit; font-size:20px; font-weight:700; white-space:nowrap; transition:transform .12s; }
+  .btn.ghost { background:var(--panel2); color:var(--text); border:1px solid var(--line); font-weight:500; }
+  .btn.danger { background:var(--bad); color:#fff; }
+  .btn.press { transform:scale(.95); }
+  .term { flex:1; background:#06080b; border:1px solid var(--line); border-radius:14px; padding:16px 18px; font:17px/1.65 ui-monospace, monospace; color:#9aa5b8; overflow:hidden; }
+  .term .p { color:var(--ok); } .term .w { color:var(--warn); } .term .e { color:var(--bad); } .term .h { color:var(--text); }
+  .mapbox { flex:1.25; background:radial-gradient(circle at 1px 1px, #1a1f2b 1px, transparent 0) 0 0/26px 26px, var(--bg); border:1px solid var(--line); border-radius:14px; position:relative; overflow:hidden; }
+  .mapbox .lbl { position:absolute; left:16px; top:12px; font-size:15px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+  .node { position:absolute; width:210px; padding:10px 14px; background:var(--panel); border:1px solid var(--line); border-radius:12px; opacity:0; transform:scale(.85); transition:all .5s cubic-bezier(.2,.8,.2,1); }
+  .node.on { opacity:1; transform:scale(1); }
+  .node .k { font-size:13px; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); }
+  .node .n { font-size:19px; margin-top:2px; }
+  .node .d { position:absolute; right:12px; top:12px; width:11px; height:11px; border-radius:50%; background:var(--ok); transition:background .4s; }
+  .node.bad { border-color:var(--bad); } .node.bad .d { background:var(--bad); }
+  svg.edges { position:absolute; inset:0; width:100%; height:100%; }
+  svg.edges path { stroke:#2e3647; stroke-width:2; fill:none; stroke-dasharray:400; stroke-dashoffset:400; transition:stroke-dashoffset .9s ease; }
+  svg.edges path.on { stroke-dashoffset:0; }
+  /* repos */
+  .repos { display:flex; gap:26px; justify-content:center; margin-top:60px; }
+  .repo { width:440px; padding:24px; border-radius:18px; background:var(--panel); border:1px solid var(--line); opacity:0; transform:translateY(30px); transition:all .6s cubic-bezier(.2,.8,.2,1); }
+  .repo.on { opacity:1; transform:none; }
+  .repo h3 { margin:0 0 6px; font-size:28px; } .repo .r { color:var(--muted); font-size:18px; }
+  .tags { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .tag { padding:4px 11px; border-radius:999px; border:1px solid var(--line); font-size:16px; color:var(--muted); }
+  .tag.hl { color:var(--text); border-color:rgba(217,119,87,.5); }
+  /* plan overlay */
+  .overlay { position:absolute; inset:0; background:rgba(6,7,10,.6); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .5s; pointer-events:none; }
+  .overlay.on { opacity:1; }
+  .sheet { width:1100px; background:#0f131a; border:1px solid #2c3446; border-radius:20px; padding:26px 30px; box-shadow:0 30px 90px rgba(0,0,0,.7); }
+  .sheet h2 { margin:0 0 4px; font-size:30px; }
+  .counts { display:flex; gap:22px; margin:14px 0 16px; font-size:21px; }
+  .res { display:flex; gap:14px; align-items:center; padding:9px 14px; border:1px solid var(--line); border-radius:10px; margin-bottom:7px; font:18px ui-monospace, monospace; opacity:0; transform:translateX(-16px); transition:all .4s; }
+  .res.on { opacity:1; transform:none; }
+  .res .a { width:80px; font-family:Inter, sans-serif; font-weight:650; color:var(--ok); }
+  .gates { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:16px 0; }
+  .gate { padding:14px 16px; border-radius:12px; border:1px solid var(--line); background:var(--panel); opacity:.35; transition:opacity .4s; }
+  .gate.on { opacity:1; } .gate .k { font-size:15px; color:var(--muted); } .gate .v { font-size:24px; font-weight:650; margin-top:2px; }
+  .meter { display:inline-flex; gap:10px; align-items:center; padding:4px 14px; border-radius:999px; border:1px solid rgba(226,179,64,.5); color:var(--warn); font:17px ui-monospace, monospace; opacity:0; transition:opacity .5s; }
+  .meter.on { opacity:1; }
+  /* caption + cursor */
+  .caption { position:absolute; left:50%; bottom:34px; transform:translateX(-50%); max-width:1500px; padding:16px 30px; border-radius:16px;
+    background:rgba(10,12,17,.92); border:1px solid #2a3142; font-size:30px; font-weight:560; text-align:center; opacity:0; transition:opacity .4s; z-index:50; }
+  .caption.on { opacity:1; }
+  .caption small { display:block; font-size:20px; color:var(--muted); font-weight:400; margin-top:4px; }
+  #cursor { position:absolute; left:960px; top:600px; width:34px; height:34px; z-index:60; transition:left .9s cubic-bezier(.4,0,.2,1), top .9s cubic-bezier(.4,0,.2,1); pointer-events:none; filter:drop-shadow(0 3px 6px rgba(0,0,0,.5)); }
+  .ripple { position:absolute; width:20px; height:20px; border-radius:50%; border:3px solid var(--accent); z-index:59; pointer-events:none; animation:rip .6s ease-out forwards; }
+  @keyframes rip { from { transform:translate(-50%,-50%) scale(.4); opacity:1 } to { transform:translate(-50%,-50%) scale(3.2); opacity:0 } }
+  .badge { display:inline-block; padding:3px 10px; border-radius:8px; font-size:16px; font-weight:650; }
+</style>
+</head>
+<body>
+
+<!-- 1 intro -->
+<section class="scene" id="intro"><div class="card-title">
+  <h1>From repo to <b>running</b>.</h1>
+  <p>A DevOps IDE that starts from your project, not from a tool list.</p>
+  <span class="pill">Concept walkthrough · Claude-powered · working name “Conn”</span>
+</div></section>
+
+<!-- 2 open project -->
+<section class="scene" id="open"><div style="text-align:center;padding-top:110px">
+  <div class="muted" style="font-size:24px;letter-spacing:.1em;text-transform:uppercase">The team hands you an app</div>
+  <h1 style="font-size:64px;margin:12px 0 0">~/work/<b style="color:var(--accent)">shop</b></h1>
+  <div class="repos">
+    <div class="repo" id="r1"><h3>shop</h3><div class="r">app repo</div><div class="tags"><span class="tag hl">Dockerfile</span><span class="tag hl">k8s/ (kustomize)</span><span class="tag">GitHub Actions</span></div></div>
+    <div class="repo" id="r2"><h3>shop-gitops</h3><div class="r">sibling · GitOps</div><div class="tags"><span class="tag hl">Argo CD apps</span><span class="tag">envs/dev · envs/prod</span></div></div>
+    <div class="repo" id="r3"><h3>platform</h3><div class="r">sibling · infrastructure</div><div class="tags"><span class="tag hl">Terraform</span><span class="tag">VPC · EKS · ECR</span></div></div>
+  </div>
+  <div style="margin-top:46px"><button class="btn" id="confirm" style="margin:0 auto;display:inline-block">This is one project ✓</button></div>
+</div></section>
+
+<!-- 3 app -->
+<section class="scene" id="app"><div class="win" id="win">
+  <div class="bar"><span class="dots"><span></span><span></span><span></span></span><b style="color:var(--text)">shop</b>
+    <span class="chip" id="ctx">☸ no cluster</span><span class="chip" id="aws">☁ aws: not signed in</span>
+    <span class="meter" id="meter">● EKS running <span id="meterv">0m · $0.00</span></span>
+    <span style="margin-left:auto">⌘ : commands</span></div>
+  <div class="body">
+    <div class="main">
+      <div class="stepper" id="stepper"></div>
+      <div class="row">
+        <div class="col">
+          <div class="next"><div><div class="t" id="nt">Next step</div><div class="h" id="nh"></div><div class="s" id="ns"></div></div><button class="btn" id="go">Run</button></div>
+          <div class="term" id="term"></div>
+        </div>
+        <div class="mapbox" id="map"><div class="lbl" id="maplbl">System map</div><svg class="edges" id="edges"></svg></div>
+      </div>
+    </div>
+    <aside class="claude"><h4>Claude</h4><div id="msgs" style="display:flex;flex-direction:column;gap:12px"></div></aside>
+  </div>
+  <div class="overlay" id="plan"><div class="sheet">
+    <div class="muted" style="font-size:17px;letter-spacing:.1em;text-transform:uppercase">platform · envs/dev · account 1234…7890 · eu-central-1</div>
+    <h2>Terraform plan — nothing applied yet</h2>
+    <div class="counts"><span style="color:var(--ok)">47 to add</span><span class="muted">0 to change</span><span class="muted">0 to destroy</span></div>
+    <div id="reslist"></div>
+    <div class="gates">
+      <div class="gate" id="g1"><div class="k">Cost · Infracost</div><div class="v" style="color:var(--warn)">≈ $219 / month</div><div class="muted" style="font-size:16px">$0.30 / hour while it runs</div></div>
+      <div class="gate" id="g2"><div class="k">Policy · Checkov + Trivy</div><div class="v" style="color:var(--ok)">0 failed</div><div class="muted" style="font-size:16px">2 low, explained by Claude</div></div>
+      <div class="gate" id="g3"><div class="k">Budget alert</div><div class="v" style="color:var(--ok)">$50 / month ✓</div><div class="muted" style="font-size:16px">exists before anything is created</div></div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:center"><span class="muted" style="font-size:18px">Claude can explain this plan. Only you can apply it.</span>
+      <button class="btn ghost" style="margin-left:auto">Explain with Claude</button><button class="btn" id="approve">Approve & apply</button></div>
+  </div></div>
+</div></section>
+
+<!-- 4 outro -->
+<section class="scene" id="outro"><div class="card-title">
+  <h1>Every step <b>one click</b>.</h1>
+  <p>Local first and free. Nothing billed without your approval. Torn down when you're done.</p>
+  <div style="display:flex;gap:14px;margin-top:38px;flex-wrap:wrap;justify-content:center;max-width:1400px">
+    <span class="pill" style="margin:0">kind · k3d · vind</span><span class="pill" style="margin:0">Floci</span><span class="pill" style="margin:0">Argo CD</span><span class="pill" style="margin:0">Terraform + Infracost</span><span class="pill" style="margin:0">Trivy · Checkov · kube-linter</span><span class="pill" style="margin:0">EKS</span><span class="pill" style="margin:0">Radar</span><span class="pill" style="margin:0">Claude</span>
+  </div>
+</div></section>
+
+<div class="caption" id="cap"></div>
+<svg id="cursor" viewBox="0 0 24 24"><path d="M4 2 L4 20 L9 15 L12.5 22 L15.5 20.6 L12 13.8 L19 13.8 Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/></svg>
+
+<script>
+const $ = (id) => document.getElementById(id)
+const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+const STEPS = ['Understood', 'Runs locally', 'Local cluster', 'GitOps', 'Hardened', 'Cloud', 'Shipped']
+let stage = 0
+function drawSteps(active, doneUpTo) {
+  $('stepper').innerHTML = STEPS.map((s, i) => `<div class="step ${i < doneUpTo ? 'done' : i === active ? 'active' : ''}"><span class="i">${i < doneUpTo ? '✓' : ''}</span>${s}</div>`).join('')
+}
+function scene(id) { document.querySelectorAll('.scene').forEach((s) => s.classList.toggle('on', s.id === id)) }
+async function caption(text, sub) {
+  const c = $('cap'); c.classList.remove('on'); await wait(250)
+  c.innerHTML = text + (sub ? `<small>${sub}</small>` : ''); c.classList.add('on')
+}
+function hideCaption() { $('cap').classList.remove('on') }
+async function moveTo(el, dx = 0.5, dy = 0.55) {
+  const r = (typeof el === 'string' ? $(el) : el).getBoundingClientRect()
+  const c = $('cursor'); c.style.left = `${r.left + r.width * dx}px`; c.style.top = `${r.top + r.height * dy}px`
+  await wait(950)
+}
+async function click(el) {
+  await moveTo(el)
+  const target = typeof el === 'string' ? $(el) : el
+  const c = $('cursor'); const rip = document.createElement('div'); rip.className = 'ripple'
+  rip.style.left = c.style.left; rip.style.top = c.style.top; document.body.appendChild(rip)
+  target.classList.add('press'); await wait(140); target.classList.remove('press')
+  setTimeout(() => rip.remove(), 700); await wait(250)
+}
+async function type(el, html, speed = 14) {
+  const tmp = document.createElement('div'); tmp.innerHTML = html
+  const text = tmp.textContent; el.innerHTML = ''
+  for (let i = 0; i <= text.length; i += 2) { el.textContent = text.slice(0, i); await wait(speed) }
+  el.innerHTML = html
+}
+async function term(lines, gap = 380) {
+  for (const line of lines) { const d = document.createElement('div'); d.innerHTML = line; $('term').appendChild(d); await wait(gap) }
+}
+async function claudeSays(html) {
+  const m = document.createElement('div'); m.className = 'msg'; $('msgs').appendChild(m)
+  while ($('msgs').children.length > 3) $('msgs').firstChild.remove()
+  await type(m, html, 10)
+}
+function setNext(t, h, s, btn) { $('nt').textContent = t; $('nh').textContent = h; $('ns').textContent = s; $('go').textContent = btn; $('go').className = 'btn' }
+const NODES = {
+  ing: [40, 70, 'Ingress', 'shop.localhost'], svc: [290, 70, 'Service', 'shop-web :80'],
+  web: [40, 200, 'Deployment', 'shop-web 2/2'], api: [290, 200, 'Deployment', 'shop-api 2/2'],
+  db: [40, 330, 'StatefulSet', 'postgres 1/1'], sec: [290, 330, 'Secret', 'shop-db'],
+  argo: [40, 460, 'Argo CD', 'shop-dev · Synced'], mon: [290, 460, 'Grafana', 'shop dashboards']
+}
+const EDGES = [['ing', 'svc'], ['svc', 'web'], ['web', 'api'], ['api', 'db'], ['api', 'sec'], ['argo', 'web']]
+function buildMap() {
+  const map = $('map'); map.querySelectorAll('.node').forEach((n) => n.remove())
+  for (const [id, [x, y, k, n]] of Object.entries(NODES)) {
+    const el = document.createElement('div'); el.className = 'node'; el.id = `n-${id}`
+    el.style.left = `${x}px`; el.style.top = `${y + 30}px`
+    el.innerHTML = `<div class="k">${k}</div><div class="n">${n}</div><span class="d"></span>`; map.appendChild(el)
+  }
+  $('edges').innerHTML = EDGES.map(([a, b]) => {
+    const A = NODES[a], B = NODES[b]
+    return `<path id="e-${a}-${b}" d="M${A[0] + 105},${A[1] + 62} C${A[0] + 105},${(A[1] + B[1]) / 2 + 60} ${B[0] + 105},${(A[1] + B[1]) / 2 + 60} ${B[0] + 105},${B[1] + 62}"/>`
+  }).join('')
+}
+async function showNodes(ids, gap = 260) {
+  for (const id of ids) { $(`n-${id}`).classList.add('on'); EDGES.filter(([, b]) => b === id).forEach(([a, b]) => $(`e-${a}-${b}`)?.classList.add('on')); await wait(gap) }
+}
+
+async function run() {
+  // 1 intro
+  scene('intro'); await wait(3600)
+  // 2 open project
+  scene('open'); await caption('Open the folder. The IDE finds the whole project.', 'One repo or three: app, GitOps and platform repos are grouped together.')
+  for (const r of ['r1', 'r2', 'r3']) { await wait(500); $(r).classList.add('on') }
+  await wait(1200); await click('confirm'); await wait(500)
+  // 3 understand
+  scene('app'); buildMap(); drawSteps(0, 0); $('cursor').style.left = '1200px'; $('cursor').style.top = '700px'
+  setNext('Step 1 of 7', 'Understand the app', 'Claude reads all three repos', 'Explain it')
+  await caption('Step 1 · Understand', 'Before touching anything, Claude explains what you were given.')
+  await wait(900); await click('go')
+  await claudeSays('<b>shop</b> is a web + API on Postgres.<ul><li>Needs: <span class="mono">DATABASE_URL</span>, port 8080</li><li>Manifests: <span class="mono">k8s/overlays/dev</span></li><li>Missing: CPU limits, readiness probe on api</li></ul>')
+  drawSteps(1, 1); await wait(1400)
+  // 4 run locally
+  setNext('Step 2 of 7', 'Run it locally', 'Build the image, start it with a throwaway Postgres', 'Run locally')
+  await caption('Step 2 · Run it', 'One click builds and runs it. No README archaeology.')
+  await wait(700); await click('go')
+  await term(['<span class="p">❯</span> podman build -t shop:dev .', '  ✓ image built (42 s)', '<span class="p">❯</span> podman run postgres:16 + shop:dev', '  ✓ <span class="h">http://localhost:8080</span> answers 200'])
+  drawSteps(2, 2); await wait(900)
+  // 5 local cluster
+  $('term').innerHTML = ''
+  setNext('Step 3 of 7', 'Put it on a local cluster', 'kind cluster “shop-dev”, this app deployed into it', 'Deploy locally')
+  await caption('Step 3 · Local cluster', 'Free, on your laptop. The system map draws itself as it comes up.')
+  await wait(700); await click('go')
+  $('ctx').textContent = '☸ kind-shop-dev'; $('ctx').className = 'chip local'
+  await term(['<span class="p">❯</span> kind create cluster --name shop-dev', '<span class="p">❯</span> kind load docker-image shop:dev', '<span class="p">❯</span> kubectl apply -k k8s/overlays/dev'], 300)
+  await showNodes(['ing', 'svc', 'web', 'api', 'db', 'sec'])
+  $('n-api').classList.add('bad'); $('n-api').querySelector('.n').textContent = 'shop-api 0/2'
+  await term(['  <span class="e">✗ shop-api CrashLoopBackOff</span>'], 200)
+  await caption('Something is wrong? It shows up on the map, and Claude says why.')
+  await claudeSays('<b>shop-api</b> crashes: Secret <span class="mono">shop-db</span> has no <span class="mono">password</span> key.<br>Fix: add it to the dev overlay (value stays masked).')
+  await wait(1200)
+  $('n-api').classList.remove('bad'); $('n-api').querySelector('.n').textContent = 'shop-api 2/2'
+  await term(['  <span class="p">✓ fixed · all pods ready</span>'], 300)
+  drawSteps(3, 3); await wait(900)
+  // 6 gitops
+  $('term').innerHTML = ''
+  setNext('Step 4 of 7', 'Deploy this repo with Argo CD', 'Uses shop-gitops · envs/dev · branch main', 'Deploy with Argo CD')
+  await caption('Step 4 · GitOps', 'Argo CD installed if missing, pointed at your GitOps repo, synced, opened.')
+  await wait(700); await click('go')
+  await term(['<span class="p">❯</span> Argo CD not found → installing (helm)', '<span class="p">❯</span> Application shop-dev → github.com/team/shop-gitops@main:envs/dev', '  ✓ <span class="h">Synced · Healthy</span>  →  opened https://localhost:8080'], 520)
+  await showNodes(['argo']); drawSteps(4, 4); await wait(1000)
+  // 7 harden
+  $('term').innerHTML = ''
+  setNext('Step 5 of 7', 'Harden it', 'Trivy, Checkov and kube-linter on all three repos', 'Scan')
+  await caption('Step 5 · Harden', 'Findings land on the exact lines. Claude fixes them on a branch you review.')
+  await wait(700); await click('go')
+  await term(['<span class="w">⚠ k8s/base/api.yaml:21  no CPU limit</span>', '<span class="w">⚠ k8s/base/api.yaml:30  runs as root</span>', '<span class="w">⚠ platform/eks.tf:44    public endpoint open to 0.0.0.0/0</span>', '<span class="p">✓ Claude: 3 fixes on branch harden/shop · ready for review</span>'], 480)
+  drawSteps(5, 5); await wait(1200)
+  // 8 cloud
+  $('term').innerHTML = ''
+  setNext('Step 6 of 7', 'Create the cloud environment', 'platform/envs/dev → EKS in eu-central-1', 'Plan EKS')
+  $('aws').textContent = '☁ sso-dev · eu-central-1'; $('aws').className = 'chip real'
+  await caption('Step 6 · Cloud', 'Signed in keylessly. Now the same project goes to EKS, with a plan first.')
+  await wait(900); await click('go')
+  $('plan').classList.add('on'); $('plan').style.pointerEvents = 'auto'
+  const res = ['module.vpc.aws_vpc.this', 'module.vpc.aws_subnet.private[0..2]', 'module.eks.aws_eks_cluster.this', 'module.eks.aws_eks_node_group.default', 'aws_ecr_repository.shop']
+  for (const r of res) { const d = document.createElement('div'); d.className = 'res'; d.innerHTML = `<span class="a">create</span>${r}`; $('reslist').appendChild(d); await wait(120); d.classList.add('on'); await wait(220) }
+  await caption('Cost, policy and budget are checked before you decide.')
+  for (const g of ['g1', 'g2', 'g3']) { await wait(650); $(g).classList.add('on') }
+  await wait(1100)
+  await caption('Approving is always yours. Two clicks, account and cost in front of you.')
+  await click('approve'); $('approve').textContent = 'Click again: apply to 1234…7890 ($219/mo)'; $('approve').className = 'btn danger'
+  await wait(1100); await click('approve')
+  $('plan').classList.remove('on')
+  await term(['<span class="p">❯</span> terraform apply tfplan', '  … 47 resources · 13 min (sped up)', '  ✓ <span class="h">EKS shop-dev ready</span> · context added'], 520)
+  $('win').classList.add('real'); $('ctx').textContent = '☸ eks-shop-dev'; $('ctx').className = 'chip real'
+  $('meter').classList.add('on'); $('maplbl').textContent = 'System map · eks-shop-dev (real)'
+  await caption('Real infrastructure looks different, everywhere.', 'The frame turns amber, and a cost meter runs while it exists.')
+  let mins = 0; const tick = setInterval(() => { mins += 7; $('meterv').textContent = `${Math.floor(mins / 60)}h ${mins % 60}m · $${(mins / 60 * 0.30).toFixed(2)}` }, 120)
+  drawSteps(6, 6); await wait(1700)
+  // 9 ship
+  $('term').innerHTML = ''
+  setNext('Step 7 of 7', 'Ship it', 'CI pushes the image to ECR; Argo CD on EKS syncs envs/dev', 'Ship')
+  await caption('Step 7 · Ship', 'The GitOps step again, now on EKS: same buttons, same map.')
+  await wait(600); await click('go')
+  await term(['<span class="p">❯</span> CI #212 → ECR shop:1.4.0', '<span class="p">❯</span> Argo CD (EKS) · shop-dev → <span class="h">Synced · Healthy</span>'], 520)
+  drawSteps(7, 7); await wait(1400)
+  // 10 teardown
+  clearInterval(tick); $('term').innerHTML = ''
+  setNext('Done for today', 'End session', 'Destroys what this session created, through the same plan and approval', 'End session')
+  $('go').className = 'btn danger'
+  await caption('Done? End the session.', 'Everything billed this session is listed, planned for destroy, and approved by you.')
+  await wait(800); await click('go')
+  await term(['<span class="p">❯</span> terraform plan -destroy  → 47 to destroy (approved)', '<span class="p">❯</span> kind delete cluster --name shop-dev', '  ✓ <span class="h">nothing left running · $0.00 / hour</span>'], 520)
+  $('meter').classList.remove('on'); $('win').classList.remove('real'); $('ctx').textContent = '☸ no cluster'; $('ctx').className = 'chip'
+  await wait(1600)
+  // outro
+  hideCaption(); $('cursor').style.opacity = 0
+  scene('outro'); await wait(4200)
+  document.title = 'done'
+}
+window.addEventListener('load', () => { setTimeout(run, 400) })
+</script>
+</body>
+</html>
