@@ -3,6 +3,7 @@ import { statSync } from 'node:fs'
 import { isAbsolute } from 'node:path'
 import { inspectDevopsWorkspace } from './devops-inspect'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
+import { readDevopsContext } from './devops-context'
 import type { DevopsInspection } from '../../../shared/fork-devops-inspection'
 
 const EMPTY: DevopsInspection = { findings: [], environment: 'path', shell: 'posix', tools: {} }
@@ -60,5 +61,18 @@ export function registerDevopsSandboxHandlers(): void {
             ? 'pause'
             : 'resume'
     )
+  })
+}
+
+/** Fork A1: the context bar's view of where this workspace's commands land. */
+export function registerDevopsContextHandlers(): void {
+  ipcMain.handle('aiVault:readDevopsContext', (_event, request: unknown) => {
+    const workspacePath: unknown =
+      request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
+    const terraformDir: unknown =
+      request && typeof request === 'object' ? Reflect.get(request, 'terraformDir') : null
+    return isLocalDirectory(workspacePath)
+      ? readDevopsContext(workspacePath, typeof terraformDir === 'string' ? terraformDir : null)
+      : {}
   })
 }

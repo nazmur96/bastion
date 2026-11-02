@@ -1444,6 +1444,12 @@
       "handOff": "Hand off to another agent",
       "handOffUnavailable": "This chat cannot be handed off yet."
     },
+    "devops": {
+      "sandbox": {
+        "awsBadge": "Local AWS",
+        "badgeHint": "This workspace runs against a local sandbox, not real infrastructure"
+      }
+    },
     "native-chat": {
       "approval": {
         "allow": "Allow",

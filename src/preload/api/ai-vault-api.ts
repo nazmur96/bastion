@@ -31,6 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { DevopsInspection } from '../../shared/fork-devops-inspection'
+import type { DevopsContext } from '../../shared/fork-devops-context'
 import type {
   DevopsSandboxRequest,
   DevopsSandboxResult,
@@ -78,6 +79,11 @@ export type AiVaultApi = {
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */
   readDevopsSandbox: (workspacePath: string) => Promise<DevopsSandboxState>
   runDevopsSandbox: (request: DevopsSandboxRequest) => Promise<DevopsSandboxResult>
+  /** Fork A1: kube context, AWS profile and Terraform workspace for the context bar. */
+  readDevopsContext: (request: {
+    workspacePath: string
+    terraformDir: string | null
+  }) => Promise<DevopsContext>
   /** Fork: save a file after undoing some of Claude's blocks in the review dialog. */
   writeReviewedClaudeEdit: (request: {
     workspacePath: string

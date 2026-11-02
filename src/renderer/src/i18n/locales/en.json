@@ -20668,6 +20668,11 @@
         "awsWorking": "Local AWS (Floci): {{action}}…",
         "clusterWorking": "Local cluster (vind): {{action}}…",
         "done": "Done."
+      },
+      "context": {
+        "local": "Local sandbox: free, nothing real is touched",
+        "prod": "Looks like production: be careful",
+        "normal": "Real infrastructure"
       }
     }
   },

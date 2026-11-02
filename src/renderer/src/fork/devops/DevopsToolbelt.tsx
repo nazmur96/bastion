@@ -13,6 +13,7 @@ import { useEditorContextEntry } from '../editor-context/editor-context-store'
 import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { useDevopsInspection } from './use-devops-inspection'
 import { useDevopsSandbox, type DevopsSandbox } from './use-devops-sandbox'
+import { DevopsContextBar } from './DevopsContextBar'
 import { rankDevopsActions, type RankedDevopsAction } from '../../../../shared/fork-devops-actions'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
@@ -173,27 +174,16 @@ export function DevopsToolbelt({ worktreeId }: { worktreeId: string }): React.JS
   const top = ranked.find((item) => !missingHint(inspection, item))
   const groups = [...new Set(ranked.map((item) => item.action.stack))]
   const menuLabel = translate('components.devops.toolbelt.menu', 'DevOps')
-  const local = [
-    sandbox.state.awsEnv ? translate('components.devops.sandbox.awsBadge', 'Local AWS') : null,
-    sandbox.state.cluster
-      ? `vind ${sandbox.state.cluster.name}${sandbox.state.cluster.paused ? ' (asleep)' : ''}`
-      : null
-  ].filter((part): part is string => part !== null)
   return (
     <div className="ml-1 flex items-center gap-0.5" data-devops-toolbelt="">
-      {local.length > 0 ? (
-        <span
-          className="flex items-center gap-1 rounded-md px-1.5 text-xs text-status-success"
-          data-devops-sandbox-badge=""
-          title={translate(
-            'components.devops.sandbox.badgeHint',
-            'This workspace runs against a local sandbox, not real infrastructure'
-          )}
-        >
-          <span className="size-1.5 rounded-full bg-status-success" aria-hidden />
-          {local.join(' · ')}
-        </span>
-      ) : null}
+      <DevopsContextBar
+        worktreeId={worktreeId}
+        show={{ kube: offersCluster, aws: offersAws, terraform: has('terraform') }}
+        terraformDir={
+          inspection.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
+        }
+        refreshKey={JSON.stringify(sandbox.state)}
+      />
       {top ? (
         <Button
           type="button"

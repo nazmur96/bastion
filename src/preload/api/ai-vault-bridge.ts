@@ -72,6 +72,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:readDevopsSandbox', workspacePath),
   runDevopsSandbox: (request: DevopsSandboxRequest) =>
     ipcRenderer.invoke('aiVault:runDevopsSandbox', request),
+  readDevopsContext: (request: { workspacePath: string; terraformDir: string | null }) =>
+    ipcRenderer.invoke('aiVault:readDevopsContext', request),
   listSubagentSessions: (args: AiVaultSubagentListArgs) =>
     ipcRenderer.invoke('aiVault:listSubagentSessions', args),
   getFirstUserPrompt: (args: AiVaultFirstUserPromptArgs) =>
