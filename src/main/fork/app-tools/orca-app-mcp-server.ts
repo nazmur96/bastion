@@ -4,6 +4,7 @@ import { createOrcaCliCall, type OrcaCliCall } from './orca-cli-call'
 import { loadOrcaDocs, searchOrcaDocs } from './orca-docs-search'
 import { toolText } from './orca-app-tool-text'
 import { withClaudeEditHooks } from '../claude-edits/claude-edit-hooks'
+import { withDevopsGateHooks } from '../devops/devops-command-gate-hook'
 import { buildOrcaSettingsTools } from './orca-app-settings-tools'
 import { buildOrcaWorkspaceTools } from './orca-app-workspace-tools'
 
@@ -123,7 +124,7 @@ export function orcaAppToolOptions(
   cwd: string
 ): Pick<ClaudeAgentSdk.Options, 'mcpServers' | 'allowedTools' | 'hooks'> {
   // Edit snapshots for the Keep/Undo review do not depend on the CLI.
-  const editHooks = withClaudeEditHooks(undefined, cwd)
+  const editHooks = withDevopsGateHooks(withClaudeEditHooks(undefined, cwd).hooks, cwd)
   const call = createOrcaCliCall(env, cwd)
   if (!call) {
     return editHooks
