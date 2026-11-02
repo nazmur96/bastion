@@ -66,6 +66,26 @@ describe('terraform plan summary', () => {
     expect(text).not.toContain('new')
   })
 
+  it('reads drift made outside Terraform without counting it as planned change', () => {
+    const drifted = summarizeTerraformPlan(
+      JSON.stringify({
+        resource_drift: [
+          {
+            address: 'aws_security_group.web',
+            type: 'aws_security_group',
+            change: {
+              actions: ['update'],
+              before: { ingress: '443' },
+              after: { ingress: '443,22' }
+            }
+          }
+        ]
+      })
+    )
+    expect(drifted.counts.update).toBe(0)
+    expect(drifted.drift[0].changes).toEqual([{ path: 'ingress', before: '443', after: '443,22' }])
+  })
+
   it('survives bad JSON', () => {
     expect(summarizeTerraformPlan('nope').resources).toEqual([])
   })

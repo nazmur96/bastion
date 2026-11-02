@@ -20763,7 +20763,9 @@
         "ask": "Ask Claude",
         "security": "Security",
         "source": "Source",
-        "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand."
+        "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand.",
+        "driftHint": "kubectl diff against the manifest in this repo",
+        "drift": "Drift"
       },
       "deck": {
         "title": "Command deck",
@@ -20786,7 +20788,10 @@
         "noChanges": "No changes. Infrastructure matches the code.",
         "explain": "Explain with Claude",
         "confirm": "Click again to apply to {{target}}",
-        "apply": "Apply this plan"
+        "apply": "Apply this plan",
+        "driftHint": "terraform plan -refresh-only: what changed outside Terraform",
+        "drift": "Check drift",
+        "driftCount": "{{count}} drifted outside Terraform"
       }
     }
   },

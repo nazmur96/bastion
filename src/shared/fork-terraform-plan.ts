@@ -18,6 +18,8 @@ export type TerraformPlanSummary = {
   counts: Record<PlanAction, number>
   /** Output values that change, by name. */
   outputs: string[]
+  /** Changes made outside Terraform since the last apply (`resource_drift`). */
+  drift: PlanResourceChange[]
 }
 
 export type TerraformPlanResult =
@@ -104,46 +106,52 @@ export function summarizeTerraformPlan(json: string): TerraformPlanSummary {
   try {
     plan = JSON.parse(json)
   } catch {
-    return { resources: [], counts, outputs: [] }
+    return { resources: [], counts, outputs: [], drift: [] }
   }
   const root = isObj(plan) ? plan : {}
-  const resources = asList(root.resource_changes).flatMap((entry): PlanResourceChange[] => {
-    if (!isObj(entry) || !isObj(entry.change)) {
-      return []
-    }
-    const action = actionOf(asList(entry.change.actions))
-    if (!action) {
-      return []
-    }
-    counts[action] += 1
-    const changes: PlanAttributeChange[] = []
-    if (action === 'update' || action === 'replace') {
-      diff(
-        entry.change.before,
-        entry.change.after,
-        // A leaf is sensitive if either side says so.
-        mergeSensitive(entry.change.before_sensitive, entry.change.after_sensitive),
-        entry.change.after_unknown,
-        '',
-        changes
-      )
-    }
-    return [
-      {
-        address: typeof entry.address === 'string' ? entry.address : '?',
-        module: typeof entry.module_address === 'string' ? entry.module_address : 'root',
-        type: typeof entry.type === 'string' ? entry.type : '?',
-        action,
-        changes
+  const toChange =
+    (count: boolean) =>
+    (entry: unknown): PlanResourceChange[] => {
+      if (!isObj(entry) || !isObj(entry.change)) {
+        return []
       }
-    ]
-  })
+      const action = actionOf(asList(entry.change.actions))
+      if (!action) {
+        return []
+      }
+      if (count) {
+        counts[action] += 1
+      }
+      const changes: PlanAttributeChange[] = []
+      if (action === 'update' || action === 'replace') {
+        diff(
+          entry.change.before,
+          entry.change.after,
+          // A leaf is sensitive if either side says so.
+          mergeSensitive(entry.change.before_sensitive, entry.change.after_sensitive),
+          entry.change.after_unknown,
+          '',
+          changes
+        )
+      }
+      return [
+        {
+          address: typeof entry.address === 'string' ? entry.address : '?',
+          module: typeof entry.module_address === 'string' ? entry.module_address : 'root',
+          type: typeof entry.type === 'string' ? entry.type : '?',
+          action,
+          changes
+        }
+      ]
+    }
+  const resources = asList(root.resource_changes).flatMap(toChange(true))
+  const drift = asList(root.resource_drift).flatMap(toChange(false))
   const outputs = isObj(root.output_changes)
     ? Object.entries(root.output_changes)
         .filter(([, change]) => isObj(change) && actionOf(asList(change.actions)) !== null)
         .map(([name]) => name)
     : []
-  return { resources, counts, outputs }
+  return { resources, counts, outputs, drift }
 }
 
 function mergeSensitive(left: unknown, right: unknown): unknown {

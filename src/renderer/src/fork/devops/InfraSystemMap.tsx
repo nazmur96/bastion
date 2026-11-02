@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
-import { FileCode, FileText, MessageSquare, RefreshCw, ScrollText } from 'lucide-react'
+import { FileCode, FileText, GitCompare, MessageSquare, RefreshCw, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
-import { openManifest } from './open-manifest'
+import { diffManifest, openManifest } from './open-manifest'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import { InfraCard } from './InfraHomeCards'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
@@ -313,6 +313,19 @@ export function InfraSystemMap({
                 >
                   <FileCode aria-hidden />
                   {translate('components.devops.map.source', 'Source')}
+                </Button>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="outline"
+                  title={translate(
+                    'components.devops.map.driftHint',
+                    'kubectl diff against the manifest in this repo'
+                  )}
+                  onClick={() => void diffManifest(worktreeId, node.kind, node.name, kubectlPrefix)}
+                >
+                  <GitCompare aria-hidden />
+                  {translate('components.devops.map.drift', 'Drift')}
                 </Button>
                 <Button
                   type="button"

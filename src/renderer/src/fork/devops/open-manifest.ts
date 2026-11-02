@@ -5,12 +5,14 @@ import { translate } from '@/i18n/i18n'
 import { detectLanguage } from '@/lib/language-detect'
 import { scheduleEditorLineReveal } from '@/store/slices/editor/focus/editor-focus-reveal'
 import { joinPath } from '@/lib/path'
+import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 
-/** Map node → the manifest that defines it, opened at its `kind:` line. */
-export async function openManifest(worktreeId: string, kind: string, name: string): Promise<void> {
+type Found = { root: string; path: string; line: number; kustomize: string | null }
+
+async function locate(worktreeId: string, kind: string, name: string): Promise<Found | null> {
   const root = selectKnownWorktreeById(useAppStore.getState(), worktreeId)?.path
   if (!root) {
-    return
+    return null
   }
   const found = await window.api.aiVault.findManifest({ workspacePath: root, kind, name })
   if (!found) {
@@ -21,11 +23,19 @@ export async function openManifest(worktreeId: string, kind: string, name: strin
         { kind, name }
       )
     )
+    return null
+  }
+  return { root, ...found }
+}
+
+/** Map node → the manifest that defines it, opened at its `kind:` line. */
+export async function openManifest(worktreeId: string, kind: string, name: string): Promise<void> {
+  const found = await locate(worktreeId, kind, name)
+  if (!found) {
     return
   }
-  const filePath = joinPath(root, found.path)
-  const store = useAppStore.getState()
-  const fileId = store.openFile({
+  const filePath = joinPath(found.root, found.path)
+  const fileId = useAppStore.getState().openFile({
     filePath,
     relativePath: found.path,
     worktreeId,
@@ -33,4 +43,22 @@ export async function openManifest(worktreeId: string, kind: string, name: strin
     mode: 'edit'
   })
   scheduleEditorLineReveal(useAppStore.getState, filePath, found.line, 1, fileId)
+}
+
+/** B2: what differs between the repo and the cluster, via `kubectl diff` (read-only, server-side dry run). */
+export async function diffManifest(
+  worktreeId: string,
+  kind: string,
+  name: string,
+  kubectlPrefix: string
+): Promise<void> {
+  const found = await locate(worktreeId, kind, name)
+  if (!found) {
+    return
+  }
+  const target = found.kustomize !== null ? `-k "${found.kustomize}"` : `-f "${found.path}"`
+  runInWorkbenchTerminal(
+    worktreeId,
+    `${kubectlPrefix}kubectl diff ${target} && echo "No drift: the cluster matches ${found.kustomize ?? found.path}"`
+  )
 }

@@ -73,7 +73,7 @@ export async function findManifest(
   workspacePath: string,
   kind: string,
   name: string
-): Promise<{ path: string; line: number } | null> {
+): Promise<{ path: string; line: number; kustomize: string | null } | null> {
   const files = (await listFiles(workspacePath))
     .filter((file) => /\.ya?ml$/i.test(file) && !/(^|\/)templates\//.test(file))
     .slice(0, MANIFEST_FILES)
@@ -85,10 +85,24 @@ export async function findManifest(
       }
       const line = manifestLine(readFileSync(full, 'utf8'), kind, name)
       if (line !== null) {
-        return { path: file, line }
+        return { path: file, line, kustomize: kustomizeRoot(workspacePath, file) }
       }
     } catch {
       // Unreadable files are simply not the source.
+    }
+  }
+  return null
+}
+
+const KUSTOMIZATION = ['kustomization.yaml', 'kustomization.yml', 'Kustomization']
+
+/** The nearest directory above a manifest with a kustomization, so drift diffs what is really applied. */
+function kustomizeRoot(workspacePath: string, file: string): string | null {
+  const parts = file.split('/').slice(0, -1)
+  for (let depth = parts.length; depth >= 1; depth -= 1) {
+    const dir = parts.slice(0, depth).join('/')
+    if (KUSTOMIZATION.some((name) => existsSync(join(workspacePath, dir, name)))) {
+      return dir
     }
   }
   return null

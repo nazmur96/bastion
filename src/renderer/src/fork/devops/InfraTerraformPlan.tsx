@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layers, MessageSquare, Play, ShieldAlert } from 'lucide-react'
+import { GitCompare, Layers, MessageSquare, Play, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -47,22 +47,26 @@ export function InfraTerraformPlan({
   const [result, setResult] = useState<TerraformPlanResult | null>(null)
   const [running, setRunning] = useState(false)
   const [armed, setArmed] = useState(false)
+  const [drift, setDrift] = useState(false)
   const prod = context.aws?.tone === 'prod' || context.terraform?.tone === 'prod'
 
-  const plan = (): void => {
+  const plan = (refreshOnly: boolean): void => {
     if (!path || running) {
       return
     }
     setRunning(true)
     setArmed(false)
+    setDrift(refreshOnly)
     void window.api.aiVault
-      .terraformPlan({ workspacePath: path, dir: terraformDir })
+      .terraformPlan({ workspacePath: path, dir: terraformDir, refreshOnly })
       .then(setResult)
       .finally(() => setRunning(false))
   }
 
   const summary = result?.ok ? result.summary : null
-  const modules = summary ? [...new Set(summary.resources.map((resource) => resource.module))] : []
+  // A drift check lists what changed outside Terraform; a plan lists what it would change.
+  const shown = summary ? (drift ? summary.drift : summary.resources) : []
+  const modules = [...new Set(shown.map((resource) => resource.module))]
   const target =
     context.aws?.tone === 'local'
       ? 'Floci (local)'
@@ -80,11 +84,25 @@ export function InfraTerraformPlan({
       )}
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Button type="button" size="xs" onClick={plan} disabled={running || !path}>
+        <Button type="button" size="xs" onClick={() => plan(false)} disabled={running || !path}>
           <Layers aria-hidden />
           {running
             ? translate('components.devops.plan.running', 'Planning…')
             : translate('components.devops.plan.run', 'Plan')}
+        </Button>
+        <Button
+          type="button"
+          size="xs"
+          variant="outline"
+          onClick={() => plan(true)}
+          disabled={running || !path}
+          title={translate(
+            'components.devops.plan.driftHint',
+            'terraform plan -refresh-only: what changed outside Terraform'
+          )}
+        >
+          <GitCompare aria-hidden />
+          {translate('components.devops.plan.drift', 'Check drift')}
         </Button>
         <span className={cn('text-xs', prod ? 'text-destructive' : 'text-muted-foreground')}>
           {translate('components.devops.plan.target', 'against {{target}}', { target })}
@@ -98,7 +116,18 @@ export function InfraTerraformPlan({
       {summary && result?.ok ? (
         <>
           <div className="mb-2 flex flex-wrap gap-3 text-xs">
-            {(['create', 'update', 'replace', 'delete'] as const).map((action) => (
+            {drift ? (
+              <span className={shown.length > 0 ? 'text-status-warning' : 'text-status-success'}>
+                {translate(
+                  'components.devops.plan.driftCount',
+                  '{{count}} drifted outside Terraform',
+                  {
+                    count: shown.length
+                  }
+                )}
+              </span>
+            ) : null}
+            {(drift ? [] : (['create', 'update', 'replace', 'delete'] as const)).map((action) => (
               <span key={action} className={ACTION_CLASS[action]}>
                 {summary.counts[action]} {action}
               </span>
@@ -111,7 +140,7 @@ export function InfraTerraformPlan({
               </span>
             ) : null}
           </div>
-          {summary.resources.length === 0 ? (
+          {shown.length === 0 ? (
             <p className="text-xs text-muted-foreground">
               {translate(
                 'components.devops.plan.noChanges',
@@ -123,7 +152,7 @@ export function InfraTerraformPlan({
               {modules.map((module) => (
                 <div key={module}>
                   <div className="mb-1 font-mono text-[11px] text-muted-foreground">{module}</div>
-                  {summary.resources
+                  {shown
                     .filter((resource) => resource.module === module)
                     .map((resource) => (
                       <details
@@ -161,7 +190,7 @@ export function InfraTerraformPlan({
               ))}
             </div>
           )}
-          {summary.resources.length > 0 ? (
+          {shown.length > 0 ? (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button
                 type="button"
@@ -170,46 +199,50 @@ export function InfraTerraformPlan({
                 onClick={() =>
                   draftForClaude(
                     worktreeId,
-                    `Review this Terraform plan for ${terraformDir} against ${target}. List the risky changes first (deletes, replaces, data loss, downtime, IAM and network exposure, cost), then anything I should check before applying. Do not apply anything.\n\n${planAsText(summary)}`
+                    drift
+                      ? `Terraform in ${terraformDir} (${target}) found these changes made outside Terraform. For each, say what likely changed it, whether it is risky, and whether to adopt it into the code or revert it. Do not apply anything.\n\n${planAsText({ ...summary, resources: summary.drift })}`
+                      : `Review this Terraform plan for ${terraformDir} against ${target}. List the risky changes first (deletes, replaces, data loss, downtime, IAM and network exposure, cost), then anything I should check before applying. Do not apply anything.\n\n${planAsText(summary)}`
                   )
                 }
               >
                 <MessageSquare aria-hidden />
                 {translate('components.devops.plan.explain', 'Explain with Claude')}
               </Button>
-              <Button
-                type="button"
-                size="xs"
-                variant={armed ? 'destructive' : 'outline'}
-                onBlur={() => setArmed(false)}
-                onClick={() => {
-                  if (!armed) {
-                    setArmed(true)
-                    return
-                  }
-                  setArmed(false)
-                  runInWorkbenchTerminal(
-                    worktreeId,
-                    devopsCommandLine(
-                      inspection?.tools.terraform,
-                      `terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`,
-                      inspection?.shell
-                    ),
-                    sandbox.state.awsEnv
-                  )
-                }}
-              >
-                {prod ? <ShieldAlert aria-hidden /> : <Play aria-hidden />}
-                {armed
-                  ? translate(
-                      'components.devops.plan.confirm',
-                      'Click again to apply to {{target}}',
-                      {
-                        target
-                      }
+              {drift ? null : (
+                <Button
+                  type="button"
+                  size="xs"
+                  variant={armed ? 'destructive' : 'outline'}
+                  onBlur={() => setArmed(false)}
+                  onClick={() => {
+                    if (!armed) {
+                      setArmed(true)
+                      return
+                    }
+                    setArmed(false)
+                    runInWorkbenchTerminal(
+                      worktreeId,
+                      devopsCommandLine(
+                        inspection?.tools.terraform,
+                        `terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`,
+                        inspection?.shell
+                      ),
+                      sandbox.state.awsEnv
                     )
-                  : translate('components.devops.plan.apply', 'Apply this plan')}
-              </Button>
+                  }}
+                >
+                  {prod ? <ShieldAlert aria-hidden /> : <Play aria-hidden />}
+                  {armed
+                    ? translate(
+                        'components.devops.plan.confirm',
+                        'Click again to apply to {{target}}',
+                        {
+                          target
+                        }
+                      )
+                    : translate('components.devops.plan.apply', 'Apply this plan')}
+                </Button>
+              )}
             </div>
           ) : null}
         </>

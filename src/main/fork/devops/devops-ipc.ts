@@ -49,7 +49,13 @@ export function registerDevopsHandlers(): void {
       request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
     const dir: unknown = request && typeof request === 'object' ? Reflect.get(request, 'dir') : null
     return isLocalDirectory(workspacePath) && typeof dir === 'string'
-      ? runTerraformPlan(workspacePath, dir)
+      ? runTerraformPlan(
+          workspacePath,
+          dir,
+          typeof request === 'object' &&
+            request !== null &&
+            Reflect.get(request, 'refreshOnly') === true
+        )
       : { ok: false, error: 'Terraform plan needs a local workspace.' }
   })
   ipcMain.handle('aiVault:findManifest', async (_event, request: unknown) => {

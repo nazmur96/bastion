@@ -19,7 +19,9 @@ const PLAN_TIMEOUT_MS = 10 * 60_000
  */
 export async function runTerraformPlan(
   workspacePath: string,
-  dir: string
+  dir: string,
+  /** Drift check: what changed outside Terraform, with no planned changes. */
+  refreshOnly = false
 ): Promise<TerraformPlanResult> {
   const relative = normalize(dir)
   if (isAbsolute(relative) || relative.startsWith('..')) {
@@ -60,7 +62,14 @@ export async function runTerraformPlan(
   mkdirSync(plans, { recursive: true })
   const id = createHash('sha256').update(`${workspacePath}\0${relative}`).digest('hex').slice(0, 16)
   const planFile = join(plans, `${id}.tfplan`)
-  const plan = await exec(['plan', '-input=false', '-no-color', '-lock=false', `-out=${planFile}`])
+  const plan = await exec([
+    'plan',
+    '-input=false',
+    '-no-color',
+    '-lock=false',
+    ...(refreshOnly ? ['-refresh-only'] : []),
+    `-out=${planFile}`
+  ])
   if (!plan.ok) {
     return { ok: false, error: lastLines(plan.out) }
   }

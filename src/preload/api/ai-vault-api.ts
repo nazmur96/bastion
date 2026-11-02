@@ -85,12 +85,16 @@ export type AiVaultApi = {
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
   /** Fork A3: plan only (init if needed, plan -out, show -json); never applies. */
-  terraformPlan: (request: { workspacePath: string; dir: string }) => Promise<TerraformPlanResult>
+  terraformPlan: (request: {
+    workspacePath: string
+    dir: string
+    refreshOnly?: boolean
+  }) => Promise<TerraformPlanResult>
   findManifest: (request: {
     workspacePath: string
     kind: string
     name: string
-  }) => Promise<{ path: string; line: number } | null>
+  }) => Promise<{ path: string; line: number; kustomize: string | null } | null>
   listLocalRuns: (workspacePath: string) => Promise<LocalRun[]>
   checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */

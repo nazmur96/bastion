@@ -70,7 +70,7 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
-  terraformPlan: (request: { workspacePath: string; dir: string }) =>
+  terraformPlan: (request: { workspacePath: string; dir: string; refreshOnly?: boolean }) =>
     ipcRenderer.invoke('aiVault:terraformPlan', request),
   findManifest: (request: { workspacePath: string; kind: string; name: string }) =>
     ipcRenderer.invoke('aiVault:findManifest', request),
