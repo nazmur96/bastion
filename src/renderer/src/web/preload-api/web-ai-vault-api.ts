@@ -117,6 +117,7 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
       }),
     readSystemMap: () =>
       Promise.resolve({ ok: false as const, error: 'The system map needs the desktop app.' }),
+    addDevpodRecipe: () => Promise.resolve({ ok: false as const, error: 'Needs the desktop app.' }),
     observabilityPlan: () =>
       Promise.resolve({ ok: false as const, error: 'Needs the desktop app.' }),
     probeGrafana: () => Promise.resolve(false),

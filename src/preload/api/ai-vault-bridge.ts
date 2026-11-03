@@ -70,6 +70,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  addDevpodRecipe: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:addDevpodRecipe', workspacePath),
   observabilityPlan: (request: { workspacePath: string; namespace: string }) =>
     ipcRenderer.invoke('aiVault:observabilityPlan', request),
   probeGrafana: (port: number) => ipcRenderer.invoke('aiVault:probeGrafana', port),

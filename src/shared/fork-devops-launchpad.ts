@@ -21,6 +21,8 @@ export type LaunchpadTile = {
   steps?: string[]
   /** What the tile leaves running, so End session can remove exactly that. */
   creates?: { kind: LocalRunKind; name: string }
+  /** A tile that changes the repo instead of running commands (reviewed like any edit). */
+  writes?: 'devpod-recipe'
 }
 
 export const LAUNCHPAD_GROUPS: readonly LaunchpadGroup[] = [
@@ -139,6 +141,16 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     tool: 'devpod',
     cost: null,
     steps: ['devpod up .']
+  },
+  {
+    id: 'devpod-recipe',
+    group: 'machine',
+    title: 'Dev container per workspace · DevPod',
+    blurb:
+      'Adds a DevPod environment to orca.yaml: every new workspace can open in its own container.',
+    tool: 'devpod',
+    cost: null,
+    writes: 'devpod-recipe'
   },
   {
     id: 'multipass',

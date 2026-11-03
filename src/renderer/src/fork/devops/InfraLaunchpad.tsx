@@ -9,6 +9,7 @@ import {
   Sparkles,
   Wrench
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -133,6 +134,22 @@ export function InfraLaunchpad({
   const launch = (tile: LaunchpadTile, status: DevopsToolStatus | undefined): void => {
     if (tile.sandbox) {
       sandbox.run(tile.sandbox, 'start')
+      return
+    }
+    if (tile.writes === 'devpod-recipe' && path) {
+      void window.api.aiVault.addDevpodRecipe(path).then((result) =>
+        result.ok
+          ? toast.success(
+              translate(
+                'components.devops.launchpad.devpodAdded',
+                'Added the DevPod environment: {{files}}. Review and commit them.',
+                {
+                  files: result.files.join(', ')
+                }
+              )
+            )
+          : toast.error(result.error)
+      )
       return
     }
     if (launchpadNeedsFiles(tile)) {

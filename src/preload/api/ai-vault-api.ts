@@ -92,6 +92,10 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork F3: write the DevPod per-workspace environment recipe into the repo. */
+  addDevpodRecipe: (
+    workspacePath: string
+  ) => Promise<{ ok: true; files: string[] } | { ok: false; error: string }>
   /** Fork observability: reuse or install Prometheus + Grafana, monitor and dashboard for the app. */
   observabilityPlan: (request: {
     workspacePath: string

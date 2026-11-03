@@ -9,6 +9,7 @@ import { readProjectRepos } from './devops-project'
 import { readCloudReadiness } from './devops-cloud'
 import { runRepoScan } from './devops-scan'
 import { readWorkloadMetrics } from './devops-metrics'
+import { addDevpodRecipe } from './devops-devpod-recipe'
 import { prepareObservability, probeGrafana } from './devops-observability'
 import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
@@ -80,6 +81,11 @@ export function registerDevopsHandlers(): void {
     typeof port === 'number' && Number.isInteger(port) && port >= 1024 && port <= 65535
       ? probeGrafana(port)
       : false
+  )
+  ipcMain.handle('aiVault:addDevpodRecipe', (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath)
+      ? addDevpodRecipe(workspacePath)
+      : { ok: false, error: 'Needs a local workspace.' }
   )
   ipcMain.handle('aiVault:workloadMetrics', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath)
