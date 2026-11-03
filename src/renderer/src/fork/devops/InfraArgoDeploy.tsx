@@ -23,9 +23,12 @@ export function InfraArgoDeploy({
   worktreeId,
   inspection,
   context,
-  clusterAnswers
+  clusterAnswers,
+  gitopsRepo
 }: {
   worktreeId: string
+  /** A confirmed sibling GitOps repo deploys instead of the open one. */
+  gitopsRepo: { path: string; folder: string } | null
   inspection: DevopsInspection | null
   context: DevopsContext
   clusterAnswers: boolean
@@ -42,16 +45,18 @@ export function InfraArgoDeploy({
       return
     }
     let current = true
-    void window.api.aiVault.argoDeployPlan(path).then((next) => {
-      if (current) {
-        setPlan(next)
-        setSource(0)
-      }
-    })
+    void window.api.aiVault
+      .argoDeployPlan({ repoPath: gitopsRepo?.path ?? path, clusterPath: path })
+      .then((next) => {
+        if (current) {
+          setPlan(next)
+          setSource(0)
+        }
+      })
     return () => {
       current = false
     }
-  }, [path, clusterAnswers, kube?.context])
+  }, [path, clusterAnswers, kube?.context, gitopsRepo?.path])
   useEffect(() => () => window.clearInterval(polling.current), [])
 
   const blocked = !kube
@@ -167,6 +172,7 @@ export function InfraArgoDeploy({
           <div className="flex items-center gap-2">
             <GitBranch className="size-4 shrink-0 text-muted-foreground" aria-hidden />
             <span className="min-w-0 truncate font-mono text-xs">
+              {gitopsRepo ? `${gitopsRepo.folder} · ` : ''}
               {plan.repoURL} @ {plan.branch}
             </span>
           </div>

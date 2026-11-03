@@ -27,6 +27,8 @@ import { useSystemMap } from './use-system-map'
 import { InfraTerraformPlan } from './InfraTerraformPlan'
 import { InfraCiCard } from './InfraCiCard'
 import { InfraArgoDeploy } from './InfraArgoDeploy'
+import { InfraProjectCard } from './InfraProjectCard'
+import { useDevopsProject } from './use-devops-project'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
 import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
@@ -51,6 +53,11 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const ranked = rankDevopsActions({ findings, activeFile })
   const whoAmI = ranked.find((item) => item.action.id === 'aws.whoami')
   const [deckOpen, setDeckOpen] = useState(false)
+  const project = useDevopsProject(worktreeId)
+  const gitopsRepo = project?.repoFor('gitops') ?? null
+  const platformRepo = terraformDir === null ? (project?.repoFor('platform') ?? null) : null
+  const platformDir =
+    platformRepo?.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const cluster = useSystemMap(context.kube ? path : undefined, context.kube?.context ?? '')
   return (
     <div
@@ -109,6 +116,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             <X aria-hidden />
           </Button>
         </header>
+        {project ? <InfraProjectCard project={project} /> : null}
         <InfraSystemMap
           worktreeId={worktreeId}
           context={context}
@@ -120,18 +128,20 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
               : ''
           }
         />
-        {offersCluster ? (
+        {offersCluster || gitopsRepo ? (
           <InfraArgoDeploy
+            gitopsRepo={gitopsRepo}
             worktreeId={worktreeId}
             inspection={inspection}
             context={context}
             clusterAnswers={cluster.result?.ok === true}
           />
         ) : null}
-        {terraformDir !== null ? (
+        {terraformDir !== null || (platformRepo && platformDir !== null) ? (
           <InfraTerraformPlan
             worktreeId={worktreeId}
-            terraformDir={terraformDir}
+            terraformDir={terraformDir ?? platformDir ?? '.'}
+            platformRepo={terraformDir === null ? platformRepo : null}
             inspection={inspection}
             sandbox={sandbox}
             context={context}

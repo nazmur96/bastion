@@ -35,15 +35,19 @@ export function InfraTerraformPlan({
   terraformDir,
   inspection,
   sandbox,
-  context
+  context,
+  platformRepo = null
 }: {
   worktreeId: string
   terraformDir: string
+  /** A confirmed sibling infrastructure repo, when the open repo has no Terraform of its own. */
+  platformRepo?: { path: string; folder: string; usesMise: boolean } | null
   inspection: DevopsInspection | null
   sandbox: DevopsSandbox
   context: DevopsContext
 }): React.JSX.Element {
-  const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
+  const workspace = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
+  const path = platformRepo?.path ?? workspace
   const [result, setResult] = useState<TerraformPlanResult | null>(null)
   const [running, setRunning] = useState(false)
   const [armed, setArmed] = useState(false)
@@ -76,7 +80,7 @@ export function InfraTerraformPlan({
     <InfraCard
       className="mb-4"
       title={translate('components.devops.plan.title', 'Terraform plan · {{dir}}', {
-        dir: terraformDir
+        dir: platformRepo ? `${platformRepo.folder}/${terraformDir}` : terraformDir
       })}
       hint={translate(
         'components.devops.plan.hint',
@@ -222,11 +226,14 @@ export function InfraTerraformPlan({
                     setArmed(false)
                     runInWorkbenchTerminal(
                       worktreeId,
-                      devopsCommandLine(
-                        inspection?.tools.terraform,
-                        `terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`,
-                        inspection?.shell
-                      ),
+                      platformRepo
+                        ? // The sibling repo's own mise pin, from its own folder.
+                          `cd ${shellQuote(platformRepo.path)} && ${platformRepo.usesMise ? 'mise exec -- ' : ''}terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`
+                        : devopsCommandLine(
+                            inspection?.tools.terraform,
+                            `terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`,
+                            inspection?.shell
+                          ),
                       sandbox.state.awsEnv
                     )
                   }}

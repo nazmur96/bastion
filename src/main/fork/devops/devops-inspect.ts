@@ -132,16 +132,21 @@ export async function resolveTool(
   }
 }
 
-export async function inspectDevopsWorkspace(workspacePath: string): Promise<DevopsInspection> {
+/** Stacks only, no tool lookups: cheap enough to run over sibling repos. */
+export async function findDevopsStacks(workspacePath: string): Promise<DevopsStackFinding[]> {
   const files = await listFiles(workspacePath)
   let headsRead = 0
-  const findings: DevopsStackFinding[] = detectDevopsStacks(files, (path) => {
+  return detectDevopsStacks(files, (path) => {
     if (!devopsHeadWanted(path) || headsRead >= HEAD_LIMIT) {
       return null
     }
     headsRead += 1
     return readHead(join(workspacePath, path))
   })
+}
+
+export async function inspectDevopsWorkspace(workspacePath: string): Promise<DevopsInspection> {
+  const findings = await findDevopsStacks(workspacePath)
   const usesMise = MISE_FILES.some((name) => existsSync(join(workspacePath, name)))
   const wanted = CATALOG_TOOLS.filter((tool) =>
     DEVOPS_ACTIONS.some(

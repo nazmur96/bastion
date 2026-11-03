@@ -20828,6 +20828,17 @@
         "unpushed": "{{count}} commits are not pushed; Argo CD will not see them.",
         "adopt": "Anything already applied by hand with the same names is taken over by Argo CD. Private repos need Argo CD read access (not set up by this button yet).",
         "deploy": "Deploy with Argo CD"
+      },
+      "project": {
+        "app": "app",
+        "gitops": "GitOps",
+        "platform": "infrastructure",
+        "ask": "These look like one project",
+        "title": "This project",
+        "askHint": "Each step then uses the right repo: manifests from GitOps, Terraform from infrastructure.",
+        "confirm": "Yes, one project",
+        "single": "No, just this repo",
+        "change": "Change"
       }
     }
   },

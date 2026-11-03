@@ -5,6 +5,7 @@ import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspec
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
+import { readProjectRepos } from './devops-project'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import {
   KIND_MULTI_NODE_CONFIG,
@@ -49,11 +50,18 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
-  ipcMain.handle('aiVault:argoDeployPlan', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? readArgoDeployPlan(workspacePath)
-      : { ok: false, error: 'Argo CD deploy needs a local workspace.' }
+  ipcMain.handle('aiVault:projectRepos', async (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath) ? readProjectRepos(workspacePath) : null
   )
+  ipcMain.handle('aiVault:argoDeployPlan', async (_event, request: unknown) => {
+    const field = (key: string): unknown =>
+      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+    const repoPath = field('repoPath')
+    const clusterPath = field('clusterPath')
+    return isLocalDirectory(repoPath) && isLocalDirectory(clusterPath)
+      ? readArgoDeployPlan(repoPath, clusterPath)
+      : { ok: false, error: 'Argo CD deploy needs a local workspace.' }
+  })
   ipcMain.handle('aiVault:writeArgoApplication', (_event, request: unknown) => {
     const name: unknown =
       typeof request === 'object' && request !== null ? Reflect.get(request, 'name') : null

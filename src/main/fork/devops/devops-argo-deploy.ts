@@ -13,7 +13,11 @@ import {
 } from '../../../shared/fork-devops-argo-deploy'
 
 /** What "Deploy this repo with Argo CD" would use, read-only: remote, branch, sources, and whether Argo is there. */
-export async function readArgoDeployPlan(workspacePath: string): Promise<ArgoDeployPlan> {
+export async function readArgoDeployPlan(
+  workspacePath: string,
+  /** The open workspace: its kubeconfig decides which cluster is checked for Argo CD. */
+  clusterPath: string = workspacePath
+): Promise<ArgoDeployPlan> {
   const remote = await run('git', ['remote', 'get-url', 'origin'], workspacePath)
   if (!remote.ok) {
     return {
@@ -35,7 +39,7 @@ export async function readArgoDeployPlan(workspacePath: string): Promise<ArgoDep
   const [files, inspection, crd] = await Promise.all([
     listFiles(workspacePath),
     inspectDevopsWorkspace(workspacePath),
-    kubectlIn(workspacePath, [
+    kubectlIn(clusterPath, [
       'get',
       'crd',
       'applications.argoproj.io',
