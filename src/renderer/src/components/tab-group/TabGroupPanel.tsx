@@ -1,7 +1,7 @@
 import { ClaudeEditsBar } from '@/fork/claude-edits/ClaudeEditsBar'
 import { WorkbenchSectionBar, useWorkbenchSections } from '@/fork/workbench/WorkbenchSectionBar'
 import { ClaudePanelHeaderActions } from '@/fork/claude-panel/ClaudePanelHeaderActions'
-import { InfraHomeOverlay } from '@/fork/devops/InfraHome'
+import { InfraHomeOverlay } from '@/fork/devops/InfraHomeOverlay'
 import { Suspense, useCallback, useMemo } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { useDroppable } from '@dnd-kit/core'

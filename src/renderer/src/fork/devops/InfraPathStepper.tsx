@@ -117,9 +117,13 @@ function nextStep(id: PathStageId): NextStep {
 }
 
 function scrollTo(card: string): void {
-  if (card) {
-    document.getElementById(card)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const element = card ? document.getElementById(card) : null
+  // Cards live in folded sections: open the one holding this card first.
+  const section = element?.closest('details')
+  if (section) {
+    section.open = true
   }
+  element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 /** Path step 4: where the project is, and the next step as the one main button. */

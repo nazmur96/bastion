@@ -21013,7 +21013,7 @@
         "hint": "This branch on its way to production, what changed when, and what is broken now.",
         "release": "Release flight",
         "time": "Time machine",
-        "incident": "Incident{{count}}",
+        "incident": "Incident{{badge}}",
         "openPr": "Open #{{number}} {{title}}",
         "noPr": "No pull request for this branch (or gh is not signed in).",
         "window": "Last {{hours}}h",
@@ -21023,6 +21023,13 @@
         "recent": "Latest commits: {{commits}}",
         "diagnose": "Diagnose with Claude",
         "runbooks": "Runbooks"
+      },
+      "section": {
+        "deploy": "Deploy · local cluster and GitOps",
+        "harden": "Harden · security findings",
+        "cloud": "Cloud · EKS, plan, cost",
+        "observe": "Observe · environments, metrics, incidents, runbooks",
+        "playground": "Playground and tools · clusters, demos, machines, scans"
       }
     }
   },
