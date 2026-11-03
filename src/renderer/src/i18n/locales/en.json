@@ -20781,7 +20781,8 @@
         "open": "Command deck (press :)",
         "button": "Commands",
         "launch": "Launch",
-        "map": "Cluster"
+        "map": "Cluster",
+        "path": "Project path"
       },
       "plan": {
         "title": "Terraform plan · {{dir}}",
@@ -20852,6 +20853,36 @@
         "apply": "Deploy {{path}} ({{kind}}) into namespace {{namespace}}",
         "retarget": "Run the local build in: {{targets}}",
         "run": "Build and run on {{name}}"
+      },
+      "path": {
+        "understand": "Understood",
+        "cluster": "Local cluster",
+        "app": "App running",
+        "gitops": "GitOps",
+        "harden": "Hardened",
+        "cloud": "Cloud",
+        "ship": "Shipped",
+        "next": {
+          "understand": "Understand the app",
+          "understandHint": "Claude reads the project and explains what it needs before anything runs.",
+          "understandButton": "Explain it",
+          "cluster": "Start a local cluster",
+          "clusterHint": "kind with metrics-server, on this machine, free.",
+          "clusterButton": "Create kind cluster",
+          "app": "Run this app on the cluster",
+          "appHint": "Build the image, load it, deploy your own manifests.",
+          "appButton": "Build and run",
+          "gitops": "Deploy it with Argo CD",
+          "gitopsHint": "From then on the cluster follows the pushed repo.",
+          "gitopsButton": "Deploy with Argo CD",
+          "harden": "Scan it for risks",
+          "hardenHint": "Trivy over the repo: misconfigurations in manifests, Terraform and Dockerfiles.",
+          "hardenButton": "Scan"
+        },
+        "coming": "Coming next",
+        "nextLabel": "Next step",
+        "show": "Show me",
+        "localDone": "The local path is complete. The cloud steps (EKS, ship) are coming next."
       }
     }
   },

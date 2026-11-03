@@ -4,8 +4,8 @@ import { basename, dirname, join } from 'node:path'
 import { MISE_FILES, findDevopsStacks, listFiles, resolveTool, run } from './devops-inspect'
 import { kubectlIn } from './devops-kubectl'
 import { readDevopsContext } from './devops-context'
-import { argoAppName, argoSources, type ArgoSource } from '../../../shared/fork-devops-argo-deploy'
-import { projectBase } from '../../../shared/fork-devops-project'
+import { argoSources, type ArgoSource } from '../../../shared/fork-devops-argo-deploy'
+import { projectAppName } from '../../../shared/fork-devops-project'
 import {
   imageTargets,
   localClusterOf,
@@ -101,7 +101,7 @@ export async function readLocalDeployPlan(input: {
   if (rendered === null) {
     return { ok: false, error: `Could not render ${source.path} (${source.kind}).` }
   }
-  const appName = argoAppName(projectBase(basename(appPath)) ?? basename(appPath))
+  const appName = projectAppName(basename(appPath))
   const targets = imageTargets(rendered, appName)
   if (targets.length === 0) {
     return {

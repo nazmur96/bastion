@@ -13,6 +13,8 @@ export type ArgoDeployPlan =
       unpushed: number | null
       sources: ArgoSource[]
       argoInstalled: boolean
+      /** This repo's Application is already in Argo CD (the GitOps stage is done). */
+      applicationExists: boolean
       name: string
     }
   | { ok: false; error: string }

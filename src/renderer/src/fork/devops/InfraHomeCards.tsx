@@ -31,15 +31,18 @@ export function InfraCard({
   title,
   hint,
   children,
-  className
+  className,
+  id
 }: {
   title: string
   hint?: string
   children: React.ReactNode
   className?: string
+  /** Lets the project path scroll to the card for its stage. */
+  id?: string
 }): React.JSX.Element {
   return (
-    <section className={cn('rounded-lg border border-border bg-card p-4', className)}>
+    <section id={id} className={cn('rounded-lg border border-border bg-card p-4', className)}>
       <header className="mb-3">
         <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         {hint ? <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p> : null}

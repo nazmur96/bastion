@@ -189,6 +189,7 @@ export function InfraLaunchpad({
 
   return (
     <InfraCard
+      id="infra-path-launchpad"
       className="mb-4"
       title={translate('components.devops.launchpad.title', 'What do you want to do?')}
       hint={translate(

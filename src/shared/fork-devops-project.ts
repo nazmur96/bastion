@@ -85,3 +85,12 @@ export function proposeProject(
   }
   return members
 }
+
+/** The app's Kubernetes-safe name, shared by namespaces, images and Argo apps. */
+export function projectAppName(folder: string): string {
+  const slug = (projectBase(folder) ?? folder)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  return (slug || 'app').slice(0, 53)
+}

@@ -6,6 +6,7 @@ import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { InfraCard } from './InfraHomeCards'
+import { useDeckCommands } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
@@ -24,8 +25,11 @@ export function InfraArgoDeploy({
   inspection,
   context,
   clusterAnswers,
-  gitopsRepo
+  gitopsRepo,
+  onApplication
 }: {
+  /** Tells the project path whether this repo's Application already exists. */
+  onApplication: (exists: boolean) => void
   worktreeId: string
   /** A confirmed sibling GitOps repo deploys instead of the open one. */
   gitopsRepo: { path: string; folder: string } | null
@@ -51,12 +55,13 @@ export function InfraArgoDeploy({
         if (current) {
           setPlan(next)
           setSource(0)
+          onApplication(next.ok && next.applicationExists)
         }
       })
     return () => {
       current = false
     }
-  }, [path, clusterAnswers, kube?.context, gitopsRepo?.path])
+  }, [path, clusterAnswers, kube?.context, gitopsRepo?.path, onApplication])
   useEffect(() => () => window.clearInterval(polling.current), [])
 
   const blocked = !kube
@@ -150,8 +155,24 @@ export function InfraArgoDeploy({
     }, UI_POLL_MS)
   }
 
+  useDeckCommands(
+    'path:gitops',
+    plan?.ok && !blocked
+      ? [
+          {
+            id: 'path:gitops',
+            group: translate('components.devops.deck.path', 'Project path'),
+            label: translate('components.devops.argo.deploy', 'Deploy with Argo CD'),
+            keywords: ['argo', 'gitops', 'deploy'],
+            run: () => void deploy()
+          }
+        ]
+      : []
+  )
+
   return (
     <InfraCard
+      id="infra-path-gitops"
       className="mb-4"
       title={translate('components.devops.argo.title', 'Deploy this repo with Argo CD')}
       hint={translate(

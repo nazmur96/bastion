@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { InfraCard } from './InfraHomeCards'
+import { useDeckCommands } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import { localDeploySteps, type LocalDeployPlan } from '../../../../shared/fork-devops-local-deploy'
@@ -74,8 +75,26 @@ export function InfraLocalDeploy({
     window.setTimeout(onDeployed, 20_000)
   }
 
+  useDeckCommands(
+    'path:app',
+    plan?.ok
+      ? [
+          {
+            id: 'path:app',
+            group: translate('components.devops.deck.path', 'Project path'),
+            label: translate('components.devops.local.run', 'Build and run on {{name}}', {
+              name: plan.cluster.name
+            }),
+            keywords: ['build', 'deploy', 'local', plan.image],
+            run
+          }
+        ]
+      : []
+  )
+
   return (
     <InfraCard
+      id="infra-path-app"
       className="mb-4"
       title={translate('components.devops.local.title', 'Run this app on the local cluster')}
       hint={translate(

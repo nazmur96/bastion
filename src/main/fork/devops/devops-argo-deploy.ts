@@ -57,14 +57,30 @@ export async function readArgoDeployPlan(
       error: 'No Kubernetes manifests, kustomization or Helm chart found in this repo.'
     }
   }
+  const argoInstalled = crd.ok && crd.out.includes('applications.argoproj.io')
+  const name = argoAppName(basename(workspacePath))
+  const application = argoInstalled
+    ? await kubectlIn(clusterPath, [
+        '-n',
+        'argocd',
+        'get',
+        'application',
+        name,
+        '-o',
+        'name',
+        '--request-timeout=8s'
+      ])
+    : null
+  const applicationExists = application?.ok === true && application.out.trim() !== ''
   return {
     ok: true,
     repoURL,
     branch: branch && branch !== 'HEAD' ? branch : 'HEAD',
     unpushed: ahead.ok ? Number.parseInt(ahead.stdout.trim(), 10) || 0 : null,
     sources,
-    argoInstalled: crd.ok && crd.out.includes('applications.argoproj.io'),
-    name: argoAppName(basename(workspacePath))
+    argoInstalled,
+    applicationExists,
+    name
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Command, Server, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store'
@@ -29,6 +29,10 @@ import { InfraCiCard } from './InfraCiCard'
 import { InfraArgoDeploy } from './InfraArgoDeploy'
 import { InfraProjectCard } from './InfraProjectCard'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
+import { InfraPathStepper } from './InfraPathStepper'
+import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
+import { pathStages } from '../../../../shared/fork-devops-path'
+import { projectAppName } from '../../../../shared/fork-devops-project'
 import { useDevopsProject } from './use-devops-project'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
@@ -66,9 +70,24 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
     ? appRepo.findings.some((finding) => ['kubernetes', 'helm'].includes(finding.stack))
     : has('kubernetes', 'helm')
   const manifestsPath = appHasManifests ? appPath : (gitopsRepo?.path ?? appPath)
+  const [marks, setMarks] = useState<PathMarks>(() =>
+    path ? readPathMarks(path) : { understood: false, hardened: false }
+  )
+  const [gitopsDone, setGitopsDone] = useState(false)
+  const onApplication = useCallback((exists: boolean) => setGitopsDone(exists), [])
+  const appNamespace = appPath ? projectAppName(appPath.split(/[\\/]/).findLast(Boolean) ?? '') : ''
   const platformDir =
     platformRepo?.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const cluster = useSystemMap(context.kube ? path : undefined, context.kube?.context ?? '')
+  const stages = pathStages({
+    understood: marks.understood,
+    localCluster: context.kube?.tone === 'local' && cluster.result?.ok === true,
+    appRunning:
+      cluster.result?.ok === true &&
+      cluster.result.map.nodes.some((node) => node.layer === 2 && node.namespace === appNamespace),
+    gitops: gitopsDone,
+    hardened: marks.hardened
+  })
   return (
     <div
       className="scrollbar-sleek absolute inset-0 z-30 overflow-y-auto bg-background"
@@ -126,6 +145,15 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             <X aria-hidden />
           </Button>
         </header>
+        {path ? (
+          <InfraPathStepper
+            worktreeId={worktreeId}
+            stages={stages}
+            members={project?.members ?? []}
+            onUnderstood={() => setMarks(markPath(path, 'understood'))}
+            onHardened={() => setMarks(markPath(path, 'hardened'))}
+          />
+        ) : null}
         {project ? <InfraProjectCard project={project} /> : null}
         <InfraSystemMap
           worktreeId={worktreeId}
@@ -153,6 +181,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
         {offersCluster || gitopsRepo ? (
           <InfraArgoDeploy
             gitopsRepo={gitopsRepo}
+            onApplication={onApplication}
             worktreeId={worktreeId}
             inspection={inspection}
             context={context}
