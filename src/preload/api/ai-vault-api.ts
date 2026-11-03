@@ -31,6 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
+import type { LocalDeployPlan } from '../../shared/fork-devops-local-deploy'
 import type { ProjectRepo } from '../../shared/fork-devops-project'
 import type { ArgoDeployPlan } from '../../shared/fork-devops-argo-deploy'
 import type { TerraformPlanResult } from '../../shared/fork-terraform-plan'
@@ -87,6 +88,12 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork path stage 2: build this app and run it on the local cluster (read-only plan). */
+  localDeployPlan: (request: {
+    appPath: string
+    manifestsPath: string
+    clusterPath: string
+  }) => Promise<LocalDeployPlan>
   /** Fork path step 2: the open repo and related sibling repos, for one-project grouping. */
   projectRepos: (
     workspacePath: string

@@ -6,6 +6,7 @@ import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
 import { readProjectRepos } from './devops-project'
+import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import {
   KIND_MULTI_NODE_CONFIG,
@@ -50,6 +51,18 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
+  ipcMain.handle('aiVault:localDeployPlan', async (_event, request: unknown) => {
+    const field = (key: string): unknown =>
+      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+    const appPath = field('appPath')
+    const manifestsPath = field('manifestsPath')
+    const clusterPath = field('clusterPath')
+    return isLocalDirectory(appPath) &&
+      isLocalDirectory(manifestsPath) &&
+      isLocalDirectory(clusterPath)
+      ? readLocalDeployPlan({ appPath, manifestsPath, clusterPath })
+      : { ok: false, error: 'Running on a local cluster needs local folders.' }
+  })
   ipcMain.handle('aiVault:projectRepos', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? readProjectRepos(workspacePath) : null
   )

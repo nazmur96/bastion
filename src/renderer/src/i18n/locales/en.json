@@ -20839,6 +20839,19 @@
         "confirm": "Yes, one project",
         "single": "No, just this repo",
         "change": "Change"
+      },
+      "local": {
+        "noCluster": "Start a local cluster first (kind or k3d).",
+        "notLocal": "{{context}} is not a local cluster.",
+        "down": "The cluster is not answering.",
+        "title": "Run this app on the local cluster",
+        "hint": "Builds your image, loads it into the cluster and deploys your own manifests. Nothing in the repo changes.",
+        "reading": "Reading the app and its manifests…",
+        "build": "Build {{image}} from {{dockerfile}} with {{runtime}}",
+        "load": "Load it into {{tool}} cluster {{name}}",
+        "apply": "Deploy {{path}} ({{kind}}) into namespace {{namespace}}",
+        "retarget": "Run the local build in: {{targets}}",
+        "run": "Build and run on {{name}}"
       }
     }
   },

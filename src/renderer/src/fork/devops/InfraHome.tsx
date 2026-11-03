@@ -28,6 +28,7 @@ import { InfraTerraformPlan } from './InfraTerraformPlan'
 import { InfraCiCard } from './InfraCiCard'
 import { InfraArgoDeploy } from './InfraArgoDeploy'
 import { InfraProjectCard } from './InfraProjectCard'
+import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { useDevopsProject } from './use-devops-project'
 import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
@@ -56,6 +57,15 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const project = useDevopsProject(worktreeId)
   const gitopsRepo = project?.repoFor('gitops') ?? null
   const platformRepo = terraformDir === null ? (project?.repoFor('platform') ?? null) : null
+  const appRepo = project?.repoFor('app') ?? null
+  const appPath = appRepo?.path ?? path
+  const appHasImage = appRepo
+    ? appRepo.findings.some((finding) => finding.stack === 'containers')
+    : has('containers')
+  const appHasManifests = appRepo
+    ? appRepo.findings.some((finding) => ['kubernetes', 'helm'].includes(finding.stack))
+    : has('kubernetes', 'helm')
+  const manifestsPath = appHasManifests ? appPath : (gitopsRepo?.path ?? appPath)
   const platformDir =
     platformRepo?.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const cluster = useSystemMap(context.kube ? path : undefined, context.kube?.context ?? '')
@@ -128,6 +138,18 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
               : ''
           }
         />
+        {path && appPath && manifestsPath && appHasImage && (appHasManifests || gitopsRepo) ? (
+          <InfraLocalDeploy
+            worktreeId={worktreeId}
+            workspacePath={path}
+            appPath={appPath}
+            manifestsPath={manifestsPath}
+            inspection={inspection}
+            context={context}
+            clusterAnswers={cluster.result?.ok === true}
+            onDeployed={cluster.refresh}
+          />
+        ) : null}
         {offersCluster || gitopsRepo ? (
           <InfraArgoDeploy
             gitopsRepo={gitopsRepo}
