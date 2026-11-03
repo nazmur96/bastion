@@ -144,6 +144,55 @@ export function InfraTerraformPlan({
               </span>
             ) : null}
           </div>
+          {!drift && result.gates ? (
+            <div className="mb-2 grid gap-2 sm:grid-cols-2" data-plan-gates="">
+              <div className="rounded-md border border-border px-3 py-2">
+                <div className="text-xs text-muted-foreground">
+                  {translate('components.devops.plan.costGate', 'Cost · Infracost')}
+                </div>
+                {result.gates.cost.ok ? (
+                  <div className="text-sm font-medium text-status-warning">
+                    {translate(
+                      'components.devops.plan.cost',
+                      '≈ ${{monthly}} / month · ${{hourly}} / hour',
+                      {
+                        monthly: result.gates.cost.value.toFixed(2),
+                        hourly: (result.gates.cost.value / 730).toFixed(2)
+                      }
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground">{result.gates.cost.reason}</div>
+                )}
+              </div>
+              <div className="rounded-md border border-border px-3 py-2">
+                <div className="text-xs text-muted-foreground">
+                  {translate('components.devops.plan.policyGate', 'Policy · Checkov')}
+                </div>
+                {result.gates.policy.ok ? (
+                  <div
+                    className={cn(
+                      'text-sm font-medium',
+                      result.gates.policy.value.failed > 0
+                        ? 'text-destructive'
+                        : 'text-status-success'
+                    )}
+                  >
+                    {translate(
+                      'components.devops.plan.policy',
+                      '{{failed}} failed · {{passed}} passed',
+                      {
+                        failed: result.gates.policy.value.failed,
+                        passed: result.gates.policy.value.passed
+                      }
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-xs text-muted-foreground">{result.gates.policy.reason}</div>
+                )}
+              </div>
+            </div>
+          ) : null}
           {shown.length === 0 ? (
             <p className="text-xs text-muted-foreground">
               {translate(
@@ -242,9 +291,12 @@ export function InfraTerraformPlan({
                   {armed
                     ? translate(
                         'components.devops.plan.confirm',
-                        'Click again to apply to {{target}}',
+                        'Click again to apply to {{target}}{{cost}}',
                         {
-                          target
+                          target,
+                          cost: result.gates?.cost.ok
+                            ? ` (≈ ${result.gates.cost.value.toFixed(0)}/mo)`
+                            : ''
                         }
                       )
                     : translate('components.devops.plan.apply', 'Apply this plan')}

@@ -1445,6 +1445,9 @@
       "handOffUnavailable": "This chat cannot be handed off yet."
     },
     "devops": {
+      "plan": {
+        "confirm": "Click again to apply to {{target}}"
+      },
       "sandbox": {
         "awsBadge": "Local AWS",
         "awsDashboard": "Open AWS dashboard",

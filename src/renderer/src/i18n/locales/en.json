@@ -20797,7 +20797,11 @@
         "apply": "Apply this plan",
         "driftHint": "terraform plan -refresh-only: what changed outside Terraform",
         "drift": "Check drift",
-        "driftCount": "{{count}} drifted outside Terraform"
+        "driftCount": "{{count}} drifted outside Terraform",
+        "costGate": "Cost · Infracost",
+        "cost": "≈ ${{monthly}} / month · ${{hourly}} / hour",
+        "policyGate": "Policy · Checkov",
+        "policy": "{{failed}} failed · {{passed}} passed"
       },
       "ci": {
         "success": "All checks passed",

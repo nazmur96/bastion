@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { planAsText, summarizeTerraformPlan } from './fork-terraform-plan'
+import {
+  parseCheckovSummary,
+  parseInfracostMonthly,
+  planAsText,
+  summarizeTerraformPlan
+} from './fork-terraform-plan'
 
 const plan = {
   resource_changes: [
@@ -84,6 +89,21 @@ describe('terraform plan summary', () => {
     )
     expect(drifted.counts.update).toBe(0)
     expect(drifted.drift[0].changes).toEqual([{ path: 'ingress', before: '443', after: '443,22' }])
+  })
+
+  it('reads Infracost and Checkov output for the plan gates', () => {
+    expect(parseInfracostMonthly('{"totalMonthlyCost":"219.4","currency":"USD"}')).toBe(219.4)
+    expect(parseInfracostMonthly('nope')).toBeNull()
+    expect(parseCheckovSummary('{"summary":{"passed":12,"failed":2}}')).toEqual({
+      passed: 12,
+      failed: 2
+    })
+    expect(
+      parseCheckovSummary(
+        '[{"summary":{"passed":1,"failed":0}},{"summary":{"passed":3,"failed":1}}]'
+      )
+    ).toEqual({ passed: 4, failed: 1 })
+    expect(parseCheckovSummary('[]')).toBeNull()
   })
 
   it('survives bad JSON', () => {

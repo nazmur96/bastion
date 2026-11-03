@@ -51,5 +51,6 @@ export const MISE_TOOL_SPECS: Readonly<Record<string, string>> = {
   devpod: 'devpod',
   trivy: 'trivy',
   checkov: 'pipx:checkov',
+  infracost: 'infracost',
   'kube-linter': 'kube-linter'
 }

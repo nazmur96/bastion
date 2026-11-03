@@ -1,13 +1,15 @@
 import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join, normalize } from 'node:path'
 import { MISE_FILES, resolveTool } from './devops-inspect'
 import { workspaceEnv } from './devops-context'
 import { devopsSandboxEnvFor } from './devops-sandbox'
+import { runPlanGates } from './devops-plan-gates'
 import {
   summarizeTerraformPlan,
+  type PlanGates,
   type TerraformPlanResult
 } from '../../../shared/fork-terraform-plan'
 
@@ -77,7 +79,15 @@ export async function runTerraformPlan(
   if (!shown.ok) {
     return { ok: false, error: lastLines(shown.out) }
   }
-  return { ok: true, dir: relative, planFile, summary: summarizeTerraformPlan(shown.out) }
+  const summary = summarizeTerraformPlan(shown.out)
+  // Drift checks and empty plans have nothing to price or police.
+  let gates: PlanGates | null = null
+  if (!refreshOnly && summary.resources.length > 0) {
+    const planJson = `${planFile}.json`
+    writeFileSync(planJson, shown.out)
+    gates = await runPlanGates(workspacePath, planJson, env)
+  }
+  return { ok: true, dir: relative, planFile, summary, gates }
 }
 
 function lastLines(text: string): string {

@@ -22,8 +22,24 @@ export type TerraformPlanSummary = {
   drift: PlanResourceChange[]
 }
 
+/** A gate that did not run says why: the tool is missing, or it failed. */
+export type PlanGate<T> = { ok: true; value: T } | { ok: false; reason: string }
+
+export type PlanGates = {
+  /** Infracost: estimated monthly cost of the planned infrastructure, USD. */
+  cost: PlanGate<number>
+  /** Checkov on the plan JSON. */
+  policy: PlanGate<{ passed: number; failed: number }>
+}
+
 export type TerraformPlanResult =
-  | { ok: true; dir: string; planFile: string; summary: TerraformPlanSummary }
+  | {
+      ok: true
+      dir: string
+      planFile: string
+      summary: TerraformPlanSummary
+      gates: PlanGates | null
+    }
   | { ok: false; error: string }
 
 type Obj = Record<string, unknown>
@@ -184,4 +200,38 @@ export function planAsText(summary: TerraformPlanSummary): string {
     `Plan: ${create} to add, ${update} to change, ${replace} to replace, ${destroy} to destroy.`,
     ...lines
   ].join('\n')
+}
+
+export function parseInfracostMonthly(stdout: string): number | null {
+  try {
+    const value: unknown = JSON.parse(stdout)
+    const total: unknown = isObj(value) ? value.totalMonthlyCost : null
+    const parsed =
+      typeof total === 'string' || typeof total === 'number' ? Number(total) : Number.NaN
+    return Number.isFinite(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
+/** Checkov prints one report object, or a list when several frameworks ran. */
+export function parseCheckovSummary(stdout: string): { passed: number; failed: number } | null {
+  try {
+    const value: unknown = JSON.parse(stdout)
+    const reports = Array.isArray(value) ? value : [value]
+    let passed = 0
+    let failed = 0
+    let seen = false
+    for (const report of reports) {
+      const summary = isObj(report) && isObj(report.summary) ? report.summary : null
+      if (summary && typeof summary.passed === 'number' && typeof summary.failed === 'number') {
+        passed += summary.passed
+        failed += summary.failed
+        seen = true
+      }
+    }
+    return seen ? { passed, failed } : null
+  } catch {
+    return null
+  }
 }
