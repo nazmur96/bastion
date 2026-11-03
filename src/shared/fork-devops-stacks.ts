@@ -136,7 +136,8 @@ export function detectDevopsStacks(
         add('argocd', path)
       }
       if (head && isManifestHead(head)) {
-        add('kubernetes', path)
+        // Plain manifest folders are deployable too; a folder of Argo Applications is not the app.
+        add('kubernetes', path, isArgoHead(head) ? undefined : dirOf(path))
       } else if (head && isAnsibleHead(head)) {
         add('ansible', path)
       }
