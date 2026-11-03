@@ -20738,7 +20738,9 @@
         "askClaude": "Ask Claude",
         "clusterDown": "The current cluster is not answering. Check “Running on this machine”.",
         "scan": "Check it · security and policy scans",
-        "devpodAdded": "Added the DevPod environment: {{files}}. Review and commit them."
+        "devpodAdded": "Added the DevPod environment: {{files}}. Review and commit them.",
+        "openPlugins": "Open plugins",
+        "addToRepo": "Add to repo"
       },
       "runs": {
         "confirm": "Click again",

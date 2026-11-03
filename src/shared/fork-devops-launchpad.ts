@@ -9,7 +9,7 @@ export type LaunchpadTile = {
   group: LaunchpadGroup
   title: string
   blurb: string
-  /** The CLI the tile runs; its status decides "ready" or "add it". */
+  /** The CLI the tile runs; its status decides "ready" or "add it". Empty: no CLI needed. */
   tool: string
   /** `null` = free. Real tiles only plan or dry-run; nothing billed is created by a click. */
   cost: string | null
@@ -23,6 +23,10 @@ export type LaunchpadTile = {
   creates?: { kind: LocalRunKind; name: string }
   /** A tile that changes the repo instead of running commands (reviewed like any edit). */
   writes?: 'devpod-recipe'
+  /** Opens an Orca settings page (an existing plugin covers it). */
+  opens?: 'plugins'
+  /** Drafts this request for Claude, for setups that depend on the person's own hardware. */
+  asks?: string
 }
 
 export const LAUNCHPAD_GROUPS: readonly LaunchpadGroup[] = [
@@ -153,6 +157,16 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     writes: 'devpod-recipe'
   },
   {
+    id: 'upstash-box',
+    group: 'machine',
+    title: 'Cloud sandbox · Upstash Box',
+    blurb:
+      'A fresh cloud box per workspace that pauses when idle (free tier). Comes as an Orca plugin.',
+    tool: '',
+    cost: 'free tier',
+    opens: 'plugins'
+  },
+  {
     id: 'multipass',
     group: 'machine',
     title: 'Ubuntu VM · Multipass',
@@ -199,6 +213,23 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     steps: ['terraform -chdir={tfdir} init -input=false', 'terraform -chdir={tfdir} plan']
   },
   {
+    id: 'talos-proxmox',
+    group: 'real',
+    title: 'Kubernetes on your Proxmox · Talos',
+    blurb:
+      'Talos VMs on your own Proxmox server, written as Terraform by Claude for you to review.',
+    tool: '',
+    cost: 'your hardware',
+    asks: [
+      'Write Terraform for a small Talos Linux Kubernetes cluster on my Proxmox VE server, in platform/proxmox-talos.',
+      '- Providers: bpg/proxmox and siderolabs/talos, pinned. Proxmox endpoint, node name and API token come from variables (token from an environment variable, never in files).',
+      '- 1 control plane and 2 workers from the Talos nocloud image; static IPs as variables.',
+      '- Generate machine configs and bootstrap with the talos provider; output the kubeconfig and talosconfig paths.',
+      '- Pin talosctl and terraform in that folder’s mise.toml.',
+      'Write the files only. Do not run terraform init, plan or apply.'
+    ].join('\n')
+  },
+  {
     id: 'eksctl',
     group: 'real',
     title: 'EKS cluster · eksctl',
@@ -220,7 +251,7 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
 
 /** Every tile's tool, once: what the Launchpad asks the main process to look up. */
 export const LAUNCHPAD_TOOLS: readonly string[] = [
-  ...new Set(LAUNCHPAD_TILES.map((tile) => tile.tool))
+  ...new Set(LAUNCHPAD_TILES.map((tile) => tile.tool).filter(Boolean))
 ]
 
 /** One terminal line: steps stop at the first failure. */

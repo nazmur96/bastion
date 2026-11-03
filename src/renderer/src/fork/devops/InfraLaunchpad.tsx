@@ -18,7 +18,7 @@ import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
-import { draftGoalForClaude } from './ask-claude'
+import { draftForClaude, draftGoalForClaude } from './ask-claude'
 import { rememberLaunched } from './launched-store'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
@@ -136,6 +136,16 @@ export function InfraLaunchpad({
       sandbox.run(tile.sandbox, 'start')
       return
     }
+    if (tile.opens === 'plugins') {
+      const state = useAppStore.getState()
+      state.openSettingsTarget({ pane: 'plugins', repoId: null })
+      state.openSettingsPage()
+      return
+    }
+    if (tile.asks) {
+      draftForClaude(worktreeId, tile.asks)
+      return
+    }
     if (tile.writes === 'devpod-recipe' && path) {
       void window.api.aiVault.addDevpodRecipe(path).then((result) =>
         result.ok
@@ -188,7 +198,7 @@ export function InfraLaunchpad({
 
   const deck: DeckCommand[] = LAUNCHPAD_TILES.flatMap((tile) => {
     const status = tools?.[tile.tool]
-    if (!status?.available || blockedReason(tile)) {
+    if ((tile.tool !== '' && !status?.available) || blockedReason(tile)) {
       return []
     }
     return [
@@ -250,7 +260,7 @@ export function InfraLaunchpad({
               <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                 {LAUNCHPAD_TILES.filter((tile) => tile.group === group).map((tile) => {
                   const status = tools?.[tile.tool]
-                  const missing = tools !== null && !status?.available
+                  const missing = tile.tool !== '' && tools !== null && !status?.available
                   const blocked = blockedReason(tile)
                   const canAdd = missing && usesMise && Boolean(MISE_TOOL_SPECS[tile.tool])
                   return (
@@ -312,9 +322,21 @@ export function InfraLaunchpad({
                             onClick={() => launch(tile, status)}
                           >
                             <Rocket aria-hidden />
-                            {tile.cost
-                              ? translate('components.devops.launchpad.preview', 'Preview')
-                              : translate('components.devops.launchpad.launch', 'Launch')}
+                            {tile.asks
+                              ? translate('components.devops.launchpad.askClaude', 'Ask Claude')
+                              : tile.opens
+                                ? translate(
+                                    'components.devops.launchpad.openPlugins',
+                                    'Open plugins'
+                                  )
+                                : tile.writes
+                                  ? translate(
+                                      'components.devops.launchpad.addToRepo',
+                                      'Add to repo'
+                                    )
+                                  : tile.cost
+                                    ? translate('components.devops.launchpad.preview', 'Preview')
+                                    : translate('components.devops.launchpad.launch', 'Launch')}
                           </Button>
                         )}
                       </div>
