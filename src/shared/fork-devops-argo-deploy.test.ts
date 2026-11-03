@@ -53,6 +53,12 @@ describe('argo deploy', () => {
     expect(yaml).toContain('- CreateNamespace=true')
   })
 
+  it('waits for Synced, then reports health instead of hanging on it', () => {
+    const steps = argoDeploySteps({ argoInstalled: true, appFile: '/tmp/a.yaml', name: 'shop' })
+    expect(steps.join(' ')).toContain('{.status.sync.status}=Synced')
+    expect(steps.join(' ')).not.toContain('=Healthy --timeout')
+  })
+
   it('installs Argo CD only when missing and never needs base64', () => {
     const fresh = argoDeploySteps({ argoInstalled: false, appFile: '/tmp/a.yaml', name: 'shop' })
     const reuse = argoDeploySteps({ argoInstalled: true, appFile: '/tmp/a.yaml', name: 'shop' })

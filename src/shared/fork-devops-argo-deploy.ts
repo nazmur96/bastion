@@ -141,7 +141,10 @@ export function argoDeploySteps(input: {
         ]),
     'kubectl -n argocd rollout status deploy/argocd-server --timeout=300s',
     `kubectl apply -f ${quoted}`,
-    `kubectl -n argocd wait application/${input.name} --for=jsonpath={.status.health.status}=Healthy --timeout=600s`,
+    // Synced is the deploy signal. Health can stay Degraded for reasons outside the repo
+    // (an HPA on a cluster without metrics-server), so it is reported, not waited on.
+    `kubectl -n argocd wait application/${input.name} --for=jsonpath={.status.sync.status}=Synced --timeout=600s`,
+    `kubectl -n argocd get application/${input.name} -o go-template='sync: {{.status.sync.status}}  health: {{.status.health.status}}{{println}}{{if ne .status.health.status "Healthy"}}Not Healthy: open the app in Argo CD to see which resource. On kind, an HPA stays Degraded until metrics-server is installed.{{println}}{{end}}'`,
     'kubectl -n argocd get secret argocd-initial-admin-secret -o go-template="admin password: {{.data.password | base64decode}}{{println}}"'
   ]
 }
