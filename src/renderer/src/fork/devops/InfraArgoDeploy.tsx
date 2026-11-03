@@ -10,7 +10,6 @@ import { useDeckCommands } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
-  ARGO_UI_PORT,
   argoApplicationYaml,
   argoDeploySteps,
   type ArgoDeployPlan
@@ -111,7 +110,7 @@ export function InfraArgoDeploy({
       worktreeId,
       devopsCommandLine(
         tool,
-        `kubectl -n argocd wait --for=create deploy/argocd-server --timeout=900s && kubectl -n argocd rollout status deploy/argocd-server --timeout=900s && kubectl -n argocd port-forward svc/argocd-server ${ARGO_UI_PORT}:443`,
+        `kubectl -n argocd wait --for=create deploy/argocd-server --timeout=900s && kubectl -n argocd rollout status deploy/argocd-server --timeout=900s && kubectl -n argocd port-forward svc/argocd-server ${plan.uiPort}:443`,
         shell
       )
     )
@@ -125,7 +124,7 @@ export function InfraArgoDeploy({
     window.clearInterval(polling.current)
     polling.current = window.setInterval(() => {
       tries += 1
-      void window.api.aiVault.probeArgoUi().then((up) => {
+      void window.api.aiVault.probeArgoUi(plan.uiPort).then((up) => {
         if (up) {
           window.clearInterval(polling.current)
           setStatus(
@@ -136,7 +135,7 @@ export function InfraArgoDeploy({
           )
           openInWorkbenchBrowser(
             worktreeId,
-            `https://localhost:${ARGO_UI_PORT}/applications/argocd/${plan.name}`,
+            `https://localhost:${plan.uiPort}/applications/argocd/${plan.name}`,
             'Argo CD'
           )
         } else if (tries >= UI_POLL_LIMIT) {

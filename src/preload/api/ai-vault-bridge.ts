@@ -72,7 +72,7 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
   observabilityPlan: (request: { workspacePath: string; namespace: string }) =>
     ipcRenderer.invoke('aiVault:observabilityPlan', request),
-  probeGrafana: () => ipcRenderer.invoke('aiVault:probeGrafana'),
+  probeGrafana: (port: number) => ipcRenderer.invoke('aiVault:probeGrafana', port),
   workloadMetrics: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:workloadMetrics', workspacePath),
   scanRepo: (workspacePath: string) => ipcRenderer.invoke('aiVault:scanRepo', workspacePath),
@@ -86,7 +86,7 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:argoDeployPlan', request),
   writeArgoApplication: (request: { name: string; yaml: string }) =>
     ipcRenderer.invoke('aiVault:writeArgoApplication', request),
-  probeArgoUi: () => ipcRenderer.invoke('aiVault:probeArgoUi'),
+  probeArgoUi: (port: number) => ipcRenderer.invoke('aiVault:probeArgoUi', port),
   terraformOutputs: (request: { workspacePath: string; dir: string }) =>
     ipcRenderer.invoke('aiVault:terraformOutputs', request),
   terraformPlan: (request: {

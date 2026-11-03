@@ -8,7 +8,6 @@ import { useDeckCommands } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
-  GRAFANA_PORT,
   grafanaForward,
   observabilitySteps,
   type ObservabilityPlan
@@ -73,7 +72,7 @@ export function InfraWatchCard({
       return
     }
     const grafana = plan.grafana
-    runInWorkbenchTerminal(worktreeId, line(grafanaForward(grafana)))
+    runInWorkbenchTerminal(worktreeId, line(grafanaForward(grafana, plan.grafanaPort)))
     setStatus(
       translate('components.devops.watch.waiting', 'Setting up… Grafana opens when it answers.')
     )
@@ -81,7 +80,7 @@ export function InfraWatchCard({
     window.clearInterval(polling.current)
     polling.current = window.setInterval(() => {
       tries += 1
-      void window.api.aiVault.probeGrafana().then((up) => {
+      void window.api.aiVault.probeGrafana(plan.grafanaPort).then((up) => {
         if (up) {
           window.clearInterval(polling.current)
           setStatus(
@@ -92,7 +91,7 @@ export function InfraWatchCard({
           )
           openInWorkbenchBrowser(
             worktreeId,
-            `http://localhost:${GRAFANA_PORT}/d/${plan.dashboardUid}`,
+            `http://localhost:${plan.grafanaPort}/d/${plan.dashboardUid}`,
             'Grafana'
           )
         } else if (tries >= POLL_LIMIT) {
@@ -165,11 +164,15 @@ export function InfraWatchCard({
             </li>
             <li>
               {plan.targets.length > 0
-                ? translate('components.devops.watch.scrape', 'Scrape /metrics on: {{targets}}', {
-                    targets: plan.targets
-                      .map((target) => `${target.service}:${target.port}`)
-                      .join(', ')
-                  })
+                ? translate(
+                    'components.devops.watch.scrape',
+                    'Scrape /metrics on: {{targets}}. An app that does not serve /metrics shows as down there; CPU, memory and restarts still work.',
+                    {
+                      targets: plan.targets
+                        .map((target) => `${target.service}:${target.port}`)
+                        .join(', ')
+                    }
+                  )
                 : translate(
                     'components.devops.watch.noTargets',
                     'No labelled Service with a named port in {{namespace}}: CPU, memory and restarts still show.',

@@ -1,11 +1,11 @@
 import { app } from 'electron'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
-import { createServer } from 'node:net'
 import { join, sep } from 'node:path'
 import { MISE_FILES, resolveTool } from './devops-inspect'
 import { workspaceEnv } from './devops-context'
 import type { DevopsRadarResult } from '../../../shared/fork-devops-radar'
+import { freeLocalPort } from './devops-ports'
 
 const RADAR = 'kubectl-radar'
 const FIRST_PORT = 9280
@@ -13,14 +13,6 @@ const READY_TIMEOUT_MS = 45_000
 
 const running = new Map<string, { child: ChildProcess; url: string }>()
 let quitHooked = false
-
-function freePort(port: number): Promise<number> {
-  return new Promise((resolve) => {
-    const server = createServer()
-    server.once('error', () => resolve(freePort(port + 1)))
-    server.listen(port, '127.0.0.1', () => server.close(() => resolve(port)))
-  })
-}
 
 async function waitUntilServing(url: string, child: ChildProcess): Promise<boolean> {
   const deadline = Date.now() + READY_TIMEOUT_MS
@@ -76,7 +68,7 @@ export async function startDevopsRadar(workspacePath: string): Promise<DevopsRad
     }
   }
   const env = { ...process.env, ...(await workspaceEnv(workspacePath)) }
-  const port = await freePort(FIRST_PORT)
+  const port = await freeLocalPort(FIRST_PORT)
   const kubeconfig = env.KUBECONFIG?.split(process.platform === 'win32' ? ';' : ':')[0]
   const args = [
     '--no-browser',

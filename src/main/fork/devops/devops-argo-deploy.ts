@@ -4,6 +4,7 @@ import { request } from 'node:https'
 import { basename, join } from 'node:path'
 import { inspectDevopsWorkspace, listFiles, run } from './devops-inspect'
 import { kubectlIn } from './devops-kubectl'
+import { freeLocalPort } from './devops-ports'
 import {
   ARGO_UI_PORT,
   argoAppName,
@@ -80,7 +81,8 @@ export async function readArgoDeployPlan(
     sources,
     argoInstalled,
     applicationExists,
-    name
+    name,
+    uiPort: await freeLocalPort(ARGO_UI_PORT)
   }
 }
 
@@ -94,12 +96,12 @@ export function writeArgoApplication(name: string, yaml: string): string {
 }
 
 /** Whether the forwarded Argo CD UI answers yet (self-signed certificate, local only). */
-export function probeArgoUi(): Promise<boolean> {
+export function probeArgoUi(port: number): Promise<boolean> {
   return new Promise((resolve) => {
     const req = request(
       {
         host: '127.0.0.1',
-        port: ARGO_UI_PORT,
+        port,
         path: '/',
         method: 'GET',
         rejectUnauthorized: false,

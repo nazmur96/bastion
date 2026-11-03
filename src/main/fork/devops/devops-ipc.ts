@@ -76,7 +76,11 @@ export function registerDevopsHandlers(): void {
       ? prepareObservability(workspacePath, namespace)
       : { ok: false, error: 'Needs a local workspace and a namespace.' }
   })
-  ipcMain.handle('aiVault:probeGrafana', () => probeGrafana())
+  ipcMain.handle('aiVault:probeGrafana', (_event, port: unknown) =>
+    typeof port === 'number' && Number.isInteger(port) && port >= 1024 && port <= 65535
+      ? probeGrafana(port)
+      : false
+  )
   ipcMain.handle('aiVault:workloadMetrics', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath)
       ? readWorkloadMetrics(workspacePath)
@@ -133,7 +137,11 @@ export function registerDevopsHandlers(): void {
     }
     return writeArgoApplication(name, yaml)
   })
-  ipcMain.handle('aiVault:probeArgoUi', () => probeArgoUi())
+  ipcMain.handle('aiVault:probeArgoUi', (_event, port: unknown) =>
+    typeof port === 'number' && Number.isInteger(port) && port >= 1024 && port <= 65535
+      ? probeArgoUi(port)
+      : false
+  )
   ipcMain.handle('aiVault:terraformPlan', async (_event, request: unknown) => {
     const workspacePath: unknown =
       request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null

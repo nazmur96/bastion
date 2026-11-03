@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { request } from 'node:http'
 import { join } from 'node:path'
 import { kubectlIn } from './devops-kubectl'
+import { freeLocalPort } from './devops-ports'
 import {
   GRAFANA_PORT,
   dashboardConfigMap,
@@ -83,20 +84,18 @@ export async function prepareObservability(
       (stackInstalled ? null : { namespace: 'monitoring', service: 'monitoring-grafana' }),
     targets,
     files: { serviceMonitor, dashboard },
-    dashboardUid
+    dashboardUid,
+    grafanaPort: await freeLocalPort(GRAFANA_PORT)
   }
 }
 
 /** Whether the forwarded Grafana answers yet. */
-export function probeGrafana(): Promise<boolean> {
+export function probeGrafana(port: number): Promise<boolean> {
   return new Promise((resolve) => {
-    const req = request(
-      { host: '127.0.0.1', port: GRAFANA_PORT, path: '/api/health', timeout: 2_000 },
-      (res) => {
-        res.resume()
-        resolve(true)
-      }
-    )
+    const req = request({ host: '127.0.0.1', port, path: '/api/health', timeout: 2_000 }, (res) => {
+      res.resume()
+      resolve(true)
+    })
     req.on('timeout', () => req.destroy())
     req.on('error', () => resolve(false))
     req.end()

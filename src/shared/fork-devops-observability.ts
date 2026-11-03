@@ -12,6 +12,8 @@ export type ObservabilityPlan =
       /** Written to userData; applied by the Watch it terminal. */
       files: { serviceMonitor: string | null; dashboard: string }
       dashboardUid: string
+      /** A local port free right now for the Grafana port-forward. */
+      grafanaPort: number
     }
   | { ok: false; error: string }
 
@@ -165,11 +167,14 @@ export function observabilitySteps(plan: Extract<ObservabilityPlan, { ok: true }
 }
 
 /** The port-forward that keeps Grafana open, and how to read its admin password without base64. */
-export function grafanaForward(grafana: { namespace: string; service: string }): string {
+export function grafanaForward(
+  grafana: { namespace: string; service: string },
+  port: number
+): string {
   return [
     `kubectl -n ${grafana.namespace} wait --for=create deploy/${grafana.service} --timeout=900s`,
     `kubectl -n ${grafana.namespace} rollout status deploy/${grafana.service} --timeout=900s`,
     `kubectl -n ${grafana.namespace} get secret ${grafana.service} -o go-template='admin password: {{index .data "admin-password" | base64decode}}{{println}}'`,
-    `kubectl -n ${grafana.namespace} port-forward svc/${grafana.service} ${GRAFANA_PORT}:80`
+    `kubectl -n ${grafana.namespace} port-forward svc/${grafana.service} ${port}:80`
   ].join(' && ')
 }

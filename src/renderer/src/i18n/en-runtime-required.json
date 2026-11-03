@@ -1468,6 +1468,9 @@
       },
       "toolbelt": {
         "menu": "DevOps"
+      },
+      "watch": {
+        "scrape": "Scrape /metrics on: {{targets}}"
       }
     },
     "native-chat": {

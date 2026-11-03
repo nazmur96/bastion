@@ -48,7 +48,8 @@ describe('observability', () => {
       grafana: { namespace: 'monitoring', service: 'monitoring-grafana' },
       targets: [],
       files: { serviceMonitor: null, dashboard: '/d.yaml' },
-      dashboardUid: 'bastion-hello'
+      dashboardUid: 'bastion-hello',
+      grafanaPort: 3001
     }
     expect(observabilitySteps({ ...base, stackInstalled: false })[0]).toMatch(
       /^helm install monitoring /
@@ -56,6 +57,9 @@ describe('observability', () => {
     expect(observabilitySteps({ ...base, stackInstalled: true })).toEqual([
       'kubectl apply -f "/d.yaml"'
     ])
-    expect(grafanaForward(base.grafana)).not.toContain('base64 -d')
+    expect(grafanaForward(base.grafana, 3001)).not.toContain('base64 -d')
+    expect(grafanaForward(base.grafana, 3001)).toContain(
+      'port-forward svc/monitoring-grafana 3001:80'
+    )
   })
 })

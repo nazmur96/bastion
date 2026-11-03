@@ -16,6 +16,8 @@ export type ArgoDeployPlan =
       /** This repo's Application is already in Argo CD (the GitOps stage is done). */
       applicationExists: boolean
       name: string
+      /** A local port free right now for the Argo CD UI port-forward. */
+      uiPort: number
     }
   | { ok: false; error: string }
 

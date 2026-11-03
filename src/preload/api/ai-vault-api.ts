@@ -97,7 +97,7 @@ export type AiVaultApi = {
     workspacePath: string
     namespace: string
   }) => Promise<ObservabilityPlan>
-  probeGrafana: () => Promise<boolean>
+  probeGrafana: (port: number) => Promise<boolean>
   /** Fork observability: CPU, memory and restarts per workload (metrics-server), read-only. */
   workloadMetrics: (workspacePath: string) => Promise<MetricsResult>
   /** Fork path stage Harden: Trivy misconfigurations with their files and lines (read-only). */
@@ -117,7 +117,7 @@ export type AiVaultApi = {
   /** Fork path stage 3: deploy this repo with Argo CD. */
   argoDeployPlan: (request: { repoPath: string; clusterPath: string }) => Promise<ArgoDeployPlan>
   writeArgoApplication: (request: { name: string; yaml: string }) => Promise<string | null>
-  probeArgoUi: () => Promise<boolean>
+  probeArgoUi: (port: number) => Promise<boolean>
   /** Fork A3: plan only (init if needed, plan -out, show -json); never applies. */
   terraformPlan: (request: {
     workspacePath: string
