@@ -1,3 +1,4 @@
+import { interceptCloseForBilledInfra } from '../fork/devops/billed-close-guard'
 import { useEffect, useRef } from 'react'
 import { useAppStore } from '../store'
 import { isIntentionalAppRestartInProgress } from '@/lib/updater-beforeunload'
@@ -50,6 +51,10 @@ export function useTerminalWindowLifecycle(controller: TerminalActivationControl
           dirtyFiles.map((file) => file.id),
           { isQuitting }
         )
+        return
+      }
+      // Fork: applied cloud infrastructure keeps billing after the app closes; warn once.
+      if (interceptCloseForBilledInfra(() => proceedToNativeWindowClose(isQuitting))) {
         return
       }
       proceedToNativeWindowClose(isQuitting)

@@ -37,6 +37,11 @@ function writeAll(all: Record<string, CostMeter>): void {
   listeners.forEach((listener) => listener())
 }
 
+/** Every repo with billed infrastructure applied and not yet destroyed. */
+export function activeCostMeters(): [string, CostMeter][] {
+  return Object.entries(readAll())
+}
+
 export function startCostMeter(repo: string, monthly: number | null): void {
   const all = readAll()
   // An apply on top of running infrastructure keeps the original start time.

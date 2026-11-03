@@ -20919,6 +20919,12 @@
         "meter": "Running {{time}} · ≈ ${{spent}} so far (≈ ${{monthly}}/month)",
         "connect": "Connect kubectl to {{cluster}}",
         "teardown": "Tear it down"
+      },
+      "closeGuard": {
+        "title": "Cloud infrastructure is still running",
+        "body": "{{repos}} applied and not destroyed{{cost}}. It keeps billing after Orca closes.",
+        "quit": "Quit anyway",
+        "keep": "Keep it open"
       }
     }
   },
