@@ -1448,6 +1448,9 @@
       "argo": {
         "notLocal": "This deploys to local clusters only. {{context}} is not one."
       },
+      "modes": {
+        "incident": "Incident{{count}}"
+      },
       "plan": {
         "confirm": "Click again to apply to {{target}}"
       },

@@ -239,6 +239,9 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
         {path ? (
           <InfraExtras
             appName={appNamespace}
+            map={cluster.result}
+            deployed={gitopsDone}
+            shipped={shipped}
             worktreeId={worktreeId}
             workspacePath={path}
             context={context}

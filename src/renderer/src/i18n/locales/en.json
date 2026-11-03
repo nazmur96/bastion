@@ -21002,6 +21002,27 @@
         "empty": "Tracker",
         "hint": "Checkboxes in TRACKER.md; ticking one writes the file (commit it like any change).",
         "create": "Create a tracker with Claude"
+      },
+      "modes": {
+        "review": "Review",
+        "ci": "CI checks",
+        "merged": "Merged",
+        "deployed": "Deployed (local)",
+        "shipped": "Shipped (cloud)",
+        "title": "Release · Time machine · Incident",
+        "hint": "This branch on its way to production, what changed when, and what is broken now.",
+        "release": "Release flight",
+        "time": "Time machine",
+        "incident": "Incident{{count}}",
+        "openPr": "Open #{{number}} {{title}}",
+        "noPr": "No pull request for this branch (or gh is not signed in).",
+        "window": "Last {{hours}}h",
+        "quiet": "Nothing happened in this window.",
+        "show": "Show this commit",
+        "calm": "Every workload on the map is healthy.",
+        "recent": "Latest commits: {{commits}}",
+        "diagnose": "Diagnose with Claude",
+        "runbooks": "Runbooks"
       }
     }
   },

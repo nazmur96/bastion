@@ -71,6 +71,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  timeline: (workspacePath: string) => ipcRenderer.invoke('aiVault:timeline', workspacePath),
+  pullRequest: (workspacePath: string) => ipcRenderer.invoke('aiVault:pullRequest', workspacePath),
   repoDocs: (workspacePath: string) => ipcRenderer.invoke('aiVault:repoDocs', workspacePath),
   setTrackerItem: (request: {
     workspacePath: string

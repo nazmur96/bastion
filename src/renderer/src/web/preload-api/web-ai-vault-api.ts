@@ -117,6 +117,8 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
       }),
     readSystemMap: () =>
       Promise.resolve({ ok: false as const, error: 'The system map needs the desktop app.' }),
+    timeline: () => Promise.resolve([]),
+    pullRequest: () => Promise.resolve(null),
     repoDocs: () => Promise.resolve({ runbooks: [], tracker: null }),
     setTrackerItem: () => Promise.resolve(false),
     radarFindings: () => Promise.resolve({ ok: false as const, error: 'Needs the desktop app.' }),
