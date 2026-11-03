@@ -117,6 +117,7 @@ export function createWebAiVaultApi(): NonNullable<Partial<PreloadApi>['aiVault'
       }),
     readSystemMap: () =>
       Promise.resolve({ ok: false as const, error: 'The system map needs the desktop app.' }),
+    cloudReadiness: () => Promise.resolve({ error: 'Needs the desktop app.' }),
     localDeployPlan: () => Promise.resolve({ ok: false as const, error: 'Needs the desktop app.' }),
     projectRepos: () => Promise.resolve(null),
     argoDeployPlan: () =>

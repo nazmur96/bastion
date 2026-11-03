@@ -70,6 +70,8 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  cloudReadiness: (workspacePath: string) =>
+    ipcRenderer.invoke('aiVault:cloudReadiness', workspacePath),
   localDeployPlan: (request: { appPath: string; manifestsPath: string; clusterPath: string }) =>
     ipcRenderer.invoke('aiVault:localDeployPlan', request),
   projectRepos: (workspacePath: string) =>

@@ -20883,6 +20883,23 @@
         "nextLabel": "Next step",
         "show": "Show me",
         "localDone": "The local path is complete. The cloud steps (EKS, ship) are coming next."
+      },
+      "cloud": {
+        "title": "Cloud · who and where",
+        "hint": "Checked before anything is planned. These calls only read; nothing is created.",
+        "checking": "Asking AWS who you are…",
+        "local": "Local AWS (Floci), account {{account}}",
+        "account": "Account {{account}} as {{arn}}",
+        "notSignedIn": "Not signed in ({{profile}}): {{error}}",
+        "region": "Region {{region}}",
+        "noRegion": "No region set for profile {{profile}}",
+        "budgetUnknown": "Budgets could not be read (needs budgets:ViewBudget).",
+        "budgets": "{{count}} budget alert(s) in place",
+        "noBudget": "No budget alert yet: add one before creating anything.",
+        "staticKeys": "Using long-lived access keys. Keyless sign-in (SSO or federated) is safer.",
+        "signIn": "Sign in ({{profile}})",
+        "scaffold": "Write the platform with Claude",
+        "recheck": "Check again"
       }
     }
   },

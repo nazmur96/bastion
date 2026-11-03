@@ -30,6 +30,7 @@ import { InfraArgoDeploy } from './InfraArgoDeploy'
 import { InfraProjectCard } from './InfraProjectCard'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { InfraPathStepper } from './InfraPathStepper'
+import { InfraCloudCard } from './InfraCloudCard'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
 import { pathStages } from '../../../../shared/fork-devops-path'
 import { projectAppName } from '../../../../shared/fork-devops-project'
@@ -186,6 +187,15 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             inspection={inspection}
             context={context}
             clusterAnswers={cluster.result?.ok === true}
+          />
+        ) : null}
+        {path ? (
+          <InfraCloudCard
+            worktreeId={worktreeId}
+            workspacePath={path}
+            appName={appNamespace}
+            hasTerraform={terraformDir !== null || platformDir !== null}
+            platformFolder={project?.repoFor('platform')?.folder ?? 'platform'}
           />
         ) : null}
         {terraformDir !== null || (platformRepo && platformDir !== null) ? (

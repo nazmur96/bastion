@@ -6,6 +6,7 @@ import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
 import { readProjectRepos } from './devops-project'
+import { readCloudReadiness } from './devops-cloud'
 import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import {
@@ -50,6 +51,11 @@ export function registerDevopsHandlers(): void {
     isLocalDirectory(workspacePath)
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
+  )
+  ipcMain.handle('aiVault:cloudReadiness', async (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath)
+      ? readCloudReadiness(workspacePath)
+      : { error: 'Needs a local workspace.' }
   )
   ipcMain.handle('aiVault:localDeployPlan', async (_event, request: unknown) => {
     const field = (key: string): unknown =>
