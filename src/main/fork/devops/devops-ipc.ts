@@ -1,19 +1,13 @@
 import { app, ipcMain } from 'electron'
-import { existsSync, statSync, writeFileSync } from 'node:fs'
-import { isAbsolute, join } from 'node:path'
+import { isLocalDirectory } from './devops-ipc-guards'
+import { registerDevopsDay2Handlers } from './devops-ipc-day2'
+import { existsSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { readTerraformOutputs, runTerraformPlan } from './devops-terraform-plan'
 import { readProjectRepos } from './devops-project'
-import { readCloudReadiness } from './devops-cloud'
-import { runRepoScan } from './devops-scan'
-import { readWorkloadMetrics } from './devops-metrics'
-import { addDevpodRecipe } from './devops-devpod-recipe'
-import { cancelSteps, runSteps } from './devops-step-runner'
-import { readEnvironments } from './devops-environments'
-import { prepareObservability, probeGrafana } from './devops-observability'
-import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import {
   KIND_MULTI_NODE_CONFIG,
@@ -47,17 +41,6 @@ function planMode(request: unknown): 'plan' | 'refresh-only' | 'destroy' {
 
 const EMPTY: DevopsInspection = { findings: [], environment: 'path', shell: 'posix', tools: {} }
 
-function isLocalDirectory(path: unknown): path is string {
-  if (typeof path !== 'string' || !isAbsolute(path)) {
-    return false
-  }
-  try {
-    return statSync(path).isDirectory()
-  } catch {
-    return false
-  }
-}
-
 /** Fork: the Toolbelt's view of a local workspace; SSH and missing paths get an empty one. */
 export function registerDevopsHandlers(): void {
   ipcMain.handle('aiVault:inspectDevops', async (_event, workspacePath: unknown) =>
@@ -68,96 +51,7 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
-  ipcMain.handle('aiVault:observabilityPlan', async (_event, request: unknown) => {
-    const field = (key: string): unknown =>
-      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
-    const workspacePath = field('workspacePath')
-    const namespace = field('namespace')
-    return isLocalDirectory(workspacePath) &&
-      typeof namespace === 'string' &&
-      /^[a-z0-9][a-z0-9-]{0,62}$/.test(namespace)
-      ? prepareObservability(workspacePath, namespace)
-      : { ok: false, error: 'Needs a local workspace and a namespace.' }
-  })
-  ipcMain.handle('aiVault:probeGrafana', (_event, port: unknown) =>
-    typeof port === 'number' && Number.isInteger(port) && port >= 1024 && port <= 65535
-      ? probeGrafana(port)
-      : false
-  )
-  ipcMain.handle('aiVault:environments', async (_event, request: unknown) => {
-    const field = (key: string): unknown =>
-      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
-    const workspacePath = field('workspacePath')
-    const namespace = field('namespace')
-    return isLocalDirectory(workspacePath) &&
-      typeof namespace === 'string' &&
-      /^[a-z0-9][a-z0-9-]{0,62}$/.test(namespace)
-      ? readEnvironments(workspacePath, namespace)
-      : { ok: false, error: 'Needs a local workspace and a namespace.' }
-  })
-  ipcMain.handle('aiVault:runSteps', (event, request: unknown) => {
-    const field = (key: string): unknown =>
-      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
-    const runId = field('runId')
-    const workspacePath = field('workspacePath')
-    const steps = field('steps')
-    const env = field('env')
-    if (
-      typeof runId !== 'string' ||
-      !isLocalDirectory(workspacePath) ||
-      !Array.isArray(steps) ||
-      !steps.every((step) => typeof step === 'string')
-    ) {
-      return false
-    }
-    const extra =
-      env && typeof env === 'object'
-        ? Object.fromEntries(
-            Object.entries(env).filter(
-              (entry): entry is [string, string] => typeof entry[1] === 'string'
-            )
-          )
-        : undefined
-    void runSteps(event.sender, { runId, workspacePath, steps, env: extra })
-    return true
-  })
-  ipcMain.handle('aiVault:cancelSteps', (_event, runId: unknown) => {
-    if (typeof runId === 'string') {
-      cancelSteps(runId)
-    }
-  })
-  ipcMain.handle('aiVault:addDevpodRecipe', (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? addDevpodRecipe(workspacePath)
-      : { ok: false, error: 'Needs a local workspace.' }
-  )
-  ipcMain.handle('aiVault:workloadMetrics', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? readWorkloadMetrics(workspacePath)
-      : { ok: false, error: 'Needs a local workspace.' }
-  )
-  ipcMain.handle('aiVault:scanRepo', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? runRepoScan(workspacePath)
-      : { ok: false, error: 'Needs a local workspace.' }
-  )
-  ipcMain.handle('aiVault:cloudReadiness', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? readCloudReadiness(workspacePath)
-      : { error: 'Needs a local workspace.' }
-  )
-  ipcMain.handle('aiVault:localDeployPlan', async (_event, request: unknown) => {
-    const field = (key: string): unknown =>
-      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
-    const appPath = field('appPath')
-    const manifestsPath = field('manifestsPath')
-    const clusterPath = field('clusterPath')
-    return isLocalDirectory(appPath) &&
-      isLocalDirectory(manifestsPath) &&
-      isLocalDirectory(clusterPath)
-      ? readLocalDeployPlan({ appPath, manifestsPath, clusterPath })
-      : { ok: false, error: 'Running on a local cluster needs local folders.' }
-  })
+  registerDevopsDay2Handlers()
   ipcMain.handle('aiVault:projectRepos', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? readProjectRepos(workspacePath) : null
   )

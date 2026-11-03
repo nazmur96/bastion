@@ -35,6 +35,7 @@ import { InfraHardenCard } from './InfraHardenCard'
 import { InfraWatchCard } from './InfraWatchCard'
 import { InfraRunsCard } from './InfraRunsCard'
 import { InfraEnvironmentsCard } from './InfraEnvironmentsCard'
+import { InfraExtras } from './InfraExtras'
 import { useTerraformOutputs } from './use-terraform-outputs'
 import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
@@ -231,6 +232,14 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             workspacePath={path}
             namespace={appNamespace}
             inspection={inspection}
+            context={context}
+            clusterAnswers={cluster.result?.ok === true}
+          />
+        ) : null}
+        {path ? (
+          <InfraExtras
+            worktreeId={worktreeId}
+            workspacePath={path}
             context={context}
             clusterAnswers={cluster.result?.ok === true}
           />

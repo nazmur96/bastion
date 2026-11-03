@@ -20974,6 +20974,14 @@
         "none": "Nothing deployed in {{namespace}} on any cluster yet.",
         "down": "not answering",
         "refresh": "Refresh"
+      },
+      "radarFeed": {
+        "title": "Radar findings · {{context}}",
+        "hint": "Radar’s own read-only view of what is wrong in the cluster.",
+        "reading": "Asking Radar…",
+        "clean": "Radar found nothing wrong.",
+        "ask": "Diagnose with Claude",
+        "refresh": "Refresh"
       }
     }
   },
