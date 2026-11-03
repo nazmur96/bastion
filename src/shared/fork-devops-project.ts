@@ -50,6 +50,19 @@ export function projectRole(repo: ProjectRepo): ProjectRole {
   return 'app'
 }
 
+/** From a bare `platform` repo: the one base name that appears in more than one role. */
+function inferredBase(siblings: readonly ProjectRepo[]): string | null {
+  const roles = new Map<string, Set<ProjectRole>>()
+  for (const repo of siblings) {
+    const base = projectBase(repo.folder)
+    if (base !== null) {
+      roles.set(base, (roles.get(base) ?? new Set()).add(projectRole(repo)))
+    }
+  }
+  const shared = [...roles].filter(([, set]) => set.size > 1).map(([base]) => base)
+  return shared.length === 1 ? shared[0] : null
+}
+
 /**
  * The siblings that belong with the open repo: same base name (`shop`, `shop-gitops`),
  * or a bare role-named folder (`platform`, `gitops`) next to it. At most one per role;
@@ -59,7 +72,7 @@ export function proposeProject(
   current: ProjectRepo,
   siblings: readonly ProjectRepo[]
 ): ProjectMember[] {
-  const base = projectBase(current.folder)
+  const base = projectBase(current.folder) ?? inferredBase(siblings)
   const currentRole = projectRole(current)
   const members: ProjectMember[] = [{ repo: current, role: currentRole }]
   for (const repo of siblings) {

@@ -42,6 +42,15 @@ describe('project detection', () => {
     expect(members.map((member) => member.repo.folder)).toEqual(['shop-gitops', 'shop'])
   })
 
+  it('from a bare platform repo, joins the one app that has a GitOps sibling', () => {
+    const members = proposeProject(repo('platform', ['terraform']), [
+      repo('shop', ['containers']),
+      repo('shop-gitops', ['argocd']),
+      repo('billing', ['containers'])
+    ])
+    expect(members.map((member) => member.repo.folder)).toEqual(['platform', 'shop', 'shop-gitops'])
+  })
+
   it('leaves a single repo alone', () => {
     expect(proposeProject(repo('shop', ['containers', 'terraform']), [repo('notes')])).toHaveLength(
       1

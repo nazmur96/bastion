@@ -39,10 +39,9 @@ export async function readProjectRepos(
   }
   const candidates = names.filter((name) => {
     const siblingBase = projectBase(name)
-    return (
-      (siblingBase === null || (base !== null && siblingBase === base)) &&
-      existsSync(join(parent, name, '.git'))
-    )
+    // A bare-named repo (platform) cannot tell which app it serves, so every sibling repo is read.
+    const related = base === null || siblingBase === null || siblingBase === base
+    return related && existsSync(join(parent, name, '.git'))
   })
   const [current, siblings] = await Promise.all([
     describeRepo(workspacePath),
