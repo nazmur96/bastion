@@ -182,6 +182,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
           context={context}
           result={cluster.result}
           refresh={cluster.refresh}
+          workspacePath={path}
           kubectlPrefix={
             inspection?.tools.kubectl?.available && inspection.tools.kubectl.runner === 'mise'
               ? 'mise exec -- '

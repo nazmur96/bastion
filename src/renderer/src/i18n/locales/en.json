@@ -20770,7 +20770,8 @@
         "source": "Source",
         "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand.",
         "driftHint": "kubectl diff against the manifest in this repo",
-        "drift": "Drift"
+        "drift": "Drift",
+        "metrics": "Metrics"
       },
       "deck": {
         "title": "Command deck",

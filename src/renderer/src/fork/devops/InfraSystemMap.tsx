@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
+import { useWorkloadMetrics } from './use-workload-metrics'
+import { metricsLabel } from '../../../../shared/fork-devops-metrics'
 import { draftForClaude } from './ask-claude'
 import { diffManifest, openManifest } from './open-manifest'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
@@ -29,7 +31,7 @@ const HEALTH_CLASS: Record<MapHealth, string> = {
   bad: 'text-destructive'
 }
 
-type Lens = 'health' | 'blast' | 'security'
+type Lens = 'health' | 'blast' | 'security' | 'metrics'
 
 function kubectlRef(node: MapNode): string {
   return `-n ${node.namespace} ${node.kind.toLowerCase()}/${node.name}`
@@ -41,9 +43,12 @@ export function InfraSystemMap({
   context,
   kubectlPrefix,
   result,
-  refresh
+  refresh,
+  workspacePath
 }: {
   worktreeId: string
+  /** The repo whose kubeconfig the map reads; the Metrics lens reads the same cluster. */
+  workspacePath: string | undefined
   context: DevopsContext
   result: SystemMapResult | null
   refresh: () => void
@@ -53,6 +58,7 @@ export function InfraSystemMap({
   const kube = context.kube
   const [selected, setSelected] = useState<string | null>(null)
   const [lens, setLens] = useState<Lens>('health')
+  const metrics = useWorkloadMetrics(lens === 'metrics' ? workspacePath : undefined)
   const map = result?.ok ? result.map : null
 
   const layout = useMemo(() => {
@@ -136,19 +142,23 @@ export function InfraSystemMap({
       )}
     >
       <div className="mb-2 flex items-center gap-1.5">
-        {(['health', 'blast', 'security'] as const).map((value) => (
+        {(['health', 'metrics', 'blast', 'security'] as const).map((value) => (
           <Button
             key={value}
             type="button"
             size="xs"
             variant={lens === value ? 'secondary' : 'ghost'}
-            onClick={() => setLens(value)}
+            onClick={() => {
+              setLens(value)
+            }}
           >
             {value === 'health'
               ? translate('components.devops.map.health', 'Health')
-              : value === 'blast'
-                ? translate('components.devops.map.blast', 'Blast radius')
-                : translate('components.devops.map.security', 'Security')}
+              : value === 'metrics'
+                ? translate('components.devops.map.metrics', 'Metrics')
+                : value === 'blast'
+                  ? translate('components.devops.map.blast', 'Blast radius')
+                  : translate('components.devops.map.security', 'Security')}
           </Button>
         ))}
         <Button type="button" size="xs" variant="ghost" className="ml-auto" onClick={refresh}>
@@ -213,15 +223,22 @@ export function InfraSystemMap({
                 }
                 const dim =
                   (hit && item.id !== selected && !hit.has(item.id)) ||
-                  (lens === 'security' && item.layer !== 2)
+                  ((lens === 'security' || lens === 'metrics') && item.layer !== 2)
+                const live = metrics?.ok ? metrics.byWorkload[item.id] : undefined
                 const dot =
-                  lens === 'security'
-                    ? item.risks.length === 0
-                      ? 'ok'
-                      : item.risks.length > 2
-                        ? 'bad'
-                        : 'warn'
-                    : item.health
+                  lens === 'metrics' && live
+                    ? live.restarts > 5
+                      ? 'bad'
+                      : live.restarts > 0
+                        ? 'warn'
+                        : 'ok'
+                    : lens === 'security'
+                      ? item.risks.length === 0
+                        ? 'ok'
+                        : item.risks.length > 2
+                          ? 'bad'
+                          : 'warn'
+                      : item.health
                 return (
                   <g
                     key={item.id}
@@ -252,7 +269,9 @@ export function InfraSystemMap({
                       className={HEALTH_CLASS[dot]}
                     />
                     <text x={9} y={15} className="fill-muted-foreground text-[9px] uppercase">
-                      {item.kind} · {item.namespace}
+                      {lens === 'metrics' && live && metrics?.ok
+                        ? metricsLabel(live, metrics.usage)
+                        : `${item.kind} · ${item.namespace}`}
                     </text>
                     <text x={9} y={32} className="fill-foreground text-[11px]">
                       {item.name.length > 22 ? `${item.name.slice(0, 21)}…` : item.name}
