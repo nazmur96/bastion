@@ -32,6 +32,7 @@ import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { InfraPathStepper } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
 import { InfraHardenCard } from './InfraHardenCard'
+import { InfraWatchCard } from './InfraWatchCard'
 import { useTerraformOutputs } from './use-terraform-outputs'
 import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
@@ -206,6 +207,16 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             gitopsRepo={gitopsRepo}
             onApplication={onApplication}
             worktreeId={worktreeId}
+            inspection={inspection}
+            context={context}
+            clusterAnswers={cluster.result?.ok === true}
+          />
+        ) : null}
+        {path && (offersCluster || appHasManifests) ? (
+          <InfraWatchCard
+            worktreeId={worktreeId}
+            workspacePath={path}
+            namespace={appNamespace}
             inspection={inspection}
             context={context}
             clusterAnswers={cluster.result?.ok === true}

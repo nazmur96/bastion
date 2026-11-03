@@ -20936,6 +20936,23 @@
         "clean": "No misconfigurations found.",
         "fix": "Fix with Claude",
         "more": "{{count}} more files with findings."
+      },
+      "watch": {
+        "noGrafana": "Applied. This cluster has no Grafana to open.",
+        "waiting": "Setting up… Grafana opens when it answers.",
+        "open": "Grafana is up. Log in as admin; the password is in its terminal.",
+        "timeout": "Grafana did not come up. Check the terminals.",
+        "button": "Watch it with Prometheus + Grafana",
+        "title": "Watch it · metrics and dashboard",
+        "hint": "Prometheus scrapes the app, Grafana shows a dashboard for its namespace. The map’s Metrics lens works without this.",
+        "noCluster": "Needs a cluster that answers.",
+        "reading": "Looking for Prometheus and the app’s Services…",
+        "reuse": "Prometheus is already in the cluster: it is reused, never reinstalled.",
+        "install": "Prometheus + Grafana are not in the cluster: they will be installed (kube-prometheus-stack).",
+        "scrape": "Scrape /metrics on: {{targets}}",
+        "noTargets": "No labelled Service with a named port in {{namespace}}: CPU, memory and restarts still show.",
+        "dashboard": "Dashboard “{{namespace}} · Bastion”: CPU, memory, restarts, request rate.",
+        "confirmReal": "Click again to install on {{context}}"
       }
     }
   },

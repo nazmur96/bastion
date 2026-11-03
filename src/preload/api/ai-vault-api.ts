@@ -31,6 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
+import type { ObservabilityPlan } from '../../shared/fork-devops-observability'
 import type { MetricsResult } from '../../shared/fork-devops-metrics'
 import type { ScanResult } from '../../shared/fork-devops-scan'
 import type { CloudReadiness } from '../../shared/fork-devops-cloud'
@@ -91,6 +92,12 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork observability: reuse or install Prometheus + Grafana, monitor and dashboard for the app. */
+  observabilityPlan: (request: {
+    workspacePath: string
+    namespace: string
+  }) => Promise<ObservabilityPlan>
+  probeGrafana: () => Promise<boolean>
   /** Fork observability: CPU, memory and restarts per workload (metrics-server), read-only. */
   workloadMetrics: (workspacePath: string) => Promise<MetricsResult>
   /** Fork path stage Harden: Trivy misconfigurations with their files and lines (read-only). */

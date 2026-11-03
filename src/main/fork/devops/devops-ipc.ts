@@ -9,6 +9,7 @@ import { readProjectRepos } from './devops-project'
 import { readCloudReadiness } from './devops-cloud'
 import { runRepoScan } from './devops-scan'
 import { readWorkloadMetrics } from './devops-metrics'
+import { prepareObservability, probeGrafana } from './devops-observability'
 import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
 import {
@@ -64,6 +65,18 @@ export function registerDevopsHandlers(): void {
       ? readSystemMap(workspacePath)
       : { ok: false, error: 'The system map needs a local workspace.' }
   )
+  ipcMain.handle('aiVault:observabilityPlan', async (_event, request: unknown) => {
+    const field = (key: string): unknown =>
+      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+    const workspacePath = field('workspacePath')
+    const namespace = field('namespace')
+    return isLocalDirectory(workspacePath) &&
+      typeof namespace === 'string' &&
+      /^[a-z0-9][a-z0-9-]{0,62}$/.test(namespace)
+      ? prepareObservability(workspacePath, namespace)
+      : { ok: false, error: 'Needs a local workspace and a namespace.' }
+  })
+  ipcMain.handle('aiVault:probeGrafana', () => probeGrafana())
   ipcMain.handle('aiVault:workloadMetrics', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath)
       ? readWorkloadMetrics(workspacePath)
