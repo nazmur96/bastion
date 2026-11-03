@@ -32,7 +32,10 @@ describe('launchpad', () => {
   })
 
   it('never creates billed resources from a click', () => {
-    for (const real of LAUNCHPAD_TILES.filter((candidate) => candidate.group === 'real')) {
+    // Tiles that only draft a request for Claude run nothing at all.
+    for (const real of LAUNCHPAD_TILES.filter(
+      (candidate) => candidate.group === 'real' && candidate.steps !== undefined
+    )) {
       expect(real.steps?.some((step) => /apply|--dry-run|plan|init/.test(step))).toBe(true)
       expect(real.steps?.some((step) => /\bapply\b/.test(step))).toBe(false)
     }

@@ -5,6 +5,7 @@ import { translate } from '@/i18n/i18n'
 import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { InfraCard } from './InfraHomeCards'
 import { useDeckCommands } from './command-deck-store'
+import { startSteps } from './steps-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
@@ -61,7 +62,11 @@ export function InfraWatchCard({
     }
     const line = (command: string): string =>
       devopsCommandLine(inspection?.tools.kubectl, command, inspection?.shell)
-    runInWorkbenchTerminal(worktreeId, line(observabilitySteps(plan).join(' && ')))
+    startSteps({
+      title: translate('components.devops.watch.title', 'Watch it · metrics and dashboard'),
+      workspacePath,
+      steps: observabilitySteps(plan).map(line)
+    })
     if (!plan.grafana) {
       setStatus(
         translate(

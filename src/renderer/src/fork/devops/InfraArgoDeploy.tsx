@@ -7,6 +7,7 @@ import { translate } from '@/i18n/i18n'
 import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { InfraCard } from './InfraHomeCards'
 import { useDeckCommands } from './command-deck-store'
+import { startSteps } from './steps-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
@@ -95,16 +96,15 @@ export function InfraArgoDeploy({
     }
     const tool = inspection?.tools.kubectl
     const shell = inspection?.shell
-    runInWorkbenchTerminal(
-      worktreeId,
-      devopsCommandLine(
-        tool,
-        argoDeploySteps({ argoInstalled: plan.argoInstalled, appFile, name: plan.name }).join(
-          ' && '
-        ),
-        shell
-      )
-    )
+    if (path) {
+      startSteps({
+        title: translate('components.devops.argo.title', 'Deploy this repo with Argo CD'),
+        workspacePath: path,
+        steps: argoDeploySteps({ argoInstalled: plan.argoInstalled, appFile, name: plan.name }).map(
+          (step) => devopsCommandLine(tool, step, shell)
+        )
+      })
+    }
     // A second terminal holds the UI open once Argo CD exists; the first one keeps the deploy log.
     runInWorkbenchTerminal(
       worktreeId,

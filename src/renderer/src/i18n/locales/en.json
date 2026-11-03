@@ -20756,7 +20756,12 @@
         "here": "from Launchpad",
         "endHint": "Removes only the clusters and VMs the Launchpad started; stop Floci and vind on their rows.",
         "endConfirm": "Click again to remove {{count}}",
-        "end": "End session"
+        "end": "End session",
+        "ok": "done",
+        "failed": "stopped",
+        "running": "running",
+        "dismiss": "Dismiss",
+        "cancel": "Cancel"
       },
       "map": {
         "title": "System map · {{context}}",

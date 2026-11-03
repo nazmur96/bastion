@@ -1,3 +1,4 @@
+import type { StepsEvent, StepsRequest } from '../../shared/fork-devops-steps'
 import type {
   ClaudeInlineEditRequest,
   ResolveClaudeEditsRequest
@@ -70,6 +71,14 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  runSteps: (request: StepsRequest) => ipcRenderer.invoke('aiVault:runSteps', request),
+  cancelSteps: (runId: string) => ipcRenderer.invoke('aiVault:cancelSteps', runId),
+  onStepsEvent: (callback: (event: StepsEvent) => void): (() => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, payload: StepsEvent): void =>
+      callback(payload)
+    ipcRenderer.on('aiVault:stepsEvent', listener)
+    return () => ipcRenderer.removeListener('aiVault:stepsEvent', listener)
+  },
   addDevpodRecipe: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:addDevpodRecipe', workspacePath),
   observabilityPlan: (request: { workspacePath: string; namespace: string }) =>

@@ -20,6 +20,7 @@ import type { DevopsSandbox } from './use-devops-sandbox'
 import { InfraCard } from './InfraHomeCards'
 import { draftForClaude, draftGoalForClaude } from './ask-claude'
 import { rememberLaunched } from './launched-store'
+import { startSteps } from './steps-store'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import {
@@ -34,6 +35,7 @@ import {
   launchpadNeedsFiles,
   type LaunchpadFiles,
   launchpadScript,
+  launchpadSteps,
   type LaunchpadGroup,
   type LaunchpadTile
 } from '../../../../shared/fork-devops-launchpad'
@@ -182,11 +184,19 @@ export function InfraLaunchpad({
           name: tile.creates.name.replaceAll('{name}', name)
         })
       }
-      runInWorkbenchTerminal(
-        worktreeId,
-        devopsCommandLine(status, script, inspection?.shell),
-        sandbox.state.awsEnv
-      )
+      if (!path) {
+        return
+      }
+      startSteps({
+        title: tile.title,
+        workspacePath: path,
+        steps: launchpadSteps(tile, { name, tfdir: terraformDir ?? '.', files }).map((step) =>
+          devopsCommandLine(status, step, inspection?.shell)
+        ),
+        env: sandbox.state.awsEnv,
+        thenInTerminal: (command) =>
+          runInWorkbenchTerminal(worktreeId, command, sandbox.state.awsEnv)
+      })
     }
   }
 

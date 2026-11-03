@@ -2,16 +2,15 @@ import { useEffect, useState } from 'react'
 import { Container, Play } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
-import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { InfraCard } from './InfraHomeCards'
 import { useDeckCommands } from './command-deck-store'
+import { startSteps } from './steps-store'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import { localDeploySteps, type LocalDeployPlan } from '../../../../shared/fork-devops-local-deploy'
 
 /** Path stage 2: this app's own image and manifests on the local cluster, before any GitOps. */
 export function InfraLocalDeploy({
-  worktreeId,
   workspacePath,
   appPath,
   manifestsPath,
@@ -64,15 +63,14 @@ export function InfraLocalDeploy({
     if (!plan?.ok) {
       return
     }
-    runInWorkbenchTerminal(
-      worktreeId,
-      devopsCommandLine(
-        inspection?.tools.kubectl,
-        localDeploySteps(plan).join(' && '),
-        inspection?.shell
-      )
-    )
-    window.setTimeout(onDeployed, 20_000)
+    startSteps({
+      title: translate('components.devops.local.title', 'Run this app on the local cluster'),
+      workspacePath,
+      steps: localDeploySteps(plan).map((step) =>
+        devopsCommandLine(inspection?.tools.kubectl, step, inspection?.shell)
+      ),
+      onSuccess: onDeployed
+    })
   }
 
   useDeckCommands(

@@ -33,6 +33,7 @@ import { InfraPathStepper } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
 import { InfraHardenCard } from './InfraHardenCard'
 import { InfraWatchCard } from './InfraWatchCard'
+import { InfraRunsCard } from './InfraRunsCard'
 import { useTerraformOutputs } from './use-terraform-outputs'
 import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
@@ -177,6 +178,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             onUnderstood={() => setMarks(markPath(path, 'understood'))}
           />
         ) : null}
+        <InfraRunsCard />
         {project ? <InfraProjectCard project={project} /> : null}
         <InfraSystemMap
           worktreeId={worktreeId}

@@ -10,6 +10,7 @@ import { readCloudReadiness } from './devops-cloud'
 import { runRepoScan } from './devops-scan'
 import { readWorkloadMetrics } from './devops-metrics'
 import { addDevpodRecipe } from './devops-devpod-recipe'
+import { cancelSteps, runSteps } from './devops-step-runner'
 import { prepareObservability, probeGrafana } from './devops-observability'
 import { readLocalDeployPlan } from './devops-local-deploy'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
@@ -82,6 +83,37 @@ export function registerDevopsHandlers(): void {
       ? probeGrafana(port)
       : false
   )
+  ipcMain.handle('aiVault:runSteps', (event, request: unknown) => {
+    const field = (key: string): unknown =>
+      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+    const runId = field('runId')
+    const workspacePath = field('workspacePath')
+    const steps = field('steps')
+    const env = field('env')
+    if (
+      typeof runId !== 'string' ||
+      !isLocalDirectory(workspacePath) ||
+      !Array.isArray(steps) ||
+      !steps.every((step) => typeof step === 'string')
+    ) {
+      return false
+    }
+    const extra =
+      env && typeof env === 'object'
+        ? Object.fromEntries(
+            Object.entries(env).filter(
+              (entry): entry is [string, string] => typeof entry[1] === 'string'
+            )
+          )
+        : undefined
+    void runSteps(event.sender, { runId, workspacePath, steps, env: extra })
+    return true
+  })
+  ipcMain.handle('aiVault:cancelSteps', (_event, runId: unknown) => {
+    if (typeof runId === 'string') {
+      cancelSteps(runId)
+    }
+  })
   ipcMain.handle('aiVault:addDevpodRecipe', (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath)
       ? addDevpodRecipe(workspacePath)

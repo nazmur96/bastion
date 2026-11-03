@@ -254,23 +254,27 @@ export const LAUNCHPAD_TOOLS: readonly string[] = [
   ...new Set(LAUNCHPAD_TILES.map((tile) => tile.tool).filter(Boolean))
 ]
 
+/** The tile's steps with its placeholders filled; empty when the tile runs no commands. */
+export function launchpadSteps(
+  tile: LaunchpadTile,
+  values: { name: string; tfdir: string; files?: LaunchpadFiles }
+): string[] {
+  return (tile.steps ?? []).map((step) =>
+    step
+      .replaceAll('{name}', values.name)
+      .replaceAll('{tfdir}', values.tfdir)
+      .replaceAll('{kindConfig}', values.files?.kindConfig ?? '')
+      .replaceAll('{metricsPatch}', values.files?.metricsPatch ?? '')
+  )
+}
+
 /** One terminal line: steps stop at the first failure. */
 export function launchpadScript(
   tile: LaunchpadTile,
   values: { name: string; tfdir: string; files?: LaunchpadFiles }
 ): string | null {
-  if (!tile.steps || tile.steps.length === 0) {
-    return null
-  }
-  return tile.steps
-    .map((step) =>
-      step
-        .replaceAll('{name}', values.name)
-        .replaceAll('{tfdir}', values.tfdir)
-        .replaceAll('{kindConfig}', values.files?.kindConfig ?? '')
-        .replaceAll('{metricsPatch}', values.files?.metricsPatch ?? '')
-    )
-    .join(' && ')
+  const steps = launchpadSteps(tile, values)
+  return steps.length > 0 ? steps.join(' && ') : null
 }
 
 /** One control plane (multi-control-plane kind clusters do not survive a Docker restart) and two workers. */
