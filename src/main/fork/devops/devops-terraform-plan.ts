@@ -8,6 +8,7 @@ import { workspaceEnv } from './devops-context'
 import { devopsSandboxEnvFor } from './devops-sandbox'
 import { runPlanGates } from './devops-plan-gates'
 import {
+  parseTerraformOutputs,
   summarizeTerraformPlan,
   type PlanGates,
   type TerraformPlanResult
@@ -22,9 +23,10 @@ const PLAN_TIMEOUT_MS = 10 * 60_000
 export async function runTerraformPlan(
   workspacePath: string,
   dir: string,
-  /** Drift check: what changed outside Terraform, with no planned changes. */
-  refreshOnly = false
+  /** refresh-only: drift check; destroy: what tearing it all down would remove. */
+  mode: 'plan' | 'refresh-only' | 'destroy' = 'plan'
 ): Promise<TerraformPlanResult> {
+  const refreshOnly = mode === 'refresh-only'
   const relative = normalize(dir)
   if (isAbsolute(relative) || relative.startsWith('..')) {
     return { ok: false, error: 'The Terraform directory must be inside the workspace.' }
@@ -70,6 +72,7 @@ export async function runTerraformPlan(
     '-no-color',
     '-lock=false',
     ...(refreshOnly ? ['-refresh-only'] : []),
+    ...(mode === 'destroy' ? ['-destroy'] : []),
     `-out=${planFile}`
   ])
   if (!plan.ok) {
@@ -82,12 +85,48 @@ export async function runTerraformPlan(
   const summary = summarizeTerraformPlan(shown.out)
   // Drift checks and empty plans have nothing to price or police.
   let gates: PlanGates | null = null
-  if (!refreshOnly && summary.resources.length > 0) {
+  if (mode === 'plan' && summary.resources.length > 0) {
     const planJson = `${planFile}.json`
     writeFileSync(planJson, shown.out)
     gates = await runPlanGates(workspacePath, planJson, env)
   }
   return { ok: true, dir: relative, planFile, summary, gates }
+}
+
+/** `terraform output -json` as plain strings; read-only, from the same env as plans. */
+export async function readTerraformOutputs(
+  workspacePath: string,
+  dir: string
+): Promise<Record<string, string> | { error: string }> {
+  const relative = normalize(dir)
+  if (isAbsolute(relative) || relative.startsWith('..')) {
+    return { error: 'The Terraform directory must be inside the workspace.' }
+  }
+  const usesMise = MISE_FILES.some((name) => existsSync(join(workspacePath, name)))
+  const terraform = await resolveTool(workspacePath, 'terraform', usesMise)
+  if (!terraform.available || !existsSync(join(workspacePath, relative, '.terraform'))) {
+    return { error: 'not initialised' }
+  }
+  const env = {
+    ...process.env,
+    ...(await workspaceEnv(workspacePath)),
+    ...devopsSandboxEnvFor(workspacePath)
+  }
+  const args = [`-chdir=${relative}`, 'output', '-json', '-no-color']
+  return new Promise((resolve) => {
+    execFile(
+      terraform.runner === 'mise' ? 'mise' : 'terraform',
+      terraform.runner === 'mise' ? ['exec', '--', 'terraform', ...args] : args,
+      { cwd: workspacePath, env, timeout: 60_000 },
+      (error, stdout, stderr) => {
+        if (error) {
+          resolve({ error: lastLines(String(stderr)) || error.message })
+          return
+        }
+        resolve(parseTerraformOutputs(String(stdout)))
+      }
+    )
+  })
 }
 
 function lastLines(text: string): string {

@@ -6,19 +6,21 @@ const none = {
   localCluster: false,
   appRunning: false,
   gitops: false,
-  hardened: false
+  hardened: false,
+  cloud: false,
+  shipped: false
 }
 
 describe('project path', () => {
-  it('starts at understanding, and the unbuilt cloud stages are never next', () => {
+  it('starts at understanding; later stages wait', () => {
     expect(pathStages(none).map((stage) => stage.state)).toEqual([
       'next',
       'todo',
       'todo',
       'todo',
       'todo',
-      'coming',
-      'coming'
+      'todo',
+      'todo'
     ])
   })
 
@@ -27,13 +29,15 @@ describe('project path', () => {
     expect(stages.slice(0, 4).map((stage) => stage.state)).toEqual(['next', 'done', 'done', 'todo'])
   })
 
-  it('has no next once every built stage is done', () => {
+  it('has no next once every stage is done', () => {
     const all = pathStages({
       understood: true,
       localCluster: true,
       appRunning: true,
       gitops: true,
-      hardened: true
+      hardened: true,
+      cloud: true,
+      shipped: true
     })
     expect(all.some((stage) => stage.state === 'next')).toBe(false)
   })

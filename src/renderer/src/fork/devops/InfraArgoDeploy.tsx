@@ -28,8 +28,8 @@ export function InfraArgoDeploy({
   gitopsRepo,
   onApplication
 }: {
-  /** Tells the project path whether this repo's Application already exists. */
-  onApplication: (exists: boolean) => void
+  /** Tells the project path whether this repo's Application exists, and on a local or real cluster. */
+  onApplication: (exists: boolean, local: boolean) => void
   worktreeId: string
   /** A confirmed sibling GitOps repo deploys instead of the open one. */
   gitopsRepo: { path: string; folder: string } | null
@@ -55,26 +55,23 @@ export function InfraArgoDeploy({
         if (current) {
           setPlan(next)
           setSource(0)
-          onApplication(next.ok && next.applicationExists)
+          onApplication(next.ok && next.applicationExists, kube?.tone === 'local')
         }
       })
     return () => {
       current = false
     }
-  }, [path, clusterAnswers, kube?.context, gitopsRepo?.path, onApplication])
+  }, [path, clusterAnswers, kube?.context, kube?.tone, gitopsRepo?.path, onApplication])
   useEffect(() => () => window.clearInterval(polling.current), [])
 
   const blocked = !kube
     ? translate('components.devops.argo.noCluster', 'Start a local cluster first.')
-    : kube.tone !== 'local'
-      ? translate(
-          'components.devops.argo.notLocal',
-          'This deploys to local clusters only. {{context}} is not one.',
-          { context: kube.context }
-        )
-      : !clusterAnswers
-        ? translate('components.devops.argo.down', 'The cluster is not answering.')
-        : null
+    : !clusterAnswers
+      ? translate('components.devops.argo.down', 'The cluster is not answering.')
+      : null
+  // The Ship stage: the same deploy on a real cluster, behind a second click that names it.
+  const real = kube !== undefined && kube.tone !== 'local'
+  const [armed, setArmed] = useState(false)
 
   const deploy = async (): Promise<void> => {
     if (!plan?.ok) {
@@ -251,9 +248,39 @@ export function InfraArgoDeploy({
             </li>
           </ul>
           <div className="flex items-center gap-2 pt-1">
-            <Button type="button" size="xs" onClick={() => void deploy()}>
+            <Button
+              type="button"
+              size="xs"
+              variant={real && armed ? 'destructive' : 'default'}
+              onBlur={() => setArmed(false)}
+              onClick={() => {
+                if (real && !armed) {
+                  setArmed(true)
+                  return
+                }
+                setArmed(false)
+                void deploy()
+              }}
+            >
               <Rocket aria-hidden />
-              {translate('components.devops.argo.deploy', 'Deploy with Argo CD')}
+              {real && armed
+                ? translate(
+                    'components.devops.argo.confirmReal',
+                    'Click again to install on {{context}} ({{tone}})',
+                    {
+                      context: kube.context,
+                      tone: kube.tone === 'prod' ? 'PRODUCTION' : 'real'
+                    }
+                  )
+                : real
+                  ? translate(
+                      'components.devops.argo.deployReal',
+                      'Deploy with Argo CD to {{context}}',
+                      {
+                        context: kube.context
+                      }
+                    )
+                  : translate('components.devops.argo.deploy', 'Deploy with Argo CD')}
             </Button>
             {status ? <span className="text-xs text-muted-foreground">{status}</span> : null}
           </div>

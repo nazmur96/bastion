@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
+  eksFromOutputs,
   parseCheckovSummary,
+  parseTerraformOutputs,
   parseInfracostMonthly,
   planAsText,
   summarizeTerraformPlan
@@ -104,6 +106,20 @@ describe('terraform plan summary', () => {
       )
     ).toEqual({ passed: 4, failed: 1 })
     expect(parseCheckovSummary('[]')).toBeNull()
+  })
+
+  it('finds the EKS cluster in outputs and hides sensitive ones', () => {
+    const outputs = parseTerraformOutputs(
+      JSON.stringify({
+        cluster_name: { value: 'shop-dev', sensitive: false },
+        region: { value: 'eu-central-1' },
+        db_password: { value: 'x', sensitive: true },
+        subnets: { value: ['a', 'b'] }
+      })
+    )
+    expect(outputs).toEqual({ cluster_name: 'shop-dev', region: 'eu-central-1' })
+    expect(eksFromOutputs(outputs, null)).toEqual({ cluster: 'shop-dev', region: 'eu-central-1' })
+    expect(eksFromOutputs({}, 'eu-central-1')).toBeNull()
   })
 
   it('survives bad JSON', () => {

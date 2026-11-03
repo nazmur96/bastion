@@ -81,8 +81,14 @@ export const aiVaultApi = {
   writeArgoApplication: (request: { name: string; yaml: string }) =>
     ipcRenderer.invoke('aiVault:writeArgoApplication', request),
   probeArgoUi: () => ipcRenderer.invoke('aiVault:probeArgoUi'),
-  terraformPlan: (request: { workspacePath: string; dir: string; refreshOnly?: boolean }) =>
-    ipcRenderer.invoke('aiVault:terraformPlan', request),
+  terraformOutputs: (request: { workspacePath: string; dir: string }) =>
+    ipcRenderer.invoke('aiVault:terraformOutputs', request),
+  terraformPlan: (request: {
+    workspacePath: string
+    dir: string
+    refreshOnly?: boolean
+    destroy?: boolean
+  }) => ipcRenderer.invoke('aiVault:terraformPlan', request),
   findManifest: (request: { workspacePath: string; kind: string; name: string }) =>
     ipcRenderer.invoke('aiVault:findManifest', request),
   listLocalRuns: (workspacePath: string) =>

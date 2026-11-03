@@ -31,6 +31,8 @@ import { InfraProjectCard } from './InfraProjectCard'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { InfraPathStepper } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
+import { useTerraformOutputs } from './use-terraform-outputs'
+import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
 import { pathStages } from '../../../../shared/fork-devops-path'
 import { projectAppName } from '../../../../shared/fork-devops-project'
@@ -75,10 +77,27 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
     path ? readPathMarks(path) : { understood: false, hardened: false }
   )
   const [gitopsDone, setGitopsDone] = useState(false)
-  const onApplication = useCallback((exists: boolean) => setGitopsDone(exists), [])
+  const [shipped, setShipped] = useState(false)
+  const onApplication = useCallback((exists: boolean, local: boolean) => {
+    if (local) {
+      setGitopsDone(exists)
+    } else {
+      setShipped(exists)
+    }
+  }, [])
   const appNamespace = appPath ? projectAppName(appPath.split(/[\\/]/).findLast(Boolean) ?? '') : ''
   const platformDir =
     platformRepo?.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
+  const planRepo = terraformDir !== null ? path : platformRepo?.path
+  const planDir = terraformDir ?? platformDir
+  const tfOutputs = useTerraformOutputs(planRepo, planDir)
+  const eks = eksFromOutputs(tfOutputs.outputs, context.aws?.region ?? null)
+  // EKS applies take 10-20 minutes; re-read the outputs a few times instead of polling forever.
+  const afterApply = useCallback(() => {
+    for (const minutes of [2, 8, 16, 25]) {
+      window.setTimeout(tfOutputs.refresh, minutes * 60_000)
+    }
+  }, [tfOutputs.refresh])
   const cluster = useSystemMap(context.kube ? path : undefined, context.kube?.context ?? '')
   const stages = pathStages({
     understood: marks.understood,
@@ -87,7 +106,9 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
       cluster.result?.ok === true &&
       cluster.result.map.nodes.some((node) => node.layer === 2 && node.namespace === appNamespace),
     gitops: gitopsDone,
-    hardened: marks.hardened
+    hardened: marks.hardened,
+    cloud: eks !== null,
+    shipped
   })
   return (
     <div
@@ -196,6 +217,11 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             appName={appNamespace}
             hasTerraform={terraformDir !== null || platformDir !== null}
             platformFolder={project?.repoFor('platform')?.folder ?? 'platform'}
+            eks={eks}
+            meterRepo={planRepo}
+            commandLine={(command) =>
+              devopsCommandLine(inspection?.tools.aws, command, inspection?.shell)
+            }
           />
         ) : null}
         {terraformDir !== null || (platformRepo && platformDir !== null) ? (
@@ -203,6 +229,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             worktreeId={worktreeId}
             terraformDir={terraformDir ?? platformDir ?? '.'}
             platformRepo={terraformDir === null ? platformRepo : null}
+            onApplied={afterApply}
             inspection={inspection}
             sandbox={sandbox}
             context={context}

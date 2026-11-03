@@ -1445,6 +1445,9 @@
       "handOffUnavailable": "This chat cannot be handed off yet."
     },
     "devops": {
+      "argo": {
+        "notLocal": "This deploys to local clusters only. {{context}} is not one."
+      },
       "plan": {
         "confirm": "Click again to apply to {{target}}"
       },

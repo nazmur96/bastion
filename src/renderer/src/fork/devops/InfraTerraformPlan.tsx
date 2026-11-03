@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { GitCompare, Layers, MessageSquare, Play, ShieldAlert } from 'lucide-react'
+import { Flame, GitCompare, Layers, MessageSquare, Play, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
@@ -8,6 +8,7 @@ import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
 import { InfraCard } from './InfraHomeCards'
+import { startCostMeter, stopCostMeter } from './cost-meter-store'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
@@ -36,8 +37,11 @@ export function InfraTerraformPlan({
   inspection,
   sandbox,
   context,
-  platformRepo = null
+  platformRepo = null,
+  onApplied
 }: {
+  /** The outputs (and the stepper) re-read once an apply has had time to finish. */
+  onApplied: () => void
   worktreeId: string
   terraformDir: string
   /** A confirmed sibling infrastructure repo, when the open repo has no Terraform of its own. */
@@ -52,17 +56,19 @@ export function InfraTerraformPlan({
   const [running, setRunning] = useState(false)
   const [armed, setArmed] = useState(false)
   const [drift, setDrift] = useState(false)
+  const [destroying, setDestroying] = useState(false)
   const prod = context.aws?.tone === 'prod' || context.terraform?.tone === 'prod'
 
-  const plan = (refreshOnly: boolean): void => {
+  const plan = (refreshOnly: boolean, destroy = false): void => {
     if (!path || running) {
       return
     }
     setRunning(true)
     setArmed(false)
     setDrift(refreshOnly)
+    setDestroying(destroy)
     void window.api.aiVault
-      .terraformPlan({ workspacePath: path, dir: terraformDir, refreshOnly })
+      .terraformPlan({ workspacePath: path, dir: terraformDir, refreshOnly, destroy })
       .then(setResult)
       .finally(() => setRunning(false))
   }
@@ -78,6 +84,7 @@ export function InfraTerraformPlan({
 
   return (
     <InfraCard
+      id="infra-path-plan"
       className="mb-4"
       title={translate('components.devops.plan.title', 'Terraform plan · {{dir}}', {
         dir: platformRepo ? `${platformRepo.folder}/${terraformDir}` : terraformDir
@@ -107,6 +114,20 @@ export function InfraTerraformPlan({
         >
           <GitCompare aria-hidden />
           {translate('components.devops.plan.drift', 'Check drift')}
+        </Button>
+        <Button
+          type="button"
+          size="xs"
+          variant="outline"
+          onClick={() => plan(false, true)}
+          disabled={running || !path}
+          title={translate(
+            'components.devops.plan.destroyHint',
+            'terraform plan -destroy: what tearing it all down would remove. Nothing is removed until you apply.'
+          )}
+        >
+          <Flame aria-hidden />
+          {translate('components.devops.plan.destroy', 'Plan destroy')}
         </Button>
         <span className={cn('text-xs', prod ? 'text-destructive' : 'text-muted-foreground')}>
           {translate('components.devops.plan.target', 'against {{target}}', { target })}
@@ -285,21 +306,42 @@ export function InfraTerraformPlan({
                           ),
                       sandbox.state.awsEnv
                     )
+                    if (path) {
+                      if (destroying) {
+                        stopCostMeter(path)
+                      } else {
+                        startCostMeter(path, result.gates?.cost.ok ? result.gates.cost.value : null)
+                      }
+                    }
+                    onApplied()
                   }}
                 >
                   {prod ? <ShieldAlert aria-hidden /> : <Play aria-hidden />}
-                  {armed
-                    ? translate(
-                        'components.devops.plan.confirm',
-                        'Click again to apply to {{target}}{{cost}}',
-                        {
-                          target,
-                          cost: result.gates?.cost.ok
-                            ? ` (≈ ${result.gates.cost.value.toFixed(0)}/mo)`
-                            : ''
-                        }
-                      )
-                    : translate('components.devops.plan.apply', 'Apply this plan')}
+                  {destroying
+                    ? armed
+                      ? translate(
+                          'components.devops.plan.destroyConfirm',
+                          'Click again to destroy on {{target}}',
+                          {
+                            target
+                          }
+                        )
+                      : translate(
+                          'components.devops.plan.destroyApply',
+                          'Destroy what this plan lists'
+                        )
+                    : armed
+                      ? translate(
+                          'components.devops.plan.confirm',
+                          'Click again to apply to {{target}}{{cost}}',
+                          {
+                            target,
+                            cost: result.gates?.cost.ok
+                              ? ` (≈ ${result.gates.cost.value.toFixed(0)}/mo)`
+                              : ''
+                          }
+                        )
+                      : translate('components.devops.plan.apply', 'Apply this plan')}
                 </Button>
               )}
             </div>

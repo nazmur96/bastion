@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import { CircleAlert, CircleCheck, Cloud, RefreshCw, Sparkles } from 'lucide-react'
+import { CircleAlert, CircleCheck, Cloud, Flame, Plug, RefreshCw, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
 import { InfraCard } from './InfraHomeCards'
+import { useCostMeter } from './cost-meter-store'
 import { scaffoldPlatformPrompt, type CloudReadiness } from '../../../../shared/fork-devops-cloud'
 
 function Row({
@@ -40,8 +41,17 @@ export function InfraCloudCard({
   workspacePath,
   appName,
   hasTerraform,
-  platformFolder
+  platformFolder,
+  eks,
+  meterRepo,
+  commandLine
 }: {
+  /** The EKS cluster the platform's outputs name, once applied. */
+  eks: { cluster: string; region: string } | null
+  /** The repo whose apply started the cost meter. */
+  meterRepo: string | undefined
+  /** Wraps a command with the workspace's own tool versions. */
+  commandLine: (command: string) => string
   worktreeId: string
   workspacePath: string
   appName: string
@@ -60,6 +70,7 @@ export function InfraCloudCard({
   const ready = readiness && 'identity' in readiness ? readiness : null
   const signedIn = ready !== null && 'account' in ready.identity
   const region = ready?.region ?? 'eu-central-1'
+  const meter = useCostMeter(meterRepo)
 
   return (
     <InfraCard
@@ -142,6 +153,37 @@ export function InfraCloudCard({
                     )}
             </Row>
           ) : null}
+          {eks ? (
+            <Row ok>
+              {translate('components.devops.cloud.eks', 'EKS cluster {{cluster}} in {{region}}', {
+                cluster: eks.cluster,
+                region: eks.region
+              })}
+            </Row>
+          ) : null}
+          {meter ? (
+            <Row ok={false}>
+              <span className="text-status-warning">
+                {meter.spent === null
+                  ? translate(
+                      'components.devops.cloud.meterUnknown',
+                      'Billed infrastructure running for {{time}} (cost not estimated)',
+                      {
+                        time: `${Math.floor(meter.hours)}h ${Math.round((meter.hours % 1) * 60)}m`
+                      }
+                    )
+                  : translate(
+                      'components.devops.cloud.meter',
+                      'Running {{time}} · ≈ ${{spent}} so far (≈ ${{monthly}}/month)',
+                      {
+                        time: `${Math.floor(meter.hours)}h ${Math.round((meter.hours % 1) * 60)}m`,
+                        spent: meter.spent.toFixed(2),
+                        monthly: (meter.monthly ?? 0).toFixed(0)
+                      }
+                    )}
+              </span>
+            </Row>
+          ) : null}
           {ready.staticKeys ? (
             <Row ok={false}>
               {translate(
@@ -180,6 +222,41 @@ export function InfraCloudCard({
           >
             <Sparkles aria-hidden />
             {translate('components.devops.cloud.scaffold', 'Write the platform with Claude')}
+          </Button>
+        ) : null}
+        {eks ? (
+          <Button
+            type="button"
+            size="xs"
+            variant="outline"
+            onClick={() =>
+              runInWorkbenchTerminal(
+                worktreeId,
+                commandLine(
+                  `aws eks update-kubeconfig --name ${eks.cluster} --region ${eks.region} --alias eks-${eks.cluster}`
+                )
+              )
+            }
+          >
+            <Plug aria-hidden />
+            {translate('components.devops.cloud.connect', 'Connect kubectl to {{cluster}}', {
+              cluster: eks.cluster
+            })}
+          </Button>
+        ) : null}
+        {meter || eks ? (
+          <Button
+            type="button"
+            size="xs"
+            variant="outline"
+            onClick={() =>
+              document
+                .getElementById('infra-path-plan')
+                ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }
+          >
+            <Flame aria-hidden />
+            {translate('components.devops.cloud.teardown', 'Tear it down')}
           </Button>
         ) : null}
         <Button type="button" size="xs" variant="ghost" onClick={check}>

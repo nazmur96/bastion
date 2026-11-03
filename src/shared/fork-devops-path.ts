@@ -24,6 +24,10 @@ export type PathFacts = {
   /** An Argo CD Application for this repo exists. */
   gitops: boolean
   hardened: boolean
+  /** The platform's outputs name an EKS cluster. */
+  cloud: boolean
+  /** This repo's Argo CD Application exists on a real (non-local) cluster. */
+  shipped: boolean
 }
 
 /** The fact that marks each stage done; null for stages not built yet (shown, never clickable). */
@@ -33,8 +37,8 @@ const DONE: Record<PathStageId, keyof PathFacts | null> = {
   app: 'appRunning',
   gitops: 'gitops',
   harden: 'hardened',
-  cloud: null,
-  ship: null
+  cloud: 'cloud',
+  ship: 'shipped'
 }
 
 /** The first stage that is not done (and is built) is next; later ones wait. */

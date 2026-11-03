@@ -92,8 +92,27 @@ function nextStep(id: PathStageId): NextStep {
         card: 'infra-path-launchpad'
       }
     case 'cloud':
+      return {
+        title: translate('components.devops.path.next.cloud', 'Create the cloud environment'),
+        hint: translate(
+          'components.devops.path.next.cloudHint',
+          'Sign in, write or review the platform, then plan: cost, policy and your approval before anything is billed.'
+        ),
+        button: translate('components.devops.path.show', 'Show me'),
+        command: null,
+        card: 'infra-path-cloud'
+      }
     case 'ship':
-      return { title: '', hint: '', button: '', command: null, card: '' }
+      return {
+        title: translate('components.devops.path.next.ship', 'Ship it to the cloud cluster'),
+        hint: translate(
+          'components.devops.path.next.shipHint',
+          'Connect kubectl to EKS, then the same Argo CD deploy, confirmed for the real cluster.'
+        ),
+        button: translate('components.devops.path.show', 'Show me'),
+        command: null,
+        card: 'infra-path-cloud'
+      }
   }
 }
 

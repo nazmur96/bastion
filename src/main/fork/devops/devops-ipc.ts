@@ -4,7 +4,7 @@ import { isAbsolute, join } from 'node:path'
 import { MISE_FILES, inspectDevopsWorkspace, resolveTool } from './devops-inspect'
 import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
-import { runTerraformPlan } from './devops-terraform-plan'
+import { readTerraformOutputs, runTerraformPlan } from './devops-terraform-plan'
 import { readProjectRepos } from './devops-project'
 import { readCloudReadiness } from './devops-cloud'
 import { readLocalDeployPlan } from './devops-local-deploy'
@@ -28,6 +28,16 @@ const MANIFEST_KINDS = new Set([
   'ConfigMap',
   'Secret'
 ])
+
+function planMode(request: unknown): 'plan' | 'refresh-only' | 'destroy' {
+  const field = (key: string): unknown =>
+    typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+  return field('destroy') === true
+    ? 'destroy'
+    : field('refreshOnly') === true
+      ? 'refresh-only'
+      : 'plan'
+}
 
 const EMPTY: DevopsInspection = { findings: [], environment: 'path', shell: 'posix', tools: {} }
 
@@ -104,14 +114,17 @@ export function registerDevopsHandlers(): void {
       request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
     const dir: unknown = request && typeof request === 'object' ? Reflect.get(request, 'dir') : null
     return isLocalDirectory(workspacePath) && typeof dir === 'string'
-      ? runTerraformPlan(
-          workspacePath,
-          dir,
-          typeof request === 'object' &&
-            request !== null &&
-            Reflect.get(request, 'refreshOnly') === true
-        )
+      ? runTerraformPlan(workspacePath, dir, planMode(request))
       : { ok: false, error: 'Terraform plan needs a local workspace.' }
+  })
+  ipcMain.handle('aiVault:terraformOutputs', async (_event, request: unknown) => {
+    const workspacePath: unknown =
+      typeof request === 'object' && request !== null ? Reflect.get(request, 'workspacePath') : null
+    const dir: unknown =
+      typeof request === 'object' && request !== null ? Reflect.get(request, 'dir') : null
+    return isLocalDirectory(workspacePath) && typeof dir === 'string'
+      ? readTerraformOutputs(workspacePath, dir)
+      : { error: 'Needs a local workspace.' }
   })
   ipcMain.handle('aiVault:findManifest', async (_event, request: unknown) => {
     const field = (key: string): unknown =>

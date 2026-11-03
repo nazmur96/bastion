@@ -235,3 +235,32 @@ export function parseCheckovSummary(stdout: string): { passed: number; failed: n
     return null
   }
 }
+
+/** `terraform output -json` → name → value, strings only (sensitive outputs are left out). */
+export function parseTerraformOutputs(stdout: string): Record<string, string> {
+  try {
+    const value: unknown = JSON.parse(stdout)
+    if (!isObj(value)) {
+      return {}
+    }
+    return Object.fromEntries(
+      Object.entries(value).flatMap(([name, output]) =>
+        isObj(output) && output.sensitive !== true && typeof output.value === 'string'
+          ? [[name, output.value]]
+          : []
+      )
+    )
+  } catch {
+    return {}
+  }
+}
+
+/** The EKS cluster a platform created, from its outputs (the common module output names). */
+export function eksFromOutputs(
+  outputs: Record<string, string>,
+  fallbackRegion: string | null
+): { cluster: string; region: string } | null {
+  const cluster = outputs.cluster_name ?? outputs.eks_cluster_name ?? outputs.cluster_id
+  const region = outputs.region ?? outputs.aws_region ?? fallbackRegion
+  return cluster && region ? { cluster, region } : null
+}

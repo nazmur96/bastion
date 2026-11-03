@@ -110,7 +110,12 @@ export type AiVaultApi = {
     workspacePath: string
     dir: string
     refreshOnly?: boolean
+    destroy?: boolean
   }) => Promise<TerraformPlanResult>
+  terraformOutputs: (request: {
+    workspacePath: string
+    dir: string
+  }) => Promise<Record<string, string> | { error: string }>
   findManifest: (request: {
     workspacePath: string
     kind: string

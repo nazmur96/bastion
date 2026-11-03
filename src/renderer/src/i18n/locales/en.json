@@ -20801,7 +20801,11 @@
         "costGate": "Cost · Infracost",
         "cost": "≈ ${{monthly}} / month · ${{hourly}} / hour",
         "policyGate": "Policy · Checkov",
-        "policy": "{{failed}} failed · {{passed}} passed"
+        "policy": "{{failed}} failed · {{passed}} passed",
+        "destroyHint": "terraform plan -destroy: what tearing it all down would remove. Nothing is removed until you apply.",
+        "destroy": "Plan destroy",
+        "destroyConfirm": "Click again to destroy on {{target}}",
+        "destroyApply": "Destroy what this plan lists"
       },
       "ci": {
         "success": "All checks passed",
@@ -20832,7 +20836,9 @@
         "noUpstream": "This branch is not pushed. Argo CD only sees what is on the remote.",
         "unpushed": "{{count}} commits are not pushed; Argo CD will not see them.",
         "adopt": "Anything already applied by hand with the same names is taken over by Argo CD. Private repos need Argo CD read access (not set up by this button yet).",
-        "deploy": "Deploy with Argo CD"
+        "deploy": "Deploy with Argo CD",
+        "confirmReal": "Click again to install on {{context}} ({{tone}})",
+        "deployReal": "Deploy with Argo CD to {{context}}"
       },
       "project": {
         "app": "app",
@@ -20881,7 +20887,11 @@
           "gitopsButton": "Deploy with Argo CD",
           "harden": "Scan it for risks",
           "hardenHint": "Trivy over the repo: misconfigurations in manifests, Terraform and Dockerfiles.",
-          "hardenButton": "Scan"
+          "hardenButton": "Scan",
+          "cloud": "Create the cloud environment",
+          "cloudHint": "Sign in, write or review the platform, then plan: cost, policy and your approval before anything is billed.",
+          "ship": "Ship it to the cloud cluster",
+          "shipHint": "Connect kubectl to EKS, then the same Argo CD deploy, confirmed for the real cluster."
         },
         "coming": "Coming next",
         "nextLabel": "Next step",
@@ -20903,7 +20913,12 @@
         "staticKeys": "Using long-lived access keys. Keyless sign-in (SSO or federated) is safer.",
         "signIn": "Sign in ({{profile}})",
         "scaffold": "Write the platform with Claude",
-        "recheck": "Check again"
+        "recheck": "Check again",
+        "eks": "EKS cluster {{cluster}} in {{region}}",
+        "meterUnknown": "Billed infrastructure running for {{time}} (cost not estimated)",
+        "meter": "Running {{time}} · ≈ ${{spent}} so far (≈ ${{monthly}}/month)",
+        "connect": "Connect kubectl to {{cluster}}",
+        "teardown": "Tear it down"
       }
     }
   },
