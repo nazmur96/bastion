@@ -61,6 +61,26 @@ export function readDevopsSandbox(workspacePath: string): DevopsSandboxState {
 }
 
 /** Local AWS endpoints for a process started inside a sandboxed workspace (Claude chats). */
+/**
+ * Floci's env, sealed off from the person's real AWS setup: their ~/.aws profiles
+ * (SSO, `aws login`, credential_process) must neither leak into local runs nor break
+ * them, so config and credentials point at a file with only a bare default profile.
+ */
+function hermeticAwsEnv(awsEnv: Record<string, string>): Record<string, string> {
+  if (Object.keys(awsEnv).length === 0) {
+    return awsEnv
+  }
+  const sealed = join(app.getPath('userData'), 'fork-floci-aws-config')
+  // An empty AWS_PROFILE is rejected by the CLI, so a bare default profile is selected instead.
+  writeFileSync(sealed, '[default]\n')
+  return {
+    ...awsEnv,
+    AWS_CONFIG_FILE: sealed,
+    AWS_SHARED_CREDENTIALS_FILE: sealed,
+    AWS_PROFILE: 'default'
+  }
+}
+
 export function devopsSandboxEnvFor(cwd: string): Record<string, string> {
   const match = Object.entries(load())
     .filter(([path]) => cwd === path || cwd.startsWith(`${path}${sep}`))
@@ -120,7 +140,7 @@ export async function runDevopsSandbox(
       return failed(state, 'Starting Floci', started)
     }
     const env = await cli(workspacePath, 'aws', ['env'], 30_000)
-    const awsEnv = parseShellEnv(env.stdout)
+    const awsEnv = hermeticAwsEnv(parseShellEnv(env.stdout))
     return Object.keys(awsEnv).length > 0
       ? { ok: true, state: save(workspacePath, { ...state, awsEnv }) }
       : failed(state, 'Reading `floci env`', env)
