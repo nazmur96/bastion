@@ -48,7 +48,10 @@ export async function readCloudReadiness(
     call(['configure', 'get', 'sso_start_url'])
   ])
   const profile = env.AWS_PROFILE ?? 'default'
-  const sso = Boolean(ssoSession.out.trim() || ssoUrl.out.trim())
+  // A failed lookup returns its error text, so only successful, non-empty answers count.
+  const sso =
+    (ssoSession.ok && ssoSession.out.trim() !== '') || (ssoUrl.ok && ssoUrl.out.trim() !== '')
+  const local = Object.keys(sandbox).length > 0
   const identity = identityOut.ok ? parseCallerIdentity(identityOut.out) : null
   const region = env.AWS_REGION ?? env.AWS_DEFAULT_REGION ?? (regionOut.out.trim() || null)
   const budgets = identity
@@ -66,12 +69,13 @@ export async function readCloudReadiness(
       )
     : null
   return {
-    local: Object.keys(sandbox).length > 0,
+    local,
     profile,
     signIn: sso ? `aws sso login --profile ${profile}` : `aws login --profile ${profile}`,
     region,
     identity: identity ?? { error: identityOut.out || 'Not signed in.' },
     budgets,
-    staticKeys: listOut.ok && usesStaticKeys(listOut.out, env)
+    // Floci's test keys are expected on a local emulator.
+    staticKeys: !local && listOut.ok && usesStaticKeys(listOut.out, env)
   }
 }
