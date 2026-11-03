@@ -7,6 +7,9 @@ import { installInlineEditShortcut } from '../inline-edit/inline-edit-shortcut'
 import { installClaudeSuggestShortcut } from '../inline-edit/claude-suggest'
 import { installClaudeEditGutter } from '../claude-edits/claude-edit-gutter'
 import { installSecretMask } from '../devops/secret-mask-decorations'
+import { installScanMarkers } from '../devops/scan-markers'
+import { useAppStore } from '@/store'
+import { selectKnownWorktreeById } from '@/store/selectors'
 import { maskSecrets } from '../../../../shared/fork-secret-mask'
 
 export function useEditorContextTracking({
@@ -75,6 +78,8 @@ export function useEditorContextTracking({
     })
     const removeGutter = installClaudeEditGutter(codeEditor, worktreeId, relativePath)
     const removeSecretMask = installSecretMask(codeEditor)
+    const repo = selectKnownWorktreeById(useAppStore.getState(), worktreeId)?.path
+    const removeScanMarkers = repo ? installScanMarkers(codeEditor, repo, relativePath) : () => {}
     return () => {
       for (const subscription of subscriptions) {
         subscription.dispose()
@@ -84,6 +89,7 @@ export function useEditorContextTracking({
       removeSuggest()
       removeGutter()
       removeSecretMask()
+      removeScanMarkers()
       freezeEditorContextEntry(worktreeId, codeEditor.getId())
     }
   }, [codeEditor, worktreeId, relativePath, language, enabled])

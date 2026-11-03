@@ -31,6 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
+import type { ScanResult } from '../../shared/fork-devops-scan'
 import type { CloudReadiness } from '../../shared/fork-devops-cloud'
 import type { LocalDeployPlan } from '../../shared/fork-devops-local-deploy'
 import type { ProjectRepo } from '../../shared/fork-devops-project'
@@ -89,6 +90,8 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork path stage Harden: Trivy misconfigurations with their files and lines (read-only). */
+  scanRepo: (workspacePath: string) => Promise<ScanResult>
   /** Fork path stage 5: AWS identity, region and budgets for this workspace (read-only). */
   cloudReadiness: (workspacePath: string) => Promise<CloudReadiness | { error: string }>
   /** Fork path stage 2: build this app and run it on the local cluster (read-only plan). */

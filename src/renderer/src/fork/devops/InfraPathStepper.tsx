@@ -88,8 +88,8 @@ function nextStep(id: PathStageId): NextStep {
           'Trivy over the repo: misconfigurations in manifests, Terraform and Dockerfiles.'
         ),
         button: translate('components.devops.path.next.hardenButton', 'Scan'),
-        command: 'launch:trivy',
-        card: 'infra-path-launchpad'
+        command: 'path:harden',
+        card: 'infra-path-harden'
       }
     case 'cloud':
       return {
@@ -127,14 +127,12 @@ export function InfraPathStepper({
   worktreeId,
   stages,
   members,
-  onUnderstood,
-  onHardened
+  onUnderstood
 }: {
   worktreeId: string
   stages: PathStage[]
   members: ProjectMember[]
   onUnderstood: () => void
-  onHardened: () => void
 }): React.JSX.Element {
   const commands = useAllDeckCommands()
   const next = stages.find((stage) => stage.state === 'next')
@@ -156,9 +154,6 @@ export function InfraPathStepper({
     }
     if (available) {
       available.run()
-      if (next.id === 'harden') {
-        onHardened()
-      }
       return
     }
     scrollTo(step.card)

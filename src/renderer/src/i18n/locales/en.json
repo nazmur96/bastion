@@ -20925,6 +20925,16 @@
         "body": "{{repos}} applied and not destroyed{{cost}}. It keeps billing after Orca closes.",
         "quit": "Quit anyway",
         "keep": "Keep it open"
+      },
+      "harden": {
+        "scan": "Scan for risks",
+        "title": "Harden · security findings",
+        "hint": "Trivy checks manifests, charts, Terraform and Dockerfiles. Findings also show as squiggles in the editor.",
+        "running": "Scanning…",
+        "rescan": "Scan again",
+        "clean": "No misconfigurations found.",
+        "fix": "Fix with Claude",
+        "more": "{{count}} more files with findings."
       }
     }
   },

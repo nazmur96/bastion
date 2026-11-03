@@ -28,21 +28,29 @@ async function locate(worktreeId: string, kind: string, name: string): Promise<F
   return { root, ...found }
 }
 
-/** Map node → the manifest that defines it, opened at its `kind:` line. */
-export async function openManifest(worktreeId: string, kind: string, name: string): Promise<void> {
-  const found = await locate(worktreeId, kind, name)
-  if (!found) {
+/** A repo file in the editor at a line (scan findings, manifests). */
+export function openWorkspaceFile(worktreeId: string, relativePath: string, line: number): void {
+  const root = selectKnownWorktreeById(useAppStore.getState(), worktreeId)?.path
+  if (!root) {
     return
   }
-  const filePath = joinPath(found.root, found.path)
+  const filePath = joinPath(root, relativePath)
   const fileId = useAppStore.getState().openFile({
     filePath,
-    relativePath: found.path,
+    relativePath,
     worktreeId,
     language: detectLanguage(filePath),
     mode: 'edit'
   })
-  scheduleEditorLineReveal(useAppStore.getState, filePath, found.line, 1, fileId)
+  scheduleEditorLineReveal(useAppStore.getState, filePath, line, 1, fileId)
+}
+
+/** Map node → the manifest that defines it, opened at its `kind:` line. */
+export async function openManifest(worktreeId: string, kind: string, name: string): Promise<void> {
+  const found = await locate(worktreeId, kind, name)
+  if (found) {
+    openWorkspaceFile(worktreeId, found.path, found.line)
+  }
 }
 
 /** B2: what differs between the repo and the cluster, via `kubectl diff` (read-only, server-side dry run). */

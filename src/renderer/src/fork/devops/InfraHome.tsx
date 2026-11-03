@@ -31,6 +31,7 @@ import { InfraProjectCard } from './InfraProjectCard'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { InfraPathStepper } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
+import { InfraHardenCard } from './InfraHardenCard'
 import { useTerraformOutputs } from './use-terraform-outputs'
 import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
@@ -173,7 +174,6 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             stages={stages}
             members={project?.members ?? []}
             onUnderstood={() => setMarks(markPath(path, 'understood'))}
-            onHardened={() => setMarks(markPath(path, 'hardened'))}
           />
         ) : null}
         {project ? <InfraProjectCard project={project} /> : null}
@@ -208,6 +208,13 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
             inspection={inspection}
             context={context}
             clusterAnswers={cluster.result?.ok === true}
+          />
+        ) : null}
+        {path ? (
+          <InfraHardenCard
+            worktreeId={worktreeId}
+            workspacePath={path}
+            onScanned={() => setMarks(markPath(path, 'hardened'))}
           />
         ) : null}
         {path ? (
