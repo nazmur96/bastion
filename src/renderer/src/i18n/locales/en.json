@@ -20963,6 +20963,17 @@
         "noTargets": "No labelled Service with a named port in {{namespace}}: CPU, memory and restarts still show.",
         "dashboard": "Dashboard “{{namespace}} · Bastion”: CPU, memory, restarts, request rate.",
         "confirmReal": "Click again to install on {{context}}"
+      },
+      "env": {
+        "title": "Environments · {{namespace}}",
+        "hint": "Every cluster in this repo’s kubeconfig, read-only. Use switches kubectl.",
+        "workload": "Workload",
+        "current": "(current)",
+        "confirmProd": "Click again: production",
+        "use": "Use",
+        "none": "Nothing deployed in {{namespace}} on any cluster yet.",
+        "down": "not answering",
+        "refresh": "Refresh"
       }
     }
   },
