@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { cpuMilli, memoryMi, workloadMetrics } from './fork-devops-metrics'
+import {
+  costLabel,
+  cpuMilli,
+  memoryMi,
+  requestedMonthlyCost,
+  workloadMetrics
+} from './fork-devops-metrics'
 
 const pods = JSON.stringify({
   items: [
@@ -56,8 +62,58 @@ describe('workload metrics', () => {
 
   it('sums pods into their Deployment and StatefulSet, keeping restarts without usage', () => {
     expect(workloadMetrics(pods, usage)).toEqual({
-      'Deployment/shop/web': { cpuMilli: 20, memoryMi: 64, restarts: 2, pods: 2 },
-      'StatefulSet/shop/db': { cpuMilli: 0, memoryMi: 0, restarts: 1, pods: 1 }
+      'Deployment/shop/web': {
+        cpuMilli: 20,
+        memoryMi: 64,
+        restarts: 2,
+        pods: 2,
+        cpuRequestMilli: 0,
+        memoryRequestMi: 0
+      },
+      'StatefulSet/shop/db': {
+        cpuMilli: 0,
+        memoryMi: 0,
+        restarts: 1,
+        pods: 1,
+        cpuRequestMilli: 0,
+        memoryRequestMi: 0
+      }
+    })
+  })
+
+  it('prices requests at Fargate list prices, and says so when nothing is requested', () => {
+    const base = { cpuMilli: 0, memoryMi: 0, restarts: 0, pods: 2 }
+    // 2 pods × (500m, 1Gi): 1 vCPU + 2 GB → (0.04048 + 2 × 0.004445) × 730
+    const cost = requestedMonthlyCost({ ...base, cpuRequestMilli: 1000, memoryRequestMi: 2048 })
+    expect(cost?.toFixed(2)).toBe('36.04')
+    expect(costLabel({ ...base, cpuRequestMilli: 0, memoryRequestMi: 0 })).toBe('no requests set')
+    expect(costLabel({ ...base, cpuRequestMilli: 1000, memoryRequestMi: 2048 })).toBe(
+      '≈ $36/mo · 1000m · 2048Mi'
+    )
+  })
+
+  it('sums container requests per workload', () => {
+    const withRequests = JSON.stringify({
+      items: [
+        {
+          metadata: {
+            name: 'api-0',
+            namespace: 'shop',
+            ownerReferences: [{ kind: 'StatefulSet', name: 'api' }]
+          },
+          spec: {
+            containers: [
+              { resources: { requests: { cpu: '250m', memory: '128Mi' } } },
+              { resources: { requests: { cpu: '50m' } } }
+            ]
+          },
+          status: {}
+        }
+      ]
+    })
+    expect(workloadMetrics(withRequests, '{}')['StatefulSet/shop/api']).toMatchObject({
+      cpuRequestMilli: 300,
+      memoryRequestMi: 128
     })
   })
 

@@ -7,6 +7,9 @@ export type WorkloadMetrics = {
   memoryMi: number
   restarts: number
   pods: number
+  /** Sum of the pods' container requests; 0 when none are set. */
+  cpuRequestMilli: number
+  memoryRequestMi: number
 }
 
 export type MetricsResult =
@@ -127,12 +130,30 @@ export function workloadMetrics(
       0
     )
     const used = usage.get(key)
-    const current = out[workload] ?? { cpuMilli: 0, memoryMi: 0, restarts: 0, pods: 0 }
+    const containers = at(pod, 'spec', 'containers')
+    let cpuRequest = 0
+    let memoryRequest = 0
+    for (const container of Array.isArray(containers) ? containers : []) {
+      const c = at(container, 'resources', 'requests', 'cpu')
+      const m = at(container, 'resources', 'requests', 'memory')
+      cpuRequest += typeof c === 'string' ? cpuMilli(c) : 0
+      memoryRequest += typeof m === 'string' ? memoryMi(m) : 0
+    }
+    const current = out[workload] ?? {
+      cpuMilli: 0,
+      memoryMi: 0,
+      restarts: 0,
+      pods: 0,
+      cpuRequestMilli: 0,
+      memoryRequestMi: 0
+    }
     out[workload] = {
       cpuMilli: current.cpuMilli + (used?.cpu ?? 0),
       memoryMi: current.memoryMi + (used?.memory ?? 0),
       restarts: current.restarts + restarts,
-      pods: current.pods + 1
+      pods: current.pods + 1,
+      cpuRequestMilli: current.cpuRequestMilli + cpuRequest,
+      memoryRequestMi: current.memoryRequestMi + memoryRequest
     }
   }
   return out
@@ -144,4 +165,26 @@ export function metricsLabel(metrics: WorkloadMetrics, usage: boolean): string {
   return usage
     ? `${Math.round(metrics.cpuMilli)}m CPU · ${Math.round(metrics.memoryMi)}Mi${restarts}`
     : `${metrics.pods} pod${metrics.pods === 1 ? '' : 's'}${restarts}`
+}
+
+/** AWS Fargate list prices (us-east-1, Linux/x86): a transparent basis, not a bill. */
+export const FARGATE_VCPU_HOUR = 0.04048
+export const FARGATE_GB_HOUR = 0.004445
+const HOURS_PER_MONTH = 730
+
+/** Monthly cost of what the workload requests, at Fargate prices; null when nothing is requested. */
+export function requestedMonthlyCost(metrics: WorkloadMetrics): number | null {
+  if (metrics.cpuRequestMilli === 0 && metrics.memoryRequestMi === 0) {
+    return null
+  }
+  const vcpu = metrics.cpuRequestMilli / 1000
+  const gb = metrics.memoryRequestMi / 1024
+  return (vcpu * FARGATE_VCPU_HOUR + gb * FARGATE_GB_HOUR) * HOURS_PER_MONTH
+}
+
+export function costLabel(metrics: WorkloadMetrics): string {
+  const cost = requestedMonthlyCost(metrics)
+  return cost === null
+    ? 'no requests set'
+    : `≈ $${cost < 1 ? cost.toFixed(2) : cost.toFixed(0)}/mo · ${Math.round(metrics.cpuRequestMilli)}m · ${Math.round(metrics.memoryRequestMi)}Mi`
 }

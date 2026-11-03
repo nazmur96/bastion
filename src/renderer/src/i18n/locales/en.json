@@ -20779,7 +20779,9 @@
         "noSource": "{{kind}} {{name}} is not defined in this repo. It came from a Helm chart, another repo, or kubectl by hand.",
         "driftHint": "kubectl diff against the manifest in this repo",
         "drift": "Drift",
-        "metrics": "Metrics"
+        "metrics": "Metrics",
+        "cost": "Cost",
+        "costTotal": "≈ ${{total}}/month at AWS Fargate list prices, from requests"
       },
       "deck": {
         "title": "Command deck",

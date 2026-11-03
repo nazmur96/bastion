@@ -5,7 +5,8 @@ import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { useWorkloadMetrics } from './use-workload-metrics'
-import { metricsLabel } from '../../../../shared/fork-devops-metrics'
+import { requestedMonthlyCost } from '../../../../shared/fork-devops-metrics'
+import { lensCaption, lensDot, type MapLens } from './map-lens'
 import { draftForClaude } from './ask-claude'
 import { diffManifest, openManifest } from './open-manifest'
 import { useDeckCommands, type DeckCommand } from './command-deck-store'
@@ -31,7 +32,7 @@ const HEALTH_CLASS: Record<MapHealth, string> = {
   bad: 'text-destructive'
 }
 
-type Lens = 'health' | 'blast' | 'security' | 'metrics'
+type Lens = MapLens
 
 function kubectlRef(node: MapNode): string {
   return `-n ${node.namespace} ${node.kind.toLowerCase()}/${node.name}`
@@ -58,7 +59,9 @@ export function InfraSystemMap({
   const kube = context.kube
   const [selected, setSelected] = useState<string | null>(null)
   const [lens, setLens] = useState<Lens>('health')
-  const metrics = useWorkloadMetrics(lens === 'metrics' ? workspacePath : undefined)
+  const metrics = useWorkloadMetrics(
+    lens === 'metrics' || lens === 'cost' ? workspacePath : undefined
+  )
   const map = result?.ok ? result.map : null
 
   const layout = useMemo(() => {
@@ -142,7 +145,7 @@ export function InfraSystemMap({
       )}
     >
       <div className="mb-2 flex items-center gap-1.5">
-        {(['health', 'metrics', 'blast', 'security'] as const).map((value) => (
+        {(['health', 'metrics', 'cost', 'blast', 'security'] as const).map((value) => (
           <Button
             key={value}
             type="button"
@@ -154,13 +157,31 @@ export function InfraSystemMap({
           >
             {value === 'health'
               ? translate('components.devops.map.health', 'Health')
-              : value === 'metrics'
-                ? translate('components.devops.map.metrics', 'Metrics')
-                : value === 'blast'
-                  ? translate('components.devops.map.blast', 'Blast radius')
-                  : translate('components.devops.map.security', 'Security')}
+              : value === 'cost'
+                ? translate('components.devops.map.cost', 'Cost')
+                : value === 'metrics'
+                  ? translate('components.devops.map.metrics', 'Metrics')
+                  : value === 'blast'
+                    ? translate('components.devops.map.blast', 'Blast radius')
+                    : translate('components.devops.map.security', 'Security')}
           </Button>
         ))}
+        {lens === 'cost' && metrics?.ok && map ? (
+          <span className="text-xs text-muted-foreground">
+            {translate(
+              'components.devops.map.costTotal',
+              '≈ ${{total}}/month at AWS Fargate list prices, from requests',
+              {
+                total: map.nodes
+                  .reduce((sum, item) => {
+                    const live = metrics.byWorkload[item.id]
+                    return sum + ((live && requestedMonthlyCost(live)) || 0)
+                  }, 0)
+                  .toFixed(0)
+              }
+            )}
+          </span>
+        ) : null}
         <Button type="button" size="xs" variant="ghost" className="ml-auto" onClick={refresh}>
           <RefreshCw aria-hidden />
           {translate('components.devops.map.refresh', 'Refresh')}
@@ -223,22 +244,9 @@ export function InfraSystemMap({
                 }
                 const dim =
                   (hit && item.id !== selected && !hit.has(item.id)) ||
-                  ((lens === 'security' || lens === 'metrics') && item.layer !== 2)
+                  (lens !== 'health' && lens !== 'blast' && item.layer !== 2)
                 const live = metrics?.ok ? metrics.byWorkload[item.id] : undefined
-                const dot =
-                  lens === 'metrics' && live
-                    ? live.restarts > 5
-                      ? 'bad'
-                      : live.restarts > 0
-                        ? 'warn'
-                        : 'ok'
-                    : lens === 'security'
-                      ? item.risks.length === 0
-                        ? 'ok'
-                        : item.risks.length > 2
-                          ? 'bad'
-                          : 'warn'
-                      : item.health
+                const dot = lensDot(lens, item, live)
                 return (
                   <g
                     key={item.id}
@@ -269,9 +277,7 @@ export function InfraSystemMap({
                       className={HEALTH_CLASS[dot]}
                     />
                     <text x={9} y={15} className="fill-muted-foreground text-[9px] uppercase">
-                      {lens === 'metrics' && live && metrics?.ok
-                        ? metricsLabel(live, metrics.usage)
-                        : `${item.kind} · ${item.namespace}`}
+                      {lensCaption(lens, item, live, metrics)}
                     </text>
                     <text x={9} y={32} className="fill-foreground text-[11px]">
                       {item.name.length > 22 ? `${item.name.slice(0, 21)}…` : item.name}
