@@ -6,7 +6,11 @@ import { listLocalRuns } from './devops-local-runs'
 import { findManifest, readSystemMap } from './devops-system-map'
 import { runTerraformPlan } from './devops-terraform-plan'
 import { probeArgoUi, readArgoDeployPlan, writeArgoApplication } from './devops-argo-deploy'
-import { KIND_MULTI_NODE_CONFIG, LAUNCHPAD_TOOLS } from '../../../shared/fork-devops-launchpad'
+import {
+  KIND_MULTI_NODE_CONFIG,
+  LAUNCHPAD_TOOLS,
+  METRICS_SERVER_KIND_PATCH
+} from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
 import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
@@ -100,10 +104,12 @@ export function registerDevopsHandlers(): void {
     isLocalDirectory(workspacePath) ? listLocalRuns(workspacePath) : []
   )
   // A fixed file in userData: kind reads its node layout from a path on every OS.
-  ipcMain.handle('aiVault:kindMultiNodeConfig', () => {
-    const path = join(app.getPath('userData'), 'fork-kind-multi-node.yaml')
-    writeFileSync(path, KIND_MULTI_NODE_CONFIG)
-    return path
+  ipcMain.handle('aiVault:launchpadFiles', () => {
+    const kindConfig = join(app.getPath('userData'), 'fork-kind-multi-node.yaml')
+    const metricsPatch = join(app.getPath('userData'), 'fork-metrics-server-kind-patch.json')
+    writeFileSync(kindConfig, KIND_MULTI_NODE_CONFIG)
+    writeFileSync(metricsPatch, METRICS_SERVER_KIND_PATCH)
+    return { kindConfig, metricsPatch }
   })
   // Only the Launchpad's own tool names reach the shell lookup.
   ipcMain.handle('aiVault:checkLaunchpadTools', async (_event, workspacePath: unknown) => {

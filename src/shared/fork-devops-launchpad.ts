@@ -36,12 +36,14 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     id: 'kind',
     group: 'local',
     title: 'Local Kubernetes · kind',
-    blurb: 'A cluster in Docker or Podman, about 40 seconds.',
+    blurb: 'A cluster in Docker or Podman with metrics-server, about a minute.',
     tool: 'kind',
     cost: null,
     creates: { kind: 'kind', name: '{name}-dev' },
     steps: [
       'kind create cluster --name {name}-dev',
+      'kubectl --context kind-{name}-dev apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml',
+      'kubectl --context kind-{name}-dev -n kube-system patch deployment metrics-server --type=json --patch-file "{metricsPatch}"',
       'kubectl cluster-info --context kind-{name}-dev'
     ]
   },
@@ -55,6 +57,8 @@ export const LAUNCHPAD_TILES: readonly LaunchpadTile[] = [
     creates: { kind: 'kind', name: '{name}-multi' },
     steps: [
       'kind create cluster --name {name}-multi --config "{kindConfig}"',
+      'kubectl --context kind-{name}-multi apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml',
+      'kubectl --context kind-{name}-multi -n kube-system patch deployment metrics-server --type=json --patch-file "{metricsPatch}"',
       'kubectl get nodes --context kind-{name}-multi'
     ]
   },
@@ -210,7 +214,7 @@ export const LAUNCHPAD_TOOLS: readonly string[] = [
 /** One terminal line: steps stop at the first failure. */
 export function launchpadScript(
   tile: LaunchpadTile,
-  values: { name: string; tfdir: string; kindConfig?: string }
+  values: { name: string; tfdir: string; files?: LaunchpadFiles }
 ): string | null {
   if (!tile.steps || tile.steps.length === 0) {
     return null
@@ -220,7 +224,8 @@ export function launchpadScript(
       step
         .replaceAll('{name}', values.name)
         .replaceAll('{tfdir}', values.tfdir)
-        .replaceAll('{kindConfig}', values.kindConfig ?? '')
+        .replaceAll('{kindConfig}', values.files?.kindConfig ?? '')
+        .replaceAll('{metricsPatch}', values.files?.metricsPatch ?? '')
     )
     .join(' && ')
 }
@@ -236,6 +241,16 @@ export const KIND_MULTI_NODE_CONFIG = [
   ''
 ].join('\n')
 
-export function launchpadNeedsKindConfig(tile: LaunchpadTile): boolean {
-  return tile.steps?.some((step) => step.includes('{kindConfig}')) ?? false
+/**
+ * kind's kubelets serve certificates not signed for their node IPs, so metrics-server
+ * needs --kubelet-insecure-tls there (local clusters only). A patch file avoids shell quoting.
+ */
+export const METRICS_SERVER_KIND_PATCH =
+  '[{"op":"add","path":"/spec/template/spec/containers/0/args/-","value":"--kubelet-insecure-tls"}]\n'
+
+/** Files the app writes to userData for tiles, so commands stay plain on every OS. */
+export type LaunchpadFiles = { kindConfig: string; metricsPatch: string }
+
+export function launchpadNeedsFiles(tile: LaunchpadTile): boolean {
+  return tile.steps?.some((step) => /\{(kindConfig|metricsPatch)\}/.test(step)) ?? false
 }

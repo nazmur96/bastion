@@ -30,6 +30,7 @@ import type {
   AiVaultPrepareSessionResumeResult
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
+import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
 import type { ArgoDeployPlan } from '../../shared/fork-devops-argo-deploy'
 import type { TerraformPlanResult } from '../../shared/fork-terraform-plan'
 import type { SystemMapResult } from '../../shared/fork-devops-system-map'
@@ -102,7 +103,7 @@ export type AiVaultApi = {
   }) => Promise<{ path: string; line: number; kustomize: string | null } | null>
   listLocalRuns: (workspacePath: string) => Promise<LocalRun[]>
   /** Fork: path of the Launchpad's 3-node kind config, written on demand. */
-  kindMultiNodeConfig: () => Promise<string>
+  launchpadFiles: () => Promise<LaunchpadFiles>
   checkLaunchpadTools: (workspacePath: string) => Promise<Record<string, DevopsToolStatus>>
   /** Fork F4: the workspace's local sandbox (Floci, vind) and its lifecycle. */
   readDevopsSandbox: (workspacePath: string) => Promise<DevopsSandboxState>

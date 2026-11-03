@@ -11,9 +11,14 @@ function tile(id: string) {
 
 describe('launchpad', () => {
   it('fills the workspace name and chains steps', () => {
-    expect(launchpadScript(tile('kind'), { name: 'shop', tfdir: '.' })).toBe(
-      'kind create cluster --name shop-dev && kubectl cluster-info --context kind-shop-dev'
-    )
+    const script = launchpadScript(tile('kind'), {
+      name: 'shop',
+      tfdir: '.',
+      files: { kindConfig: '/k.yaml', metricsPatch: '/m.json' }
+    })
+    expect(script?.startsWith('kind create cluster --name shop-dev && ')).toBe(true)
+    expect(script).toContain('--patch-file "/m.json"')
+    expect(script?.endsWith('kubectl cluster-info --context kind-shop-dev')).toBe(true)
   })
 
   it('points Terraform at the detected directory', () => {

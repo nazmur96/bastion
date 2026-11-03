@@ -30,7 +30,8 @@ import {
 import {
   LAUNCHPAD_GROUPS,
   LAUNCHPAD_TILES,
-  launchpadNeedsKindConfig,
+  launchpadNeedsFiles,
+  type LaunchpadFiles,
   launchpadScript,
   type LaunchpadGroup,
   type LaunchpadTile
@@ -134,10 +135,8 @@ export function InfraLaunchpad({
       sandbox.run(tile.sandbox, 'start')
       return
     }
-    if (launchpadNeedsKindConfig(tile)) {
-      void window.api.aiVault
-        .kindMultiNodeConfig()
-        .then((kindConfig) => run(tile, status, kindConfig))
+    if (launchpadNeedsFiles(tile)) {
+      void window.api.aiVault.launchpadFiles().then((files) => run(tile, status, files))
       return
     }
     run(tile, status, undefined)
@@ -146,9 +145,9 @@ export function InfraLaunchpad({
   const run = (
     tile: LaunchpadTile,
     status: DevopsToolStatus | undefined,
-    kindConfig: string | undefined
+    files: LaunchpadFiles | undefined
   ): void => {
-    const script = launchpadScript(tile, { name, tfdir: terraformDir ?? '.', kindConfig })
+    const script = launchpadScript(tile, { name, tfdir: terraformDir ?? '.', files })
     if (script) {
       if (tile.creates) {
         rememberLaunched({
