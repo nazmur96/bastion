@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Activity } from 'lucide-react'
+import { Activity, ScrollText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
@@ -10,6 +10,7 @@ import type { DevopsContext } from '../../../../shared/fork-devops-context'
 import { devopsCommandLine, type DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import {
   grafanaForward,
+  logsSteps,
   observabilitySteps,
   type ObservabilityPlan
 } from '../../../../shared/fork-devops-observability'
@@ -220,6 +221,42 @@ export function InfraWatchCard({
                   )
                 : translate('components.devops.watch.button', 'Watch it with Prometheus + Grafana')}
             </Button>
+            {plan.grafana ? (
+              <Button
+                type="button"
+                size="xs"
+                variant="outline"
+                disabled={plan.lokiInstalled}
+                title={
+                  plan.lokiInstalled
+                    ? translate(
+                        'components.devops.watch.lokiThere',
+                        'Loki is already running in this cluster.'
+                      )
+                    : translate(
+                        'components.devops.watch.lokiHint',
+                        'Loki + Promtail: every pod’s logs, searchable in Grafana and on the dashboard.'
+                      )
+                }
+                onClick={() => {
+                  const grafana = plan.grafana
+                  if (grafana) {
+                    startSteps({
+                      title: translate('components.devops.watch.logsTitle', 'Add logs (Loki)'),
+                      workspacePath,
+                      steps: logsSteps(plan.files, grafana.namespace).map((step) =>
+                        devopsCommandLine(inspection?.tools.kubectl, step, inspection?.shell)
+                      )
+                    })
+                  }
+                }}
+              >
+                <ScrollText aria-hidden />
+                {plan.lokiInstalled
+                  ? translate('components.devops.watch.lokiOn', 'Logs: on')
+                  : translate('components.devops.watch.addLogs', 'Add logs (Loki)')}
+              </Button>
+            ) : null}
             {status ? <span className="text-xs text-muted-foreground">{status}</span> : null}
           </div>
         </div>

@@ -10,7 +10,14 @@ export type ObservabilityPlan =
       grafana: { namespace: string; service: string } | null
       targets: ScrapeTarget[]
       /** Written to userData; applied by the Watch it terminal. */
-      files: { serviceMonitor: string | null; dashboard: string }
+      files: {
+        serviceMonitor: string | null
+        dashboard: string
+        lokiValues: string
+        lokiDatasource: string
+      }
+      /** Loki is already running (a Loki service exists). */
+      lokiInstalled: boolean
       dashboardUid: string
       /** A local port free right now for the Grafana port-forward. */
       grafanaPort: number
@@ -129,6 +136,14 @@ export function dashboardConfigMap(namespace: string, uid: string): string {
         8,
         'short'
       ),
+      {
+        id: 5,
+        type: 'logs',
+        title: 'Logs (needs Loki)',
+        gridPos: { h: 10, w: 24, x: 0, y: 16 },
+        datasource: { type: 'loki', uid: 'loki' },
+        targets: [{ expr: `{namespace="${namespace}"}`, refId: 'A' }]
+      },
       panel(
         4,
         'HTTP requests / s (if the app exports http_requests_total)',
@@ -177,4 +192,76 @@ export function grafanaForward(
     `kubectl -n ${grafana.namespace} get secret ${grafana.service} -o go-template='admin password: {{index .data "admin-password" | base64decode}}{{println}}'`,
     `kubectl -n ${grafana.namespace} port-forward svc/${grafana.service} ${port}:80`
   ].join(' && ')
+}
+
+/** Loki as one small pod on the filesystem: enough for a laptop cluster, nothing to tune. */
+export const LOKI_VALUES = `deploymentMode: SingleBinary
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: "2024-04-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+singleBinary:
+  replicas: 1
+read:
+  replicas: 0
+write:
+  replicas: 0
+backend:
+  replicas: 0
+chunksCache:
+  enabled: false
+resultsCache:
+  enabled: false
+lokiCanary:
+  enabled: false
+test:
+  enabled: false
+gateway:
+  enabled: false
+`
+
+/** Grafana's sidecar picks this up as the Loki data source (uid `loki`, used by the dashboard). */
+export function lokiDatasourceConfigMap(grafanaNamespace: string): string {
+  return [
+    'apiVersion: v1',
+    'kind: ConfigMap',
+    'metadata:',
+    '  name: bastion-loki-datasource',
+    `  namespace: ${grafanaNamespace}`,
+    '  labels:',
+    '    grafana_datasource: "1"',
+    'data:',
+    '  loki.yaml: |',
+    '    apiVersion: 1',
+    '    datasources:',
+    '      - name: Loki',
+    '        uid: loki',
+    '        type: loki',
+    `        url: http://loki.${grafanaNamespace}:3100`,
+    ''
+  ].join('\n')
+}
+
+/** Loki, Promtail shipping every pod's logs into it, and the data source: nothing replaced if there. */
+export function logsSteps(
+  files: { lokiValues: string; lokiDatasource: string },
+  grafanaNamespace: string
+): string[] {
+  const repo = '--repo https://grafana.github.io/helm-charts'
+  return [
+    `helm upgrade --install loki loki ${repo} -n ${grafanaNamespace} --create-namespace -f "${files.lokiValues}" --wait --timeout 10m`,
+    `helm upgrade --install promtail promtail ${repo} -n ${grafanaNamespace} --set "config.clients[0].url=http://loki.${grafanaNamespace}:3100/loki/api/v1/push" --wait --timeout 5m`,
+    `kubectl apply -f "${files.lokiDatasource}"`
+  ]
 }

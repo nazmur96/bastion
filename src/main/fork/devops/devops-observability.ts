@@ -6,7 +6,9 @@ import { kubectlIn } from './devops-kubectl'
 import { freeLocalPort } from './devops-ports'
 import {
   GRAFANA_PORT,
+  LOKI_VALUES,
   dashboardConfigMap,
+  lokiDatasourceConfigMap,
   scrapeTargets,
   serviceMonitorYaml,
   type ObservabilityPlan
@@ -38,7 +40,7 @@ export async function prepareObservability(
   workspacePath: string,
   namespace: string
 ): Promise<ObservabilityPlan> {
-  const [crd, grafana, services] = await Promise.all([
+  const [crd, grafana, services, loki] = await Promise.all([
     kubectlIn(workspacePath, [
       'get',
       'crd',
@@ -57,7 +59,17 @@ export async function prepareObservability(
       'json',
       '--request-timeout=8s'
     ]),
-    kubectlIn(workspacePath, ['-n', namespace, 'get', 'svc', '-o', 'json', '--request-timeout=8s'])
+    kubectlIn(workspacePath, ['-n', namespace, 'get', 'svc', '-o', 'json', '--request-timeout=8s']),
+    kubectlIn(workspacePath, [
+      'get',
+      'svc',
+      '--all-namespaces',
+      '-l',
+      'app.kubernetes.io/name=loki',
+      '-o',
+      'name',
+      '--request-timeout=8s'
+    ])
   ])
   if (!services.ok) {
     return { ok: false, error: services.out }
@@ -74,16 +86,22 @@ export async function prepareObservability(
     serviceMonitor = join(dir, `${namespace}-servicemonitor.yaml`)
     writeFileSync(serviceMonitor, serviceMonitorYaml(namespace, targets))
   }
+  const grafanaAt =
+    (grafana.ok ? grafanaService(grafana.out) : null) ??
+    (stackInstalled ? null : { namespace: 'monitoring', service: 'monitoring-grafana' })
+  const lokiValues = join(dir, 'loki-values.yaml')
+  writeFileSync(lokiValues, LOKI_VALUES)
+  const lokiDatasource = join(dir, 'loki-datasource.yaml')
+  writeFileSync(lokiDatasource, lokiDatasourceConfigMap(grafanaAt?.namespace ?? 'monitoring'))
   return {
     ok: true,
     namespace,
     stackInstalled,
     // When the stack is installed by Watch it, its Grafana gets the chart's default name.
-    grafana:
-      (grafana.ok ? grafanaService(grafana.out) : null) ??
-      (stackInstalled ? null : { namespace: 'monitoring', service: 'monitoring-grafana' }),
+    grafana: grafanaAt,
     targets,
-    files: { serviceMonitor, dashboard },
+    files: { serviceMonitor, dashboard, lokiValues, lokiDatasource },
+    lokiInstalled: loki.ok && loki.out.trim() !== '',
     dashboardUid,
     grafanaPort: await freeLocalPort(GRAFANA_PORT)
   }

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import {
+  LOKI_VALUES,
   dashboardConfigMap,
+  logsSteps,
+  lokiDatasourceConfigMap,
   grafanaForward,
   observabilitySteps,
   scrapeTargets,
@@ -41,13 +44,35 @@ describe('observability', () => {
     expect(json.panels[0].targets[0].expr).toContain('namespace="hello"')
   })
 
+  it('adds Loki, Promtail and the Grafana data source that the logs panel uses', () => {
+    const steps = logsSteps({ lokiValues: '/l.yaml', lokiDatasource: '/ds.yaml' }, 'monitoring')
+    expect(steps[0]).toContain(
+      'helm upgrade --install loki loki --repo https://grafana.github.io/helm-charts'
+    )
+    expect(steps[1]).toContain('config.clients[0].url=http://loki.monitoring:3100/loki/api/v1/push')
+    expect(lokiDatasourceConfigMap('monitoring')).toContain('uid: loki')
+    expect(LOKI_VALUES).toContain('deploymentMode: SingleBinary')
+    const panels = JSON.parse(
+      JSON.parse(dashboardConfigMap('hello', 'u').split('hello.json: ')[1])
+    ).panels
+    expect(panels.find((panel: { type: string }) => panel.type === 'logs').targets[0].expr).toBe(
+      '{namespace="hello"}'
+    )
+  })
+
   it('installs the stack only when missing, and never needs base64 for the password', () => {
     const base = {
       ok: true as const,
       namespace: 'hello',
       grafana: { namespace: 'monitoring', service: 'monitoring-grafana' },
       targets: [],
-      files: { serviceMonitor: null, dashboard: '/d.yaml' },
+      files: {
+        serviceMonitor: null,
+        dashboard: '/d.yaml',
+        lokiValues: '/l.yaml',
+        lokiDatasource: '/ds.yaml'
+      },
+      lokiInstalled: false,
       dashboardUid: 'bastion-hello',
       grafanaPort: 3001
     }

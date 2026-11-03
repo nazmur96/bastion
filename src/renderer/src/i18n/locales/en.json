@@ -20962,7 +20962,12 @@
         "scrape": "Scrape /metrics on: {{targets}}",
         "noTargets": "No labelled Service with a named port in {{namespace}}: CPU, memory and restarts still show.",
         "dashboard": "Dashboard “{{namespace}} · Bastion”: CPU, memory, restarts, request rate.",
-        "confirmReal": "Click again to install on {{context}}"
+        "confirmReal": "Click again to install on {{context}}",
+        "lokiThere": "Loki is already running in this cluster.",
+        "lokiHint": "Loki + Promtail: every pod’s logs, searchable in Grafana and on the dashboard.",
+        "logsTitle": "Add logs (Loki)",
+        "lokiOn": "Logs: on",
+        "addLogs": "Add logs (Loki)"
       },
       "env": {
         "title": "Environments · {{namespace}}",
