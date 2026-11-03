@@ -104,8 +104,8 @@ export async function readTerraformOutputs(
   }
   const usesMise = MISE_FILES.some((name) => existsSync(join(workspacePath, name)))
   const terraform = await resolveTool(workspacePath, 'terraform', usesMise)
-  if (!terraform.available || !existsSync(join(workspacePath, relative, '.terraform'))) {
-    return { error: 'not initialised' }
+  if (!terraform.available) {
+    return { error: terraform.hint }
   }
   const env = {
     ...process.env,
