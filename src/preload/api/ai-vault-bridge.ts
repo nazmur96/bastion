@@ -71,6 +71,13 @@ export const aiVaultApi = {
     ipcRenderer.invoke('aiVault:inspectDevops', workspacePath),
   readSystemMap: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:readSystemMap', workspacePath),
+  repoDocs: (workspacePath: string) => ipcRenderer.invoke('aiVault:repoDocs', workspacePath),
+  setTrackerItem: (request: {
+    workspacePath: string
+    file: string
+    line: number
+    checked: boolean
+  }) => ipcRenderer.invoke('aiVault:setTrackerItem', request),
   radarFindings: (workspacePath: string) =>
     ipcRenderer.invoke('aiVault:radarFindings', workspacePath),
   environments: (request: { workspacePath: string; namespace: string }) =>

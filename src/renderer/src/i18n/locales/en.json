@@ -20987,6 +20987,21 @@
         "clean": "Radar found nothing wrong.",
         "ask": "Diagnose with Claude",
         "refresh": "Refresh"
+      },
+      "runbooks": {
+        "title": "Runbooks",
+        "hint": "Markdown in runbooks/ (or RUNBOOK*.md); every shell block runs in a terminal you watch.",
+        "none": "No runbooks in this repo yet.",
+        "open": "Open",
+        "run": "Run",
+        "write": "Write a runbook with Claude",
+        "rca": "Draft an RCA with Claude"
+      },
+      "tracker": {
+        "title": "Tracker · {{done}}/{{total}}",
+        "empty": "Tracker",
+        "hint": "Checkboxes in TRACKER.md; ticking one writes the file (commit it like any change).",
+        "create": "Create a tracker with Claude"
       }
     }
   },

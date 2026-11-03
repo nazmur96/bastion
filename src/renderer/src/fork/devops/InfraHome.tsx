@@ -238,6 +238,7 @@ function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
         ) : null}
         {path ? (
           <InfraExtras
+            appName={appNamespace}
             worktreeId={worktreeId}
             workspacePath={path}
             context={context}

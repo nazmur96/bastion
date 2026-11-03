@@ -9,9 +9,27 @@ import { readWorkloadMetrics } from './devops-metrics'
 import { runRepoScan } from './devops-scan'
 import { readCloudReadiness } from './devops-cloud'
 import { readLocalDeployPlan } from './devops-local-deploy'
+import { readRepoDocs, setRepoTrackerItem } from './devops-docs'
 
 /** Fork: the project path's later stages (local run, cloud, harden, observe, environments). */
 export function registerDevopsDay2Handlers(): void {
+  ipcMain.handle('aiVault:repoDocs', async (_event, workspacePath: unknown) =>
+    isLocalDirectory(workspacePath) ? readRepoDocs(workspacePath) : { runbooks: [], tracker: null }
+  )
+  ipcMain.handle('aiVault:setTrackerItem', (_event, request: unknown) => {
+    const field = (key: string): unknown =>
+      typeof request === 'object' && request !== null ? Reflect.get(request, key) : null
+    const workspacePath = field('workspacePath')
+    const file = field('file')
+    const line = field('line')
+    const checked = field('checked')
+    return isLocalDirectory(workspacePath) &&
+      typeof file === 'string' &&
+      typeof line === 'number' &&
+      typeof checked === 'boolean'
+      ? setRepoTrackerItem(workspacePath, file, line, checked)
+      : false
+  })
   ipcMain.handle('aiVault:observabilityPlan', async (_event, request: unknown) => {
     const field = (key: string): unknown =>
       typeof request === 'object' && request !== null ? Reflect.get(request, key) : null

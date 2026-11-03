@@ -31,6 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
+import type { RepoDocs } from '../../shared/fork-devops-docs'
 import type { RadarFindings } from '../../shared/fork-devops-radar-feed'
 import type { EnvironmentsResult } from '../../shared/fork-devops-environments'
 import type { StepsEvent, StepsRequest } from '../../shared/fork-devops-steps'
@@ -95,6 +96,14 @@ export type AiVaultApi = {
   /** Fork: local clusters and VMs on this machine (kind, k3d, Multipass). */
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
+  /** Fork: the repo's runbooks and tracker; ticking writes the tracker file. */
+  repoDocs: (workspacePath: string) => Promise<RepoDocs>
+  setTrackerItem: (request: {
+    workspacePath: string
+    file: string
+    line: number
+    checked: boolean
+  }) => Promise<boolean>
   /** Fork: findings from the workspace's running Radar (read-only MCP). */
   radarFindings: (workspacePath: string) => Promise<RadarFindings>
   /** Fork: the app namespace's workloads in every kube context (read-only). */
