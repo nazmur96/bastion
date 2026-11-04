@@ -290,14 +290,9 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
               />
             ) : null}
           </InfraSection>
-          <InfraSection
-            id="infra-section-playground"
-            title={translate(
-              'components.devops.section.playground',
-              'Playground and tools · clusters, demos, machines, scans'
-            )}
-            defaultOpen={stages.find((stage) => stage.state === 'next')?.id === 'cluster'}
-          >
+          {/* Clusters, demos, machines and scans: kept loaded for the path buttons and the command deck,
+              never shown in the middle. */}
+          <div hidden data-infra-playground="">
             <InfraLaunchpad
               worktreeId={worktreeId}
               inspection={inspection}
@@ -367,7 +362,7 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
                 />
               </div>
             ) : null}
-          </InfraSection>
+          </div>
         </div>
       </div>
     </div>

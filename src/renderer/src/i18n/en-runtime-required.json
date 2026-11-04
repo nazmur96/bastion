@@ -1471,6 +1471,9 @@
         "clusterWake": "Wake local cluster",
         "title": "Local sandbox (free, no cloud account)"
       },
+      "section": {
+        "playground": "Playground and tools · clusters, demos, machines, scans"
+      },
       "toolbelt": {
         "menu": "DevOps"
       },
