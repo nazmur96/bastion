@@ -20620,7 +20620,9 @@
       "changes": "Changes",
       "browser": "Browser",
       "infraHint": "Context, readiness, sandbox and actions for this repo",
-      "infra": "Infra"
+      "infra": "Infra",
+      "pathHint": "Where this project is, its next step and the live system map",
+      "path": "Project path"
     },
     "claudeEdits": {
       "reviewTitle": "Review Claude’s changes",
@@ -20709,7 +20711,11 @@
         "sleep": "Sleep",
         "delete": "Delete",
         "actions": "Actions",
-        "actionsHint": "Read and plan only; each runs in a terminal beside you"
+        "actionsHint": "Read and plan only; each runs in a terminal beside you",
+        "back": "Project path",
+        "path": "Project path",
+        "toolsHint": "Every Infra card: deploy, harden, cloud, observe, playground",
+        "tools": "Tools & settings"
       },
       "radar": {
         "starting": "Starting the cluster view (Radar)…",
@@ -21030,6 +21036,10 @@
         "cloud": "Cloud · EKS, plan, cost",
         "observe": "Observe · environments, metrics, incidents, runbooks",
         "playground": "Playground and tools · clusters, demos, machines, scans"
+      },
+      "bar": {
+        "meterHint": "Billed cloud infrastructure is running. End the session from the Project path to destroy it.",
+        "meter": "EKS {{time}} · {{cost}}"
       }
     }
   },

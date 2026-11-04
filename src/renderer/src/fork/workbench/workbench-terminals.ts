@@ -3,6 +3,7 @@ import { focusTerminalTabSurface } from '@/lib/focus-terminal-tab-surface'
 import { readClaudePanelGroupId } from '../claude-panel/claude-panel-registry'
 import { pickNonPanelGroupId } from '../claude-panel/claude-panel-layout'
 import { latestTabInSection } from './workbench-sections'
+import { ensureTerminalDock, liveTerminalDockId } from './terminal-dock'
 
 /** The workbench column: not the Claude panel and not a chats-only group (a side chat). */
 export function workbenchGroupId(worktreeId: string): string | null {
@@ -14,15 +15,24 @@ export function workbenchGroupId(worktreeId: string): string | null {
     const groupTabs = tabs.filter((tab) => tab.groupId === groupId)
     return groupTabs.length > 0 && groupTabs.every((tab) => tab.contentType === 'agent-session')
   }
-  const candidates = groups.filter((group) => !chatOnly(group.id))
+  const dock = liveTerminalDockId(worktreeId)
+  const candidates = groups.filter((group) => !chatOnly(group.id) && group.id !== dock)
   return panelGroupId
     ? pickNonPanelGroupId(candidates, tabs, panelGroupId)
-    : (state.activeGroupIdByWorktree[worktreeId] ?? candidates[0]?.id ?? null)
+    : (candidates.find((group) => group.id === state.activeGroupIdByWorktree[worktreeId])?.id ??
+        candidates[0]?.id ??
+        null)
 }
 
-/** Ctrl+Shift+`: a new terminal in the workbench's Terminals section. */
+/** The terminal dock under the workbench, where every workbench terminal opens. */
+export function terminalGroupId(worktreeId: string): string | null {
+  const workbench = workbenchGroupId(worktreeId)
+  return workbench ? (ensureTerminalDock(worktreeId, workbench) ?? workbench) : null
+}
+
+/** Ctrl+Shift+`: a new terminal in the terminal dock. */
 export function newWorkbenchTerminal(worktreeId: string): void {
-  const groupId = workbenchGroupId(worktreeId)
+  const groupId = terminalGroupId(worktreeId)
   if (groupId) {
     void useAppStore.getState().openNewTerminalTabInActiveWorkspace(groupId)
   }
@@ -31,7 +41,7 @@ export function newWorkbenchTerminal(worktreeId: string): void {
 /** Ctrl+`: the workbench's latest terminal, or a new one when it has none. */
 export function showWorkbenchTerminals(worktreeId: string): void {
   const state = useAppStore.getState()
-  const groupId = workbenchGroupId(worktreeId)
+  const groupId = terminalGroupId(worktreeId)
   const group = state.groupsByWorktree[worktreeId]?.find((candidate) => candidate.id === groupId)
   if (!group) {
     return
@@ -54,7 +64,7 @@ export function runInWorkbenchTerminal(
   command: string,
   env?: Record<string, string>
 ): void {
-  const groupId = workbenchGroupId(worktreeId)
+  const groupId = terminalGroupId(worktreeId)
   useAppStore.getState().createTab(worktreeId, groupId ?? undefined, undefined, {
     pendingStartup: { command, ...(env && Object.keys(env).length > 0 ? { env } : {}) }
   })

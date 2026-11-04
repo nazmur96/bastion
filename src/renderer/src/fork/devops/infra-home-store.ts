@@ -52,14 +52,17 @@ export function setInfraHomeOpen(worktreeId: string, open: boolean): void {
   }
 }
 
-/** The first time a DevOps workspace is seen, its workbench starts on the Infra home. */
-export function openInfraHomeOnce(worktreeId: string): void {
+/** The first time a DevOps workspace is seen, its workbench starts on the Infra home.
+ *  Returns whether this was that first time. */
+export function openInfraHomeOnce(worktreeId: string): boolean {
   if (!state.seen[worktreeId]) {
     update({
       open: { ...state.open, [worktreeId]: true },
       seen: { ...state.seen, [worktreeId]: true }
     })
+    return true
   }
+  return false
 }
 
 export function useInfraHomeOpen(worktreeId: string): boolean {

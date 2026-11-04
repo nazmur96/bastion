@@ -13,6 +13,7 @@ import {
   containsGroup,
   findAdoptablePanelGroupId,
   findGroupSplit,
+  pickNonPanelGroupId,
   rightmostLeafGroupId
 } from './claude-panel-layout'
 
@@ -67,7 +68,19 @@ function movableClaudeChats(worktreeId: string, panelGroupId: string): string[] 
     .map((tab) => tab.id)
 }
 
+/** A new workspace's only chat moved into the panel and its group was pruned: give back an empty
+ *  workbench beside it, or the Infra home and the editor sections have nowhere to show. */
+function keepWorkbenchBeside(worktreeId: string, panel: string): void {
+  const state = useAppStore.getState()
+  const groups = state.groupsByWorktree[worktreeId] ?? []
+  const tabs = state.unifiedTabsByWorktree[worktreeId] ?? []
+  if (!pickNonPanelGroupId(groups, tabs, panel)) {
+    state.createEmptySplitGroup(worktreeId, panel, 'left', { activate: true })
+  }
+}
+
 function applyInitialPanelWidth(worktreeId: string, panel: string): void {
+  keepWorkbenchBeside(worktreeId, panel)
   const state = useAppStore.getState()
   const layout = state.layoutByWorktree[worktreeId]
   const split = layout ? findGroupSplit(layout, panel) : null
@@ -82,7 +95,13 @@ function applyInitialPanelWidth(worktreeId: string, panel: string): void {
 
 /** Give the workspace its Claude column on the right, once, unless the user hid the panel. */
 export function ensureClaudePanel(worktreeId: string): void {
-  if (isClaudePanelHidden() || inFlight.has(worktreeId) || liveClaudePanelGroupId(worktreeId)) {
+  if (isClaudePanelHidden() || inFlight.has(worktreeId)) {
+    return
+  }
+  const live = liveClaudePanelGroupId(worktreeId)
+  if (live) {
+    // A workspace saved with only the panel left gets its workbench back on open.
+    keepWorkbenchBeside(worktreeId, live)
     return
   }
   const state = useAppStore.getState()

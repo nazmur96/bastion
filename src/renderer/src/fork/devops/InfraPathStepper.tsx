@@ -116,9 +116,9 @@ function nextStep(id: PathStageId): NextStep {
   }
 }
 
-function scrollTo(card: string): void {
+/** Opens the card behind a step: it lives in the Tools view, inside a folded section. */
+export function scrollToInfraCard(card: string): void {
   const element = card ? document.getElementById(card) : null
-  // Cards live in folded sections: open the one holding this card first.
   const section = element?.closest('details')
   if (section) {
     section.open = true
@@ -131,12 +131,15 @@ export function InfraPathStepper({
   worktreeId,
   stages,
   members,
-  onUnderstood
+  onUnderstood,
+  onShowCard
 }: {
   worktreeId: string
   stages: PathStage[]
   members: ProjectMember[]
   onUnderstood: () => void
+  /** Switches to the Tools view and scrolls to the card. */
+  onShowCard: (card: string) => void
 }): React.JSX.Element {
   const commands = useAllDeckCommands()
   const next = stages.find((stage) => stage.state === 'next')
@@ -160,7 +163,7 @@ export function InfraPathStepper({
       available.run()
       return
     }
-    scrollTo(step.card)
+    onShowCard(step.card)
   }
 
   return (
@@ -173,7 +176,7 @@ export function InfraPathStepper({
               <button
                 type="button"
                 disabled={stage.state === 'coming'}
-                onClick={() => scrollTo(card)}
+                onClick={() => card && onShowCard(card)}
                 title={
                   stage.state === 'coming'
                     ? translate('components.devops.path.coming', 'Coming next')

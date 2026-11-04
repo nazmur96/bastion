@@ -23,8 +23,11 @@ export function InfraHomeOverlay({
   const seenTab = useRef(activeTabId)
   useEffect(() => {
     // Every workspace starts here once, so the Launchpad is the first thing a new project shows.
-    if (isWorkbench && inspection) {
-      openInfraHomeOnce(worktreeId)
+    if (isWorkbench && inspection && openInfraHomeOnce(worktreeId)) {
+      // The project's files stay in view on the right while the path is worked through.
+      const store = useAppStore.getState()
+      store.setRightSidebarTab('explorer')
+      store.setRightSidebarOpen(true)
     }
   }, [inspection, isWorkbench, worktreeId])
   useEffect(() => {

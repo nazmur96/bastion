@@ -1,8 +1,7 @@
 import { Cloud, Layers, Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
-import type { DevopsContextTone } from '../../../../shared/fork-devops-context'
-import { useDevopsContext } from './use-devops-context'
+import type { DevopsContext, DevopsContextTone } from '../../../../shared/fork-devops-context'
 
 export const TONE_CLASS: Record<DevopsContextTone, string> = {
   local: 'text-status-success',
@@ -31,7 +30,10 @@ function Chip({
 }): React.JSX.Element {
   return (
     <span
-      className={cn('flex max-w-48 items-center gap-1 truncate px-1 text-xs', TONE_CLASS[tone])}
+      className={cn(
+        'flex max-w-64 items-center gap-1 truncate rounded-full border border-current/30 px-2 py-0.5 text-xs',
+        TONE_CLASS[tone]
+      )}
       title={`${kind}: ${label}\n${toneTitle(tone)}`}
       data-devops-context={kind}
       data-tone={tone}
@@ -44,17 +46,12 @@ function Chip({
 
 /** A1: where this workspace's kubectl, aws and terraform commands would land, always in view. */
 export function DevopsContextBar({
-  worktreeId,
-  show,
-  terraformDir,
-  refreshKey
+  context,
+  show
 }: {
-  worktreeId: string
+  context: DevopsContext
   show: { kube: boolean; aws: boolean; terraform: boolean }
-  terraformDir: string | null
-  refreshKey: string
 }): React.JSX.Element | null {
-  const context = useDevopsContext(worktreeId, terraformDir, refreshKey)
   const { kube, aws, terraform } = context
   const chips = [
     show.kube && kube ? (
@@ -90,7 +87,7 @@ export function DevopsContextBar({
     ) : null
   ].filter(Boolean)
   return chips.length > 0 ? (
-    <div className="flex min-w-0 items-center" data-devops-context-bar="">
+    <div className="flex min-w-0 items-center gap-1.5" data-devops-context-bar="">
       {chips}
     </div>
   ) : null

@@ -1448,6 +1448,11 @@
       "argo": {
         "notLocal": "This deploys to local clusters only. {{context}} is not one."
       },
+      "home": {
+        "close": "Close Infra home",
+        "scanning": "Looking at this repo…",
+        "title": "Infra · {{name}}"
+      },
       "plan": {
         "confirm": "Click again to apply to {{target}}"
       },
@@ -1937,6 +1942,14 @@
           "right": "Close tabs to the right?"
         }
       }
+    },
+    "workbench": {
+      "browser": "Browser",
+      "changes": "Changes",
+      "files": "Files",
+      "infra": "Infra",
+      "infraHint": "Context, readiness, sandbox and actions for this repo",
+      "terminals": "Terminals"
     },
     "workspace": {
       "cleanup": {

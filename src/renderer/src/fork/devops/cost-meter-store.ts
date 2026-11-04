@@ -75,3 +75,9 @@ export function useCostMeter(
   const hours = Math.max(0, now - meter.startedAt) / 3_600_000
   return { ...meter, hours, spent: meter.monthly === null ? null : (meter.monthly / 730) * hours }
 }
+
+/** The billed infrastructure that has run longest, for the always-visible meter in the top bar. */
+export function useOldestCostMeter(): ReturnType<typeof useCostMeter> {
+  const oldest = activeCostMeters().toSorted((a, b) => a[1].startedAt - b[1].startedAt)[0]
+  return useCostMeter(oldest?.[0])
+}

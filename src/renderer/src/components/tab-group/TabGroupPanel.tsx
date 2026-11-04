@@ -1,5 +1,5 @@
 import { ClaudeEditsBar } from '@/fork/claude-edits/ClaudeEditsBar'
-import { WorkbenchSectionBar, useWorkbenchSections } from '@/fork/workbench/WorkbenchSectionBar'
+import { WorkbenchSectionBar } from '@/fork/workbench/WorkbenchSectionBar'
 import { ClaudePanelHeaderActions } from '@/fork/claude-panel/ClaudePanelHeaderActions'
 import { InfraHomeOverlay } from '@/fork/devops/InfraHomeOverlay'
 import { Suspense, useCallback, useMemo } from 'react'
@@ -83,7 +83,7 @@ export default function TabGroupPanel({
     editorItems,
     tabBarOrder,
     terminalTabs
-  } = useWorkbenchSections(model, worktreeId, groupId)
+  } = model
   // Why: one strip owns the worktree's client-hosted rows, or every split repeats them.
   const ownsClientHostedRows = useAppStore(
     (state) =>
@@ -292,7 +292,7 @@ export default function TabGroupPanel({
                 }
               />
             ) : null}
-            <WorkbenchSectionBar worktreeId={worktreeId} groupId={groupId} model={model} />
+            <WorkbenchSectionBar worktreeId={worktreeId} groupId={groupId} />
             <div className="min-w-0 flex-1 h-full">{tabBar}</div>
             <div
               className={actionChromeClassName}

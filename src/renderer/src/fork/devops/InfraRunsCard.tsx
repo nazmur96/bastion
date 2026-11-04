@@ -29,9 +29,9 @@ function tailLines(text: string, count: number): string {
 function Run({ run }: { run: StepsRun }): React.JSX.Element {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <div className="rounded-md border border-border p-2" data-steps-run={run.runId}>
-      <div className="mb-1 flex items-center gap-2 text-sm">
-        <span className="font-medium">{run.title}</span>
+    <div className="font-mono" data-steps-run={run.runId}>
+      <div className="mb-1 flex items-center gap-2 font-sans text-xs">
+        <span className="font-medium text-foreground">{run.title}</span>
         <span
           className={cn(
             'text-xs',
@@ -71,8 +71,9 @@ function Run({ run }: { run: StepsRun }): React.JSX.Element {
                 className="flex w-full items-center gap-2 text-left text-xs"
                 onClick={() => setOpen(expanded ? -1 : index)}
               >
+                <span className="shrink-0 text-primary">❯</span>
+                <span className="min-w-0 flex-1 truncate">{step.command}</span>
                 <Icon className={cn('size-3.5 shrink-0', className)} aria-hidden />
-                <span className="min-w-0 flex-1 truncate font-mono">{step.command}</span>
                 {step.output ? (
                   expanded ? (
                     <ChevronDown className="size-3" aria-hidden />
@@ -82,7 +83,7 @@ function Run({ run }: { run: StepsRun }): React.JSX.Element {
                 ) : null}
               </button>
               {step.output && (expanded || step.state === 'running') ? (
-                <pre className="scrollbar-sleek mt-1 max-h-40 overflow-auto rounded bg-muted px-2 py-1 font-mono text-[11px] whitespace-pre-wrap text-muted-foreground">
+                <pre className="scrollbar-sleek max-h-40 overflow-auto pl-4 text-[11px] whitespace-pre-wrap text-muted-foreground">
                   {expanded ? step.output.trimEnd() : tailLines(step.output, 3)}
                 </pre>
               ) : null}
@@ -94,14 +95,17 @@ function Run({ run }: { run: StepsRun }): React.JSX.Element {
   )
 }
 
-/** Step-by-step progress for path and Launchpad runs; failures open their output. */
+/** The live run log under the system map: each step as a prompt line, failures open their output. */
 export function InfraRunsCard(): React.JSX.Element | null {
   const runs = useStepsRuns()
   if (runs.length === 0) {
     return null
   }
   return (
-    <section className="mb-4 space-y-2" data-steps-runs="">
+    <section
+      className="mt-3 space-y-3 rounded-md border border-border bg-muted/40 px-3 py-2"
+      data-steps-runs=""
+    >
       {runs.map((run) => (
         <Run key={run.runId} run={run} />
       ))}

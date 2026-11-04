@@ -45,7 +45,8 @@ export function InfraSystemMap({
   kubectlPrefix,
   result,
   refresh,
-  workspacePath
+  workspacePath,
+  footer
 }: {
   worktreeId: string
   /** The repo whose kubeconfig the map reads; the Metrics lens reads the same cluster. */
@@ -55,6 +56,8 @@ export function InfraSystemMap({
   refresh: () => void
   /** `mise exec -- ` when the repo pins kubectl, so terminals use the same one. */
   kubectlPrefix: string
+  /** The live run log, drawn as part of the map. */
+  footer?: React.ReactNode
 }): React.JSX.Element | null {
   const kube = context.kube
   const [selected, setSelected] = useState<string | null>(null)
@@ -128,7 +131,8 @@ export function InfraSystemMap({
   }, [map, kubectlPrefix, worktreeId])
   useDeckCommands('system-map', deck)
   if (!kube) {
-    return null
+    // No cluster yet: the run that creates one still shows.
+    return footer ? <>{footer}</> : null
   }
   const run = (command: string): void =>
     runInWorkbenchTerminal(worktreeId, `${kubectlPrefix}${command}`)
@@ -309,9 +313,7 @@ export function InfraSystemMap({
                   {translate(
                     'components.devops.map.blastCount',
                     '{{count}} things depend on this.',
-                    {
-                      count: hit.size
-                    }
+                    { count: hit.size }
                   )}
                 </p>
               ) : null}
@@ -380,6 +382,7 @@ export function InfraSystemMap({
           ) : null}
         </div>
       )}
+      {footer}
     </InfraCard>
   )
 }
