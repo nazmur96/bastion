@@ -69,11 +69,12 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
     // Cards that are loaded but never shown (the playground) keep the person on the path.
     const element = document.getElementById(card)
     if (!element || element.closest('[data-infra-playground]')) {
-      return
+      return false
     }
     setView('tools')
     // The Tools view shows on the next frame; scroll once it has a layout.
     window.requestAnimationFrame(() => scrollToInfraCard(card))
+    return true
   }, [])
   const project = useDevopsProject(worktreeId)
   const gitopsRepo = project?.repoFor('gitops') ?? null

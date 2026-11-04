@@ -20746,7 +20746,8 @@
         "scan": "Check it · security and policy scans",
         "devpodAdded": "Added the DevPod environment: {{files}}. Review and commit them.",
         "openPlugins": "Open plugins",
-        "addToRepo": "Add to repo"
+        "addToRepo": "Add to repo",
+        "addTool": "Add {{tool}} (mise)"
       },
       "runs": {
         "confirm": "Click again",

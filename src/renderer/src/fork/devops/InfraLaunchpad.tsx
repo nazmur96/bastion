@@ -206,10 +206,26 @@ export function InfraLaunchpad({
     window.setTimeout(recheck, 15_000)
   }
 
-  const deck: DeckCommand[] = LAUNCHPAD_TILES.flatMap((tile) => {
+  const deck: DeckCommand[] = LAUNCHPAD_TILES.flatMap((tile): DeckCommand[] => {
     const status = tools?.[tile.tool]
-    if ((tile.tool !== '' && !status?.available) || blockedReason(tile)) {
+    if (blockedReason(tile)) {
       return []
+    }
+    if (tile.tool !== '' && !status?.available) {
+      // A missing tool is one step away: the path's button adds it to the repo instead.
+      return tools !== null && usesMise && MISE_TOOL_SPECS[tile.tool]
+        ? [
+            {
+              id: `setup:${tile.id}`,
+              group: translate('components.devops.deck.launch', 'Launch'),
+              label: translate('components.devops.launchpad.addTool', 'Add {{tool}} (mise)', {
+                tool: tile.tool
+              }),
+              keywords: [tile.tool, tile.id, 'install'],
+              run: () => addTool(tile.tool)
+            }
+          ]
+        : []
     }
     return [
       {

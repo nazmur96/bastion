@@ -138,13 +138,18 @@ export function InfraPathStepper({
   stages: PathStage[]
   members: ProjectMember[]
   onUnderstood: () => void
-  /** Switches to the Tools view and scrolls to the card. */
-  onShowCard: (card: string) => void
+  /** Switches to the Tools view and scrolls to the card; false when that card is not shown. */
+  onShowCard: (card: string) => boolean
 }): React.JSX.Element {
   const commands = useAllDeckCommands()
   const next = stages.find((stage) => stage.state === 'next')
   const step = next ? nextStep(next.id) : null
   const available = step?.command ? commands.find((command) => command.id === step.command) : null
+  // The tool behind the step is missing: adding it is the step until it is there.
+  const setup =
+    !available && step?.command?.startsWith('launch:')
+      ? commands.find((command) => command.id === step.command?.replace('launch:', 'setup:'))
+      : null
 
   const go = (): void => {
     if (!next || !step) {
@@ -159,11 +164,15 @@ export function InfraPathStepper({
       onUnderstood()
       return
     }
-    if (available) {
-      available.run()
+    const action = available ?? setup
+    if (action) {
+      action.run()
       return
     }
-    onShowCard(step.card)
+    if (!onShowCard(step.card)) {
+      // Nothing on screen does this step yet: Claude does it, showing each command first.
+      draftForClaude(worktreeId, `${step.title}. ${step.hint}`)
+    }
   }
 
   return (
@@ -176,7 +185,11 @@ export function InfraPathStepper({
               <button
                 type="button"
                 disabled={stage.state === 'coming'}
-                onClick={() => card && onShowCard(card)}
+                onClick={() => {
+                  if (card) {
+                    onShowCard(card)
+                  }
+                }}
                 title={
                   stage.state === 'coming'
                     ? translate('components.devops.path.coming', 'Coming next')
@@ -217,9 +230,11 @@ export function InfraPathStepper({
             <div className="text-xs text-muted-foreground">{step.hint}</div>
           </div>
           <Button type="button" onClick={go}>
-            {next.id !== 'understand' && !available
-              ? translate('components.devops.path.show', 'Show me')
-              : step.button}
+            {next.id === 'understand' || available
+              ? step.button
+              : setup
+                ? setup.label
+                : translate('components.devops.path.show', 'Show me')}
           </Button>
         </div>
       ) : (
