@@ -20914,7 +20914,8 @@
         "coming": "Coming next",
         "nextLabel": "Next step",
         "show": "Show me",
-        "localDone": "The local path is complete. The cloud steps (EKS, ship) are coming next."
+        "localDone": "The local path is complete. The cloud steps (EKS, ship) are coming next.",
+        "askClaude": "Ask Claude to do it"
       },
       "cloud": {
         "title": "Cloud · who and where",

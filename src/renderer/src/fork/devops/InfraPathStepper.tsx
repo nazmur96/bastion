@@ -117,6 +117,9 @@ function nextStep(id: PathStageId): NextStep {
 }
 
 /** Opens the card behind a step: it lives in the Tools view, inside a folded section. */
+/** Cards that stay loaded but are never shown; a step pointing at one goes to Claude. */
+const HIDDEN_CARDS = new Set(['infra-path-launchpad'])
+
 export function scrollToInfraCard(card: string): void {
   const element = card ? document.getElementById(card) : null
   const section = element?.closest('details')
@@ -234,7 +237,9 @@ export function InfraPathStepper({
               ? step.button
               : setup
                 ? setup.label
-                : translate('components.devops.path.show', 'Show me')}
+                : HIDDEN_CARDS.has(step.card)
+                  ? translate('components.devops.path.askClaude', 'Ask Claude to do it')
+                  : translate('components.devops.path.show', 'Show me')}
           </Button>
         </div>
       ) : (

@@ -306,7 +306,8 @@ export function InfraTerraformPlan({
                           ),
                       sandbox.state.awsEnv
                     )
-                    if (path) {
+                    // Floci and other local AWS bill nothing, so they never start the meter.
+                    if (path && (destroying || context.aws?.tone !== 'local')) {
                       if (destroying) {
                         stopCostMeter(path)
                       } else {

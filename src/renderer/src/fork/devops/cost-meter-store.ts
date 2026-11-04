@@ -76,8 +76,10 @@ export function useCostMeter(
   return { ...meter, hours, spent: meter.monthly === null ? null : (meter.monthly / 730) * hours }
 }
 
-/** The billed infrastructure that has run longest, for the always-visible meter in the top bar. */
-export function useOldestCostMeter(): ReturnType<typeof useCostMeter> {
-  const oldest = activeCostMeters().toSorted((a, b) => a[1].startedAt - b[1].startedAt)[0]
+/** The project's billed infrastructure that has run longest, for the meter in the top bar. */
+export function useProjectCostMeter(repos: readonly string[]): ReturnType<typeof useCostMeter> {
+  const oldest = activeCostMeters()
+    .filter(([repo]) => repos.includes(repo))
+    .toSorted((a, b) => a[1].startedAt - b[1].startedAt)[0]
   return useCostMeter(oldest?.[0])
 }

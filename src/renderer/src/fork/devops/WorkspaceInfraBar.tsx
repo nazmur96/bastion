@@ -3,7 +3,8 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { DevopsContextBar } from './DevopsContextBar'
-import { useOldestCostMeter } from './cost-meter-store'
+import { useProjectCostMeter } from './cost-meter-store'
+import { useDevopsProject } from './use-devops-project'
 import { useDevopsContext } from './use-devops-context'
 import { useDevopsInspection } from './use-devops-inspection'
 import { useDevopsSandbox } from './use-devops-sandbox'
@@ -22,8 +23,12 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   const findings = inspection?.findings ?? []
   const terraformDir = findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
-  const meter = useOldestCostMeter()
-  if (!worktree || findings.length === 0) {
+  const project = useDevopsProject(worktreeId)
+  const meter = useProjectCostMeter([
+    ...(worktree ? [worktree.path] : []),
+    ...(project?.members.map((member) => member.repo.path) ?? [])
+  ])
+  if (!worktree) {
     return null
   }
   const has = (...stacks: DevopsStack[]): boolean =>
@@ -45,7 +50,8 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
         <DevopsContextBar
           context={context}
           show={{
-            kube: has('kubernetes', 'helm', 'argocd'),
+            // Where kubectl lands matters in every repo, infrastructure code or not.
+            kube: true,
             aws: has('aws', 'terraform'),
             terraform: has('terraform')
           }}
