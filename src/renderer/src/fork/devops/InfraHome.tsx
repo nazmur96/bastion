@@ -66,6 +66,11 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
   const [deckOpen, setDeckOpen] = useState(false)
   const [view, setView] = useState<InfraHomeView>('path')
   const showCard = useCallback((card: string) => {
+    // Cards that are loaded but never shown (the playground) keep the person on the path.
+    const element = document.getElementById(card)
+    if (!element || element.closest('[data-infra-playground]')) {
+      return
+    }
     setView('tools')
     // The Tools view shows on the next frame; scroll once it has a layout.
     window.requestAnimationFrame(() => scrollToInfraCard(card))
