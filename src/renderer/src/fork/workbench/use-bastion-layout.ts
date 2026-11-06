@@ -49,6 +49,10 @@ export function useBastionLayout(worktreeId: string): void {
       busy = true
       try {
         foldClaudePanel(worktreeId)
+        if (useAppStore.getState().rightSidebarOpen) {
+          // Orca restores its right sidebar after a workspace opens; the side panel replaces it.
+          useAppStore.getState().setRightSidebarOpen(false)
+        }
         // The side panel (files, changes, terminal, browser, checks) is always there.
         const workbench = workbenchGroupId(worktreeId)
         if (workbench) {
@@ -59,9 +63,6 @@ export function useBastionLayout(worktreeId: string): void {
       }
     }
     run()
-    // Orca's own right sidebar would repeat the side panel's Files, Changes and Checks; it can
-    // still be opened by hand, until the next workspace opens.
-    useAppStore.getState().setRightSidebarOpen(false)
     return useAppStore.subscribe(run)
   }, [worktreeId])
 }

@@ -138,7 +138,9 @@ export function useAppChromeLayout() {
     rightSidebarTab,
     shouldMountTerminalWorkbench,
     showSidebar,
-    showRightSidebarControls: !creationLayoutActive && canShowRightSidebarForView(activeView),
+    // Fork: in a workspace the Bastion side panel holds Files, Changes and Checks instead.
+    showRightSidebarControls:
+      !creationLayoutActive && !workspaceChromeActive && canShowRightSidebarForView(activeView),
     showTitlebarAppName: settings?.showTitlebarAppName !== false,
     showTitlebarExpandButton: workspaceChromeActive && !hasTabBar && effectiveActiveTabExpanded,
     sidebarOpen,
