@@ -1448,13 +1448,37 @@
       "argo": {
         "notLocal": "This deploys to local clusters only. {{context}} is not one."
       },
+      "bar": {
+        "meter": "EKS {{time}} · {{cost}}"
+      },
+      "deck": {
+        "button": "Commands",
+        "open": "Command deck (press :)"
+      },
       "home": {
+        "back": "Project path",
         "close": "Close Infra home",
+        "path": "Project path",
         "scanning": "Looking at this repo…",
-        "title": "Infra · {{name}}"
+        "title": "Infra · {{name}}",
+        "toolsHint": "Every Infra card: deploy, harden, cloud, observe, playground"
+      },
+      "path": {
+        "doneLabel": "Done for now",
+        "doneTitle": "Every step is done",
+        "nextLabel": "Next step"
+      },
+      "pathMap": {
+        "label": "System map · {{context}}{{real}}",
+        "real": " (real)"
       },
       "plan": {
         "confirm": "Click again to apply to {{target}}"
+      },
+      "runs": {
+        "failed": "stopped",
+        "ok": "done",
+        "running": "running"
       },
       "sandbox": {
         "awsBadge": "Local AWS",
@@ -1949,9 +1973,12 @@
     "workbench": {
       "browser": "Browser",
       "changes": "Changes",
+      "dockTitle": "Terminal · {{name}}",
       "files": "Files",
       "infra": "Infra",
       "infraHint": "Context, readiness, sandbox and actions for this repo",
+      "path": "Project path",
+      "pathHint": "Where this project is, its next step and the live system map",
       "terminals": "Terminals"
     },
     "workspace": {

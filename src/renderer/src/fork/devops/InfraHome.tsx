@@ -1,54 +1,41 @@
-import { useCallback, useState } from 'react'
-import { InfraHomeHeader, type InfraHomeView } from './InfraHomeHeader'
+import { useCallback, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { InfraViewHeader } from './InfraHomeHeader'
+import { setInfraView, useInfraOverlayTarget, useInfraView } from './infra-home-store'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
-import { translate } from '@/i18n/i18n'
-import { useEditorContextEntry } from '../editor-context/editor-context-store'
-import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { useDevopsInspection } from './use-devops-inspection'
 import { useDevopsSandbox } from './use-devops-sandbox'
 import { useDevopsContext } from './use-devops-context'
-import {
-  ActionsCard,
-  ContextCard,
-  InfraCard,
-  ReadinessCard,
-  SandboxCard,
-  STACK_LABELS
-} from './InfraHomeCards'
-import { InfraClusterCard } from './InfraClusterCard'
 import { InfraLaunchpad } from './InfraLaunchpad'
-import { InfraLocalRuns } from './InfraLocalRuns'
 import { InfraSystemMap } from './InfraSystemMap'
+import { InfraTools } from './InfraTools'
+import { useDeckCommands } from './command-deck-store'
+import { translate } from '@/i18n/i18n'
+import { PathMap } from './PathMap'
 import { InfraCommandDeck } from './InfraCommandDeck'
 import { useSystemMap } from './use-system-map'
 import { InfraTerraformPlan } from './InfraTerraformPlan'
-import { InfraCiCard } from './InfraCiCard'
 import { InfraArgoDeploy } from './InfraArgoDeploy'
-import { InfraProjectCard } from './InfraProjectCard'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
 import { InfraPathStepper, scrollToInfraCard } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
 import { InfraHardenCard } from './InfraHardenCard'
 import { InfraWatchCard } from './InfraWatchCard'
-import { InfraRunsCard } from './InfraRunsCard'
 import { InfraEnvironmentsCard } from './InfraEnvironmentsCard'
 import { InfraExtras } from './InfraExtras'
-import { InfraSection } from './InfraSection'
 import { useTerraformOutputs } from './use-terraform-outputs'
 import { eksFromOutputs } from '../../../../shared/fork-terraform-plan'
 import { markPath, readPathMarks, type PathMarks } from './path-progress-store'
 import { pathStages } from '../../../../shared/fork-devops-path'
 import { projectAppName } from '../../../../shared/fork-devops-project'
 import { useDevopsProject } from './use-devops-project'
-import { rankDevopsActions } from '../../../../shared/fork-devops-actions'
 import { devopsCommandLine } from '../../../../shared/fork-devops-inspection'
-import { stackOfWorkspaceFile, type DevopsStack } from '../../../../shared/fork-devops-stacks'
+import type { DevopsStack } from '../../../../shared/fork-devops-stacks'
 
 export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const inspection = useDevopsInspection(worktreeId)
   const sandbox = useDevopsSandbox(worktreeId)
-  const editor = useEditorContextEntry(worktreeId)
   // The repo folder, not the branch a worktree is named after.
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const findings = inspection?.findings ?? []
@@ -56,27 +43,38 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
     findings.some((finding) => stacks.includes(finding.stack))
   const terraformDir = findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
-  const offersAws = has('aws', 'terraform')
   const offersCluster = has('kubernetes', 'helm', 'argocd')
-  const activeFile = editor
-    ? { path: editor.file, stack: stackOfWorkspaceFile(editor.file, findings) }
-    : undefined
-  const ranked = rankDevopsActions({ findings, activeFile })
-  const whoAmI = ranked.find((item) => item.action.id === 'aws.whoami')
   const [deckOpen, setDeckOpen] = useState(false)
-  const [view, setView] = useState<InfraHomeView>('path')
-  const showCard = useCallback((card: string) => {
-    // Cards that are loaded but never shown (the playground) keep the person on the path.
-    const element = document.getElementById(card)
-    if (!element || element.closest('[data-infra-playground]')) {
-      return false
-    }
-    setView('tools')
-    // The Tools view shows on the next frame; scroll once it has a layout.
-    window.requestAnimationFrame(() => scrollToInfraCard(card))
-    return true
-  }, [])
+  const view = useInfraView(worktreeId)
+  const overlay = useInfraOverlayTarget(worktreeId)
+  const showCard = useCallback(
+    (card: string) => {
+      // Cards that are loaded but never shown (the playground) keep the person on the path.
+      const element = document.getElementById(card)
+      if (!element || element.closest('[data-infra-playground]')) {
+        return false
+      }
+      setInfraView(worktreeId, 'tools')
+      // The Tools view shows on the next frame; scroll once it has a layout.
+      window.requestAnimationFrame(() => scrollToInfraCard(card))
+      return true
+    },
+    [worktreeId]
+  )
   const project = useDevopsProject(worktreeId)
+  const toolsCommand = useMemo(
+    () => [
+      {
+        id: 'infra:tools',
+        group: translate('components.devops.deck.path', 'Project path'),
+        label: translate('components.devops.home.tools', 'Tools & settings'),
+        keywords: ['settings', 'tools', 'cards', 'launchpad', 'scan', 'grafana', 'environments'],
+        run: () => setInfraView(worktreeId, 'tools')
+      }
+    ],
+    [worktreeId]
+  )
+  useDeckCommands('infra-tools', toolsCommand)
   const gitopsRepo = project?.repoFor('gitops') ?? null
   const platformRepo = terraformDir === null ? (project?.repoFor('platform') ?? null) : null
   const appRepo = project?.repoFor('app') ?? null
@@ -125,252 +123,189 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
     cloud: eks !== null,
     shipped
   })
-  return (
-    <div
-      className="scrollbar-sleek absolute inset-0 z-30 overflow-y-auto bg-background"
-      data-infra-home=""
-    >
-      <InfraCommandDeck worktreeId={worktreeId} open={deckOpen} onOpenChange={setDeckOpen} />
-      <div className="mx-auto max-w-5xl p-5">
-        <InfraHomeHeader view={view} setView={setView} openDeck={() => setDeckOpen(true)} />
-        <div hidden={view !== 'path'}>
+  const clusterAnswers = cluster.result?.ok === true
+  const kubectlPrefix =
+    inspection?.tools.kubectl?.available && inspection.tools.kubectl.runner === 'mise'
+      ? 'mise exec -- '
+      : ''
+  const launchpad = (
+    <InfraLaunchpad
+      worktreeId={worktreeId}
+      inspection={inspection}
+      sandbox={sandbox}
+      context={context}
+      terraformDir={terraformDir}
+      clusterAnswers={clusterAnswers}
+    />
+  )
+  const localDeploy =
+    path && appPath && manifestsPath && appHasImage && (appHasManifests || gitopsRepo) ? (
+      <InfraLocalDeploy
+        worktreeId={worktreeId}
+        workspacePath={path}
+        appPath={appPath}
+        manifestsPath={manifestsPath}
+        inspection={inspection}
+        context={context}
+        clusterAnswers={clusterAnswers}
+        onDeployed={cluster.refresh}
+      />
+    ) : null
+  const argo =
+    offersCluster || gitopsRepo ? (
+      <InfraArgoDeploy
+        gitopsRepo={gitopsRepo}
+        onApplication={onApplication}
+        worktreeId={worktreeId}
+        inspection={inspection}
+        context={context}
+        clusterAnswers={clusterAnswers}
+      />
+    ) : null
+  const harden = path ? (
+    <InfraHardenCard
+      worktreeId={worktreeId}
+      workspacePath={path}
+      onScanned={() => setMarks(markPath(path, 'hardened'))}
+    />
+  ) : null
+  const nextId = stages.find((stage) => stage.state === 'next')?.id
+  // Only the card behind the next step is loaded on the path, so its button can run; the
+  // rest load when Tools & settings opens.
+  const nextCard =
+    nextId === 'cluster'
+      ? launchpad
+      : nextId === 'app'
+        ? localDeploy
+        : nextId === 'gitops' || nextId === 'ship'
+          ? argo
+          : nextId === 'harden'
+            ? harden
+            : null
+  const fullMap = (
+    <InfraSystemMap
+      worktreeId={worktreeId}
+      context={context}
+      result={cluster.result}
+      refresh={cluster.refresh}
+      workspacePath={path}
+      kubectlPrefix={kubectlPrefix}
+    />
+  )
+  const toolsView = (
+    <InfraTools
+      worktreeId={worktreeId}
+      findings={findings}
+      sandbox={sandbox}
+      context={context}
+      inspection={inspection}
+      project={project}
+      stages={stages}
+      deploy={
+        <>
+          {localDeploy}
+          {argo}
+        </>
+      }
+      harden={harden}
+      cloud={
+        <>
           {path ? (
-            <InfraPathStepper
+            <InfraCloudCard
               worktreeId={worktreeId}
-              stages={stages}
-              members={project?.members ?? []}
-              onUnderstood={() => setMarks(markPath(path, 'understood'))}
-              onShowCard={showCard}
+              workspacePath={path}
+              appName={appNamespace}
+              hasTerraform={terraformDir !== null || platformDir !== null}
+              platformFolder={project?.repoFor('platform')?.folder ?? 'platform'}
+              eks={eks}
+              meterRepo={planRepo}
+              commandLine={(command) =>
+                devopsCommandLine(inspection?.tools.aws, command, inspection?.shell)
+              }
             />
           ) : null}
-          <InfraSystemMap
-            worktreeId={worktreeId}
-            context={context}
-            result={cluster.result}
-            refresh={cluster.refresh}
-            workspacePath={path}
-            kubectlPrefix={
-              inspection?.tools.kubectl?.available && inspection.tools.kubectl.runner === 'mise'
-                ? 'mise exec -- '
-                : ''
-            }
-            footer={<InfraRunsCard />}
-          />
-        </div>
-        {/* Cards stay mounted while hidden: the path stepper runs their actions. */}
-        <div hidden={view !== 'tools'} data-infra-tools="">
-          <header className="mb-3 flex flex-wrap items-center gap-1">
-            {findings.map((finding) => (
-              <span
-                key={finding.stack}
-                className="rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground"
-                title={finding.evidence.join('\n')}
-              >
-                {STACK_LABELS[finding.stack]}
-              </span>
-            ))}
-            {inspection && findings.length === 0 ? (
-              <span className="text-xs text-muted-foreground">
-                {translate('components.devops.home.noStacks', 'No infrastructure code found yet')}
-              </span>
-            ) : null}
-          </header>
-          {project ? <InfraProjectCard project={project} /> : null}
-          <InfraSection
-            id="infra-section-deploy"
-            title={translate(
-              'components.devops.section.deploy',
-              'Deploy · local cluster and GitOps'
-            )}
-            defaultOpen={['app', 'gitops'].includes(
-              stages.find((stage) => stage.state === 'next')?.id ?? ''
-            )}
-          >
-            {path && appPath && manifestsPath && appHasImage && (appHasManifests || gitopsRepo) ? (
-              <InfraLocalDeploy
-                worktreeId={worktreeId}
-                workspacePath={path}
-                appPath={appPath}
-                manifestsPath={manifestsPath}
-                inspection={inspection}
-                context={context}
-                clusterAnswers={cluster.result?.ok === true}
-                onDeployed={cluster.refresh}
-              />
-            ) : null}
-            {offersCluster || gitopsRepo ? (
-              <InfraArgoDeploy
-                gitopsRepo={gitopsRepo}
-                onApplication={onApplication}
-                worktreeId={worktreeId}
-                inspection={inspection}
-                context={context}
-                clusterAnswers={cluster.result?.ok === true}
-              />
-            ) : null}
-          </InfraSection>
-          <InfraSection
-            id="infra-section-harden"
-            title={translate('components.devops.section.harden', 'Harden · security findings')}
-            defaultOpen={stages.find((stage) => stage.state === 'next')?.id === 'harden'}
-          >
-            {path ? (
-              <InfraHardenCard
-                worktreeId={worktreeId}
-                workspacePath={path}
-                onScanned={() => setMarks(markPath(path, 'hardened'))}
-              />
-            ) : null}
-          </InfraSection>
-          <InfraSection
-            id="infra-section-cloud"
-            title={translate('components.devops.section.cloud', 'Cloud · EKS, plan, cost')}
-            defaultOpen={['cloud', 'ship'].includes(
-              stages.find((stage) => stage.state === 'next')?.id ?? ''
-            )}
-          >
-            {path ? (
-              <InfraCloudCard
-                worktreeId={worktreeId}
-                workspacePath={path}
-                appName={appNamespace}
-                hasTerraform={terraformDir !== null || platformDir !== null}
-                platformFolder={project?.repoFor('platform')?.folder ?? 'platform'}
-                eks={eks}
-                meterRepo={planRepo}
-                commandLine={(command) =>
-                  devopsCommandLine(inspection?.tools.aws, command, inspection?.shell)
-                }
-              />
-            ) : null}
-            {terraformDir !== null || (platformRepo && platformDir !== null) ? (
-              <InfraTerraformPlan
-                worktreeId={worktreeId}
-                terraformDir={terraformDir ?? platformDir ?? '.'}
-                platformRepo={terraformDir === null ? platformRepo : null}
-                onApplied={afterApply}
-                inspection={inspection}
-                sandbox={sandbox}
-                context={context}
-              />
-            ) : null}
-          </InfraSection>
-          <InfraSection
-            id="infra-section-observe"
-            title={translate(
-              'components.devops.section.observe',
-              'Observe · environments, metrics, incidents, runbooks'
-            )}
-            defaultOpen={stages.find((stage) => stage.state === 'next')?.id === undefined}
-          >
-            {path && (offersCluster || appHasManifests) ? (
-              <InfraEnvironmentsCard
-                worktreeId={worktreeId}
-                workspacePath={path}
-                namespace={appNamespace}
-                commandLine={(command) =>
-                  devopsCommandLine(inspection?.tools.kubectl, command, inspection?.shell)
-                }
-              />
-            ) : null}
-            {path && (offersCluster || appHasManifests) ? (
-              <InfraWatchCard
-                worktreeId={worktreeId}
-                workspacePath={path}
-                namespace={appNamespace}
-                inspection={inspection}
-                context={context}
-                clusterAnswers={cluster.result?.ok === true}
-              />
-            ) : null}
-            {path ? (
-              <InfraExtras
-                appName={appNamespace}
-                map={cluster.result}
-                deployed={gitopsDone}
-                shipped={shipped}
-                worktreeId={worktreeId}
-                workspacePath={path}
-                context={context}
-                clusterAnswers={cluster.result?.ok === true}
-              />
-            ) : null}
-          </InfraSection>
-          {/* Clusters, demos, machines and scans: kept loaded for the path buttons and the command deck,
-              never shown in the middle. */}
-          <div hidden data-infra-playground="">
-            <InfraLaunchpad
+          {terraformDir !== null || (platformRepo && platformDir !== null) ? (
+            <InfraTerraformPlan
               worktreeId={worktreeId}
+              terraformDir={terraformDir ?? platformDir ?? '.'}
+              platformRepo={terraformDir === null ? platformRepo : null}
+              onApplied={afterApply}
               inspection={inspection}
               sandbox={sandbox}
               context={context}
-              terraformDir={terraformDir}
-              clusterAnswers={cluster.result?.ok === true}
             />
-            <InfraLocalRuns worktreeId={worktreeId} sandbox={sandbox} />
-            {inspection && findings.length === 0 ? (
-              <InfraCard
-                title={translate('components.devops.home.emptyTitle', 'Start with infrastructure')}
-                hint={translate(
-                  'components.devops.home.emptyHint',
-                  'Add Terraform, Kubernetes manifests, a Helm chart or CI workflows and this page fills in. Ask Claude to scaffold one.'
-                )}
-              >
-                <p className="text-xs text-muted-foreground">
-                  {translate(
-                    'components.devops.home.emptyExample',
-                    'For example: “Create a Terraform module for an S3 bucket with versioning, and a GitHub Actions workflow that runs terraform plan.”'
-                  )}
-                </p>
-              </InfraCard>
-            ) : null}
-            {inspection && findings.length > 0 ? (
-              <div className="grid gap-4 lg:grid-cols-2">
-                <ContextCard
-                  context={context}
-                  show={{ kube: offersCluster, aws: offersAws, terraform: has('terraform') }}
-                  onWhoAmI={
-                    whoAmI
-                      ? () =>
-                          runInWorkbenchTerminal(
-                            worktreeId,
-                            devopsCommandLine(
-                              inspection.tools.aws,
-                              whoAmI.command,
-                              inspection.shell
-                            ),
-                            sandbox.state.awsEnv
-                          )
-                      : null
+          ) : null}
+        </>
+      }
+      observe={
+        path ? (
+          <>
+            {offersCluster || appHasManifests ? (
+              <>
+                <InfraEnvironmentsCard
+                  worktreeId={worktreeId}
+                  workspacePath={path}
+                  namespace={appNamespace}
+                  commandLine={(command) =>
+                    devopsCommandLine(inspection?.tools.kubectl, command, inspection?.shell)
                   }
                 />
-                <ReadinessCard worktreeId={worktreeId} inspection={inspection} />
-                {offersCluster ? (
-                  <InfraClusterCard
-                    worktreeId={worktreeId}
-                    usesMise={inspection.environment === 'mise'}
-                  />
-                ) : null}
-                {offersAws || offersCluster ? (
-                  <SandboxCard
-                    worktreeId={worktreeId}
-                    sandbox={sandbox}
-                    offersAws={offersAws}
-                    offersCluster={offersCluster}
-                  />
-                ) : null}
-                {has('ci') ? <InfraCiCard /> : null}
-                <ActionsCard
+                <InfraWatchCard
                   worktreeId={worktreeId}
+                  workspacePath={path}
+                  namespace={appNamespace}
                   inspection={inspection}
-                  sandbox={sandbox}
-                  ranked={ranked}
+                  context={context}
+                  clusterAnswers={clusterAnswers}
                 />
-              </div>
+              </>
             ) : null}
-          </div>
-        </div>
+            <InfraExtras
+              appName={appNamespace}
+              map={cluster.result}
+              deployed={gitopsDone}
+              shipped={shipped}
+              worktreeId={worktreeId}
+              workspacePath={path}
+              context={context}
+              clusterAnswers={clusterAnswers}
+            />
+          </>
+        ) : null
+      }
+      playground={launchpad}
+    />
+  )
+  return (
+    <aside className="bx-pathcol" data-infra-home="">
+      <InfraCommandDeck worktreeId={worktreeId} open={deckOpen} onOpenChange={setDeckOpen} />
+      {path ? (
+        <InfraPathStepper
+          worktreeId={worktreeId}
+          stages={stages}
+          members={project?.members ?? []}
+          onUnderstood={() => setMarks(markPath(path, 'understood'))}
+          onShowCard={showCard}
+        />
+      ) : null}
+      <PathMap
+        worktreeId={worktreeId}
+        context={context}
+        result={cluster.result}
+        onOpenFull={() => setInfraView(worktreeId, 'map')}
+      />
+      <div hidden data-infra-playground="">
+        {view === 'tools' ? null : nextCard}
       </div>
-    </div>
+      {overlay && view
+        ? createPortal(
+            <div className="mx-auto max-w-5xl p-5" data-infra-view={view}>
+              <InfraViewHeader view={view} onClose={() => setInfraView(worktreeId, null)} />
+              {view === 'map' ? fullMap : toolsView}
+            </div>,
+            overlay
+          )
+        : null}
+    </aside>
   )
 }

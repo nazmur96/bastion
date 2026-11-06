@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useAppStore } from '@/store'
 import { workbenchGroupId } from '../workbench/workbench-terminals'
-import { useDevopsInspection } from './use-devops-inspection'
-import { openInfraHomeOnce, setInfraHomeOpen, useInfraHomeOpen } from './infra-home-store'
-import { InfraHome } from './InfraHome'
+import { setInfraOverlayTarget, setInfraView, useInfraView } from './infra-home-store'
+import { HidePaneSurfaces } from '../workbench/HidePaneSurfaces'
 
-/** Covers the workbench body (terminals keep running beneath) while the Infra section is chosen. */
+/** The workbench body's cover for the Project path's full map and Tools view; the path column
+ *  draws into it, so they read as tabs beside chat and files. */
 export function InfraHomeOverlay({
   worktreeId,
   groupId
@@ -13,31 +13,38 @@ export function InfraHomeOverlay({
   worktreeId: string
   groupId: string
 }): React.JSX.Element | null {
-  const open = useInfraHomeOpen(worktreeId)
+  const view = useInfraView(worktreeId)
   const isWorkbench = useAppStore(() => workbenchGroupId(worktreeId) === groupId)
-  const inspection = useDevopsInspection(worktreeId)
   const activeTabId = useAppStore(
     (state) =>
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId
   )
   const seenTab = useRef(activeTabId)
   useEffect(() => {
-    // Every workspace starts here once, so the Launchpad is the first thing a new project shows.
-    if (isWorkbench && inspection && openInfraHomeOnce(worktreeId)) {
-      // The project's files stay in view on the right while the path is worked through.
-      const store = useAppStore.getState()
-      store.setRightSidebarTab('explorer')
-      store.setRightSidebarOpen(true)
-    }
-  }, [inspection, isWorkbench, worktreeId])
-  useEffect(() => {
-    // Picking a tab in this group means the person wants that tab, not the Infra home.
+    // Picking a tab in this group means the person wants that tab, not the map or Tools.
     if (seenTab.current !== activeTabId) {
       seenTab.current = activeTabId
       if (isWorkbench) {
-        setInfraHomeOpen(worktreeId, false)
+        setInfraView(worktreeId, null)
       }
     }
   }, [activeTabId, isWorkbench, worktreeId])
-  return open && isWorkbench ? <InfraHome worktreeId={worktreeId} /> : null
+  const register = useCallback(
+    (element: HTMLDivElement | null) => setInfraOverlayTarget(worktreeId, element),
+    [worktreeId]
+  )
+  if (!isWorkbench) {
+    return null
+  }
+  return (
+    <>
+      {view ? <HidePaneSurfaces groupId={groupId} /> : null}
+      <div
+        ref={register}
+        hidden={!view}
+        className="absolute inset-0 z-30 overflow-y-auto bg-background scrollbar-sleek"
+        data-infra-overlay=""
+      />
+    </>
+  )
 }

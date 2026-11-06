@@ -1,6 +1,32 @@
 import type { TerminalThemeMap } from './types'
 
 export const DEFAULT_TERMINAL_THEMES: TerminalThemeMap = {
+  // Fork: the Bastion prototype's terminal panel (docs/fork/mockups/workbench-video.html).
+  'Bastion Dark': {
+    background: '#07090c',
+    foreground: '#9aa5b8',
+    cursor: '#e3e8f1',
+    cursorAccent: '#07090c',
+    selectionBackground: '#2c3446',
+    selectionForeground: '#e3e8f1',
+    black: '#11141b',
+    red: '#e5534b',
+    green: '#3fb68b',
+    yellow: '#e2b340',
+    blue: '#5b9cf6',
+    magenta: '#c792ea',
+    cyan: '#56b6c2',
+    white: '#9aa5b8',
+    brightBlack: '#4e566a',
+    brightRed: '#ff6b62',
+    brightGreen: '#c3e88d',
+    brightYellow: '#f0c674',
+    brightBlue: '#82aaff',
+    brightMagenta: '#d7a5ff',
+    brightCyan: '#89ddff',
+    brightWhite: '#e3e8f1'
+  },
+
   // Most colors come from Ghostty. Orca raises dark selection contrast because Ghostty's
   // original #3e4451 blends into Codex-style gray instruction blocks.
   'Ghostty Default Style Dark': {

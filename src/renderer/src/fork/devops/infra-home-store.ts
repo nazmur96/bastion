@@ -1,29 +1,43 @@
 import { useSyncExternalStore } from 'react'
 
-const STORAGE_KEY = 'orca-fork.infraHome.v1'
+const STORAGE_KEY = 'orca-fork.infraHome.v2'
+
+/** What the Project path opens over the middle of the workbench, beside chat and files. */
+export type InfraView = 'map' | 'tools'
 
 type InfraHomeState = {
-  /** Workspaces whose workbench shows the Infra home right now. */
-  open: Record<string, boolean>
-  /** Workspaces that already got their first automatic Infra home. */
+  /** The view each workspace shows over its workbench right now, if any. */
+  view: Record<string, InfraView>
+  /** Workspaces whose first open already set up the layout. */
   seen: Record<string, boolean>
+}
+
+function isView(value: unknown): value is InfraView {
+  return value === 'map' || value === 'tools'
 }
 
 function load(): InfraHomeState {
   try {
     const parsed: unknown = JSON.parse(globalThis.localStorage?.getItem(STORAGE_KEY) ?? '{}')
     if (parsed && typeof parsed === 'object') {
-      const open: unknown = Reflect.get(parsed, 'open')
+      const view: unknown = Reflect.get(parsed, 'view')
       const seen: unknown = Reflect.get(parsed, 'seen')
       return {
-        open: open && typeof open === 'object' ? Object.fromEntries(Object.entries(open)) : {},
+        view:
+          view && typeof view === 'object'
+            ? Object.fromEntries(
+                Object.entries(view).filter((entry): entry is [string, InfraView] =>
+                  isView(entry[1])
+                )
+              )
+            : {},
         seen: seen && typeof seen === 'object' ? Object.fromEntries(Object.entries(seen)) : {}
       }
     }
   } catch {
-    // A blocked or corrupt store only loses which homes were open.
+    // A blocked or corrupt store only loses which views were open.
   }
-  return { open: {}, seen: {} }
+  return { view: {}, seen: {} }
 }
 
 let state = load()
@@ -46,26 +60,46 @@ function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener)
 }
 
-export function setInfraHomeOpen(worktreeId: string, open: boolean): void {
-  if (Boolean(state.open[worktreeId]) !== open) {
-    update({ ...state, open: { ...state.open, [worktreeId]: open } })
+export function setInfraView(worktreeId: string, view: InfraView | null): void {
+  if ((state.view[worktreeId] ?? null) === view) {
+    return
   }
+  const next = { ...state.view }
+  if (view) {
+    next[worktreeId] = view
+  } else {
+    delete next[worktreeId]
+  }
+  update({ ...state, view: next })
 }
 
-/** The first time a DevOps workspace is seen, its workbench starts on the Infra home.
- *  Returns whether this was that first time. */
-export function openInfraHomeOnce(worktreeId: string): boolean {
-  if (!state.seen[worktreeId]) {
-    update({
-      open: { ...state.open, [worktreeId]: true },
-      seen: { ...state.seen, [worktreeId]: true }
-    })
-    return true
-  }
-  return false
-}
-
-export function useInfraHomeOpen(worktreeId: string): boolean {
-  const read = (): boolean => Boolean(state.open[worktreeId])
+export function useInfraView(worktreeId: string): InfraView | null {
+  const read = (): InfraView | null => state.view[worktreeId] ?? null
   return useSyncExternalStore(subscribe, read, read)
+}
+
+// Where the open view draws: the workbench body registers itself, the path column portals into it.
+const targets = new Map<string, HTMLElement>()
+const targetListeners = new Set<() => void>()
+
+export function setInfraOverlayTarget(worktreeId: string, element: HTMLElement | null): void {
+  if (element) {
+    targets.set(worktreeId, element)
+  } else {
+    targets.delete(worktreeId)
+  }
+  for (const listener of targetListeners) {
+    listener()
+  }
+}
+
+export function useInfraOverlayTarget(worktreeId: string): HTMLElement | null {
+  return useSyncExternalStore(
+    (listener) => {
+      targetListeners.add(listener)
+      return () => targetListeners.delete(listener)
+    },
+    () => targets.get(worktreeId) ?? null,
+    () => null
+  )
 }

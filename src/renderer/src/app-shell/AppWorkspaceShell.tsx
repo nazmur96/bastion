@@ -4,6 +4,7 @@ import { translate } from '@/i18n/i18n'
 import Sidebar from '../components/Sidebar'
 import RightSidebar from '../components/right-sidebar'
 import { WorkspaceInfraBar } from '@/fork/devops/WorkspaceInfraBar'
+import { WorkspacePathColumn } from '@/fork/devops/WorkspacePathColumn'
 import { RecoverableRenderErrorBoundary } from '../components/error-boundaries/RecoverableRenderErrorBoundary'
 import { FloatingTerminalToggleButton } from '../components/floating-terminal/FloatingTerminalToggleButton'
 import { TerminalWorkbenchContainer } from '../components/TerminalWorkbenchContainer'
@@ -171,7 +172,9 @@ export function AppWorkspaceShell(props: {
               layout.activeView !== 'artifacts' ? (
                 <div className="titlebar">{titlebarMainStrip}</div>
               ) : null}
+              {layout.terminalWorkbenchVisible ? <WorkspaceInfraBar /> : null}
               <div className="relative flex flex-1 min-w-0 min-h-0 overflow-hidden">
+                {layout.terminalWorkbenchVisible ? <WorkspacePathColumn /> : null}
                 {/* Match the open sidebar header’s alignment to prevent toggle jitter. */}
                 {layout.workspaceChromeActive && !layout.rightSidebarOpen && (
                   <div
@@ -188,7 +191,6 @@ export function AppWorkspaceShell(props: {
                   </div>
                 )}
                 <div className="flex flex-1 min-w-0 min-h-0 flex-col">
-                  {layout.terminalWorkbenchVisible ? <WorkspaceInfraBar /> : null}
                   {layout.shouldMountTerminalWorkbench ? (
                     <TerminalWorkbenchContainer isVisible={layout.terminalWorkbenchVisible}>
                       <Suspense fallback={null}>

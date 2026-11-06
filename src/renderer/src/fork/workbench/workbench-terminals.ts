@@ -5,7 +5,7 @@ import { pickNonPanelGroupId } from '../claude-panel/claude-panel-layout'
 import { latestTabInSection } from './workbench-sections'
 import { ensureTerminalDock, liveTerminalDockId } from './terminal-dock'
 
-/** The workbench column: not the Claude panel and not a chats-only group (a side chat). */
+/** The workbench column: not the Claude panel, not the terminal dock, preferably not a side chat. */
 export function workbenchGroupId(worktreeId: string): string | null {
   const state = useAppStore.getState()
   const groups = state.groupsByWorktree[worktreeId] ?? []
@@ -16,12 +16,16 @@ export function workbenchGroupId(worktreeId: string): string | null {
     return groupTabs.length > 0 && groupTabs.every((tab) => tab.contentType === 'agent-session')
   }
   const dock = liveTerminalDockId(worktreeId)
-  const candidates = groups.filter((group) => !chatOnly(group.id) && group.id !== dock)
-  return panelGroupId
-    ? pickNonPanelGroupId(candidates, tabs, panelGroupId)
-    : (candidates.find((group) => group.id === state.activeGroupIdByWorktree[worktreeId])?.id ??
-        candidates[0]?.id ??
-        null)
+  if (panelGroupId) {
+    const candidates = groups.filter((group) => !chatOnly(group.id) && group.id !== dock)
+    return pickNonPanelGroupId(candidates, tabs, panelGroupId)
+  }
+  // Bastion keeps the main chat in the middle, so a group of only chats can be the workbench;
+  // one that also holds files or pages wins over a side chat.
+  const groupsOutsideDock = groups.filter((group) => group.id !== dock)
+  return (
+    groupsOutsideDock.find((group) => !chatOnly(group.id))?.id ?? groupsOutsideDock[0]?.id ?? null
+  )
 }
 
 /** The terminal dock under the workbench, where every workbench terminal opens. */

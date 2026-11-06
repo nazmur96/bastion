@@ -2,6 +2,7 @@ import { ClaudeEditsBar } from '@/fork/claude-edits/ClaudeEditsBar'
 import { WorkbenchSectionBar } from '@/fork/workbench/WorkbenchSectionBar'
 import { ClaudePanelHeaderActions } from '@/fork/claude-panel/ClaudePanelHeaderActions'
 import { InfraHomeOverlay } from '@/fork/devops/InfraHomeOverlay'
+import { SidePanelOverlay } from '@/fork/workbench/SidePanelOverlay'
 import { Suspense, useCallback, useMemo } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { useDroppable } from '@dnd-kit/core'
@@ -293,7 +294,9 @@ export default function TabGroupPanel({
               />
             ) : null}
             <WorkbenchSectionBar worktreeId={worktreeId} groupId={groupId} />
-            <div className="min-w-0 flex-1 h-full">{tabBar}</div>
+            <div className="min-w-0 flex-1 h-full" data-tab-bar-slot="">
+              {tabBar}
+            </div>
             <div
               className={actionChromeClassName}
               style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
@@ -340,6 +343,7 @@ export default function TabGroupPanel({
           />
         ) : null}
         <InfraHomeOverlay worktreeId={worktreeId} groupId={groupId} />
+        <SidePanelOverlay worktreeId={worktreeId} groupId={groupId} />
         {activeTab &&
           activeTab.contentType !== 'terminal' &&
           activeTab.contentType !== 'agent-session' &&

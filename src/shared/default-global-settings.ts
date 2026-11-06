@@ -82,7 +82,7 @@ export function buildDefaultSettings(args: {
     terminalCursorStyle: 'block',
     terminalCursorStyleDefaultedToBlock: true,
     terminalCursorBlink: true,
-    terminalThemeDark: 'Ghostty Default Style Dark',
+    terminalThemeDark: 'Bastion Dark',
     terminalDividerColorDark: '#3f3f46',
     terminalUseSeparateLightTheme: true,
     terminalThemeLight: 'Builtin Tango Light',

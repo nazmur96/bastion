@@ -1,25 +1,15 @@
 import { useState } from 'react'
-import {
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Circle,
-  CircleSlash,
-  LoaderCircle,
-  X
-} from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { cancelRun, dismissRun, useStepsRuns, type StepsRun } from './steps-store'
 import type { StepState } from '../../../../shared/fork-devops-steps'
 
-const ICON: Record<StepState, { icon: typeof Check; className: string }> = {
-  waiting: { icon: Circle, className: 'text-muted-foreground' },
-  running: { icon: LoaderCircle, className: 'animate-spin text-primary' },
-  done: { icon: Check, className: 'text-status-success' },
-  failed: { icon: X, className: 'text-destructive' },
-  cancelled: { icon: CircleSlash, className: 'text-muted-foreground' }
+const MARK: Record<StepState, { text: string; className: string }> = {
+  waiting: { text: '·', className: 'run' },
+  running: { text: '…', className: 'w' },
+  done: { text: '✓', className: 'p' },
+  failed: { text: '✗', className: 'e' },
+  cancelled: { text: '–', className: 'run' }
 }
 
 function tailLines(text: string, count: number): string {
@@ -27,85 +17,68 @@ function tailLines(text: string, count: number): string {
 }
 
 function Run({ run }: { run: StepsRun }): React.JSX.Element {
-  const [open, setOpen] = useState<number | null>(null)
+  const [open, setOpen] = useState<string | null>(null)
   return (
-    <div className="font-mono" data-steps-run={run.runId}>
-      <div className="mb-1 flex items-center gap-2 font-sans text-xs">
-        <span className="font-medium text-foreground">{run.title}</span>
-        <span
-          className={cn(
-            'text-xs',
-            run.finished
-              ? run.ok
-                ? 'text-status-success'
-                : 'text-destructive'
-              : 'text-muted-foreground'
-          )}
-        >
+    <div data-steps-run={run.runId}>
+      {run.steps.map((step) => {
+        const mark = MARK[step.state]
+        const expanded = open === step.id || step.state === 'failed'
+        return (
+          <div key={step.id}>
+            <button
+              type="button"
+              className="flex w-full gap-2 text-left"
+              onClick={() => setOpen(open === step.id ? null : step.id)}
+            >
+              <span className="p">❯</span>
+              <span className="min-w-0 flex-1 truncate">{step.command}</span>
+              <span className={mark.className}>{mark.text}</span>
+            </button>
+            {step.output && (expanded || step.state === 'running') ? (
+              <pre
+                className={cn(
+                  'scrollbar-sleek max-h-28 overflow-auto pl-4 whitespace-pre-wrap',
+                  step.state === 'failed' ? 'e' : 'run'
+                )}
+              >
+                {expanded ? step.output.trimEnd() : tailLines(step.output, 2)}
+              </pre>
+            ) : null}
+          </div>
+        )
+      })}
+      <div className="flex gap-3 pl-4">
+        <span className={run.finished ? (run.ok ? 'p' : 'e') : 'run'}>
           {run.finished
             ? run.ok
-              ? translate('components.devops.runs.ok', 'done')
-              : translate('components.devops.runs.failed', 'stopped')
-            : translate('components.devops.runs.running', 'running')}
+              ? translate('components.devops.runs.okLine', '✓ {{title}}', { title: run.title })
+              : translate('components.devops.runs.failedLine', '✗ {{title}} stopped', {
+                  title: run.title
+                })
+            : translate('components.devops.runs.runningLine', '{{title}}…', { title: run.title })}
         </span>
-        <Button
+        <button
           type="button"
-          size="xs"
-          variant="ghost"
-          className="ml-auto"
+          className="run ml-auto hover:text-[var(--bx-text)]"
           onClick={() => (run.finished ? dismissRun(run.runId) : cancelRun(run.runId))}
         >
           {run.finished
             ? translate('components.devops.runs.dismiss', 'Dismiss')
             : translate('components.devops.runs.cancel', 'Cancel')}
-        </Button>
+        </button>
       </div>
-      <ol className="space-y-0.5">
-        {run.steps.map((step, index) => {
-          const { icon: Icon, className } = ICON[step.state]
-          const expanded = open === index || (step.state === 'failed' && open === null)
-          return (
-            <li key={step.id}>
-              <button
-                type="button"
-                className="flex w-full items-center gap-2 text-left text-xs"
-                onClick={() => setOpen(expanded ? -1 : index)}
-              >
-                <span className="shrink-0 text-primary">❯</span>
-                <span className="min-w-0 flex-1 truncate">{step.command}</span>
-                <Icon className={cn('size-3.5 shrink-0', className)} aria-hidden />
-                {step.output ? (
-                  expanded ? (
-                    <ChevronDown className="size-3" aria-hidden />
-                  ) : (
-                    <ChevronRight className="size-3" aria-hidden />
-                  )
-                ) : null}
-              </button>
-              {step.output && (expanded || step.state === 'running') ? (
-                <pre className="scrollbar-sleek max-h-40 overflow-auto pl-4 text-[11px] whitespace-pre-wrap text-muted-foreground">
-                  {expanded ? step.output.trimEnd() : tailLines(step.output, 3)}
-                </pre>
-              ) : null}
-            </li>
-          )
-        })}
-      </ol>
     </div>
   )
 }
 
-/** The live run log under the system map: each step as a prompt line, failures open their output. */
+/** The live run log at the bottom of the system map: one prompt line per step, as in a terminal. */
 export function InfraRunsCard(): React.JSX.Element | null {
   const runs = useStepsRuns()
   if (runs.length === 0) {
     return null
   }
   return (
-    <section
-      className="mt-3 space-y-3 rounded-md border border-border bg-muted/40 px-3 py-2"
-      data-steps-runs=""
-    >
+    <section className="bx-log space-y-2" data-steps-runs="">
       {runs.map((run) => (
         <Run key={run.runId} run={run} />
       ))}

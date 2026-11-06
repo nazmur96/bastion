@@ -1,5 +1,4 @@
 import { Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { draftForClaude } from './ask-claude'
@@ -178,78 +177,84 @@ export function InfraPathStepper({
     }
   }
 
+  const nextIndex = stages.findIndex((stage) => stage.state === 'next')
+  const label =
+    !next || !step
+      ? ''
+      : next.id === 'understand' || available
+        ? step.button
+        : setup
+          ? setup.label
+          : HIDDEN_CARDS.has(step.card)
+            ? translate('components.devops.path.askClaude', 'Ask Claude to do it')
+            : translate('components.devops.path.show', 'Show me')
+  const doneCount = stages.filter((stage) => stage.state === 'done').length
   return (
-    <section className="mb-4" data-project-path="">
-      <ol className="mb-3 flex gap-1.5 overflow-x-auto scrollbar-sleek">
-        {stages.map((stage) => {
-          const card = nextStep(stage.id).card
-          return (
-            <li key={stage.id} className="min-w-0 flex-1">
+    <>
+      <div className="bx-pathcol-head">
+        <b>{translate('components.devops.path.title', 'Project path')}</b>
+        <span>
+          {translate('components.devops.path.progress', '{{done}} of {{total}}', {
+            done: doneCount,
+            total: stages.length
+          })}
+        </span>
+      </div>
+      <ol className="bx-vsteps" data-project-path="">
+        {stages.map((stage, index) =>
+          stage.state === 'next' && step ? (
+            <li key={stage.id} className="bx-vstep active">
+              <div className="row">
+                <span className="i" />
+                <span>{stageLabel(stage.id)}</span>
+                <span className="n">
+                  {translate('components.devops.path.stepOf', 'Step {{n}} of {{total}}', {
+                    n: index + 1,
+                    total: stages.length
+                  })}
+                </span>
+              </div>
+              <div className="h">{step.title}</div>
+              <div className="s">{step.hint}</div>
+              <button type="button" className="bx-btn" onClick={go}>
+                {label}
+              </button>
+            </li>
+          ) : (
+            <li key={stage.id}>
               <button
                 type="button"
+                className={cn('bx-vstep', stage.state === 'done' && 'done')}
                 disabled={stage.state === 'coming'}
-                onClick={() => {
-                  if (card) {
-                    onShowCard(card)
-                  }
-                }}
                 title={
                   stage.state === 'coming'
                     ? translate('components.devops.path.coming', 'Coming next')
                     : undefined
                 }
-                className={cn(
-                  'flex w-full items-center gap-1.5 rounded-md border px-2 py-1.5 text-xs whitespace-nowrap',
-                  stage.state === 'done' && 'border-border text-foreground',
-                  stage.state === 'next' && 'border-primary text-foreground ring-1 ring-primary',
-                  stage.state === 'todo' && 'border-border text-muted-foreground',
-                  stage.state === 'coming' &&
-                    'border-dashed border-border text-muted-foreground opacity-60'
-                )}
+                onClick={() => {
+                  const card = nextStep(stage.id).card
+                  if (card) {
+                    onShowCard(card)
+                  }
+                }}
               >
-                <span
-                  className={cn(
-                    'grid size-4 shrink-0 place-items-center rounded-full border',
-                    stage.state === 'done'
-                      ? 'border-status-success bg-status-success text-background'
-                      : 'border-current'
-                  )}
-                >
-                  {stage.state === 'done' ? <Check className="size-3" aria-hidden /> : null}
+                <span className="i">
+                  {stage.state === 'done' ? <Check className="size-2.5" aria-hidden /> : null}
                 </span>
-                <span className="truncate">{stageLabel(stage.id)}</span>
+                <span>{stageLabel(stage.id)}</span>
               </button>
             </li>
           )
-        })}
+        )}
       </ol>
-      {next && step ? (
-        <div className="flex items-center gap-4 rounded-lg border border-primary/40 bg-primary/5 p-4">
-          <div className="min-w-0 flex-1">
-            <div className="text-xs font-medium uppercase tracking-wide text-primary">
-              {translate('components.devops.path.nextLabel', 'Next step')}
-            </div>
-            <div className="text-base font-semibold">{step.title}</div>
-            <div className="text-xs text-muted-foreground">{step.hint}</div>
-          </div>
-          <Button type="button" onClick={go}>
-            {next.id === 'understand' || available
-              ? step.button
-              : setup
-                ? setup.label
-                : HIDDEN_CARDS.has(step.card)
-                  ? translate('components.devops.path.askClaude', 'Ask Claude to do it')
-                  : translate('components.devops.path.show', 'Show me')}
-          </Button>
-        </div>
-      ) : (
-        <p className="rounded-lg border border-border p-3 text-sm text-muted-foreground">
+      {nextIndex === -1 ? (
+        <p className="bx-pathcol-done">
           {translate(
             'components.devops.path.localDone',
             'The local path is complete. The cloud steps (EKS, ship) are coming next.'
           )}
         </p>
-      )}
-    </section>
+      ) : null}
+    </>
   )
 }

@@ -22,6 +22,8 @@ function typingSomewhere(target: EventTarget | null): boolean {
 }
 
 /** k9s-style `:` palette over the Infra home: launch, inspect, or hand the words to Claude. */
+export const OPEN_DECK_EVENT = 'orca-fork:open-command-deck'
+
 export function InfraCommandDeck({
   worktreeId,
   open,
@@ -40,9 +42,15 @@ export function InfraCommandDeck({
         onOpenChange(true)
       }
     }
+    const onAsk = (): void => onOpenChange(true)
     // Capture: the app's own shortcut layer stops some keys before they bubble to window.
     window.addEventListener('keydown', onKey, true)
-    return () => window.removeEventListener('keydown', onKey, true)
+    // The top bar's "⌘ : commands" asks for the deck too.
+    window.addEventListener(OPEN_DECK_EVENT, onAsk)
+    return () => {
+      window.removeEventListener('keydown', onKey, true)
+      window.removeEventListener(OPEN_DECK_EVENT, onAsk)
+    }
   }, [onOpenChange])
   const groups = [...new Set(commands.map((command) => command.group))]
   const close = (): void => {

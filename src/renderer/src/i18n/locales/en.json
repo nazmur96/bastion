@@ -20622,7 +20622,11 @@
       "infraHint": "Context, readiness, sandbox and actions for this repo",
       "infra": "Infra",
       "pathHint": "Where this project is, its next step and the live system map",
-      "path": "Project path"
+      "path": "Project path",
+      "dockTitle": "Terminal · {{name}}",
+      "fullMap": "System map",
+      "tools": "Tools & settings",
+      "closeView": "Close"
     },
     "claudeEdits": {
       "reviewTitle": "Review Claude’s changes",
@@ -20715,7 +20719,9 @@
         "back": "Project path",
         "path": "Project path",
         "toolsHint": "Every Infra card: deploy, harden, cloud, observe, playground",
-        "tools": "Tools & settings"
+        "tools": "Tools & settings",
+        "fullMap": "System map",
+        "closeView": "Close"
       },
       "radar": {
         "starting": "Starting the cluster view (Radar)…",
@@ -20768,7 +20774,10 @@
         "failed": "stopped",
         "running": "running",
         "dismiss": "Dismiss",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "okLine": "✓ {{title}}",
+        "failedLine": "✗ {{title}} stopped",
+        "runningLine": "{{title}}…"
       },
       "map": {
         "title": "System map · {{context}}",
@@ -20915,7 +20924,12 @@
         "nextLabel": "Next step",
         "show": "Show me",
         "localDone": "The local path is complete. The cloud steps (EKS, ship) are coming next.",
-        "askClaude": "Ask Claude to do it"
+        "askClaude": "Ask Claude to do it",
+        "stepOf": "Step {{n}} of {{total}}",
+        "doneLabel": "Done for now",
+        "doneTitle": "Every step is done",
+        "title": "Project path",
+        "progress": "{{done}} of {{total}}"
       },
       "cloud": {
         "title": "Cloud · who and where",
@@ -21041,8 +21055,34 @@
       },
       "bar": {
         "meterHint": "Billed cloud infrastructure is running. End the session from the Project path to destroy it.",
-        "meter": "EKS {{time}} · {{cost}}"
+        "meter": "EKS {{time}} · {{cost}}",
+        "kubeHint": "Where kubectl commands land",
+        "noCluster": "☸ no cluster",
+        "awsHint": "Where aws and terraform commands land",
+        "noAws": "☁ aws: not signed in",
+        "commands": "⌘ : commands"
+      },
+      "pathMap": {
+        "label": "System map · {{context}}{{real}}",
+        "real": " (real)",
+        "title": "System map",
+        "open": "Open its manifest",
+        "noCluster": "No cluster yet. The next step starts one.",
+        "nothing": "Nothing is running yet.",
+        "reading": "Reading the cluster…",
+        "openFull": "Open full map ↗"
       }
+    },
+    "sidePanel": {
+      "pages": "Pages this project opened",
+      "noPages": "None yet. Argo CD, Grafana and the app open here once a step starts them.",
+      "page": "Browser tab",
+      "files": "Files",
+      "changes": "Changes",
+      "terminal": "Terminal",
+      "browser": "Browser",
+      "checks": "Checks",
+      "label": "Side panel"
     }
   },
   "dashboardPopout": {

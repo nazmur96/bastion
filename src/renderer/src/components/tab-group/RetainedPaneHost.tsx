@@ -147,6 +147,7 @@ export function RetainedPaneHost({
       // Pane-local layers cannot compete with app notifications or escape their split rectangle.
       className="isolate z-10 min-h-0 min-w-0 overflow-hidden"
       data-retained-pane-host=""
+      data-retained-group={groupId}
       {...identity}
       inert={!isVisible}
       aria-hidden={!isVisible}

@@ -1,21 +1,30 @@
-import { Gauge } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
-import { DevopsContextBar } from './DevopsContextBar'
+import { OPEN_DECK_EVENT } from './InfraCommandDeck'
 import { useProjectCostMeter } from './cost-meter-store'
 import { useDevopsProject } from './use-devops-project'
 import { useDevopsContext } from './use-devops-context'
 import { useDevopsInspection } from './use-devops-inspection'
 import { useDevopsSandbox } from './use-devops-sandbox'
-import type { DevopsStack } from '../../../../shared/fork-devops-stacks'
+import type { DevopsContextTone } from '../../../../shared/fork-devops-context'
+
+type AppRegion = React.CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' }
+/** The bar is window chrome: it drags the window, its button does not. */
+const DRAG: AppRegion = { WebkitAppRegion: 'drag' }
+const NO_DRAG: AppRegion = { WebkitAppRegion: 'no-drag' }
 
 function elapsed(hours: number): string {
   const minutes = Math.floor(hours * 60)
   return `${Math.floor(minutes / 60)}h ${minutes % 60}m`
 }
 
-/** Top of the workspace: which project, where its commands land, and what real cloud is costing. */
+function toneClass(tone: DevopsContextTone): string {
+  return tone === 'local' ? 'local' : tone === 'prod' ? 'prod' : 'real'
+}
+
+/** The prototype's top bar: project, where kubectl and aws land, and what real cloud costs. */
 function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   const inspection = useDevopsInspection(worktreeId)
   const sandbox = useDevopsSandbox(worktreeId)
@@ -24,6 +33,8 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   const terraformDir = findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
   const project = useDevopsProject(worktreeId)
+  const sidebarOpen = useAppStore((state) => state.sidebarOpen)
+  const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
   const meter = useProjectCostMeter([
     ...(worktree ? [worktree.path] : []),
     ...(project?.members.map((member) => member.repo.path) ?? [])
@@ -31,56 +42,67 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   if (!worktree) {
     return null
   }
-  const has = (...stacks: DevopsStack[]): boolean =>
-    findings.some((finding) => stacks.includes(finding.stack))
-  const real = (context.kube && context.kube.tone !== 'local') || meter !== null
+  const { kube, aws } = context
+  const real = (kube !== undefined && kube.tone !== 'local') || meter !== null
   const name = worktree.path.split(/[\\/]/).findLast(Boolean) ?? ''
   return (
     <>
       <div
-        className="flex h-8 shrink-0 items-center gap-2 border-b border-border bg-card px-3 text-xs"
+        className="bx-bar"
         data-workspace-infra-bar=""
+        style={{
+          ...DRAG,
+          // The window's own controls float over the top-left while the sidebar is closed.
+          paddingLeft: sidebarOpen ? 12 : 'calc(12px + var(--collapsed-sidebar-header-width))',
+          // With the right sidebar closed, the window controls and its toggle float top-right.
+          paddingRight: rightSidebarOpen ? 12 : 'calc(52px + var(--window-controls-width, 0px))'
+        }}
       >
-        <span className="font-semibold text-foreground">{name}</span>
-        {worktree.branch ? (
-          <span className="text-muted-foreground">
-            {worktree.branch.replace(/^refs\/heads\//, '')}
-          </span>
-        ) : null}
-        <DevopsContextBar
-          context={context}
-          show={{
-            // Where kubectl lands matters in every repo, infrastructure code or not.
-            kube: true,
-            aws: has('aws', 'terraform'),
-            terraform: has('terraform')
-          }}
-        />
+        <b>{name}</b>
+        <span
+          className={cn('bx-chip', kube && toneClass(kube.tone))}
+          title={translate('components.devops.bar.kubeHint', 'Where kubectl commands land')}
+        >
+          {kube
+            ? `☸ ${kube.namespace ? `${kube.context} / ${kube.namespace}` : kube.context}`
+            : translate('components.devops.bar.noCluster', '☸ no cluster')}
+        </span>
+        <span
+          className={cn('bx-chip', aws && toneClass(aws.tone))}
+          title={translate(
+            'components.devops.bar.awsHint',
+            'Where aws and terraform commands land'
+          )}
+        >
+          {aws
+            ? `☁ ${aws.tone === 'local' ? 'floci (local)' : aws.profile}${aws.region ? ` · ${aws.region}` : ''}`
+            : translate('components.devops.bar.noAws', '☁ aws: not signed in')}
+        </span>
         {meter ? (
           <span
-            className="flex items-center gap-1 rounded-full border border-status-warning/40 px-2 py-0.5 font-medium text-status-warning"
+            className="bx-meter"
             title={translate(
               'components.devops.bar.meterHint',
               'Billed cloud infrastructure is running. End the session from the Project path to destroy it.'
             )}
             data-cost-meter=""
           >
-            <Gauge className="size-3" aria-hidden />
-            {translate('components.devops.bar.meter', 'EKS {{time}} · {{cost}}', {
+            {translate('components.devops.bar.meter', '● EKS {{time}} · {{cost}}', {
               time: elapsed(meter.hours),
               cost: meter.spent === null ? '$?' : `$${meter.spent.toFixed(2)}`
             })}
           </span>
         ) : null}
+        <button
+          type="button"
+          className="ml-auto hover:text-[var(--bx-text)]"
+          style={NO_DRAG}
+          onClick={() => window.dispatchEvent(new Event(OPEN_DECK_EVENT))}
+        >
+          {translate('components.devops.bar.commands', '⌘ : commands')}
+        </button>
       </div>
-      {real ? (
-        // Real infrastructure frames the whole window, like the prototype's amber border.
-        <div
-          className="pointer-events-none fixed inset-0 z-50 border-2 border-status-warning/80"
-          aria-hidden
-          data-real-frame=""
-        />
-      ) : null}
+      {real ? <div className="bx-real-frame" aria-hidden data-real-frame="" /> : null}
     </>
   )
 }
