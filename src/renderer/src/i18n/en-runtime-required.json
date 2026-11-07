@@ -67,6 +67,10 @@
         "approvalsRemaining_one": "{{count}} approval remaining",
         "approvalsRemaining_other": "{{count}} approvals remaining"
       },
+      "Landing": {
+        "520304a067": "Orca logo",
+        "6ca6ff404e": "ORCA"
+      },
       "NativeChatResumeOnRestartModal": {
         "activityMonitorCount_one": "Monitoring {{count}} background task",
         "activityMonitorCount_other": "Monitoring {{count}} background tasks",
@@ -2500,6 +2504,11 @@
     "severedDaemonBanner": {
       "count_one": "{{count}} running terminal",
       "count_other": "{{count}} running terminals"
+    }
+  },
+  "tray": {
+    "minimizeNotice": {
+      "body": "Orca is still running in the system tray"
     }
   },
   "updates": {

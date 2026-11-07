@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 128 128">
+  <!-- Bastion app icon: the bastion host, a glowing iridescent box with a keyhole shield, on a
+       navy-to-violet ground. Source for every generated icon (see generate-bastion.sh). -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#151a3a"/>
+      <stop offset=".6" stop-color="#1d1336"/>
+      <stop offset="1" stop-color="#2a1640"/>
+    </linearGradient>
+    <radialGradient id="halo" cx=".5" cy=".48" r=".5">
+      <stop offset="0" stop-color="#b9a6ff" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#b9a6ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="front" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a8e1ff"/>
+      <stop offset=".5" stop-color="#c7b8ff"/>
+      <stop offset="1" stop-color="#f6c4ec"/>
+    </linearGradient>
+    <linearGradient id="side" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8fb7ff"/>
+      <stop offset="1" stop-color="#b59cf5"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#ground)"/>
+  <circle cx="64" cy="62" r="52" fill="url(#halo)"/>
+  <g filter="url(#glow)">
+    <path d="M40 40 L72 30 L92 40 L60 50 Z" fill="#ece7ff"/>
+    <path d="M40 40 L60 50 L60 100 L40 90 Z" fill="url(#side)"/>
+    <path d="M60 50 L92 40 L92 90 L60 100 Z" fill="url(#front)"/>
+  </g>
+  <path d="M45 52 H55 M45 57 H55" stroke="#5b4fb0" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+  <path d="M76 56 L86 60 V68 C86 75 81 79 76 82 C71 79 66 75 66 68 V60 Z" fill="#5b4fb0" opacity=".92"/>
+  <circle cx="76" cy="65" r="3" fill="#eef0fb"/>
+  <path d="M74.8 66 L77.2 66 L77.8 72 L74.2 72 Z" fill="#eef0fb"/>
+</svg>
