@@ -1,4 +1,7 @@
+import { PanelLeft, PanelRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isSidePanelCollapsed, toggleSidePanel } from '../workbench/terminal-dock'
+import { togglePathColumn, usePathColumnCollapsed } from './path-column-store'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
@@ -34,6 +37,8 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
   const project = useDevopsProject(worktreeId)
   const sidebarOpen = useAppStore((state) => state.sidebarOpen)
+  const pathCollapsed = usePathColumnCollapsed()
+  const sideCollapsed = useAppStore(() => isSidePanelCollapsed(worktreeId))
   const meter = useProjectCostMeter([
     ...(worktree ? [worktree.path] : []),
     ...(project?.members.map((member) => member.repo.path) ?? [])
@@ -94,7 +99,29 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
         ) : null}
         <button
           type="button"
-          className="ml-auto hover:text-[var(--bx-text)]"
+          className="bx-icon-btn ml-auto"
+          style={NO_DRAG}
+          aria-pressed={!pathCollapsed}
+          aria-label={translate('components.devops.bar.togglePath', 'Show or hide Project path')}
+          title={translate('components.devops.bar.togglePath', 'Show or hide Project path')}
+          onClick={togglePathColumn}
+        >
+          <PanelLeft aria-hidden />
+        </button>
+        <button
+          type="button"
+          className="bx-icon-btn"
+          style={NO_DRAG}
+          aria-pressed={!sideCollapsed}
+          aria-label={translate('components.devops.bar.toggleSide', 'Show or hide the side panel')}
+          title={translate('components.devops.bar.toggleSide', 'Show or hide the side panel')}
+          onClick={() => toggleSidePanel(worktreeId)}
+        >
+          <PanelRight aria-hidden />
+        </button>
+        <button
+          type="button"
+          className="hover:text-[var(--bx-text)]"
           style={NO_DRAG}
           onClick={() => window.dispatchEvent(new Event(OPEN_DECK_EVENT))}
         >

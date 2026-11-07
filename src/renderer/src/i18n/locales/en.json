@@ -20929,7 +20929,9 @@
         "doneLabel": "Done for now",
         "doneTitle": "Every step is done",
         "title": "Project path",
-        "progress": "{{done}} of {{total}}"
+        "progress": "{{done}} of {{total}}",
+        "expand": "Show Project path",
+        "collapse": "Hide Project path"
       },
       "cloud": {
         "title": "Cloud · who and where",
@@ -21060,7 +21062,9 @@
         "noCluster": "☸ no cluster",
         "awsHint": "Where aws and terraform commands land",
         "noAws": "☁ aws: not signed in",
-        "commands": "⌘ : commands"
+        "commands": "⌘ : commands",
+        "togglePath": "Show or hide Project path",
+        "toggleSide": "Show or hide the side panel"
       },
       "pathMap": {
         "label": "System map · {{context}}{{real}}",
@@ -21082,7 +21086,8 @@
       "terminal": "Terminal",
       "browser": "Browser",
       "checks": "Checks",
-      "label": "Side panel"
+      "label": "Side panel",
+      "hide": "Hide side panel"
     }
   },
   "dashboardPopout": {

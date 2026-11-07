@@ -10,6 +10,7 @@ import { useDevopsContext } from './use-devops-context'
 import { InfraLaunchpad } from './InfraLaunchpad'
 import { InfraSystemMap } from './InfraSystemMap'
 import { InfraTools } from './InfraTools'
+import { usePathColumnCollapsed } from './path-column-store'
 import { useDeckCommands } from './command-deck-store'
 import { translate } from '@/i18n/i18n'
 import { PathMap } from './PathMap'
@@ -46,6 +47,7 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
   const offersCluster = has('kubernetes', 'helm', 'argocd')
   const [deckOpen, setDeckOpen] = useState(false)
   const view = useInfraView(worktreeId)
+  const collapsed = usePathColumnCollapsed()
   const overlay = useInfraOverlayTarget(worktreeId)
   const showCard = useCallback(
     (card: string) => {
@@ -276,7 +278,7 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
     />
   )
   return (
-    <aside className="bx-pathcol" data-infra-home="">
+    <aside className={collapsed ? 'bx-pathcol collapsed' : 'bx-pathcol'} data-infra-home="">
       <InfraCommandDeck worktreeId={worktreeId} open={deckOpen} onOpenChange={setDeckOpen} />
       {path ? (
         <InfraPathStepper

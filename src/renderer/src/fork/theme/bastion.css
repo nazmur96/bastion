@@ -72,7 +72,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  height: 32px;
+  /* Orca's titlebar is 36px: the bar sits flush with the floating window controls. */
+  height: 36px;
   flex: none;
   padding: 0 12px;
   border-bottom: 1px solid var(--bx-line);
@@ -431,11 +432,15 @@
   font-size: 13px;
 }
 .bx-pathcol-head {
+  /* Same height as the tab rows beside it, so their bottom lines run straight across. */
   display: flex;
+  flex: none;
   align-items: center;
   gap: 8px;
-  padding: 9px 14px;
-  border-bottom: 1px solid var(--bx-line);
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 6px 0 14px;
+  border-bottom: 1px solid var(--border);
 }
 .bx-pathcol-head span {
   margin-left: auto;
@@ -640,4 +645,51 @@ button.bx-vstep:hover:not(:disabled) {
    commands, pane menu) would crowd the terminal tabs out. */
 [data-tab-group-strip-id]:has([data-side-section]) [data-tab-bar-slot] + div {
   display: none;
+}
+
+/* The titlebar mark is Bastion's full-color icon, not Orca's tinted line logo. */
+.titlebar-logo,
+:root:not(.dark) .titlebar-logo {
+  height: 18px;
+  opacity: 1;
+  filter: none;
+}
+
+.bx-icon-btn {
+  display: grid;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bx-muted);
+  cursor: pointer;
+}
+.bx-icon-btn:hover {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-icon-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.bx-icon-btn[aria-pressed='false'] {
+  opacity: 0.55;
+}
+.bx-rail .bx-icon-btn {
+  align-self: center;
+}
+/* Folded, the column is a thin strip with only its open button. */
+.bx-pathcol.collapsed {
+  width: 36px;
+}
+.bx-pathcol.collapsed > :not(.bx-pathcol-head),
+.bx-pathcol.collapsed .bx-pathcol-head > :not(.bx-icon-btn) {
+  display: none;
+}
+.bx-pathcol.collapsed .bx-pathcol-head {
+  justify-content: center;
+  padding: 0;
 }

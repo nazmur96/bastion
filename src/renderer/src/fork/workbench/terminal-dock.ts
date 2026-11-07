@@ -141,3 +141,40 @@ export function sizeEvenTerminalDock(worktreeId: string, dock: string): void {
     sizeTerminalDock(worktreeId, dock)
   }
 }
+
+const COLLAPSED_SHARE = 1
+let shareBeforeCollapse = WORKBENCH_RATIO
+
+/** The side panel's split and the workbench's share of it, while the panel is on screen. */
+function dockSplit(worktreeId: string): { path: string; workbenchShare: number } | null {
+  const dock = liveTerminalDockId(worktreeId)
+  const layout = useAppStore.getState().layoutByWorktree[worktreeId]
+  const path = dock && layout ? dockSplitPath(layout, dock) : null
+  const split = layout && path !== null ? nodeAt(layout, path) : null
+  return path !== null && split?.type === 'split'
+    ? { path, workbenchShare: split.ratio ?? 0.5 }
+    : null
+}
+
+export function isSidePanelCollapsed(worktreeId: string): boolean {
+  return (dockSplit(worktreeId)?.workbenchShare ?? 0) >= 0.98
+}
+
+/** Hide the side panel by giving the workbench the whole width; show it at its last size. */
+export function toggleSidePanel(worktreeId: string): void {
+  const split = dockSplit(worktreeId)
+  if (!split) {
+    return
+  }
+  const collapsed = split.workbenchShare >= 0.98
+  if (!collapsed) {
+    shareBeforeCollapse = split.workbenchShare
+  }
+  useAppStore
+    .getState()
+    .setTabGroupSplitRatio(
+      worktreeId,
+      split.path,
+      collapsed ? shareBeforeCollapse : COLLAPSED_SHARE
+    )
+}

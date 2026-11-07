@@ -1,4 +1,5 @@
-import { Check } from 'lucide-react'
+import { Check, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { togglePathColumn, usePathColumnCollapsed } from './path-column-store'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import { draftForClaude } from './ask-claude'
@@ -189,6 +190,7 @@ export function InfraPathStepper({
             ? translate('components.devops.path.askClaude', 'Ask Claude to do it')
             : translate('components.devops.path.show', 'Show me')
   const doneCount = stages.filter((stage) => stage.state === 'done').length
+  const collapsed = usePathColumnCollapsed()
   return (
     <>
       <div className="bx-pathcol-head">
@@ -199,6 +201,23 @@ export function InfraPathStepper({
             total: stages.length
           })}
         </span>
+        <button
+          type="button"
+          className="bx-icon-btn"
+          aria-label={
+            collapsed
+              ? translate('components.devops.path.expand', 'Show Project path')
+              : translate('components.devops.path.collapse', 'Hide Project path')
+          }
+          title={
+            collapsed
+              ? translate('components.devops.path.expand', 'Show Project path')
+              : translate('components.devops.path.collapse', 'Hide Project path')
+          }
+          onClick={togglePathColumn}
+        >
+          {collapsed ? <PanelLeftOpen aria-hidden /> : <PanelLeftClose aria-hidden />}
+        </button>
       </div>
       <ol className="bx-vsteps" data-project-path="">
         {stages.map((stage, index) =>

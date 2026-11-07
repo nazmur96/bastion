@@ -2,7 +2,8 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
-import { liveTerminalDockId } from './terminal-dock'
+import { PanelRightClose } from 'lucide-react'
+import { liveTerminalDockId, toggleSidePanel } from './terminal-dock'
 import {
   useOnlyTerminalsInDock,
   useTerminalsInDock,
@@ -70,6 +71,15 @@ export function WorkbenchSectionBar({
             {sectionLabel(id)}
           </button>
         ))}
+        <button
+          type="button"
+          className="bx-icon-btn ml-auto"
+          aria-label={translate('components.sidePanel.hide', 'Hide side panel')}
+          title={translate('components.sidePanel.hide', 'Hide side panel')}
+          onClick={() => toggleSidePanel(worktreeId)}
+        >
+          <PanelRightClose aria-hidden />
+        </button>
       </nav>
     )
   }
