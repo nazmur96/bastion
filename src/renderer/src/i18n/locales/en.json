@@ -21087,7 +21087,8 @@
       "browser": "Browser",
       "checks": "Checks",
       "label": "Side panel",
-      "hide": "Hide side panel"
+      "hide": "Hide side panel",
+      "show": "Show side panel"
     }
   },
   "dashboardPopout": {

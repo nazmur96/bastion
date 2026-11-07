@@ -704,3 +704,9 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-pathcol-head {
   -webkit-app-region: no-drag;
 }
+/* Last in the workbench's tab row, where the hidden side panel was. */
+.bx-side-restore {
+  order: 99;
+  align-self: center;
+  margin: 0 6px 0 4px;
+}

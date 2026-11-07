@@ -2,8 +2,8 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
-import { PanelRightClose } from 'lucide-react'
-import { liveTerminalDockId, toggleSidePanel } from './terminal-dock'
+import { PanelRightClose, PanelRightOpen } from 'lucide-react'
+import { isSidePanelCollapsed, liveTerminalDockId, toggleSidePanel } from './terminal-dock'
 import {
   useOnlyTerminalsInDock,
   useTerminalsInDock,
@@ -47,6 +47,7 @@ export function WorkbenchSectionBar({
     selectKnownWorktreeById(state, worktreeId)?.path.split(/[\\/]/).findLast(Boolean)
   )
   const view = useInfraView(worktreeId)
+  const sideCollapsed = useAppStore(() => isSidePanelCollapsed(worktreeId))
   const section = useSideSection(worktreeId)
   useTerminalsInDock(worktreeId, role === 'workbench' ? groupId : null)
   useWorkbenchAboveDock(worktreeId, role === 'dock' ? groupId : null)
@@ -83,25 +84,43 @@ export function WorkbenchSectionBar({
       </nav>
     )
   }
-  if (role !== 'workbench' || !view) {
+  if (role !== 'workbench') {
     return null
+  }
+  // Hidden, the side panel leaves its open button where it was: the right end of this row.
+  const restore = sideCollapsed ? (
+    <button
+      type="button"
+      className="bx-icon-btn bx-side-restore"
+      aria-label={translate('components.sidePanel.show', 'Show side panel')}
+      title={translate('components.sidePanel.show', 'Show side panel')}
+      onClick={() => toggleSidePanel(worktreeId)}
+    >
+      <PanelRightOpen aria-hidden />
+    </button>
+  ) : null
+  if (!view) {
+    return restore
   }
   // The view the Project path opened reads as the open tab, ahead of chat and files.
   return (
-    <span className="bx-tab" aria-current="page" data-workbench-infra="" data-open="true">
-      <span>
-        {view === 'map'
-          ? translate('components.workbench.fullMap', 'System map')
-          : translate('components.workbench.tools', 'Tools & settings')}
+    <>
+      {restore}
+      <span className="bx-tab" aria-current="page" data-workbench-infra="" data-open="true">
+        <span>
+          {view === 'map'
+            ? translate('components.workbench.fullMap', 'System map')
+            : translate('components.workbench.tools', 'Tools & settings')}
+        </span>
+        <button
+          type="button"
+          className="bx-tab-close"
+          aria-label={translate('components.workbench.closeView', 'Close')}
+          onClick={() => setInfraView(worktreeId, null)}
+        >
+          ×
+        </button>
       </span>
-      <button
-        type="button"
-        className="bx-tab-close"
-        aria-label={translate('components.workbench.closeView', 'Close')}
-        onClick={() => setInfraView(worktreeId, null)}
-      >
-        ×
-      </button>
-    </span>
+    </>
   )
 }
