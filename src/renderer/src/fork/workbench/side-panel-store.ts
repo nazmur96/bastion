@@ -1,4 +1,6 @@
 import { useSyncExternalStore } from 'react'
+import { useAppStore } from '@/store'
+import type { ActiveRightSidebarTab } from '@/store/slices/editor'
 
 /** The right-hand side panel's sections, as in the Bastion prototype. */
 export type SideSection = 'files' | 'changes' | 'terminal' | 'browser' | 'checks'
@@ -31,6 +33,22 @@ function load(): Record<string, SideSection> {
 let sections = load()
 const listeners = new Set<() => void>()
 
+/** The Orca panel each section draws; the store's tab is kept on it so the panel loads. */
+const TAB_FOR_SECTION: Partial<Record<SideSection, ActiveRightSidebarTab>> = {
+  files: 'explorer',
+  changes: 'source-control',
+  checks: 'checks'
+}
+
+/** Point Orca's right-sidebar state at the section's panel (the sidebar itself is not drawn). */
+export function syncSideSection(worktreeId: string): void {
+  const tab = TAB_FOR_SECTION[sections[worktreeId] ?? 'files']
+  const ui = useAppStore.getState()
+  if (tab && ui.rightSidebarTab !== tab) {
+    ui.setRightSidebarTab(tab)
+  }
+}
+
 export function setSideSection(worktreeId: string, section: SideSection): void {
   if (sections[worktreeId] === section) {
     return
@@ -41,6 +59,7 @@ export function setSideSection(worktreeId: string, section: SideSection): void {
   } catch {
     // The section resets to Files next time; nothing else is lost.
   }
+  syncSideSection(worktreeId)
   for (const listener of listeners) {
     listener()
   }

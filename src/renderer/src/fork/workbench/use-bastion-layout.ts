@@ -8,8 +8,16 @@ import {
 } from '../claude-panel/claude-panel-registry'
 import { ensureTerminalDock, liveTerminalDockId } from './terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
+import { setSideSection, syncSideSection, type SideSection } from './side-panel-store'
+
+const SECTION_FOR_TAB: Partial<Record<string, SideSection>> = {
+  explorer: 'files',
+  'source-control': 'changes',
+  checks: 'checks'
+}
 
 let busy = false
+let lastTab: string | null = null
 
 /** Bastion's layout has no separate Claude column: chat is the first tab in the middle, beside
  *  the files and pages it opens. A workspace saved with the column gets its chats moved over. */
@@ -49,9 +57,19 @@ export function useBastionLayout(worktreeId: string): void {
       busy = true
       try {
         foldClaudePanel(worktreeId)
-        if (useAppStore.getState().rightSidebarOpen) {
-          // Orca restores its right sidebar after a workspace opens; the side panel replaces it.
-          useAppStore.getState().setRightSidebarOpen(false)
+        // Orca's right sidebar is never drawn in a workspace; its state stays "open" so its
+        // panels keep loading where the side panel draws them, and a shortcut that picks one of
+        // its tabs picks the side panel's section.
+        const ui = useAppStore.getState()
+        if (!ui.rightSidebarOpen) {
+          ui.setRightSidebarOpen(true)
+        }
+        if (ui.rightSidebarTab !== lastTab) {
+          lastTab = ui.rightSidebarTab
+          const section = SECTION_FOR_TAB[ui.rightSidebarTab]
+          if (section) {
+            setSideSection(worktreeId, section)
+          }
         }
         // The side panel (files, changes, terminal, browser, checks) is always there.
         const workbench = workbenchGroupId(worktreeId)
@@ -62,6 +80,8 @@ export function useBastionLayout(worktreeId: string): void {
         busy = false
       }
     }
+    lastTab = null
+    syncSideSection(worktreeId)
     run()
     return useAppStore.subscribe(run)
   }, [worktreeId])

@@ -592,7 +592,7 @@ button.bx-vstep:hover:not(:disabled) {
   padding: 3px 4px 0;
 }
 .bx-rail-btn {
-  padding: 0 9px;
+  padding: 0 7px;
   border: 0;
   border-radius: 6px 6px 0 0;
   background: transparent;
@@ -636,9 +636,8 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-side-page:hover {
   border-color: var(--bx-muted);
 }
-/* Outside Terminal the pane's own actions (new terminal, Command) are not the panel's. */
-[data-tab-group-strip-id]:has([data-side-section]:not([data-side-section='terminal']))
-  [data-tab-bar-slot]
-  + div {
+/* The side panel's row is its sections and terminal tabs; the pane's extra actions (quick
+   commands, pane menu) would crowd the terminal tabs out. */
+[data-tab-group-strip-id]:has([data-side-section]) [data-tab-bar-slot] + div {
   display: none;
 }

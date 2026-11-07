@@ -72,3 +72,37 @@ export function useWorkbenchAboveDock(worktreeId: string, dockId: string | null)
     return useAppStore.subscribe(heal)
   }, [worktreeId, dockId])
 }
+
+/** The side panel holds only terminals: a file, page or chat opened while it had focus moves to
+ *  the middle, where the person reads and edits it. */
+export function useOnlyTerminalsInDock(worktreeId: string, dockId: string | null): void {
+  useEffect(() => {
+    if (!dockId) {
+      return
+    }
+    const sweep = (): void => {
+      if (moving) {
+        return
+      }
+      const state = useAppStore.getState()
+      const strays = (state.unifiedTabsByWorktree[worktreeId] ?? []).filter(
+        (tab) => tab.groupId === dockId && tab.contentType !== 'terminal'
+      )
+      const workbench = workbenchGroupId(worktreeId)
+      if (strays.length === 0 || !workbench) {
+        return
+      }
+      moving = true
+      try {
+        for (const tab of strays) {
+          useAppStore.getState().moveUnifiedTabToGroup(tab.id, workbench, { activate: true })
+        }
+        useAppStore.getState().focusGroup(worktreeId, workbench)
+      } finally {
+        moving = false
+      }
+    }
+    sweep()
+    return useAppStore.subscribe(sweep)
+  }, [worktreeId, dockId])
+}

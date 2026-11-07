@@ -117,7 +117,7 @@ function nextStep(id: PathStageId): NextStep {
 
 /** Opens the card behind a step: it lives in the Tools view, inside a folded section. */
 /** Cards that stay loaded but are never shown; a step pointing at one goes to Claude. */
-const HIDDEN_CARDS = new Set(['infra-path-launchpad'])
+export const HIDDEN_CARDS = new Set(['infra-path-launchpad'])
 
 export function scrollToInfraCard(card: string): void {
   const element = card ? document.getElementById(card) : null

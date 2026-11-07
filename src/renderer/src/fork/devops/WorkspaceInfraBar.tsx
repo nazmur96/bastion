@@ -34,7 +34,6 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
   const project = useDevopsProject(worktreeId)
   const sidebarOpen = useAppStore((state) => state.sidebarOpen)
-  const rightSidebarOpen = useAppStore((state) => state.rightSidebarOpen)
   const meter = useProjectCostMeter([
     ...(worktree ? [worktree.path] : []),
     ...(project?.members.map((member) => member.repo.path) ?? [])
@@ -54,8 +53,8 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
           ...DRAG,
           // The window's own controls float over the top-left while the sidebar is closed.
           paddingLeft: sidebarOpen ? 12 : 'calc(12px + var(--collapsed-sidebar-header-width))',
-          // With the right sidebar closed, the window controls and its toggle float top-right.
-          paddingRight: rightSidebarOpen ? 12 : 'calc(52px + var(--window-controls-width, 0px))'
+          // Orca's right sidebar is never drawn in a workspace: the window controls float here.
+          paddingRight: 'calc(16px + var(--window-controls-width, 0px))'
         }}
       >
         <b>{name}</b>

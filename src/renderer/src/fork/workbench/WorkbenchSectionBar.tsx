@@ -3,7 +3,11 @@ import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
 import { liveTerminalDockId } from './terminal-dock'
-import { useTerminalsInDock, useWorkbenchAboveDock } from './use-terminal-dock'
+import {
+  useOnlyTerminalsInDock,
+  useTerminalsInDock,
+  useWorkbenchAboveDock
+} from './use-terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
 import { SIDE_SECTIONS, setSideSection, useSideSection, type SideSection } from './side-panel-store'
 
@@ -45,6 +49,7 @@ export function WorkbenchSectionBar({
   const section = useSideSection(worktreeId)
   useTerminalsInDock(worktreeId, role === 'workbench' ? groupId : null)
   useWorkbenchAboveDock(worktreeId, role === 'dock' ? groupId : null)
+  useOnlyTerminalsInDock(worktreeId, role === 'dock' ? groupId : null)
   if (role === 'dock') {
     return (
       <nav

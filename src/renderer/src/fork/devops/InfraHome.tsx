@@ -18,7 +18,7 @@ import { useSystemMap } from './use-system-map'
 import { InfraTerraformPlan } from './InfraTerraformPlan'
 import { InfraArgoDeploy } from './InfraArgoDeploy'
 import { InfraLocalDeploy } from './InfraLocalDeploy'
-import { InfraPathStepper, scrollToInfraCard } from './InfraPathStepper'
+import { HIDDEN_CARDS, InfraPathStepper, scrollToInfraCard } from './InfraPathStepper'
 import { InfraCloudCard } from './InfraCloudCard'
 import { InfraHardenCard } from './InfraHardenCard'
 import { InfraWatchCard } from './InfraWatchCard'
@@ -49,14 +49,13 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
   const overlay = useInfraOverlayTarget(worktreeId)
   const showCard = useCallback(
     (card: string) => {
-      // Cards that are loaded but never shown (the playground) keep the person on the path.
-      const element = document.getElementById(card)
-      if (!element || element.closest('[data-infra-playground]')) {
+      // The Launchpad is never shown: its step stays on the path and goes to Claude instead.
+      if (!card || HIDDEN_CARDS.has(card)) {
         return false
       }
       setInfraView(worktreeId, 'tools')
-      // The Tools view shows on the next frame; scroll once it has a layout.
-      window.requestAnimationFrame(() => scrollToInfraCard(card))
+      // Tools mounts its cards on open; scroll once they are laid out.
+      window.setTimeout(() => scrollToInfraCard(card), 120)
       return true
     },
     [worktreeId]
