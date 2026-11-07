@@ -14,7 +14,7 @@ import { useDevopsSandbox } from './use-devops-sandbox'
 import type { DevopsContextTone } from '../../../../shared/fork-devops-context'
 
 type AppRegion = React.CSSProperties & { WebkitAppRegion: 'drag' | 'no-drag' }
-/** The bar is window chrome: it drags the window, its button does not. */
+/** Part of the bar is window chrome: its empty stretch drags the window, its buttons do not. */
 const DRAG: AppRegion = { WebkitAppRegion: 'drag' }
 const NO_DRAG: AppRegion = { WebkitAppRegion: 'no-drag' }
 
@@ -55,7 +55,6 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
         className="bx-bar"
         data-workspace-infra-bar=""
         style={{
-          ...DRAG,
           // The window's own controls float over the top-left while the sidebar is closed.
           paddingLeft: sidebarOpen ? 12 : 'calc(12px + var(--collapsed-sidebar-header-width))',
           // Orca's right sidebar is never drawn in a workspace: the window controls float here.
@@ -97,9 +96,12 @@ function Bar({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
             })}
           </span>
         ) : null}
+        {/* Only this empty stretch drags the window: Electron lets a drag region swallow clicks
+            on any control it overlaps that is not its descendant, like the floating titlebar. */}
+        <span className="flex-1 self-stretch" style={DRAG} aria-hidden />
         <button
           type="button"
-          className="bx-icon-btn ml-auto"
+          className="bx-icon-btn"
           style={NO_DRAG}
           aria-pressed={!pathCollapsed}
           aria-label={translate('components.devops.bar.togglePath', 'Show or hide Project path')}

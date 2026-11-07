@@ -693,3 +693,14 @@ button.bx-vstep:hover:not(:disabled) {
   justify-content: center;
   padding: 0;
 }
+
+/* Orca's tab strips are window-drag regions; Bastion's controls inside them must opt out or
+   Electron hands their clicks to the window manager. */
+.bx-rail,
+.bx-rail-btn,
+.bx-tab,
+.bx-tab-close,
+.bx-icon-btn,
+.bx-pathcol-head {
+  -webkit-app-region: no-drag;
+}
