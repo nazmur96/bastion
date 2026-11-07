@@ -682,16 +682,14 @@ button.bx-vstep:hover:not(:disabled) {
   align-self: center;
 }
 /* Folded, the column is a thin strip with only its open button. */
+/* Folded, the column is gone; its Show button waits at the start of the workbench's tab row. */
 .bx-pathcol.collapsed {
-  width: 36px;
-}
-.bx-pathcol.collapsed > :not(.bx-pathcol-head),
-.bx-pathcol.collapsed .bx-pathcol-head > :not(.bx-icon-btn) {
   display: none;
 }
-.bx-pathcol.collapsed .bx-pathcol-head {
-  justify-content: center;
-  padding: 0;
+.bx-path-restore {
+  order: -1;
+  align-self: center;
+  margin: 0 2px 0 6px;
 }
 
 /* Orca's tab strips are window-drag regions; Bastion's controls inside them must opt out or

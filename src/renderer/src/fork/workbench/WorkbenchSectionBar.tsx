@@ -2,7 +2,8 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
-import { PanelRightClose, PanelRightOpen } from 'lucide-react'
+import { PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react'
+import { togglePathColumn, usePathColumnCollapsed } from '../devops/path-column-store'
 import { isSidePanelCollapsed, liveTerminalDockId, toggleSidePanel } from './terminal-dock'
 import {
   useOnlyTerminalsInDock,
@@ -48,6 +49,7 @@ export function WorkbenchSectionBar({
   )
   const view = useInfraView(worktreeId)
   const sideCollapsed = useAppStore(() => isSidePanelCollapsed(worktreeId))
+  const pathCollapsed = usePathColumnCollapsed()
   const section = useSideSection(worktreeId)
   useTerminalsInDock(worktreeId, role === 'workbench' ? groupId : null)
   useWorkbenchAboveDock(worktreeId, role === 'dock' ? groupId : null)
@@ -99,12 +101,29 @@ export function WorkbenchSectionBar({
       <PanelRightOpen aria-hidden />
     </button>
   ) : null
+  const restorePath = pathCollapsed ? (
+    <button
+      type="button"
+      className="bx-icon-btn bx-path-restore"
+      aria-label={translate('components.devops.path.expand', 'Show Project path')}
+      title={translate('components.devops.path.expand', 'Show Project path')}
+      onClick={togglePathColumn}
+    >
+      <PanelLeftOpen aria-hidden />
+    </button>
+  ) : null
   if (!view) {
-    return restore
+    return (
+      <>
+        {restorePath}
+        {restore}
+      </>
+    )
   }
   // The view the Project path opened reads as the open tab, ahead of chat and files.
   return (
     <>
+      {restorePath}
       {restore}
       <span className="bx-tab" aria-current="page" data-workbench-infra="" data-open="true">
         <span>
