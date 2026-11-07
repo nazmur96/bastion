@@ -1,20 +1,20 @@
-/* Bastion: the workbench prototype (docs/fork/mockups/workbench-video.html), carbon-copied.
-   Its palette replaces Orca's dark tokens; the .bx-* classes are its components at app scale
-   (the video canvas is 1920px with a 20px base, so sizes here are about 0.7 of it). */
+/* Bastion's look: one neutral dark surface in the manner of Cursor. Panels share the same
+   ground and are told apart by space, not boxes; a single faint line where regions meet; one
+   lavender accent used sparingly. Orca's tokens map onto this palette, so Orca's own panels follow. */
 :root,
 .dark {
-  --bx-bg: #0b0d12;
-  --bx-panel: #11141b;
-  --bx-panel2: #171b25;
-  --bx-line: #242a38;
-  --bx-text: #e3e8f1;
-  --bx-muted: #8a93a6;
-  --bx-faint: #4e566a;
-  --bx-accent: #d97757;
-  --bx-ok: #3fb68b;
+  --bx-bg: #141414;
+  --bx-panel: #1b1b1b;
+  --bx-panel2: #232323;
+  --bx-line: #232323;
+  --bx-text: #e6e6e6;
+  --bx-muted: #9b9b9b;
+  --bx-faint: #6e6e6e;
+  --bx-accent: #c7b8ff;
+  --bx-ok: #4fbf8f;
   --bx-warn: #e2b340;
-  --bx-bad: #e5534b;
-  --bx-info: #5b9cf6;
+  --bx-bad: #e5675f;
+  --bx-info: #7fb0ff;
 }
 
 .dark {
@@ -22,10 +22,10 @@
   --orca-security-foreground: var(--bx-text);
   --orca-security-card: var(--bx-panel);
   --orca-security-card-foreground: var(--bx-text);
-  --orca-security-popover: var(--bx-panel);
+  --orca-security-popover: #1c1c1c;
   --orca-security-popover-foreground: var(--bx-text);
-  --orca-security-primary: var(--bx-accent);
-  --orca-security-primary-foreground: #1a0d07;
+  --orca-security-primary: var(--bx-text);
+  --orca-security-primary-foreground: #141414;
   --orca-security-secondary: var(--bx-panel2);
   --orca-security-secondary-foreground: var(--bx-text);
   --orca-security-muted: var(--bx-panel2);
@@ -33,16 +33,16 @@
   --orca-security-accent: var(--bx-panel2);
   --orca-security-accent-foreground: var(--bx-text);
   --orca-security-border: var(--bx-line);
-  --orca-security-input: var(--bx-line);
-  --orca-security-ring: var(--bx-accent);
+  --orca-security-input: #2a2a2a;
+  --orca-security-ring: #5a5a5a;
   --background: var(--bx-bg);
   --foreground: var(--bx-text);
   --card: var(--bx-panel);
   --card-foreground: var(--bx-text);
-  --popover: var(--bx-panel);
+  --popover: #1c1c1c;
   --popover-foreground: var(--bx-text);
-  --primary: var(--bx-accent);
-  --primary-foreground: #1a0d07;
+  --primary: var(--bx-text);
+  --primary-foreground: #141414;
   --secondary: var(--bx-panel2);
   --secondary-foreground: var(--bx-text);
   --muted: var(--bx-panel2);
@@ -50,249 +50,165 @@
   --accent: var(--bx-panel2);
   --accent-foreground: var(--bx-text);
   --border: var(--bx-line);
-  --input: var(--bx-line);
-  --ring: var(--bx-accent);
+  --input: #2a2a2a;
+  --ring: #5a5a5a;
   --destructive: var(--bx-bad);
   --status-success: var(--bx-ok);
   --status-warning: var(--bx-warn);
-  --sidebar: #0c0f14;
+  --sidebar: var(--bx-bg);
   --sidebar-foreground: var(--bx-text);
   --sidebar-accent: var(--bx-panel2);
   --sidebar-accent-foreground: var(--bx-text);
   --sidebar-border: var(--bx-line);
-  --worktree-sidebar: #0c0f14;
+  --worktree-sidebar: var(--bx-bg);
   --worktree-sidebar-foreground: var(--bx-text);
   --worktree-sidebar-accent: var(--bx-panel2);
   --worktree-sidebar-accent-foreground: var(--bx-text);
   --worktree-sidebar-border: var(--bx-line);
+  --bg-titlebar: var(--bx-bg);
+  /* The split handle between panes is a hairline, brighter only while dragged. */
+  --tab-group-split-divider: var(--bx-line);
+  --tab-group-split-divider-strong: #4a4a4a;
 }
 
-/* Top bar: project, where commands land, what real cloud costs. */
+/* Top bar: project, where commands land, what real cloud costs. Same ground as everything. */
 .bx-bar {
   display: flex;
+  flex: none;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
   /* Orca's titlebar is 36px: the bar sits flush with the floating window controls. */
   height: 36px;
-  flex: none;
   padding: 0 12px;
   border-bottom: 1px solid var(--bx-line);
   background: var(--bx-bg);
   color: var(--bx-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 .bx-bar b {
   color: var(--bx-text);
+  font-weight: 500;
 }
+/* Context reads as text with a status dot, not as outlined pills. */
 .bx-chip {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  max-width: 260px;
-  padding: 1px 8px;
-  border: 1px solid var(--bx-line);
-  border-radius: 999px;
+  gap: 6px;
+  max-width: 280px;
   overflow: hidden;
   color: var(--bx-muted);
-  font:
-    11px ui-monospace,
-    monospace;
+  font-size: 12.5px;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.bx-chip.local {
-  color: var(--bx-ok);
-  border-color: rgb(63 182 139 / 0.45);
+.bx-chip::before {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--bx-faint);
+  content: '';
+}
+.bx-chip.local::before {
+  background: var(--bx-ok);
+}
+.bx-chip.real::before {
+  background: var(--bx-warn);
 }
 .bx-chip.real {
   color: var(--bx-warn);
-  border-color: rgb(226 179 64 / 0.55);
+}
+.bx-chip.prod::before {
+  background: var(--bx-bad);
 }
 .bx-chip.prod {
   color: var(--bx-bad);
-  border-color: rgb(229 83 75 / 0.55);
 }
 .bx-meter {
-  padding: 1px 8px;
-  border: 1px solid rgb(226 179 64 / 0.5);
-  border-radius: 999px;
   color: var(--bx-warn);
-  font:
-    11px ui-monospace,
-    monospace;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
 }
 .bx-real-frame {
   position: fixed;
   inset: 0;
   z-index: 50;
   pointer-events: none;
-  border: 2px solid var(--bx-warn);
-  box-shadow: inset 0 0 0 4px rgb(226 179 64 / 0.14);
+  border: 1px solid rgb(226 179 64 / 0.75);
 }
 
-/* Workbench tab strip: rounded tabs, the open one lifted with an accent line on top. */
+/* Tab rows sit on the same ground; the open tab is a soft lighter pill, no accent bar. */
 [data-tab-group-strip-id] {
-  background: #0d1016;
+  border-color: var(--bx-line);
+  background: var(--bx-bg);
+}
+[data-tab-group-strip-id] [data-tab-id] {
+  border-color: transparent;
 }
 [data-tab-group-strip-id] [data-tab-id][data-active='true'] {
-  background: var(--bx-bg);
+  background: var(--bx-panel2);
   color: var(--bx-text);
-  box-shadow: inset 0 2px 0 var(--bx-accent);
+  box-shadow: none;
 }
-/* While the Project path is open, it is the lifted tab, not the file underneath. */
+/* While a Project path view is open, it is the open tab, not the file underneath. */
 [data-tab-group-strip-id]:has([data-workbench-infra][data-open='true'])
   [data-tab-id][data-active='true'] {
   background: transparent;
   color: var(--bx-muted);
-  box-shadow: none;
 }
 .bx-tab {
   display: flex;
+  align-self: center;
   align-items: center;
-  gap: 5px;
-  height: calc(100% - 4px);
-  margin: 4px 2px 0 6px;
+  gap: 6px;
+  height: 26px;
+  margin: 0 2px 0 6px;
   padding: 0 10px;
-  border-radius: 6px 6px 0 0;
+  border-radius: 7px;
   color: var(--bx-muted);
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
 }
 .bx-tab[data-open='true'] {
-  background: var(--bx-bg);
-  color: var(--bx-text);
-  box-shadow: inset 0 2px 0 var(--bx-accent);
-}
-/* The terminal dock reads as the prototype's terminal panel. */
-[data-tab-group-strip-id]:has([data-terminal-dock-label]) {
-  background: #07090c;
-  border-color: #151a24;
-}
-.bx-dock-label {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  color: var(--bx-faint);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.bx-dock-label b {
-  margin-right: 6px;
-  color: var(--bx-text);
-  font-weight: 500;
-}
-
-/* Project path pane. */
-.bx-path {
-  position: absolute;
-  inset: 0;
-  z-index: 30;
-  display: flex;
-  flex-direction: column;
-  padding: 13px 15px;
-  background: var(--bx-bg);
-  color: var(--bx-text);
-  font-size: 13px;
-}
-.bx-stepper {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 10px;
-}
-.bx-step {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  padding: 6px 5px;
-  border: 1px solid var(--bx-line);
-  border-radius: 7px;
-  background: var(--bx-panel);
-  color: var(--bx-faint);
-  font-size: 10.5px;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  transition: all 0.4s;
-}
-.bx-step span:last-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.bx-step .i {
-  display: grid;
-  flex: none;
-  width: 13px;
-  height: 13px;
-  place-items: center;
-  border: 1.5px solid var(--bx-faint);
-  border-radius: 50%;
-  font-size: 8px;
-}
-.bx-step.done {
-  color: var(--bx-text);
-}
-.bx-step.done .i {
-  border-color: var(--bx-ok);
-  background: var(--bx-ok);
-  color: #06120d;
-}
-.bx-step.active {
-  border-color: var(--bx-accent);
-  box-shadow: 0 0 0 1px var(--bx-accent);
-  color: var(--bx-text);
-}
-.bx-step.active .i {
-  border-color: var(--bx-accent);
-}
-.bx-next {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin-bottom: 10px;
-  padding: 10px 13px;
-  border: 1px solid rgb(217 119 87 / 0.45);
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgb(217 119 87 / 0.16), rgb(217 119 87 / 0.04));
-}
-.bx-next .t {
-  color: var(--bx-accent);
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.bx-next .h {
-  font-size: 17px;
-  font-weight: 650;
-}
-.bx-next .s {
-  color: var(--bx-muted);
-  font-size: 12px;
-}
-.bx-btn {
-  margin-left: auto;
-  padding: 8px 13px;
-  border: 0;
-  border-radius: 7px;
-  background: var(--bx-accent);
-  color: #1a0d07;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: transform 0.12s;
-}
-.bx-btn:active {
-  transform: scale(0.94);
-}
-.bx-btn.ghost {
-  border: 1px solid var(--bx-line);
   background: var(--bx-panel2);
   color: var(--bx-text);
+}
+.bx-tab-close {
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--bx-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+.bx-tab-close:hover {
+  background: #2c2c2c;
+  color: var(--bx-text);
+}
+
+/* Buttons: the main action is a light pill, like Cursor's; the rest are quiet. */
+.bx-btn {
+  margin-left: auto;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--bx-text);
+  color: #141414;
+  font: inherit;
+  font-size: 13px;
   font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.bx-btn:hover {
+  background: #ffffff;
+}
+.bx-btn.ghost {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
 }
 .bx-btn.danger {
   background: var(--bx-bad);
@@ -300,66 +216,253 @@
 }
 .bx-btn.sm {
   padding: 4px 9px;
-  font-size: 11px;
+  font-size: 12px;
 }
+.bx-icon-btn {
+  display: grid;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--bx-muted);
+  cursor: pointer;
+}
+.bx-icon-btn:hover {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-icon-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.bx-icon-btn[aria-pressed='false'] {
+  opacity: 0.55;
+}
+
+/* The Project path column on the left: steps top to bottom, the next one opened in place. */
+.bx-pathcol {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 300px;
+  min-height: 0;
+  border-right: 1px solid var(--bx-line);
+  background: var(--bx-bg);
+  color: var(--bx-text);
+  font-size: 13px;
+}
+.bx-pathcol-head {
+  /* Same height as the tab rows beside it, so their bottom lines run straight across. */
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  box-sizing: border-box;
+  padding: 0 6px 0 16px;
+  border-bottom: 1px solid var(--bx-line);
+  color: var(--bx-text);
+  font-size: 13px;
+}
+.bx-pathcol-head b {
+  font-weight: 500;
+}
+.bx-pathcol-head span {
+  margin-left: auto;
+  color: var(--bx-faint);
+  font-size: 12px;
+}
+.bx-pathcol-done {
+  margin: 0 16px 10px;
+  color: var(--bx-muted);
+  font-size: 12.5px;
+}
+/* Folded, the column is gone; its Show button waits at the start of the workbench's tab row. */
+.bx-pathcol.collapsed {
+  display: none;
+}
+.bx-path-restore {
+  order: -1;
+  align-self: center;
+  margin: 0 2px 0 6px;
+}
+.bx-vsteps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 8px;
+  list-style: none;
+}
+.bx-vstep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 31px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--bx-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+button.bx-vstep:hover:not(:disabled) {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-vstep:disabled {
+  color: var(--bx-faint);
+  cursor: default;
+}
+.bx-vstep .i {
+  display: grid;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1.5px solid #4a4a4a;
+  border-radius: 50%;
+}
+.bx-vstep.done {
+  color: var(--bx-text);
+}
+.bx-vstep.done .i {
+  border-color: var(--bx-ok);
+  background: var(--bx-ok);
+  color: #0d1a14;
+}
+.bx-vstep.active {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  height: auto;
+  margin: 2px 0;
+  padding: 10px 12px 12px;
+  background: var(--bx-panel);
+  cursor: default;
+}
+.bx-vstep.active .row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--bx-text);
+  font-weight: 500;
+}
+.bx-vstep.active .i {
+  border-color: var(--bx-accent);
+}
+.bx-vstep.active .n {
+  margin-left: auto;
+  color: var(--bx-faint);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.bx-vstep.active .h {
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.bx-vstep.active .s {
+  color: var(--bx-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.bx-vstep.active .bx-btn {
+  align-self: flex-start;
+  margin: 6px 0 0;
+}
+
+/* The compact system map under the steps, its live run log at the bottom. */
 .bx-mapbox {
   position: relative;
   display: flex;
-  flex-direction: column;
   flex: 1;
+  flex-direction: column;
   min-height: 180px;
   overflow: auto;
-  border: 1px solid var(--bx-line);
-  border-radius: 9px;
-  background:
-    radial-gradient(circle at 1px 1px, #1a1f2b 1px, transparent 0) 0 0 / 17px 17px,
-    var(--bx-bg);
+  border-radius: 10px;
+  background: var(--bx-panel);
+}
+.bx-pathcol .bx-mapbox {
+  margin: 4px 8px 8px;
+}
+.bx-map-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 6px 12px;
 }
 .bx-mapbox .lbl {
   color: var(--bx-faint);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12px;
+}
+.bx-map-open {
+  margin-left: auto;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bx-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+.bx-map-open:hover {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
 }
 .bx-mapbox .empty {
   padding: 24px 12px;
-  text-align: center;
   color: var(--bx-faint);
-  font-size: 12px;
+  font-size: 12.5px;
+  text-align: center;
+}
+.bx-map-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 8px 10px;
 }
 .bx-node {
   position: relative;
   min-width: 0;
-  padding: 6px 9px;
-  border: 1px solid var(--bx-line);
-  border-radius: 7px;
-  background: var(--bx-panel);
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--bx-panel2);
   color: var(--bx-text);
   text-align: left;
   cursor: pointer;
-  animation: bx-node-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation: bx-node-in 0.4s ease-out;
+}
+.bx-node.wide {
+  grid-column: span 2;
 }
 .bx-node:hover {
-  border-color: var(--bx-muted);
+  background: #2a2a2a;
 }
 .bx-node .k {
-  color: var(--bx-muted);
-  font-size: 8px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  color: var(--bx-faint);
+  font-size: 11px;
 }
 .bx-node .n {
   overflow: hidden;
-  font-size: 12px;
+  font-size: 12.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .bx-node .d {
   position: absolute;
-  top: 7px;
-  right: 7px;
-  width: 7px;
-  height: 7px;
+  top: 9px;
+  right: 9px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--bx-ok);
 }
@@ -367,7 +470,7 @@
   background: var(--bx-warn);
 }
 .bx-node.bad {
-  border-color: var(--bx-bad);
+  box-shadow: inset 0 0 0 1px rgb(229 103 95 / 0.6);
 }
 .bx-node.bad .d {
   background: var(--bx-bad);
@@ -375,30 +478,18 @@
 @keyframes bx-node-in {
   from {
     opacity: 0;
-    transform: scale(0.85);
+    transform: translateY(2px);
   }
 }
-.bx-edges {
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-}
-.bx-edges path {
-  fill: none;
-  stroke: #2e3647;
-  stroke-width: 1.5;
-}
-/* The run log is drawn into the bottom of the map, like the prototype's terminal. */
 .bx-log {
   position: sticky;
   bottom: 0;
   left: 0;
   margin-top: auto;
-  padding: 7px 11px;
-  border-top: 1px solid #151a24;
-  background: rgb(7 9 12 / 0.92);
-  color: #9aa5b8;
+  padding: 8px 12px;
+  border-top: 1px solid var(--bx-line);
+  background: #161616;
+  color: #a8a8a8;
   font:
     11.5px/1.6 ui-monospace,
     monospace;
@@ -416,193 +507,26 @@
   color: var(--bx-text);
 }
 .bx-log .run {
-  color: var(--bx-muted);
-}
-
-/* The Project path column on the left: steps top to bottom, the next one opened in place. */
-.bx-pathcol {
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  width: 300px;
-  min-height: 0;
-  border-right: 1px solid var(--bx-line);
-  background: #0c0f14;
-  color: var(--bx-text);
-  font-size: 13px;
-}
-.bx-pathcol-head {
-  /* Same height as the tab rows beside it, so their bottom lines run straight across. */
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  box-sizing: border-box;
-  padding: 0 6px 0 14px;
-  border-bottom: 1px solid var(--border);
-}
-.bx-pathcol-head span {
-  margin-left: auto;
-  color: var(--bx-muted);
-  font-size: 12px;
-}
-.bx-pathcol-done {
-  margin: 0 14px 8px;
-  color: var(--bx-muted);
-  font-size: 12px;
-}
-.bx-vsteps {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  margin: 0;
-  padding: 10px;
-  list-style: none;
-}
-.bx-vstep {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  width: 100%;
-  padding: 6px 9px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--bx-muted);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-button.bx-vstep:hover:not(:disabled) {
-  background: var(--bx-panel2);
-  color: var(--bx-text);
-}
-.bx-vstep:disabled {
-  cursor: default;
-  opacity: 0.6;
-}
-.bx-vstep .i {
-  display: grid;
-  flex: none;
-  width: 17px;
-  height: 17px;
-  place-items: center;
-  box-sizing: border-box;
-  border: 2px solid var(--bx-faint);
-  border-radius: 50%;
-}
-.bx-vstep.done {
-  color: var(--bx-text);
-}
-.bx-vstep.done .i {
-  border-color: var(--bx-ok);
-  background: var(--bx-ok);
-  color: #06120d;
-}
-.bx-vstep.active {
-  flex-direction: column;
-  align-items: stretch;
-  gap: 5px;
-  padding: 10px 11px;
-  border: 1px solid rgb(217 119 87 / 0.55);
-  border-radius: 10px;
-  background: linear-gradient(135deg, rgb(217 119 87 / 0.16), rgb(217 119 87 / 0.04));
-  cursor: default;
-}
-.bx-vstep.active .row {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--bx-text);
-  font-weight: 600;
-}
-.bx-vstep.active .i {
-  border-color: var(--bx-accent);
-}
-.bx-vstep.active .n {
-  margin-left: auto;
-  color: var(--bx-accent);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.bx-vstep.active .h {
-  font-size: 15px;
-  font-weight: 650;
-}
-.bx-vstep.active .s {
-  color: var(--bx-muted);
-  font-size: 12px;
-}
-.bx-vstep.active .bx-btn {
-  align-self: flex-start;
-  margin: 3px 0 0;
-}
-.bx-pathcol .bx-mapbox {
-  margin: 0 10px 10px;
-}
-.bx-map-head {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 8px 6px 10px;
-}
-.bx-map-open {
-  margin-left: auto;
-  padding: 3px 8px;
-  border: 1px solid var(--bx-line);
-  border-radius: 7px;
-  background: var(--bx-panel);
-  color: var(--bx-text);
-  font-size: 11px;
-  cursor: pointer;
-}
-.bx-map-open:hover {
-  border-color: var(--bx-muted);
-}
-.bx-map-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
-  padding: 0 10px 10px;
-}
-.bx-node.wide {
-  grid-column: span 2;
-}
-.bx-tab-close {
-  margin-left: 4px;
-  padding: 0 4px;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--bx-muted);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-}
-.bx-tab-close:hover {
-  background: var(--bx-panel2);
-  color: var(--bx-text);
+  color: var(--bx-faint);
 }
 
 /* The right-hand side panel: section buttons in its tab row, Orca's panels over its body. */
 .bx-rail {
   display: flex;
   flex: 1;
-  align-items: stretch;
+  align-items: center;
   gap: 2px;
   min-width: 0;
-  padding: 3px 4px 0;
+  padding: 0 6px;
 }
 .bx-rail-btn {
-  padding: 0 7px;
+  height: 26px;
+  padding: 0 9px;
   border: 0;
-  border-radius: 6px 6px 0 0;
+  border-radius: 7px;
   background: transparent;
   color: var(--bx-muted);
-  font-size: 12px;
+  font-size: 13px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -610,11 +534,13 @@ button.bx-vstep:hover:not(:disabled) {
   color: var(--bx-text);
 }
 .bx-rail-btn[aria-pressed='true'] {
-  background: #0c0f14;
+  background: var(--bx-panel2);
   color: var(--bx-text);
-  box-shadow: inset 0 2px 0 var(--bx-accent);
 }
-/* Outside Terminal the side panel's own tabs (terminals) and actions step aside. */
+.bx-rail .bx-icon-btn {
+  margin-left: auto;
+}
+/* Outside Terminal the side panel's own tabs (terminals) step aside. */
 [data-tab-group-strip-id]:has([data-side-section]:not([data-side-section='terminal']))
   [data-tab-bar-slot] {
   display: none;
@@ -622,16 +548,19 @@ button.bx-vstep:hover:not(:disabled) {
 [data-tab-group-strip-id]:has([data-side-section='terminal']) .bx-rail {
   flex: none;
 }
+/* The side panel's row is its sections and terminal tabs; the pane's extra actions (quick
+   commands, pane menu) would crowd the terminal tabs out. */
+[data-tab-group-strip-id]:has([data-side-section]) [data-tab-bar-slot] + div {
+  display: none;
+}
 .bx-side-label {
   color: var(--bx-faint);
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 12px;
 }
 .bx-side-page {
-  padding: 8px 10px;
-  border: 1px solid var(--bx-line);
-  border-radius: 9px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 8px;
   background: var(--bx-panel);
   color: var(--bx-text);
   font-size: 13px;
@@ -639,12 +568,13 @@ button.bx-vstep:hover:not(:disabled) {
   cursor: pointer;
 }
 .bx-side-page:hover {
-  border-color: var(--bx-muted);
+  background: var(--bx-panel2);
 }
-/* The side panel's row is its sections and terminal tabs; the pane's extra actions (quick
-   commands, pane menu) would crowd the terminal tabs out. */
-[data-tab-group-strip-id]:has([data-side-section]) [data-tab-bar-slot] + div {
-  display: none;
+/* Last in the workbench's tab row, where the hidden side panel was. */
+.bx-side-restore {
+  order: 99;
+  align-self: center;
+  margin: 0 6px 0 4px;
 }
 
 /* The titlebar mark is Bastion's full-color icon, not Orca's tinted line logo. */
@@ -653,43 +583,6 @@ button.bx-vstep:hover:not(:disabled) {
   height: 18px;
   opacity: 1;
   filter: none;
-}
-
-.bx-icon-btn {
-  display: grid;
-  flex: none;
-  width: 24px;
-  height: 24px;
-  place-items: center;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--bx-muted);
-  cursor: pointer;
-}
-.bx-icon-btn:hover {
-  background: var(--bx-panel2);
-  color: var(--bx-text);
-}
-.bx-icon-btn svg {
-  width: 15px;
-  height: 15px;
-}
-.bx-icon-btn[aria-pressed='false'] {
-  opacity: 0.55;
-}
-.bx-rail .bx-icon-btn {
-  align-self: center;
-}
-/* Folded, the column is a thin strip with only its open button. */
-/* Folded, the column is gone; its Show button waits at the start of the workbench's tab row. */
-.bx-pathcol.collapsed {
-  display: none;
-}
-.bx-path-restore {
-  order: -1;
-  align-self: center;
-  margin: 0 2px 0 6px;
 }
 
 /* Orca's tab strips are window-drag regions; Bastion's controls inside them must opt out or
@@ -702,9 +595,122 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-pathcol-head {
   -webkit-app-region: no-drag;
 }
-/* Last in the workbench's tab row, where the hidden side panel was. */
-.bx-side-restore {
-  order: 99;
-  align-self: center;
-  margin: 0 6px 0 4px;
+
+/* The start page: what the middle shows with no tab open, as in Cursor's empty window. */
+.bx-start {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bx-bg);
+}
+.bx-start-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(620px, 100%);
+}
+.bx-start-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.bx-picker {
+  display: inline-flex;
+  max-width: 420px;
+  white-space: nowrap;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bx-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.bx-picker:hover {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-picker svg {
+  width: 14px;
+  height: 14px;
+}
+.bx-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px 14px;
+  border-radius: 14px;
+  background: var(--bx-panel);
+  box-shadow: inset 0 0 0 1px #262626;
+}
+.bx-composer:focus-within {
+  box-shadow: inset 0 0 0 1px #3a3a3a;
+}
+.bx-composer textarea {
+  min-height: 44px;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--bx-text);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bx-composer textarea::placeholder {
+  color: var(--bx-faint);
+}
+.bx-composer-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--bx-muted);
+  font-size: 12.5px;
+}
+.bx-send {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--bx-text);
+  color: #141414;
+  cursor: pointer;
+}
+.bx-send svg {
+  width: 15px;
+  height: 15px;
+}
+.bx-start-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bx-chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  box-shadow: inset 0 0 0 1px #2c2c2c;
+  color: var(--bx-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.bx-chip-btn:hover {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-chip-btn svg {
+  width: 14px;
+  height: 14px;
 }

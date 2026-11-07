@@ -21089,6 +21089,20 @@
       "label": "Side panel",
       "hide": "Hide side panel",
       "show": "Show side panel"
+    },
+    "start": {
+      "noFolder": "No folder",
+      "folders": "Folders",
+      "openFolder": "Open another folder…",
+      "thisComputer": "This computer",
+      "remote": "Remote machine…",
+      "ask": "Ask Claude",
+      "placeholder": "Ask Claude to plan, build or fix something in this project",
+      "agent": "Claude",
+      "send": "Start chat",
+      "open": "Open folder",
+      "clone": "Clone from Git",
+      "create": "New project"
     }
   },
   "dashboardPopout": {

@@ -1,22 +1,18 @@
 import { Plus } from 'lucide-react'
 import { translate } from '@/i18n/i18n'
 import { useAppStore } from '@/store'
-import { isClaudePanelHidden } from './claude-panel-registry'
-import { newClaudeChatInPanel, showClaudePanel } from './claude-panel-actions'
-import { ensureClaudePanel, liveClaudePanelGroupId } from './ensure-claude-panel'
+import { launchClaudeChatInPanel } from './ensure-claude-panel'
+import { workbenchGroupId } from '../workbench/workbench-terminals'
 
+/** Bastion keeps chats in the middle: a new agent is a new chat tab there, composer focused. */
 function startNewAgent(worktreeId: string): void {
-  if (isClaudePanelHidden()) {
-    showClaudePanel(worktreeId)
-  }
-  if (liveClaudePanelGroupId(worktreeId)) {
-    newClaudeChatInPanel(worktreeId)
-  } else {
-    ensureClaudePanel(worktreeId)
+  const middle = workbenchGroupId(worktreeId)
+  if (middle) {
+    launchClaudeChatInPanel(worktreeId, middle, { focusComposer: true })
   }
 }
 
-/** Cursor's "New agent": a fresh Claude chat in the current workspace's panel. */
+/** Cursor's "New agent": a fresh Claude chat in the current workspace. */
 export function NewAgentSidebarButton(): React.JSX.Element {
   const worktreeId = useAppStore((s) => s.activeWorktreeId)
   return (

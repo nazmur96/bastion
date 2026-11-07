@@ -3,6 +3,7 @@ import { useAppStore } from '@/store'
 import { workbenchGroupId } from '../workbench/workbench-terminals'
 import { setInfraOverlayTarget, setInfraView, useInfraView } from './infra-home-store'
 import { HidePaneSurfaces } from '../workbench/HidePaneSurfaces'
+import { WorkbenchStart } from '../workbench/WorkbenchStart'
 
 /** The workbench body's cover for the Project path's full map and Tools view; the path column
  *  draws into it, so they read as tabs beside chat and files. */
@@ -19,6 +20,9 @@ export function InfraHomeOverlay({
     (state) =>
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId
   )
+  // Select the stable list, count after: a filtered selector result is new on every read.
+  const tabs = useAppStore((state) => state.unifiedTabsByWorktree[worktreeId])
+  const empty = !(tabs ?? []).some((tab) => tab.groupId === groupId)
   const seenTab = useRef(activeTabId)
   useEffect(() => {
     // Picking a tab in this group means the person wants that tab, not the map or Tools.
@@ -39,6 +43,7 @@ export function InfraHomeOverlay({
   return (
     <>
       {view ? <HidePaneSurfaces groupId={groupId} /> : null}
+      {empty && !view ? <WorkbenchStart worktreeId={worktreeId} groupId={groupId} /> : null}
       <div
         ref={register}
         hidden={!view}

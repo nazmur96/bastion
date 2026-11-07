@@ -3,11 +3,11 @@ import type { TerminalThemeMap } from './types'
 export const DEFAULT_TERMINAL_THEMES: TerminalThemeMap = {
   // Fork: the Bastion prototype's terminal panel (docs/fork/mockups/workbench-video.html).
   'Bastion Dark': {
-    background: '#07090c',
-    foreground: '#9aa5b8',
-    cursor: '#e3e8f1',
-    cursorAccent: '#07090c',
-    selectionBackground: '#2c3446',
+    background: '#141414',
+    foreground: '#d4d4d4',
+    cursor: '#e6e6e6',
+    cursorAccent: '#141414',
+    selectionBackground: '#343434',
     selectionForeground: '#e3e8f1',
     black: '#11141b',
     red: '#e5534b',
