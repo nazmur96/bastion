@@ -1,6 +1,7 @@
 import { createElement } from 'react'
 import type { LucideProps } from 'lucide-react'
-import logo from '../../../../../resources/logo.svg'
+// Fork: app settings use Bastion's mark; cloud account naming stays Orca.
+import logo from '../../../../../resources/icon-source/bastion.svg'
 import { cn } from '@/lib/utils'
 
 export function OrcaLogoSettingsIcon({ className }: LucideProps): React.JSX.Element {
@@ -8,6 +9,6 @@ export function OrcaLogoSettingsIcon({ className }: LucideProps): React.JSX.Elem
     src: logo,
     alt: '',
     'aria-hidden': true,
-    className: cn('object-contain invert dark:invert-0', className)
+    className: cn('object-contain', className)
   })
 }

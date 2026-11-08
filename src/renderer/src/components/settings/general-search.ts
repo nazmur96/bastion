@@ -30,7 +30,7 @@ export const getGeneralWorkspaceSearchEntries = createLocalizedCatalog(() => [
     ),
     description: translate(
       'auto.components.settings.general.search.externalWorktreesDescription',
-      'Choose whether worktrees created outside Orca appear by default.'
+      'Choose whether worktrees created outside Bastion appear by default.'
     ),
     keywords: [
       ...translateSearchKeyword(
@@ -245,7 +245,7 @@ export const getGeneralUpdateSearchEntries = createLocalizedCatalog(() => [
     title: translate('auto.components.settings.general.search.e15af4eb64', 'Check for Updates'),
     description: translate(
       'auto.components.settings.general.search.79ff46776e',
-      'Check for app updates and install a newer Orca version.'
+      'Check for app updates and install a newer Bastion version.'
     ),
     keywords: [
       ...translateSearchKeyword('auto.components.settings.general.search.f89a94773c', 'update'),

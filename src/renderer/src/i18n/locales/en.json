@@ -1988,16 +1988,16 @@
         "2cd4ea75da": "Workspace defaults, app setup, and maintenance.",
         "13241992bd": "General",
         "724c440e72": "getting started",
-        "0505d0df29": "get started with Orca",
+        "0505d0df29": "get started with Bastion",
         "ea0b1bc7b8": "setup guide",
         "17005c73d4": "Open the onboarding checklist for setup and milestone steps.",
         "ded9e9032f": "Onboarding checklist",
-        "5f32ac08f3": "Finish the onboarding checklist for core Orca workflows.",
+        "5f32ac08f3": "Finish the onboarding checklist for core Bastion workflows.",
         "8ac3de82f5": "Local speech-to-text dictation with on-device models.",
         "6a50cdcd7c": "Voice",
         "0059bd17f3": "Enable agents to control any app on your computer.",
         "b35e92364b": "Computer Use",
-        "cd50cec5d7": "Coordinate multiple coding agents through Orca.",
+        "cd50cec5d7": "Coordinate multiple coding agents through Bastion.",
         "58a868e8e4": "Orchestration",
         "7c79d3b7bf": "Optional",
         "b1c2f8b0ac": "Optional account switching and usage setup for Claude, Codex, Gemini, OpenCode Go, MiniMax, and Grok.",
@@ -2016,7 +2016,7 @@
         "devSearchKeywordNotification": "notification",
         "projectHostsSummary": "{{value0}} hosts",
         "linearTitle": "Linear",
-        "linearDescription": "How Linear works in Orca, setup checklist, agent skill, and example prompts.",
+        "linearDescription": "How Linear works in Bastion, setup checklist, agent skill, and example prompts.",
         "pluginsTitle": "Plugins",
         "pluginsDescription": "Install and manage Orca plugins (Alpha).",
         "tasksDescription": "Connect providers, install the Linear skill, and choose what appears in Tasks.",
@@ -7356,7 +7356,7 @@
       "setup": {
         "guide": {
           "SetupGuideModal": {
-            "3598a3ca0c": "Finish the core workflows that make Orca useful for parallel agent work.",
+            "3598a3ca0c": "Finish the core workflows that make Bastion useful for parallel agent work.",
             "48a9e5ef2d": "Getting started",
             "f3b5ffb2a6": "Hide checklist from sidebar"
           },
@@ -7531,7 +7531,7 @@
         },
         "AdvancedPane": {
           "40b29e0bf3": "Restart",
-          "87a2cb2ac8": "Orca applies this networking mode at startup.",
+          "87a2cb2ac8": "Bastion applies this networking mode at startup.",
           "89958d7edf": "Restart required",
           "b3ad629640": "Use only when a corporate VPN or proxy breaks update downloads with HTTP/2 protocol errors. It affects all Electron networking after restart.",
           "6627e75c92": "Explain HTTP/1.1 compatibility",
@@ -8034,12 +8034,12 @@
           "b492397d34": "Preferred presentation format for showing git diffs by default.",
           "a5db1d3975": "ms",
           "fc5c5306ff": "ms.",
-          "8112cd6dcf": "How long Orca waits after your last edit before saving automatically. First launch defaults to",
+          "8112cd6dcf": "How long Bastion waits after your last edit before saving automatically. First launch defaults to",
           "d6cf227ca0": "Auto Save Delay",
-          "1bec6d8318": "How long Orca waits after your last edit before saving automatically.",
+          "1bec6d8318": "How long Bastion waits after your last edit before saving automatically.",
           "70bb30feb1": "Save editor and editable diff changes automatically after a short pause.",
           "0df2e4fd12": "Auto Save Files",
-          "d21136d9ef": "Configure how Orca persists file edits.",
+          "d21136d9ef": "Configure how Bastion persists file edits.",
           "45c6e85c4d": "Editor",
           "8f1afdfbd8": "Diff Word Wrap",
           "4aa4d9fb73": "Wrap long lines in diff editors instead of requiring horizontal scrolling.",
@@ -8062,7 +8062,7 @@
           "476f302aca": "http://proxy.example.com:8080",
           "1e214e265a": "Leave empty to use system proxy settings and inherited proxy environment variables.",
           "f00daf6324": "HTTP Proxy",
-          "823e0f15b1": "Proxy URL for Orca network requests and local terminal children.",
+          "823e0f15b1": "Proxy URL for Bastion network requests and local terminal children.",
           "c46cdbbd4e": "Network",
           "nodeDistMirrorLabel": "Node.js Download Mirror",
           "nodeDistMirrorPlaceholder": "https://mirror.example.com/nodejs/dist",
@@ -8099,7 +8099,7 @@
           "42717918f4": "Download Update (",
           "02dc082e70": "Could not start the update download.",
           "e1a647adc5": "Check for Updates",
-          "ceb579abaf": "Check for app updates and install a newer Orca version.",
+          "ceb579abaf": "Check for app updates and install a newer Bastion version.",
           "d91ebfb87e": "Current version: {{value0}}",
           "f2b1ccc12a": "Updates",
           "bd79d412f0": "Update check failed. {{value0}}",
@@ -8108,7 +8108,7 @@
           "f40d88390d": "You’re on the latest version.",
           "31fd7150cf": "Checking for updates...",
           "d69a09b672": "Updates are checked automatically on launch.",
-          "e3b9d21c07": "is available. Update Orca through your system package manager — Orca cannot install this release itself."
+          "e3b9d21c07": "is available. Update Bastion through your system package manager — Bastion cannot install this release itself."
         },
         "GeneralWorkspaceSettingsSection": {
           "3d538a98f7": "Choose apps available from a workspace's Open in menu.",
@@ -8130,7 +8130,7 @@
           "fb29a73a17": "Show a confirmation dialog before deleting a shared artifact and breaking its public link.",
           "bf46474e33": "Show a confirmation before deleting a shared artifact. Anyone holding its public link loses access.",
           "externalWorktrees": "External worktrees",
-          "externalWorktreesDescription": "Choose which worktrees created outside Orca appear by default on this host."
+          "externalWorktreesDescription": "Choose which worktrees created outside Bastion appear by default on this host."
         },
         "GhosttyImportModal": {
           "9d3e56ca36": "Apply Changes",
@@ -8942,15 +8942,15 @@
           "c9ca101a3b": "Integrations",
           "f9b77539fd": "Workspace defaults, app setup, and maintenance.",
           "7807c11c4d": "General",
-          "6855b0f77d": "Finish the core workflows that make Orca useful for parallel agent work.",
+          "6855b0f77d": "Finish the core workflows that make Bastion useful for parallel agent work.",
           "6d119427ef": "Onboarding checklist",
           "eb1176a14e": "Local speech-to-text dictation with on-device models.",
           "5063bb47a5": "Voice",
           "7118953f14": "Enable agents to control any app on your computer.",
           "c9841721cb": "Computer Use",
-          "475980f53d": "Coordinate multiple coding agents through Orca.",
+          "475980f53d": "Coordinate multiple coding agents through Bastion.",
           "00c3a7950d": "Orchestration",
-          "21f09426ea": "Optional. Orca works with your existing provider logins; add accounts only if you want Orca to help switch between them.",
+          "21f09426ea": "Optional. Bastion works with your existing provider logins; add accounts only if you want Bastion to help switch between them.",
           "ad6c529693": "AI Provider Accounts",
           "ec1ba547f7": "Manage AI agents, set a default, and customize commands.",
           "8afa676615": "Agents",
@@ -8968,7 +8968,7 @@
           "dev": "Dev Tools",
           "devDescription": "Dev-only tools for exercising UI states.",
           "linearTitle": "Linear",
-          "linearDescription": "How Linear works in Orca, setup checklist, agent skill, and example prompts.",
+          "linearDescription": "How Linear works in Bastion, setup checklist, agent skill, and example prompts.",
           "tasksDescription": "Connect providers, install the Linear skill, and choose what appears in Tasks.",
           "remoteServersDescription": "Run Orca on another machine and work on it from here.",
           "noSettingsFoundForQuery": "No settings found for \"{{value0}}\""
@@ -10262,7 +10262,7 @@
             "c9d8c1ce66": "release notes",
             "9e86ccd05c": "version",
             "f89a94773c": "update",
-            "79ff46776e": "Check for app updates and install a newer Orca version.",
+            "79ff46776e": "Check for app updates and install a newer Bastion version.",
             "e15af4eb64": "Check for Updates",
             "baa263d6d8": "agents",
             "bda108e66c": "skill",
@@ -10320,7 +10320,7 @@
             "b2799ba622": "milliseconds",
             "146728ac2c": "delay",
             "86f54575c7": "autosave",
-            "8ea61ad55c": "How long Orca waits after your last edit before saving automatically.",
+            "8ea61ad55c": "How long Bastion waits after your last edit before saving automatically.",
             "14e46c745b": "Auto Save Delay",
             "4469b6fa4e": "save",
             "e9d948d3c3": "Save editor and editable diff changes automatically after a short pause.",
@@ -10380,7 +10380,7 @@
             "hideUnchangedKw": "hide unchanged",
             "foldKw": "fold",
             "externalWorktrees": "External worktrees",
-            "externalWorktreesDescription": "Choose whether worktrees created outside Orca appear by default.",
+            "externalWorktreesDescription": "Choose whether worktrees created outside Bastion appear by default.",
             "editorFontKw": "font",
             "f96cdaf37d": "spellcheck",
             "a51d23f4a1": "spell check",
@@ -21149,6 +21149,9 @@
       "openSkills": "Manage skills",
       "hooksDescription": "Project hooks control setup, archive and workspace commands.",
       "openHooks": "Manage project hooks"
+    },
+    "bastion": {
+      "name": "Bastion"
     }
   },
   "dashboardPopout": {

@@ -856,3 +856,52 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-customize [data-slot='tabs-list'] {
   margin-bottom: 16px;
 }
+
+/* Remaining workbench surfaces share the same neutral canvas. */
+[data-side-panel] {
+  background: var(--background);
+}
+[data-infra-tools] .uppercase {
+  text-transform: none;
+  letter-spacing: normal;
+}
+[data-infra-tools] [data-slot='card'] {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.bx-pathcol .bx-mapbox {
+  background: transparent;
+  border-radius: 0;
+}
+[data-bastion-status] {
+  background: var(--background);
+  color: var(--muted-foreground);
+  border-top-color: var(--border);
+  font-size: 11px;
+}
+[data-bastion-status] button {
+  box-shadow: none;
+}
+.bx-terminal-tabs {
+  scrollbar-width: none;
+}
+.bx-terminal-tabs::-webkit-scrollbar {
+  height: 0;
+}
+.settings-view-shell .bx-settings-body .uppercase {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+[data-infra-tools] [data-infra-section] {
+  margin-bottom: 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+[data-infra-tools] > header > span {
+  border: 0;
+  padding-left: 0;
+  padding-right: 8px;
+}

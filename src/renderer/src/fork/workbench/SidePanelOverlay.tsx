@@ -56,7 +56,7 @@ export function SidePanelOverlay({
   }
   return (
     <div
-      className="absolute inset-0 z-30 flex flex-col overflow-y-auto bg-[#0c0f14] scrollbar-sleek"
+      className="absolute inset-0 z-30 flex flex-col overflow-y-auto bg-background scrollbar-sleek"
       data-side-panel={section}
     >
       <HidePaneSurfaces groupId={groupId} />

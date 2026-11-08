@@ -54,6 +54,9 @@
     }
   },
   "auto": {
+    "App": {
+      "5096cbbc86": "Orca"
+    },
     "components": {
       "GitHubItemDialog": {
         "filesViewed_one": "{{viewed}} / {{count}} file viewed",
@@ -824,6 +827,13 @@
           "imported_other": "Imported {{value0}} themes",
           "over_limit_one": "Importing these themes would exceed the {{value0}} custom terminal theme limit. Deselect {{value1}} new theme and try again.",
           "over_limit_other": "Importing these themes would exceed the {{value0}} custom terminal theme limit. Deselect {{value1}} new themes and try again."
+        }
+      },
+      "setup": {
+        "guide": {
+          "SetupGuideModal": {
+            "3598a3ca0c": "Finish the core workflows that make Bastion useful for parallel agent work."
+          }
         }
       },
       "sidebar": {
