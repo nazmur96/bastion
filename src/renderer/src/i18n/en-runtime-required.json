@@ -1962,6 +1962,9 @@
         }
       }
     },
+    "sidePanel": {
+      "noTerminal": "No terminal"
+    },
     "tab": {
       "bar": {
         "bulkClose": {

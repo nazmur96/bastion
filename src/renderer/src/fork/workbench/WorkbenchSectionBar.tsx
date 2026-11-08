@@ -19,7 +19,6 @@ import {
   useWorkbenchAboveDock
 } from './use-terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
-import { TerminalSwitcher } from './TerminalSwitcher'
 import { SIDE_SECTIONS, setSideSection, useSideSection, type SideSection } from './side-panel-store'
 
 const SECTION_ICONS: Record<SideSection, typeof FileText> = {
@@ -95,9 +94,6 @@ export function WorkbenchSectionBar({
             <span className="lbl">{sectionLabel(id)}</span>
           </button>
         ))}
-        {section === 'terminal' ? (
-          <TerminalSwitcher worktreeId={worktreeId} groupId={groupId} />
-        ) : null}
         <button
           type="button"
           className="bx-icon-btn ml-auto"

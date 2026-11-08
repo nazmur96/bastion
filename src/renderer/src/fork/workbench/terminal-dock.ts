@@ -178,3 +178,27 @@ export function toggleSidePanel(worktreeId: string): void {
       collapsed ? shareBeforeCollapse : COLLAPSED_SHARE
     )
 }
+
+const sharesBeforeMaximize = new Map<string, number>()
+
+export function isTerminalDockMaximized(worktreeId: string): boolean {
+  return (dockSplit(worktreeId)?.workbenchShare ?? 1) < 0.02
+}
+
+export function toggleMaximizeTerminalDock(worktreeId: string): void {
+  const split = dockSplit(worktreeId)
+  if (!split) {
+    return
+  }
+  const maximized = split.workbenchShare < 0.02
+  if (!maximized) {
+    sharesBeforeMaximize.set(worktreeId, split.workbenchShare)
+  }
+  useAppStore
+    .getState()
+    .setTabGroupSplitRatio(
+      worktreeId,
+      split.path,
+      maximized ? (sharesBeforeMaximize.get(worktreeId) ?? WORKBENCH_RATIO) : 0
+    )
+}

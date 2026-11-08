@@ -753,3 +753,71 @@ button.bx-vstep:hover:not(:disabled) {
   width: 14px;
   height: 14px;
 }
+
+/* Terminal tabs have their own row, leaving the side-panel sections legible. */
+.bx-rail {
+  gap: 0;
+  padding: 0 4px;
+}
+.bx-rail-btn {
+  padding: 0 7px;
+  font-size: 12px;
+  gap: 4px;
+}
+.bx-rail-btn svg {
+  display: none;
+}
+.bx-terminal-toolbar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 3px;
+  height: 32px;
+  padding: 0 6px;
+  background: var(--bx-bg);
+  border-bottom: 1px solid var(--bx-line);
+  -webkit-app-region: no-drag;
+}
+.bx-terminal-tabs {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 3px;
+  overflow-x: auto;
+}
+.bx-terminal-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  max-width: 160px;
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--bx-muted);
+  font-size: 12px;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+.bx-terminal-tab span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bx-terminal-tab svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+.bx-terminal-tab:hover,
+.bx-terminal-tab[aria-pressed='true'] {
+  background: var(--bx-panel2);
+  color: var(--bx-text);
+}
+.bx-terminal-toolbar .bx-icon-btn {
+  flex: none;
+}
+.bx-terminal-toolbar .bx-icon-btn svg + svg {
+  display: none;
+}

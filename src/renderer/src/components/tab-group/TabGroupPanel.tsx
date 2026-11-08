@@ -1,4 +1,6 @@
 import { ClaudeEditsBar } from '@/fork/claude-edits/ClaudeEditsBar'
+// Fork: separate terminal toolbar keeps section navigation readable.
+import { TerminalSwitcher } from '@/fork/workbench/TerminalSwitcher'
 import { WorkbenchSectionBar } from '@/fork/workbench/WorkbenchSectionBar'
 import { ClaudePanelHeaderActions } from '@/fork/claude-panel/ClaudePanelHeaderActions'
 import { InfraHomeOverlay } from '@/fork/devops/InfraHomeOverlay'
@@ -327,6 +329,7 @@ export default function TabGroupPanel({
         </div>
       )}
       <ClaudeEditsBar worktreeId={worktreeId} groupId={groupId} />
+      <TerminalSwitcher worktreeId={worktreeId} groupId={groupId} />
 
       <div
         ref={setBodyRef}

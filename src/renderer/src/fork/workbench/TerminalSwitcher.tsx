@@ -1,4 +1,4 @@
-import { ChevronDown, Plus, SquareTerminal, X } from 'lucide-react'
+import { ChevronDown, List, Maximize2, Minimize2, Plus, SquareTerminal, X } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import {
@@ -10,57 +10,113 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { closeTerminalTab } from '@/components/terminal/terminal-tab-actions'
 import { newWorkbenchTerminal } from './workbench-terminals'
+import { useSideSection } from './side-panel-store'
+import {
+  isTerminalDockMaximized,
+  liveTerminalDockId,
+  toggleMaximizeTerminalDock
+} from './terminal-dock'
 
-/** Cursor's terminal header: the open terminal's name with a list of all of them, and +. */
 export function TerminalSwitcher({
   worktreeId,
   groupId
 }: {
   worktreeId: string
   groupId: string
-}): React.JSX.Element {
-  // Select the stable lists, filter after: a filtered selector result is new on every read.
+}): React.JSX.Element | null {
   const tabs = useAppStore((state) => state.unifiedTabsByWorktree[worktreeId])
   const activeTabId = useAppStore(
     (state) =>
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId
   )
+  const isDock = useAppStore(() => liveTerminalDockId(worktreeId) === groupId)
+  const maximized = useAppStore(() => isTerminalDockMaximized(worktreeId))
+  const section = useSideSection(worktreeId)
+  if (!isDock || section !== 'terminal') {
+    return null
+  }
   const terminals = (tabs ?? []).filter(
     (tab) => tab.groupId === groupId && tab.contentType === 'terminal'
   )
   const active = terminals.find((tab) => tab.id === activeTabId) ?? terminals[0]
   const label = (tab: (typeof terminals)[number]): string =>
     tab.customLabel || tab.label || translate('components.sidePanel.terminalName', 'Terminal')
+  const newLabel = translate('components.sidePanel.newTerminal', 'New terminal')
+  const closeLabel = translate('components.sidePanel.closeTerminal', 'Close terminal')
+  const maximizeLabel = maximized
+    ? translate('components.sidePanel.restoreTerminal', 'Restore terminal size')
+    : translate('components.sidePanel.maximizeTerminal', 'Maximise terminal')
   return (
-    <div className="bx-term-switch">
+    <div className="bx-terminal-toolbar" data-terminal-toolbar="">
+      <div className="bx-terminal-tabs scrollbar-sleek">
+        {terminals.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className="bx-terminal-tab"
+            aria-pressed={tab.id === active?.id}
+            title={label(tab)}
+            onClick={() => useAppStore.getState().activateTab(tab.id, { worktreeId })}
+          >
+            <SquareTerminal aria-hidden />
+            <span>{label(tab)}</span>
+          </button>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="bx-icon-btn"
+        title={newLabel}
+        aria-label={newLabel}
+        onClick={() => newWorkbenchTerminal(worktreeId)}
+      >
+        <Plus aria-hidden />
+      </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button type="button" className="bx-picker">
-            <SquareTerminal aria-hidden />
-            {active ? label(active) : translate('components.sidePanel.noTerminal', 'No terminal')}
-            {terminals.length > 1 ? <span className="bx-count">{terminals.length}</span> : null}
+          <button
+            type="button"
+            className="bx-icon-btn"
+            title={translate('components.sidePanel.showTerminalList', 'Show terminal list')}
+            aria-label={translate('components.sidePanel.showTerminalList', 'Show terminal list')}
+          >
+            <List aria-hidden />
             <ChevronDown aria-hidden />
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
+        <DropdownMenuContent align="end">
           {terminals.map((tab) => (
             <DropdownMenuItem
               key={tab.id}
               onSelect={() => useAppStore.getState().activateTab(tab.id, { worktreeId })}
             >
               <SquareTerminal aria-hidden />
-              {label(tab)}
+              <span className="min-w-24 flex-1">{label(tab)}</span>
+              <button
+                type="button"
+                className="bx-icon-btn"
+                title={closeLabel}
+                aria-label={translate('components.sidePanel.closeNamedTerminal', 'Close {{name}}', {
+                  name: label(tab)
+                })}
+                onClick={(event) => {
+                  event.stopPropagation()
+                  closeTerminalTab(tab.id)
+                }}
+              >
+                <X aria-hidden />
+              </button>
             </DropdownMenuItem>
           ))}
           {terminals.length > 0 ? <DropdownMenuSeparator /> : null}
           <DropdownMenuItem onSelect={() => newWorkbenchTerminal(worktreeId)}>
             <Plus aria-hidden />
-            {translate('components.sidePanel.newTerminal', 'New terminal')}
+            {newLabel}
           </DropdownMenuItem>
           {active ? (
             <DropdownMenuItem onSelect={() => closeTerminalTab(active.id)}>
               <X aria-hidden />
-              {translate('components.sidePanel.closeTerminal', 'Close terminal')}
+              {closeLabel}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>
@@ -68,11 +124,12 @@ export function TerminalSwitcher({
       <button
         type="button"
         className="bx-icon-btn"
-        aria-label={translate('components.sidePanel.newTerminal', 'New terminal')}
-        title={translate('components.sidePanel.newTerminal', 'New terminal')}
-        onClick={() => newWorkbenchTerminal(worktreeId)}
+        title={maximizeLabel}
+        aria-label={maximizeLabel}
+        aria-pressed={maximized}
+        onClick={() => toggleMaximizeTerminalDock(worktreeId)}
       >
-        <Plus aria-hidden />
+        {maximized ? <Minimize2 aria-hidden /> : <Maximize2 aria-hidden />}
       </button>
     </div>
   )

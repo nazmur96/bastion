@@ -21115,7 +21115,11 @@
       "terminalName": "Terminal",
       "noTerminal": "No terminal",
       "newTerminal": "New terminal",
-      "closeTerminal": "Close terminal"
+      "closeTerminal": "Close terminal",
+      "restoreTerminal": "Restore terminal size",
+      "maximizeTerminal": "Maximise terminal",
+      "showTerminalList": "Show terminal list",
+      "closeNamedTerminal": "Close {{name}}"
     },
     "start": {
       "noFolder": "No folder",
