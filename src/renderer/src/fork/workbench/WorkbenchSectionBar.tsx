@@ -1,8 +1,16 @@
 import { useAppStore } from '@/store'
-import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
-import { PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react'
+import {
+  FileText,
+  GitBranch,
+  Globe,
+  ListChecks,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  SquareTerminal
+} from 'lucide-react'
 import { togglePathColumn, usePathColumnCollapsed } from '../devops/path-column-store'
 import { isSidePanelCollapsed, liveTerminalDockId, toggleSidePanel } from './terminal-dock'
 import {
@@ -11,7 +19,21 @@ import {
   useWorkbenchAboveDock
 } from './use-terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
+import { TerminalSwitcher } from './TerminalSwitcher'
 import { SIDE_SECTIONS, setSideSection, useSideSection, type SideSection } from './side-panel-store'
+
+const SECTION_ICONS: Record<SideSection, typeof FileText> = {
+  files: FileText,
+  changes: GitBranch,
+  terminal: SquareTerminal,
+  browser: Globe,
+  checks: ListChecks
+}
+
+function SectionIcon({ section }: { section: SideSection }): React.JSX.Element {
+  const Icon = SECTION_ICONS[section]
+  return <Icon aria-hidden />
+}
 
 function sectionLabel(section: SideSection): string {
   switch (section) {
@@ -44,9 +66,6 @@ export function WorkbenchSectionBar({
         ? 'dock'
         : null
   )
-  const name = useAppStore((state) =>
-    selectKnownWorktreeById(state, worktreeId)?.path.split(/[\\/]/).findLast(Boolean)
-  )
   const view = useInfraView(worktreeId)
   const sideCollapsed = useAppStore(() => isSidePanelCollapsed(worktreeId))
   const pathCollapsed = usePathColumnCollapsed()
@@ -68,12 +87,17 @@ export function WorkbenchSectionBar({
             key={id}
             className="bx-rail-btn"
             aria-pressed={section === id}
-            title={id === 'terminal' ? name : undefined}
+            title={sectionLabel(id)}
+            aria-label={sectionLabel(id)}
             onClick={() => setSideSection(worktreeId, id)}
           >
-            {sectionLabel(id)}
+            <SectionIcon section={id} />
+            <span className="lbl">{sectionLabel(id)}</span>
           </button>
         ))}
+        {section === 'terminal' ? (
+          <TerminalSwitcher worktreeId={worktreeId} groupId={groupId} />
+        ) : null}
         <button
           type="button"
           className="bx-icon-btn ml-auto"

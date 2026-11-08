@@ -71,7 +71,7 @@ export function SettingsSection({
       >
         <div className="min-w-0 flex-1 space-y-2">
           <h2
-            className="flex flex-wrap items-center gap-2 text-2xl font-semibold leading-tight text-foreground"
+            className="flex flex-wrap items-center gap-2 text-xl font-semibold leading-tight text-foreground"
             onClick={onTitleClick}
           >
             {title}

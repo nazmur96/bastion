@@ -80,8 +80,9 @@ export function useBastionLayout(worktreeId: string): void {
         busy = false
       }
     }
-    lastTab = null
+    // The section the person last chose wins over the sidebar tab Orca restored.
     syncSideSection(worktreeId)
+    lastTab = useAppStore.getState().rightSidebarTab
     run()
     return useAppStore.subscribe(run)
   }, [worktreeId])

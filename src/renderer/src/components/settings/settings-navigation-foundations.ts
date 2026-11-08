@@ -7,17 +7,23 @@ import { getDefaultVoiceSettings } from '../../../../shared/constants'
 import type { SettingsNavSection, SettingsNavTarget } from '@/lib/settings-navigation-types'
 import type { SettingsDeepLinkTargetWatch } from './settings-deep-link-target-watcher'
 
+// Fork: Bastion's groups, named short and sentence-case like Cursor's; Infrastructure added.
 export const SETTINGS_NAV_GROUPS = [
   {
     id: 'capabilities',
-    titleKey: 'auto.components.settings.Settings.23c6874fdf',
-    titleDefault: 'AI Capabilities'
+    titleKey: 'components.settings.group.agents',
+    titleDefault: 'Agents'
   },
-  { id: 'setup', titleKey: 'auto.components.settings.Settings.9abb9be3bc', titleDefault: 'Set Up' },
+  {
+    id: 'infrastructure',
+    titleKey: 'components.settings.group.infrastructure',
+    titleDefault: 'Infrastructure'
+  },
+  { id: 'setup', titleKey: 'components.settings.group.general', titleDefault: 'General' },
   {
     id: 'workflows',
-    titleKey: 'auto.components.settings.Settings.e1578cd4bc',
-    titleDefault: 'Workflows'
+    titleKey: 'components.settings.group.work',
+    titleDefault: 'Work'
   },
   {
     id: 'interface',
@@ -26,13 +32,13 @@ export const SETTINGS_NAV_GROUPS = [
   },
   {
     id: 'remote',
-    titleKey: 'auto.components.settings.Settings.23931df7e8',
-    titleDefault: 'Remote Hosts'
+    titleKey: 'components.settings.group.remote',
+    titleDefault: 'Remote'
   },
   {
     id: 'security',
-    titleKey: 'auto.components.settings.Settings.084d8fac5b',
-    titleDefault: 'Privacy & Security'
+    titleKey: 'components.settings.group.privacy',
+    titleDefault: 'Privacy & security'
   },
   {
     id: 'advanced',
@@ -41,8 +47,8 @@ export const SETTINGS_NAV_GROUPS = [
   },
   {
     id: 'experimental',
-    titleKey: 'auto.components.settings.Settings.8b017f2506',
-    titleDefault: 'Experimental'
+    titleKey: 'components.settings.group.beta',
+    titleDefault: 'Beta'
   }
 ] as const
 

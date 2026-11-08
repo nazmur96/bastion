@@ -226,9 +226,7 @@ export function SettingsSidebar({
         <div className="space-y-5">
           {generalGroups.map((group) => (
             <div key={group.id} className="space-y-2">
-              <p className="px-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                {group.title}
-              </p>
+              <p className="px-3 text-xs font-medium text-muted-foreground">{group.title}</p>
               <div className="space-y-1">
                 {group.sections
                   .filter((section) => section.id !== 'setup-guide')
@@ -263,7 +261,7 @@ export function SettingsSidebar({
           ))}
 
           <div className="space-y-2">
-            <p className="px-3 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="px-3 text-xs font-medium text-muted-foreground">
               {translate('auto.components.settings.SettingsSidebar.5c9669ff9c', 'Projects')}
             </p>
 

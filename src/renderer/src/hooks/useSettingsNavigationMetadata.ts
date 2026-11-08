@@ -33,6 +33,7 @@ import { buildInterfaceSettingsSections } from './settings-navigation-interface-
 import { buildRemoteSettingsSections } from './settings-navigation-remote-sections'
 import { buildWorkflowSettingsSections } from './settings-navigation-workflow-sections'
 import { useWindowsTerminalCapabilityOwnerKey } from './useWindowsTerminalCapabilityOwnerKey'
+import { buildInfrastructureSettingsSections } from '@/fork/devops/InfrastructureSettings'
 import { useUiLanguageRevision } from '@/i18n/use-ui-language-revision'
 
 export { isWebClientLocation } from '@/lib/web-client-location'
@@ -102,6 +103,7 @@ export function buildSettingsNavigationMetadata({
   // Match SETTINGS_NAV_GROUPS order so Settings and Cmd+J keep siblings together.
   return [
     ...buildCapabilitySettingsSections(options),
+    ...buildInfrastructureSettingsSections(),
     ...buildSetupSettingsSections(options),
     ...buildWorkflowSettingsSections(options, terminalPaneSearchEntries),
     ...buildInterfaceSettingsSections(options),

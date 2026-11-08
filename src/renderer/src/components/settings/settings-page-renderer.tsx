@@ -1,6 +1,7 @@
 import { ActiveSettingsSectionProvider } from './SettingsSection'
 import { SettingsContentScrollElementProvider } from './settings-content-scroll-element'
 import { SettingsSidebar } from './SettingsSidebar'
+import { renderInfrastructureSettingsSection } from '@/fork/devops/InfrastructureSettings'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
 import type { SettingsInteractionController } from './use-settings-interaction-controller'
@@ -137,6 +138,7 @@ export function renderSettingsPage(context: SettingsRenderContext): React.JSX.El
                   {renderOrchestrationSettingsSection(context)}
                   {renderLinearSettingsSection(context)}
                   {renderDesktopCapabilitySettingsSections(context)}
+                  {renderInfrastructureSettingsSection(context)}
                   {renderOrcaAccountSettingsSection(context)}
                   {renderSetupGuideSettingsSection(context)}
                   {renderGeneralSettingsSection(context)}

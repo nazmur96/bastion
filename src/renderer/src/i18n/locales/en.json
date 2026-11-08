@@ -20497,6 +20497,29 @@
         "linkPreviewsCopy": "Hovering a web link shows a preview card. Orca fetches the page to build it, so the site can see the request.",
         "linkPreviewsSearchUnfurl": "unfurl",
         "linkPreviewsSearchHover": "hover card"
+      },
+      "infrastructure": {
+        "title": "Infrastructure",
+        "description": "Clusters, cloud accounts and the Project path for the open workspace.",
+        "kube": "Kubernetes",
+        "kubeHint": "Where kubectl commands land",
+        "none": "Not connected",
+        "aws": "AWS",
+        "awsHint": "Profile and region for aws and terraform",
+        "billed": "Billed infrastructure",
+        "billedHint": "Applied and not yet destroyed; ended from the Project path",
+        "nothingBilled": "Nothing running",
+        "billedCount": "{{count}} running",
+        "tools": "Tools & settings",
+        "toolsHint": "Every Infra card: deploy, harden, cloud, observe",
+        "open": "Open",
+        "path": "Project path column",
+        "pathHint": "Steps and system map on the left",
+        "show": "Show",
+        "hide": "Hide",
+        "side": "Side panel",
+        "sideHint": "Files, changes, terminal, browser and checks on the right",
+        "noWorkspace": "Open a workspace to see its clusters and cloud."
       }
     },
     "agentChildRow": {
@@ -21088,7 +21111,11 @@
       "checks": "Checks",
       "label": "Side panel",
       "hide": "Hide side panel",
-      "show": "Show side panel"
+      "show": "Show side panel",
+      "terminalName": "Terminal",
+      "noTerminal": "No terminal",
+      "newTerminal": "New terminal",
+      "closeTerminal": "Close terminal"
     },
     "start": {
       "noFolder": "No folder",

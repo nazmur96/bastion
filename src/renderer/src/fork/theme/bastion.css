@@ -530,6 +530,26 @@ button.bx-vstep:hover:not(:disabled) {
   white-space: nowrap;
   cursor: pointer;
 }
+.bx-rail-btn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+}
+.bx-rail-btn svg {
+  width: 14px;
+  height: 14px;
+}
+/* Sections read as labels; while a terminal is up they shrink to icons so its switcher fits. */
+.bx-rail:has(.bx-term-switch) .bx-rail-btn .lbl {
+  display: none;
+}
+.bx-rail:has(.bx-term-switch) .bx-rail-btn[aria-pressed='true'] .lbl {
+  display: inline;
+}
+.bx-rail .bx-rail-btn:not(:has(.lbl)) {
+  padding: 0 7px;
+}
 .bx-rail-btn:hover {
   color: var(--bx-text);
 }
@@ -540,13 +560,31 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-rail .bx-icon-btn {
   margin-left: auto;
 }
-/* Outside Terminal the side panel's own tabs (terminals) step aside. */
-[data-tab-group-strip-id]:has([data-side-section]:not([data-side-section='terminal']))
-  [data-tab-bar-slot] {
+/* The side panel's row is its sections; terminals are picked from the switcher, so Orca's own
+   terminal tabs step aside in every section. */
+[data-tab-group-strip-id]:has([data-side-section]) [data-tab-bar-slot] {
   display: none;
 }
-[data-tab-group-strip-id]:has([data-side-section='terminal']) .bx-rail {
-  flex: none;
+.bx-term-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid var(--bx-line);
+}
+.bx-term-switch .bx-picker {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bx-count {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--bx-panel2);
+  color: var(--bx-muted);
+  font-size: 11px;
 }
 /* The side panel's row is its sections and terminal tabs; the pane's extra actions (quick
    commands, pane menu) would crowd the terminal tabs out. */
@@ -591,6 +629,7 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-rail-btn,
 .bx-tab,
 .bx-tab-close,
+.bx-picker,
 .bx-icon-btn,
 .bx-pathcol-head {
   -webkit-app-region: no-drag;

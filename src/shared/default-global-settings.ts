@@ -40,7 +40,8 @@ export function buildDefaultSettings(args: {
     branchPrefix: 'git-username',
     branchPrefixCustom: '',
     jiraIssueKeyCasing: 'lowercase',
-    theme: 'system',
+    // Fork: Bastion's look is designed dark, as Cursor's default is.
+    theme: 'dark',
     pluginAppTheme: null,
     pluginAppThemeLight: null,
     pluginAppThemeDark: null,
