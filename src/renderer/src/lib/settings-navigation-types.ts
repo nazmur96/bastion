@@ -14,6 +14,9 @@ export type SettingsNavInstallStatus =
   | 'checking'
 
 const SETTINGS_NAV_TARGETS = [
+  // Fork: Bastion settings pages participate in deep links and navigation.
+  'infrastructure',
+  'customize',
   'general',
   'integrations',
   'accounts',

@@ -33,6 +33,8 @@ import { buildInterfaceSettingsSections } from './settings-navigation-interface-
 import { buildRemoteSettingsSections } from './settings-navigation-remote-sections'
 import { buildWorkflowSettingsSections } from './settings-navigation-workflow-sections'
 import { useWindowsTerminalCapabilityOwnerKey } from './useWindowsTerminalCapabilityOwnerKey'
+// Fork: reuse Orca's extension panes from Customize.
+import { buildCustomizeSettingsSections } from '@/fork/settings/CustomizeSettings'
 import { buildInfrastructureSettingsSections } from '@/fork/devops/InfrastructureSettings'
 import { useUiLanguageRevision } from '@/i18n/use-ui-language-revision'
 
@@ -107,7 +109,8 @@ export function buildSettingsNavigationMetadata({
     ...buildSetupSettingsSections(options),
     ...buildWorkflowSettingsSections(options, terminalPaneSearchEntries),
     ...buildInterfaceSettingsSections(options),
-    ...buildRemoteSettingsSections(options, runtimeEnvironmentsSearchEntry, reposById)
+    ...buildRemoteSettingsSections(options, runtimeEnvironmentsSearchEntry, reposById),
+    ...(!isWebClient ? buildCustomizeSettingsSections() : [])
   ]
 }
 

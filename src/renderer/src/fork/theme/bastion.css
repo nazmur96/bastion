@@ -821,3 +821,38 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-terminal-toolbar .bx-icon-btn svg + svg {
   display: none;
 }
+
+/* Settings use space and a single row divider instead of nested cards. */
+.settings-view-shell .bx-settings-body {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.settings-view-shell [data-settings-section] > div:first-child {
+  border: 0;
+  padding-bottom: 4px;
+}
+.settings-view-shell [data-settings-section] h2 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.settings-view-shell .bx-settings-body label {
+  font-size: 14px;
+  font-weight: 400;
+}
+.settings-view-shell .bx-settings-body p {
+  line-height: 1.6;
+}
+.settings-view-shell .bx-settings-body [data-slot='card'] {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.bx-customize [data-settings-section='plugins'] {
+  padding-top: 20px;
+}
+.bx-customize [data-slot='tabs-list'] {
+  margin-bottom: 16px;
+}

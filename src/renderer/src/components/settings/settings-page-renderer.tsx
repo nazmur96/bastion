@@ -1,6 +1,8 @@
 import { ActiveSettingsSectionProvider } from './SettingsSection'
 import { SettingsContentScrollElementProvider } from './settings-content-scroll-element'
 import { SettingsSidebar } from './SettingsSidebar'
+// Fork: Customize shares the existing plugin, tool and command panes.
+import { renderCustomizeSettingsSection } from '@/fork/settings/CustomizeSettings'
 import { renderInfrastructureSettingsSection } from '@/fork/devops/InfrastructureSettings'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
@@ -139,6 +141,7 @@ export function renderSettingsPage(context: SettingsRenderContext): React.JSX.El
                   {renderLinearSettingsSection(context)}
                   {renderDesktopCapabilitySettingsSections(context)}
                   {renderInfrastructureSettingsSection(context)}
+                  {renderCustomizeSettingsSection(context)}
                   {renderOrcaAccountSettingsSection(context)}
                   {renderSetupGuideSettingsSection(context)}
                   {renderGeneralSettingsSection(context)}

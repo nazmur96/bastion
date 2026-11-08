@@ -21134,6 +21134,21 @@
       "open": "Open folder",
       "clone": "Clone from Git",
       "create": "New project"
+    },
+    "customize": {
+      "title": "Customize",
+      "description": "Plugins, tools, skills and commands in one place.",
+      "search": "Plugins MCPs skills commands hooks",
+      "plugins": "Plugins",
+      "mcps": "MCPs",
+      "skills": "Skills",
+      "commands": "Commands",
+      "hooks": "Hooks",
+      "projectRequired": "Open a project to manage its tools and hooks.",
+      "skillsDescription": "Browse installed skills, filter by agent and manage their sources.",
+      "openSkills": "Manage skills",
+      "hooksDescription": "Project hooks control setup, archive and workspace commands.",
+      "openHooks": "Manage project hooks"
     }
   },
   "dashboardPopout": {

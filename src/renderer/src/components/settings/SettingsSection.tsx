@@ -89,7 +89,8 @@ export function SettingsSection({
       {/* Contain row groups in a distinct band so they cannot read as sidebar continuations. */}
       <div
         className={cn(
-          'rounded-xl border border-border/50 bg-card/50 px-7 py-6 shadow-xs',
+          // Fork: quiet rows on the shared canvas, like Cursor.
+          'bx-settings-body',
           bodyClassName
         )}
       >
