@@ -91,8 +91,9 @@ export function WorktreeVisibilitySourceAddForm({
       >
         {inputError ??
           translate(
-            'auto.components.sidebar.WorktreeVisibilitySourceList.rootHelp',
-            'Orca will recognize worktrees beneath this folder.'
+            // Fork: app-local wording uses the product name.
+            'components.start.worktreeRootHelp',
+            'Bastion will recognize worktrees beneath this folder.'
           )}
       </p>
     </form>

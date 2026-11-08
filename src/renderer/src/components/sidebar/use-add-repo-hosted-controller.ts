@@ -2,6 +2,7 @@ import type { CompleteGitRepoAdd } from './use-complete-git-repo-add'
 import { useMemo } from 'react'
 import { useAppStore } from '@/store'
 import { markOnboardingProjectAdded } from '@/lib/onboarding-project-checklist'
+import type { AddRepoDialogStep } from './add-repo-dialog-types'
 
 /** Nest Add Project in a host surface rather than replacing the store modal. */
 export type AddRepoDialogHostedController = {
@@ -16,6 +17,8 @@ export type AddRepoDialogHostedController = {
 
 export type AddRepoDialogProps = {
   hosted?: AddRepoDialogHostedController
+  // Fork: the start page opens directly into the requested project flow.
+  initialStep?: AddRepoDialogStep
 }
 
 export function useAddRepoHostedController(hosted: AddRepoDialogHostedController | undefined): {

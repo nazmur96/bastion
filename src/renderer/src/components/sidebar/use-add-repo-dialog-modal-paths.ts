@@ -1,6 +1,10 @@
 import { useMemo } from 'react'
 import { useAppStore } from '@/store'
-import { LOCAL_EXECUTION_HOST_ID, type ExecutionHostId } from '../../../../shared/execution-host'
+import {
+  LOCAL_EXECUTION_HOST_ID,
+  parseExecutionHostId,
+  type ExecutionHostId
+} from '../../../../shared/execution-host'
 import { readDroppedHostPath, type DroppedHostPath } from './add-repo-wsl-host-folder-picker'
 
 /** Paths the store modal was opened with; hosted mode never carries them. */
@@ -19,6 +23,12 @@ export function useAddRepoDialogModalPaths(hosted: boolean): {
       : ''
   )
   const droppedHostPathData = useAppStore((s) => (hosted ? undefined : s.modalData.droppedHostPath))
+  // Fork: preserve the start page's host when opening a project flow.
+  const requestedHostId = useAppStore((s) =>
+    !hosted && typeof s.modalData.preferredHostId === 'string'
+      ? parseExecutionHostId(s.modalData.preferredHostId)?.id
+      : null
+  )
   const droppedHostPath = useMemo(
     () => readDroppedHostPath({ droppedHostPath: droppedHostPathData }),
     [droppedHostPathData]
@@ -27,6 +37,7 @@ export function useAddRepoDialogModalPaths(hosted: boolean): {
     droppedLocalPath: droppedLocalPath || addOnThisComputerPath,
     droppedHostPath,
     preferredHostId:
-      droppedHostPath?.hostId ?? (addOnThisComputerPath ? LOCAL_EXECUTION_HOST_ID : null)
+      droppedHostPath?.hostId ??
+      (addOnThisComputerPath ? LOCAL_EXECUTION_HOST_ID : (requestedHostId ?? null))
   }
 }

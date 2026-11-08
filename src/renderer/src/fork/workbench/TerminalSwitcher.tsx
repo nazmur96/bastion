@@ -11,6 +11,8 @@ import {
 import { closeTerminalTab } from '@/components/terminal/terminal-tab-actions'
 import { newWorkbenchTerminal } from './workbench-terminals'
 import { useSideSection } from './side-panel-store'
+import { terminalDisplayLabel } from './terminal-display-label'
+import { startWorkspaceHost } from './start-project-actions'
 import {
   isTerminalDockMaximized,
   liveTerminalDockId,
@@ -25,6 +27,9 @@ export function TerminalSwitcher({
   groupId: string
 }): React.JSX.Element | null {
   const tabs = useAppStore((state) => state.unifiedTabsByWorktree[worktreeId])
+  const terminalTabs = useAppStore((state) => state.tabsByWorktree[worktreeId])
+  const configuredShell = useAppStore((state) => state.settings?.terminalDefaultShell)
+  const local = useAppStore(() => startWorkspaceHost(worktreeId) === 'local')
   const activeTabId = useAppStore(
     (state) =>
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId
@@ -40,7 +45,11 @@ export function TerminalSwitcher({
   )
   const active = terminals.find((tab) => tab.id === activeTabId) ?? terminals[0]
   const label = (tab: (typeof terminals)[number]): string =>
-    tab.customLabel || tab.label || translate('components.sidePanel.terminalName', 'Terminal')
+    terminalDisplayLabel(
+      tab,
+      terminalTabs?.find((terminal) => terminal.id === tab.id),
+      local ? configuredShell || window.api.platform.get().shell : ''
+    ) || translate('components.sidePanel.terminalName', 'Terminal')
   const newLabel = translate('components.sidePanel.newTerminal', 'New terminal')
   const closeLabel = translate('components.sidePanel.closeTerminal', 'Close terminal')
   const maximizeLabel = maximized

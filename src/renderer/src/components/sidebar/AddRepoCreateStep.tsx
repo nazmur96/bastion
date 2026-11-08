@@ -133,8 +133,9 @@ export function CreateStep({
         </DialogTitle>
         <DialogDescription>
           {translate(
-            'auto.components.sidebar.AddRepoCreateStep.b100311784',
-            'Name it and Orca will create a real project with sensible defaults.'
+            // Fork: app-local wording uses the product name.
+            'components.start.createDescription',
+            'Name it and Bastion will create a project with sensible defaults.'
           )}
         </DialogDescription>
       </DialogHeader>

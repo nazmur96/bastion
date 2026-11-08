@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { ArrowUp, ChevronDown, FolderOpen, GitBranch, Laptop, Plus, Server } from 'lucide-react'
+import { ArrowUp, ChevronDown, FolderOpen, GitBranch, Plus } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
-import { activateAndRevealWorktree } from '@/lib/worktree-activation'
+import { activateAndRevealWorkspace } from '@/lib/worktree-activation'
 import { isImeOwnedKeyboardEvent } from '@/lib/ime-composition-keyboard-event'
 import {
   DropdownMenu,
@@ -15,6 +15,11 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { launchClaudeChatInPanel } from '../claude-panel/ensure-claude-panel'
 import { draftForClaude } from '../devops/ask-claude'
+import { StartEnvironmentPicker } from './StartEnvironmentPicker'
+import { openStartProject } from './start-project-actions'
+import { getWorktreeExecutionHostId } from '../../../../shared/execution-host'
+import { getFolderWorkspaceHostId } from '../../../../shared/folder-workspace-execution-host'
+import { folderWorkspaceKey } from '../../../../shared/workspace-scope'
 
 /** ~/… for home paths; very long ones keep only their last two folders, like Cursor. */
 function shortPath(path: string): string {
@@ -27,13 +32,34 @@ function shortPath(path: string): string {
 function FolderPicker({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const current = useAppStore((state) => selectKnownWorktreeById(state, worktreeId))
   const byRepo = useAppStore((state) => state.worktreesByRepo)
-  const openModal = useAppStore((state) => state.openModal)
-  const all = Object.values(byRepo).flat()
+  const repos = useAppStore((state) => state.repos)
+  const folders = useAppStore((state) => state.folderWorkspaces)
+  const projectGroups = useAppStore((state) => state.projectGroups)
+  const all = [
+    ...Object.values(byRepo)
+      .flat()
+      .map((worktree) => ({
+        id: worktree.id,
+        path: worktree.path,
+        hostId: getWorktreeExecutionHostId(
+          worktree,
+          repos.find((repo) => repo.id === worktree.repoId)
+        )
+      })),
+    ...folders.map((folder) => ({
+      id: folderWorkspaceKey(folder.id),
+      path: folder.folderPath,
+      hostId: getFolderWorkspaceHostId(folder, projectGroups)
+    }))
+  ]
+  const currentPath = current?.path ?? all.find((entry) => entry.id === worktreeId)?.path
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button type="button" className="bx-picker">
-          {current ? shortPath(current.path) : translate('components.start.noFolder', 'No folder')}
+          {currentPath
+            ? shortPath(currentPath)
+            : translate('components.start.noFolder', 'No folder')}
           <ChevronDown aria-hidden />
         </button>
       </DropdownMenuTrigger>
@@ -42,49 +68,18 @@ function FolderPicker({ worktreeId }: { worktreeId: string }): React.JSX.Element
         <div className="scrollbar-sleek max-h-72 overflow-y-auto">
           {all.map((worktree) => (
             <DropdownMenuItem
-              key={worktree.id}
-              onSelect={() => activateAndRevealWorktree(worktree.id)}
+              key={`${worktree.hostId}:${worktree.id}`}
+              onSelect={() =>
+                activateAndRevealWorkspace(worktree.id, { executionHostId: worktree.hostId })
+              }
             >
               {shortPath(worktree.path)}
             </DropdownMenuItem>
           ))}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => openModal('add-repo')}>
+        <DropdownMenuItem onSelect={() => openStartProject('open', worktreeId)}>
           {translate('components.start.openFolder', 'Open another folder…')}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-/** Where the work runs: this computer, or a remote machine Bastion can reach over SSH. */
-function EnvironmentPicker(): React.JSX.Element {
-  const hosts = useAppStore((state) => state.sshTargetLabels)
-  const openModal = useAppStore((state) => state.openModal)
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button type="button" className="bx-picker">
-          <Laptop aria-hidden />
-          {translate('components.start.thisComputer', 'This computer')}
-          <ChevronDown aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <DropdownMenuItem disabled>
-          <Laptop aria-hidden />
-          {translate('components.start.thisComputer', 'This computer')}
-        </DropdownMenuItem>
-        {[...hosts].map(([id, label]) => (
-          <DropdownMenuItem key={id} onSelect={() => openModal('add-repo')}>
-            <Server aria-hidden />
-            {label}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => openModal('add-repo')}>
-          {translate('components.start.remote', 'Remote machine…')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -100,7 +95,6 @@ export function WorkbenchStart({
   groupId: string
 }): React.JSX.Element {
   const [text, setText] = useState('')
-  const openModal = useAppStore((state) => state.openModal)
   const start = (): void => {
     launchClaudeChatInPanel(worktreeId, groupId, { focusComposer: true })
     if (text.trim()) {
@@ -114,7 +108,7 @@ export function WorkbenchStart({
       <div className="bx-start-inner">
         <div className="bx-start-pickers">
           <FolderPicker worktreeId={worktreeId} />
-          <EnvironmentPicker />
+          <StartEnvironmentPicker workspaceId={worktreeId} />
         </div>
         <form
           className="bx-composer"
@@ -151,15 +145,27 @@ export function WorkbenchStart({
           </div>
         </form>
         <div className="bx-start-actions">
-          <button type="button" className="bx-chip-btn" onClick={() => openModal('add-repo')}>
+          <button
+            type="button"
+            className="bx-chip-btn"
+            onClick={() => openStartProject('open', worktreeId)}
+          >
             <FolderOpen aria-hidden />
             {translate('components.start.open', 'Open folder')}
           </button>
-          <button type="button" className="bx-chip-btn" onClick={() => openModal('add-repo')}>
+          <button
+            type="button"
+            className="bx-chip-btn"
+            onClick={() => openStartProject('clone', worktreeId)}
+          >
             <GitBranch aria-hidden />
             {translate('components.start.clone', 'Clone from Git')}
           </button>
-          <button type="button" className="bx-chip-btn" onClick={() => openModal('add-repo')}>
+          <button
+            type="button"
+            className="bx-chip-btn"
+            onClick={() => openStartProject('create', worktreeId)}
+          >
             <Plus aria-hidden />
             {translate('components.start.create', 'New project')}
           </button>

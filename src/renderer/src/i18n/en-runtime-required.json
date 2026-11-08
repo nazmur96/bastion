@@ -841,6 +841,9 @@
           "sshImportSynced_one": "Added {{count}} host to Orca.",
           "sshImportSynced_other": "Added {{count}} hosts to Orca."
         },
+        "AddRepoCreateStep": {
+          "b100311784": "Name it and Orca will create a real project with sensible defaults."
+        },
         "AddRepoNestedImportStep": {
           "foundRepositories_one": "Found {{count}} repository in {{path}}.",
           "foundRepositories_other": "Found {{count}} repositories in {{path}}."
@@ -954,6 +957,9 @@
         "WorktreeVisibilityDialog": {
           "searchHiddenPlaceholder_one": "Search {{count}} worktree…",
           "searchHiddenPlaceholder_other": "Search {{count}} worktrees…"
+        },
+        "WorktreeVisibilitySourceList": {
+          "rootHelp": "Orca will recognize worktrees beneath this folder."
         },
         "local": {
           "base": {

@@ -23,7 +23,8 @@ import { useAddRepoWslHostPaths } from './use-add-repo-wsl-host-paths'
 import { useAddRepoDialogModalPaths } from './use-add-repo-dialog-modal-paths'
 import { useAddRepoWindowsDriveRefusal } from './use-add-repo-windows-drive-refusal'
 
-export default React.memo(function AddRepoDialog({ hosted }: AddRepoDialogProps) {
+export default React.memo(function AddRepoDialog(props: AddRepoDialogProps) {
+  const { hosted, initialStep = 'add' } = props
   const isOpen = useAppStore((s) => (hosted ? hosted.open : s.activeModal === 'add-repo'))
   const modalPaths = useAddRepoDialogModalPaths(Boolean(hosted))
   const addRepoPath = useAppStore((s) => s.addRepoPath)
@@ -36,7 +37,7 @@ export default React.memo(function AddRepoDialog({ hosted }: AddRepoDialogProps)
   const setHideDefaultBranchWorkspace = useAppStore((s) => s.setHideDefaultBranchWorkspace)
   const settings = useAppStore((s) => s.settings)
   const { closeModal, closeForFolderHandoff, finishProjectAdd } = useAddRepoHostedController(hosted)
-  const [step, setStep] = useState<AddRepoDialogStep>('add')
+  const [step, setStep] = useState<AddRepoDialogStep>(initialStep) // Fork: start-page intent.
   const [isAdding, setIsAdding] = useState(false)
   const [addProjectBusyLabel, setAddProjectBusyLabel] = useState<string | null>(null)
   const completeGitRepoAdd = useCompleteGitRepoAdd({
@@ -222,7 +223,6 @@ export default React.memo(function AddRepoDialog({ hosted }: AddRepoDialogProps)
     resetRemoteState,
     resetCreateState
   ])
-
   const resetHostScopedState = useCallback(() => {
     setIsAdding(false)
     setAddProjectBusyLabel(null)

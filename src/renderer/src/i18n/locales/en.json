@@ -21133,7 +21133,10 @@
       "send": "Start chat",
       "open": "Open folder",
       "clone": "Clone from Git",
-      "create": "New project"
+      "create": "New project",
+      "switchFailed": "Could not switch environment",
+      "createDescription": "Name it and Bastion will create a project with sensible defaults.",
+      "worktreeRootHelp": "Bastion will recognize worktrees beneath this folder."
     },
     "customize": {
       "title": "Customize",
