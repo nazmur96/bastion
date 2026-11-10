@@ -25,7 +25,15 @@ export function draftGoalForClaude(worktreeId: string, goal: string): void {
 
 /** Text lands in the Claude chat's composer as a draft: the person reads it and presses Enter.
  *  With no chat open, one starts in the middle first. */
-export function draftForClaude(worktreeId: string, text: string, attempt = 0): void {
+export function draftForClaude(
+  worktreeId: string,
+  text: string,
+  attempt = 0,
+  isCurrent?: () => boolean
+): void {
+  if (isCurrent && !isCurrent()) {
+    return
+  }
   const chat = claudeChat(worktreeId)
   if (!chat) {
     const middle = workbenchGroupId(worktreeId)
@@ -34,7 +42,7 @@ export function draftForClaude(worktreeId: string, text: string, attempt = 0): v
     }
     // A new chat appears a moment later.
     if (attempt < 10) {
-      window.setTimeout(() => draftForClaude(worktreeId, text, attempt + 1), 300)
+      window.setTimeout(() => draftForClaude(worktreeId, text, attempt + 1, isCurrent), 300)
     }
     return
   }

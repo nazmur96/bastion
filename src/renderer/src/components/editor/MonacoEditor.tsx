@@ -31,6 +31,8 @@ import {
 import { useMonacoTheme } from '@/hooks/use-monaco-theme'
 import { useEditorModelRekeyCarry } from './editor-model-rekey-carry'
 import { useEditorContextTracking } from '@/fork/editor-context/use-editor-context-tracking'
+// Fork: contextual help stays at the editor edge until requested.
+import { EditorRuntimeAssistance } from '@/fork/editor-context/EditorRuntimeAssistance'
 
 type MonacoEditorProps = {
   fileId: string
@@ -342,6 +344,11 @@ export default function MonacoEditor({
       />
 
       {toastNode}
+      <EditorRuntimeAssistance
+        worktreeId={worktreeId}
+        relativePath={relativePath}
+        enabled={!readOnly && !passiveMirror}
+      />
       <MonacoGutterContextMenu
         open={gutterMenuOpen}
         onOpenChange={setGutterMenuOpen}

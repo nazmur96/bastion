@@ -21158,6 +21158,19 @@
     },
     "bastion": {
       "name": "Bastion"
+    },
+    "assistance": {
+      "commandGroup": "Editor assistance",
+      "restore": "Show assistance for this file",
+      "dismiss": "Dismiss assistance for this file",
+      "terraform": "Terraform assistance",
+      "terraformMissing": "Review Terraform setup",
+      "title": "Assistance for this file",
+      "available": "The last local workspace inspection found the Terraform CLI.",
+      "missing": "The last local workspace inspection did not find the Terraform CLI. Review the declared development environment before setting it up.",
+      "scope": "This is a CLI lookup, not a language-server or infrastructure check. This hint does not send model requests or run Terraform.",
+      "draft": "Draft a request for Claude",
+      "draftHint": "Opens an unsent request in this workspace. Review it before sending."
     }
   },
   "dashboardPopout": {
