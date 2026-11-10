@@ -253,8 +253,8 @@ export default function Landing(): React.JSX.Element {
   ])
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center bg-background">
-      <div className="w-full max-w-lg px-6">
+    <div className="scrollbar-sleek absolute inset-0 overflow-y-auto bg-background">
+      <div className="mx-auto flex min-h-full w-full max-w-lg flex-col justify-center px-6 pb-16">
         <div className="flex flex-col items-center gap-4 py-8">
           <img
             src={logo}
