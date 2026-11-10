@@ -10,10 +10,11 @@ import { Store } from '../../persistence'
 const mocks = vi.hoisted(() => ({
   handlers: new Map<string, (...args: unknown[]) => unknown>(),
   flush: vi.fn(),
-  relaunch: vi.fn(),
+  destination: vi.fn(async () => {}),
   quit: vi.fn()
 }))
-vi.mock('./workspace-dev-restart', () => ({ requestDevWorkspaceRestart: () => false }))
+vi.mock('./workspace-destination', () => ({ openProjectWorkspaceDestination: mocks.destination }))
+vi.mock('./workspace-arrival', () => ({ registerProjectWorkspaceArrival: () => {} }))
 vi.mock('electron', () => ({
   app: { on: vi.fn() },
   ipcMain: {
@@ -32,7 +33,6 @@ vi.mock('../../orca-profiles/profile-persistence-deadline', () => ({
   flushActiveProfileBeforeRelaunch: mocks.flush
 }))
 vi.mock('../../app-relaunch', () => ({
-  relaunchApp: mocks.relaunch,
   runBeforeRelaunchCleanup: async () => {}
 }))
 vi.mock('../../startup/process-quit-request', () => ({ quitProcess: mocks.quit }))
@@ -70,17 +70,22 @@ it('refuses stale sources and failed checkpoints without changing selection, the
       'disk full'
     )
     expect(catalog.selected().id).toBe(a.id)
-    expect(mocks.relaunch).not.toHaveBeenCalled()
+    expect(mocks.destination).not.toHaveBeenCalled()
     mocks.flush.mockResolvedValueOnce(undefined)
+    mocks.destination.mockRejectedValueOnce(new Error('Destination unavailable'))
+    await expect(switchWorkspace({ sender }, { fromId: a.id, toId: b.id })).rejects.toThrow(
+      'Destination unavailable'
+    )
+    expect(catalog.selected().id).toBe(a.id)
+    expect(mocks.quit).not.toHaveBeenCalled()
+    mocks.destination.mockClear()
     await expect(switchWorkspace({ sender }, { fromId: a.id, toId: b.id })).resolves.toEqual({
       status: 'relaunching'
     })
     expect(catalog.selected().id).toBe(b.id)
     expect(sender.send).toHaveBeenCalledWith('app:restart-committed')
     await vi.advanceTimersByTimeAsync(150)
-    expect(mocks.relaunch).toHaveBeenCalledWith('project-workspace-switch', undefined, {
-      args: expect.arrayContaining([`--bastion-project-workspace=${b.id}`])
-    })
+    expect(mocks.destination).toHaveBeenCalledWith(sender, b.id)
     expect(mocks.quit).toHaveBeenCalledOnce()
     const list = mocks.handlers.get('bastionWorkspaces:list')
     expect(list?.()).toMatchObject({ activeId: a.id })
@@ -108,9 +113,7 @@ it('leaves a workspace for application home and creates new workspaces only ther
     ).resolves.toEqual({ status: 'relaunching' })
     expect(catalog.atHome()).toBe(true)
     await vi.advanceTimersByTimeAsync(150)
-    expect(mocks.relaunch).toHaveBeenCalledWith('project-workspace-switch', undefined, {
-      args: expect.arrayContaining(['--bastion-project-workspace=home'])
-    })
+    expect(mocks.destination).toHaveBeenCalledWith(sender, 'home')
     mocks.handlers.clear()
     configureProjectWorkspace(root, () => {}, [], {})
     registerProjectWorkspaceHandlers(new Store())

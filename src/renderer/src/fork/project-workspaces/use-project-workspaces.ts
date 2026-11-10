@@ -24,7 +24,14 @@ export function useProjectWorkspaces(): {
     if (!api) {
       return
     }
-    initial ??= api.list()
+    initial ??= api.list().then((value) => {
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          void api.ready?.()
+        })
+      )
+      return value
+    })
     let live = true
     initial
       .then((value) => live && setLocalSnapshot(value))

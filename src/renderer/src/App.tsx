@@ -1,3 +1,8 @@
+// Fork: keep workspace transitions visible until the destination is ready.
+import {
+  ProjectWorkspaceTransition,
+  ProjectWorkspaceLoading
+} from './fork/project-workspaces/ProjectWorkspaceTransition'
 import { useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Toaster } from '@/components/ui/sonner'
@@ -110,6 +115,8 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <AppBackgroundServices />
             <SpaceWindowStatePublisher />
+            <ProjectWorkspaceTransition />
+            {workspaceView === 'pending' && <ProjectWorkspaceLoading />}
             {workspaceView === 'home' && <ApplicationHome />}
             {workspaceView === 'workspace' && (
               <>

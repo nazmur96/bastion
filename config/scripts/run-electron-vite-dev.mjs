@@ -1,10 +1,12 @@
 // Fork: project workspace switches reopen the development server and Electron together.
 import {
-  devWorkspaceForwardedArgs,
+  failDevWorkspaceChild,
+  devWorkspaceSignalExitCode,
   spawnDevWorkspaceChild,
   terminateDevWorkspaceChild,
   devWorkspaceRestartEnvironment,
-  consumeDevWorkspaceRestart
+  installDevWorkspaceHandoffPoll,
+  prepareDevWorkspaceHandoff
 } from './bastion-dev-workspace-restart.mjs'
 import { execFileSync, spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -580,15 +582,17 @@ if (!isHelpOrVersion) {
 let forwardedArgs = ['dev', ...forwardedRaw, ...forwardedExtras]
 Object.assign(process.env, devWorkspaceRestartEnvironment(repoRoot))
 function spawnDevChild() {
-  return spawnDevWorkspaceChild(
+  const spawned = spawnDevWorkspaceChild(
     process.execPath,
     [electronViteCli, ...forwardedArgs],
     withDevRolldownRuntimeEnv(process.env),
     handleChildError,
-    handleChildExit
+    (code, signal) => handleChildExit(code, signal, spawned)
   )
+  return spawned
 }
 let child = spawnDevChild()
+let previousChild = null
 
 let webClientBuild = null
 let isShuttingDown = false
@@ -602,20 +606,6 @@ child.once('spawn', () => {
 
 let forcedKillTimer = null
 
-function signalExitCode(signal) {
-  if (signal === 'SIGINT') {
-    return 130
-  }
-  if (signal === 'SIGTERM') {
-    return 143
-  }
-  return 1
-}
-
-function terminateChild(signal) {
-  terminateDevWorkspaceChild(child, signal)
-}
-
 function beginShutdown(signal) {
   if (isShuttingDown) {
     return
@@ -623,36 +613,48 @@ function beginShutdown(signal) {
   isShuttingDown = true
 
   webClientBuild?.kill()
-  terminateChild(signal)
+  terminateDevWorkspaceChild(child, signal)
+  if (previousChild) {
+    terminateDevWorkspaceChild(previousChild, signal)
+  }
   forcedKillTimer = setTimeout(() => {
-    terminateChild('SIGKILL')
+    terminateDevWorkspaceChild(child, 'SIGKILL')
   }, 5000)
 }
 
-process.on('SIGINT', () => {
-  beginShutdown('SIGINT')
-})
-
-process.on('SIGTERM', () => {
-  beginShutdown('SIGTERM')
-})
-
-function handleChildError(error) {
-  if (forcedKillTimer) {
-    clearTimeout(forcedKillTimer)
+installDevWorkspaceHandoffPoll(
+  process.env,
+  devProfile,
+  () => !previousChild && !isShuttingDown,
+  async (request) => {
+    previousChild = child
+    try {
+      forwardedArgs = await prepareDevWorkspaceHandoff(request, forwardedRaw, repoRoot, devProfile)
+      child = spawnDevChild()
+    } catch (error) {
+      previousChild = null
+      throw error
+    }
   }
-  console.error(error)
-  process.exit(1)
+)
+
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => beginShutdown(signal))
 }
 
-async function handleChildExit(code, signal) {
-  const restartTarget =
-    !isShuttingDown && !signal && code === 0 ? consumeDevWorkspaceRestart(process.env) : null
-  if (restartTarget) {
-    console.error('[bastion-dev] Reopening project workspace')
-    process.env.BASTION_PROJECT_WORKSPACE_LAUNCH = restartTarget
-    forwardedArgs = await devWorkspaceForwardedArgs(forwardedRaw, repoRoot, devProfile)
-    child = spawnDevChild()
+function handleChildError(error) {
+  failDevWorkspaceChild(error, forcedKillTimer)
+}
+
+async function handleChildExit(code, signal, exited) {
+  if (exited && exited !== child) {
+    previousChild = null
+    return
+  }
+  if (previousChild && !isShuttingDown) {
+    console.error('[bastion-dev] Destination did not start; keeping the current workspace')
+    child = previousChild
+    previousChild = null
     return
   }
   if (forcedKillTimer) {
@@ -662,12 +664,12 @@ async function handleChildExit(code, signal) {
   webClientBuild?.kill()
 
   if (isShuttingDown) {
-    process.exit(signalExitCode(signal ?? 'SIGINT'))
+    process.exit(devWorkspaceSignalExitCode(signal ?? 'SIGINT'))
     return
   }
 
   if (signal) {
-    process.exit(signalExitCode(signal))
+    process.exit(devWorkspaceSignalExitCode(signal))
     return
   }
 

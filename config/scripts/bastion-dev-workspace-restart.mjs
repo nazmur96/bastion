@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { resolveDevInstancePorts, announceDevInstance } from './dev-instance-isolation.mjs'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, rmSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 
 /** One runner owns this request path; catalog selection remains the startup authority. */
 export function devWorkspaceRestartEnvironment(repoRoot, pid = process.pid) {
@@ -41,7 +41,7 @@ export async function devWorkspaceForwardedArgs(forwardedRaw, repoRoot, profile)
     instanceKey: process.env.ORCA_DEV_INSTANCE_KEY || repoRoot
   })
   announceDevInstance({ repoRoot, profile, ...ports })
-  return ['dev', ...forwardedRaw, ...ports.forwardedExtras]
+  return ['dev', '--rendererOnly', ...forwardedRaw, ...ports.forwardedExtras]
 }
 
 export function spawnDevWorkspaceChild(executable, args, env, onError, onExit) {
@@ -77,4 +77,72 @@ export function terminateDevWorkspaceChild(child, signal) {
       throw error
     }
   }
+}
+
+export function consumeDevWorkspaceHandoff(env, profile) {
+  const file = env.BASTION_DEV_RESTART_FILE
+  if (!file || !env.BASTION_DEV_RESTART_NONCE) {
+    return null
+  }
+  try {
+    const request = JSON.parse(readFileSync(file, 'utf8'))
+    if (request.mode !== 'handoff') {
+      return null
+    }
+    rmSync(file, { force: true })
+    if (
+      request.nonce !== env.BASTION_DEV_RESTART_NONCE ||
+      typeof request.target !== 'string' ||
+      !LAUNCH_TARGET.test(request.target) ||
+      typeof request.handoff !== 'string' ||
+      !/^[0-9a-f-]{36}\.json$/.test(basename(request.handoff)) ||
+      dirname(request.handoff) !==
+        join(profile.userDataPath, 'bastion-project-workspaces', 'handoffs')
+    ) {
+      return null
+    }
+    return { target: request.target, handoff: request.handoff }
+  } catch {
+    return null
+  }
+}
+
+export function installDevWorkspaceHandoffPoll(env, profile, canStart, onStart) {
+  const timer = setInterval(() => {
+    if (!canStart()) {
+      return
+    }
+    const request = consumeDevWorkspaceHandoff(env, profile)
+    if (request) {
+      void onStart(request).catch((error) =>
+        console.error('[bastion-dev] Workspace handoff failed:', error.message)
+      )
+    }
+  }, 100)
+  timer.unref()
+}
+
+export async function prepareDevWorkspaceHandoff(request, forwardedRaw, repoRoot, profile) {
+  delete process.env.ORCA_DEV_RENDERER_PORT
+  process.env.BASTION_PROJECT_WORKSPACE_LAUNCH = request.target
+  process.env.BASTION_WORKSPACE_HANDOFF = request.handoff
+  return devWorkspaceForwardedArgs(forwardedRaw, repoRoot, profile)
+}
+
+export function devWorkspaceSignalExitCode(signal) {
+  if (signal === 'SIGINT') {
+    return 130
+  }
+  if (signal === 'SIGTERM') {
+    return 143
+  }
+  return 1
+}
+
+export function failDevWorkspaceChild(error, forcedKillTimer) {
+  if (forcedKillTimer) {
+    clearTimeout(forcedKillTimer)
+  }
+  console.error(error)
+  process.exit(1)
 }

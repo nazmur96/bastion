@@ -22,6 +22,7 @@ export type ProjectWorkspaceList = {
 export type ProjectWorkspaceSwitchResult = { status: 'already-active' | 'relaunching' }
 
 export type ProjectWorkspacesApi = {
+  ready?: () => Promise<void>
   list: () => Promise<ProjectWorkspaceList>
   create: (args: { name: string }) => Promise<ProjectWorkspaceList>
   rename: (args: { id: string; name: string }) => Promise<ProjectWorkspaceList>

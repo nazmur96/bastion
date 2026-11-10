@@ -21175,7 +21175,10 @@
     "projectWorkspaces": {
       "menu": "Project workspace {{name}}",
       "leave": "Leave workspace",
-      "switchTo": "Switch to"
+      "switchTo": "Switch to",
+      "returningHome": "Returning to your workspaces…",
+      "opening": "Opening your workspace…",
+      "preparing": "Preparing your saved environment"
     },
     "applicationHome": {
       "product": "Engineering workspace",

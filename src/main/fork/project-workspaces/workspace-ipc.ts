@@ -1,11 +1,12 @@
-import { requestDevWorkspaceRestart } from './workspace-dev-restart'
+import { openProjectWorkspaceDestination } from './workspace-destination'
+import { registerProjectWorkspaceArrival } from './workspace-arrival'
 import { app, ipcMain } from 'electron'
 import type { Store } from '../../persistence'
-import { relaunchApp, runBeforeRelaunchCleanup } from '../../app-relaunch'
+import { runBeforeRelaunchCleanup } from '../../app-relaunch'
 import { quitProcess } from '../../startup/process-quit-request'
 import { flushActiveProfileBeforeRelaunch } from '../../orca-profiles/profile-persistence-deadline'
 import { WorkspaceCatalog } from './workspace-catalog'
-import { projectWorkspaceRelaunchArgs, readProjectWorkspaceContext } from './workspace-context'
+import { readProjectWorkspaceContext } from './workspace-context'
 import {
   PROJECT_WORKSPACE_HOME_ID,
   type ProjectWorkspaceList,
@@ -53,6 +54,7 @@ export function registerProjectWorkspaceHandlers(
   store: Store,
   onBeforeRelaunch?: () => void | Promise<void>
 ): void {
+  registerProjectWorkspaceArrival()
   app.on('before-quit', () => {
     try {
       recordOwnSummary(store)
@@ -102,7 +104,6 @@ export function registerProjectWorkspaceHandlers(
       switching = true
       try {
         await flushActiveProfileBeforeRelaunch(store)
-        const relaunchArgs = projectWorkspaceRelaunchArgs(process.argv.slice(1), toId)
         recordOwnSummary(store)
         withCatalog((catalog) => {
           if (toId === PROJECT_WORKSPACE_HOME_ID) {
@@ -112,19 +113,24 @@ export function registerProjectWorkspaceHandlers(
             catalog.select(toId)
           }
         })
+        await openProjectWorkspaceDestination(event.sender, toId)
         await runBeforeRelaunchCleanup(onBeforeRelaunch)
         if (!event.sender.isDestroyed()) {
           event.sender.send('app:restart-committed')
         }
         setTimeout(() => {
-          if (!requestDevWorkspaceRestart(toId)) {
-            relaunchApp('project-workspace-switch', undefined, { args: relaunchArgs })
-          }
           quitProcess()
         }, 150)
         return { status: 'relaunching' }
       } catch (error) {
         switching = false
+        withCatalog((catalog) => {
+          if (fromId === PROJECT_WORKSPACE_HOME_ID) {
+            catalog.enterHome()
+          } else {
+            catalog.select(fromId)
+          }
+        })
         throw error
       }
     }
