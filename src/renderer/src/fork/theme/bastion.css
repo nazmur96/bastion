@@ -631,6 +631,7 @@ button.bx-vstep:hover:not(:disabled) {
 .bx-tab-close,
 .bx-picker,
 .bx-icon-btn,
+.bx-focus-toggle,
 .bx-pathcol-head {
   -webkit-app-region: no-drag;
 }

@@ -9,6 +9,7 @@ import {
 import { ensureTerminalDock, liveTerminalDockId } from './terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
 import { setSideSection, syncSideSection, type SideSection } from './side-panel-store'
+import { recoverWorkbenchLayout, restoreWorkbenchLayout } from './workbench-focus'
 
 const SECTION_FOR_TAB: Partial<Record<string, SideSection>> = {
   explorer: 'files',
@@ -56,6 +57,7 @@ export function useBastionLayout(worktreeId: string): void {
       }
       busy = true
       try {
+        recoverWorkbenchLayout()
         foldClaudePanel(worktreeId)
         // Orca's right sidebar is never drawn in a workspace; its state stays "open" so its
         // panels keep loading where the side panel draws them, and a shortcut that picks one of
@@ -84,6 +86,10 @@ export function useBastionLayout(worktreeId: string): void {
     syncSideSection(worktreeId)
     lastTab = useAppStore.getState().rightSidebarTab
     run()
-    return useAppStore.subscribe(run)
+    const unsubscribe = useAppStore.subscribe(run)
+    return () => {
+      unsubscribe()
+      restoreWorkbenchLayout(worktreeId)
+    }
   }, [worktreeId])
 }

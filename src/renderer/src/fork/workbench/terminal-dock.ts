@@ -5,6 +5,7 @@ import { containsGroup } from '../claude-panel/claude-panel-layout'
 const KEY = 'orca-fork.terminalDock.v1'
 /** Share of the width the workbench keeps beside the side panel. */
 const WORKBENCH_RATIO = 0.66
+const restoredWorkbenchShares = new Map<string, number>()
 
 function load(): Record<string, string> {
   try {
@@ -119,7 +120,11 @@ export function sizeTerminalDock(worktreeId: string, dock: string): void {
   const layout = state.layoutByWorktree[worktreeId]
   const path = layout ? dockSplitPath(layout, dock) : null
   if (path !== null) {
-    state.setTabGroupSplitRatio(worktreeId, path, WORKBENCH_RATIO)
+    state.setTabGroupSplitRatio(
+      worktreeId,
+      path,
+      restoredWorkbenchShares.get(worktreeId) ?? WORKBENCH_RATIO
+    )
   }
 }
 
@@ -143,10 +148,12 @@ export function sizeEvenTerminalDock(worktreeId: string, dock: string): void {
 }
 
 const COLLAPSED_SHARE = 1
-let shareBeforeCollapse = WORKBENCH_RATIO
+const sharesBeforeCollapse = new Map<string, number>()
 
 /** The side panel's split and the workbench's share of it, while the panel is on screen. */
-function dockSplit(worktreeId: string): { path: string; workbenchShare: number } | null {
+export function readTerminalDockSplit(
+  worktreeId: string
+): { path: string; workbenchShare: number } | null {
   const dock = liveTerminalDockId(worktreeId)
   const layout = useAppStore.getState().layoutByWorktree[worktreeId]
   const path = dock && layout ? dockSplitPath(layout, dock) : null
@@ -157,36 +164,48 @@ function dockSplit(worktreeId: string): { path: string; workbenchShare: number }
 }
 
 export function isSidePanelCollapsed(worktreeId: string): boolean {
-  return (dockSplit(worktreeId)?.workbenchShare ?? 0) >= 0.98
+  return (readTerminalDockSplit(worktreeId)?.workbenchShare ?? 0) >= 0.98
+}
+
+export function setTerminalDockShare(worktreeId: string, share: number, remember = true): boolean {
+  if (remember) {
+    restoredWorkbenchShares.set(worktreeId, share)
+  }
+  const split = readTerminalDockSplit(worktreeId)
+  if (!split) {
+    return false
+  }
+  useAppStore.getState().setTabGroupSplitRatio(worktreeId, split.path, share)
+  return true
 }
 
 /** Hide the side panel by giving the workbench the whole width; show it at its last size. */
 export function toggleSidePanel(worktreeId: string): void {
-  const split = dockSplit(worktreeId)
+  const split = readTerminalDockSplit(worktreeId)
   if (!split) {
     return
   }
   const collapsed = split.workbenchShare >= 0.98
   if (!collapsed) {
-    shareBeforeCollapse = split.workbenchShare
+    sharesBeforeCollapse.set(worktreeId, split.workbenchShare)
   }
   useAppStore
     .getState()
     .setTabGroupSplitRatio(
       worktreeId,
       split.path,
-      collapsed ? shareBeforeCollapse : COLLAPSED_SHARE
+      collapsed ? (sharesBeforeCollapse.get(worktreeId) ?? WORKBENCH_RATIO) : COLLAPSED_SHARE
     )
 }
 
 const sharesBeforeMaximize = new Map<string, number>()
 
 export function isTerminalDockMaximized(worktreeId: string): boolean {
-  return (dockSplit(worktreeId)?.workbenchShare ?? 1) < 0.02
+  return (readTerminalDockSplit(worktreeId)?.workbenchShare ?? 1) < 0.02
 }
 
 export function toggleMaximizeTerminalDock(worktreeId: string): void {
-  const split = dockSplit(worktreeId)
+  const split = readTerminalDockSplit(worktreeId)
   if (!split) {
     return
   }

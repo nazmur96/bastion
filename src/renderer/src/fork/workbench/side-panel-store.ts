@@ -65,8 +65,12 @@ export function setSideSection(worktreeId: string, section: SideSection): void {
   }
 }
 
+export function readSideSection(worktreeId: string): SideSection {
+  return sections[worktreeId] ?? 'files'
+}
+
 export function useSideSection(worktreeId: string): SideSection {
-  const read = (): SideSection => sections[worktreeId] ?? 'files'
+  const read = (): SideSection => readSideSection(worktreeId)
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener)

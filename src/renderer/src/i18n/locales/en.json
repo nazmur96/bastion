@@ -20649,7 +20649,10 @@
       "dockTitle": "Terminal · {{name}}",
       "fullMap": "System map",
       "tools": "Tools & settings",
-      "closeView": "Close"
+      "closeView": "Close",
+      "restoreLayout": "Restore previous layout",
+      "focusTerminal": "Focus terminal",
+      "focusMain": "Focus editor or agent"
     },
     "claudeEdits": {
       "reviewTitle": "Review Claude’s changes",

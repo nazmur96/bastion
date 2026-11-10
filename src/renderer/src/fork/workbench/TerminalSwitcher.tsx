@@ -1,4 +1,4 @@
-import { ChevronDown, List, Maximize2, Minimize2, Plus, SquareTerminal, X } from 'lucide-react'
+import { ChevronDown, List, Plus, SquareTerminal, X } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import {
@@ -13,11 +13,8 @@ import { newWorkbenchTerminal } from './workbench-terminals'
 import { useSideSection } from './side-panel-store'
 import { terminalDisplayLabel } from './terminal-display-label'
 import { startWorkspaceHost } from './start-project-actions'
-import {
-  isTerminalDockMaximized,
-  liveTerminalDockId,
-  toggleMaximizeTerminalDock
-} from './terminal-dock'
+import { liveTerminalDockId } from './terminal-dock'
+import { WorkbenchFocusButton } from './WorkbenchFocusButton'
 
 export function TerminalSwitcher({
   worktreeId,
@@ -35,7 +32,6 @@ export function TerminalSwitcher({
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId
   )
   const isDock = useAppStore(() => liveTerminalDockId(worktreeId) === groupId)
-  const maximized = useAppStore(() => isTerminalDockMaximized(worktreeId))
   const section = useSideSection(worktreeId)
   if (!isDock || section !== 'terminal') {
     return null
@@ -52,9 +48,6 @@ export function TerminalSwitcher({
     ) || translate('components.sidePanel.terminalName', 'Terminal')
   const newLabel = translate('components.sidePanel.newTerminal', 'New terminal')
   const closeLabel = translate('components.sidePanel.closeTerminal', 'Close terminal')
-  const maximizeLabel = maximized
-    ? translate('components.sidePanel.restoreTerminal', 'Restore terminal size')
-    : translate('components.sidePanel.maximizeTerminal', 'Maximise terminal')
   return (
     <div className="bx-terminal-toolbar" data-terminal-toolbar="">
       <div className="bx-terminal-tabs scrollbar-sleek">
@@ -130,16 +123,7 @@ export function TerminalSwitcher({
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
-      <button
-        type="button"
-        className="bx-icon-btn"
-        title={maximizeLabel}
-        aria-label={maximizeLabel}
-        aria-pressed={maximized}
-        onClick={() => toggleMaximizeTerminalDock(worktreeId)}
-      >
-        {maximized ? <Minimize2 aria-hidden /> : <Maximize2 aria-hidden />}
-      </button>
+      <WorkbenchFocusButton worktreeId={worktreeId} target="terminal" />
     </div>
   )
 }

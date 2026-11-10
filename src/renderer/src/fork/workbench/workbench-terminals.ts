@@ -4,6 +4,11 @@ import { readClaudePanelGroupId } from '../claude-panel/claude-panel-registry'
 import { pickNonPanelGroupId } from '../claude-panel/claude-panel-layout'
 import { latestTabInSection } from './workbench-sections'
 import { ensureTerminalDock, liveTerminalDockId } from './terminal-dock'
+import {
+  focusWorkbenchSurface,
+  readWorkbenchFocus,
+  restoreWorkbenchLayout
+} from './workbench-focus'
 
 /** The workbench column: not the Claude panel, not the terminal dock, preferably not a side chat. */
 export function workbenchGroupId(worktreeId: string): string | null {
@@ -38,12 +43,17 @@ export function terminalGroupId(worktreeId: string): string | null {
 export function newWorkbenchTerminal(worktreeId: string): void {
   const groupId = terminalGroupId(worktreeId)
   if (groupId) {
+    focusWorkbenchSurface(worktreeId, 'terminal')
     void useAppStore.getState().openNewTerminalTabInActiveWorkspace(groupId)
   }
 }
 
 /** Ctrl+`: the workbench's latest terminal, or a new one when it has none. */
 export function showWorkbenchTerminals(worktreeId: string): void {
+  if (readWorkbenchFocus(worktreeId) === 'terminal') {
+    restoreWorkbenchLayout(worktreeId)
+    return
+  }
   const state = useAppStore.getState()
   const groupId = terminalGroupId(worktreeId)
   const group = state.groupsByWorktree[worktreeId]?.find((candidate) => candidate.id === groupId)
@@ -59,6 +69,7 @@ export function showWorkbenchTerminals(worktreeId: string): void {
     return
   }
   state.activateTab(tabId, { worktreeId })
+  focusWorkbenchSurface(worktreeId, 'terminal')
   focusTerminalTabSurface(tabId)
 }
 

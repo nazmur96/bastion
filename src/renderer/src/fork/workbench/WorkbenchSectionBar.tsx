@@ -20,6 +20,7 @@ import {
 } from './use-terminal-dock'
 import { workbenchGroupId } from './workbench-terminals'
 import { SIDE_SECTIONS, setSideSection, useSideSection, type SideSection } from './side-panel-store'
+import { WorkbenchFocusButton } from './WorkbenchFocusButton'
 
 const SECTION_ICONS: Record<SideSection, typeof FileText> = {
   files: FileText,
@@ -135,6 +136,7 @@ export function WorkbenchSectionBar({
   if (!view) {
     return (
       <>
+        <WorkbenchFocusButton worktreeId={worktreeId} target="workbench" />
         {restorePath}
         {restore}
       </>
@@ -143,6 +145,7 @@ export function WorkbenchSectionBar({
   // The view the Project path opened reads as the open tab, ahead of chat and files.
   return (
     <>
+      <WorkbenchFocusButton worktreeId={worktreeId} target="workbench" />
       {restorePath}
       {restore}
       <span className="bx-tab" aria-current="page" data-workbench-infra="" data-open="true">

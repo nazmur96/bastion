@@ -1979,7 +1979,9 @@
       }
     },
     "sidePanel": {
-      "noTerminal": "No terminal"
+      "maximizeTerminal": "Maximise terminal",
+      "noTerminal": "No terminal",
+      "restoreTerminal": "Restore terminal size"
     },
     "tab": {
       "bar": {

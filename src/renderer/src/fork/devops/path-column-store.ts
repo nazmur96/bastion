@@ -15,7 +15,18 @@ const listeners = new Set<() => void>()
 
 /** Fold the Project path column to a thin strip, or open it again. */
 export function togglePathColumn(): void {
-  collapsed = !collapsed
+  setPathColumnCollapsed(!collapsed)
+}
+
+export function isPathColumnCollapsed(): boolean {
+  return collapsed
+}
+
+export function setPathColumnCollapsed(next: boolean): void {
+  if (collapsed === next) {
+    return
+  }
+  collapsed = next
   try {
     localStorage.setItem(KEY, String(collapsed))
   } catch {
