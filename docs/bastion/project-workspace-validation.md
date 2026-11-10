@@ -34,3 +34,11 @@ This is application-state isolation. Shared external filesystem paths are intent
 Home, explicit Leave and Incognito remain milestone 3. Native agent/automation continuity while switching is bounded by existing quit behavior. Cloud authentication, resource recipes, provider-neutral assistance and connected delivery remain later roadmap work.
 
 Final CLI ownership proof: while Platform is selected, an ordinary CLI lists only platform-tools. A still-running Retail terminal retains its original runtime identity; its CLI returns runtime_unavailable after the Retail desktop runtime exits, rather than silently targeting Platform. Returning to Retail restores its terminal surfaces. This refusal is an explicit continuity limitation of the initial relaunch design.
+
+## Application home (first milestone 3 slice)
+
+A cold launch now opens application home in its own empty namespace (`bastion-project-workspaces/home`), outside every project workspace. Home lists workspace cards, creates and renames workspaces, and opens one by relaunching into it. Inside a workspace, the titlebar menu offers Leave workspace and switching; creation is refused outside home. Catalog schema 2 adds the home launch state and a summary each workspace records about itself (repository count, last opened); home never reads another namespace's data. The CLI routes to the home namespace while home is open.
+
+Validated in the real dev app: cold start → home; open Retail (two repositories, draft, terminals restored) → Leave → home shows Retail's recorded count; create Payments → opens empty; stop and cold start from Payments → home. A forced stop skips the quit hook, so that workspace's count stays unrecorded until a normal quit or switch.
+
+Not yet built: Incognito tasks and Archive. Orca's existing empty-state copy still calls worktrees "workspaces" and shows the ORCA name.

@@ -1,14 +1,15 @@
 import { requestDevWorkspaceRestart } from './workspace-dev-restart'
-import { ipcMain } from 'electron'
+import { app, ipcMain } from 'electron'
 import type { Store } from '../../persistence'
 import { relaunchApp, runBeforeRelaunchCleanup } from '../../app-relaunch'
 import { quitProcess } from '../../startup/process-quit-request'
 import { flushActiveProfileBeforeRelaunch } from '../../orca-profiles/profile-persistence-deadline'
 import { WorkspaceCatalog } from './workspace-catalog'
 import { projectWorkspaceRelaunchArgs, readProjectWorkspaceContext } from './workspace-context'
-import type {
-  ProjectWorkspaceList,
-  ProjectWorkspaceSwitchResult
+import {
+  PROJECT_WORKSPACE_HOME_ID,
+  type ProjectWorkspaceList,
+  type ProjectWorkspaceSwitchResult
 } from '../../../shared/fork-project-workspaces'
 
 function requestField(args: unknown, key: string): string {
@@ -29,7 +30,7 @@ function withCatalog<T>(run: (catalog: WorkspaceCatalog, activeId: string) => T)
   }
   const catalog = new WorkspaceCatalog(context.baseRoot)
   try {
-    return run(catalog, context.workspace.id)
+    return run(catalog, context.activeId)
   } finally {
     catalog.close()
   }
@@ -39,13 +40,35 @@ function list(catalog: WorkspaceCatalog, activeId: string): ProjectWorkspaceList
   return { activeId, workspaces: catalog.list(), switchMode: 'relaunch' }
 }
 
+// Home cards show what each workspace recorded about itself; home never reads another namespace.
+function recordOwnSummary(store: Store): void {
+  withCatalog((catalog, activeId) => {
+    if (activeId !== PROJECT_WORKSPACE_HOME_ID) {
+      catalog.recordRepoCount(activeId, store.getRepos().length)
+    }
+  })
+}
+
 export function registerProjectWorkspaceHandlers(
   store: Store,
   onBeforeRelaunch?: () => void | Promise<void>
 ): void {
+  app.on('before-quit', () => {
+    try {
+      recordOwnSummary(store)
+    } catch (error) {
+      console.warn(
+        '[project-workspaces] Summary not recorded:',
+        error instanceof Error ? error.name : typeof error
+      )
+    }
+  })
   ipcMain.handle('bastionWorkspaces:list', () => withCatalog(list))
   ipcMain.handle('bastionWorkspaces:create', (_event, args: unknown) =>
     withCatalog((catalog, activeId) => {
+      if (activeId !== PROJECT_WORKSPACE_HOME_ID) {
+        throw new Error('Create workspaces from application home.')
+      }
       catalog.create(requestField(args, 'name'))
       return list(catalog, activeId)
     })
@@ -66,7 +89,9 @@ export function registerProjectWorkspaceHandlers(
         if (fromId !== activeId) {
           throw new Error('Workspace context changed. Refresh before switching.')
         }
-        catalog.get(toId)
+        if (toId !== PROJECT_WORKSPACE_HOME_ID) {
+          catalog.get(toId)
+        }
       })
       if (toId === fromId) {
         return { status: 'already-active' }
@@ -78,16 +103,21 @@ export function registerProjectWorkspaceHandlers(
       try {
         await flushActiveProfileBeforeRelaunch(store)
         const relaunchArgs = projectWorkspaceRelaunchArgs(process.argv.slice(1), toId)
+        recordOwnSummary(store)
         withCatalog((catalog) => {
-          catalog.dataRoot(toId)
-          catalog.select(toId)
+          if (toId === PROJECT_WORKSPACE_HOME_ID) {
+            catalog.enterHome()
+          } else {
+            catalog.dataRoot(toId)
+            catalog.select(toId)
+          }
         })
         await runBeforeRelaunchCleanup(onBeforeRelaunch)
         if (!event.sender.isDestroyed()) {
           event.sender.send('app:restart-committed')
         }
         setTimeout(() => {
-          if (!requestDevWorkspaceRestart()) {
+          if (!requestDevWorkspaceRestart(toId)) {
             relaunchApp('project-workspace-switch', undefined, { args: relaunchArgs })
           }
           quitProcess()

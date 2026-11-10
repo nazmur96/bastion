@@ -62,7 +62,6 @@ describe('project workspace namespace', () => {
     try {
       const a = catalog.create('A')
       const b = catalog.create('B')
-      catalog.select(a.id)
       const paths: Record<string, string> = {}
       const env: NodeJS.ProcessEnv = {}
       const active = configureProjectWorkspace(
@@ -70,15 +69,18 @@ describe('project workspace namespace', () => {
         (name, path) => {
           paths[name] = path
         },
-        [],
+        [`--bastion-project-workspace=${a.id}`],
         env
       )
       expect(paths.userData).toBe(catalog.dataRoot(a.id))
       expect(paths.sessionData).toBe(paths.userData)
       expect(env.BASTION_PROJECT_WORKSPACE_DATA_ROOT).toBe(paths.userData)
       catalog.select(b.id)
-      expect(active.workspace.id).toBe(a.id)
-      expect(configureProjectWorkspace(root, () => {}, [], {}).workspace.id).toBe(b.id)
+      expect(active.activeId).toBe(a.id)
+      expect(
+        configureProjectWorkspace(root, () => {}, [`--bastion-project-workspace=${b.id}`], {})
+          .activeId
+      ).toBe(b.id)
       expect(
         projectWorkspaceRelaunchArgs(['.', '--bastion-project-workspace=existing'], b.id)
       ).toEqual(['.', `--bastion-project-workspace=${b.id}`])
@@ -88,17 +90,6 @@ describe('project workspace namespace', () => {
     } finally {
       catalog.close()
     }
-  })
-
-  it('does not initialize or relocate a legacy installation before workspace management is used', () => {
-    const root = temporary()
-    const paths: string[] = []
-    const env = { BASTION_PROJECT_WORKSPACE_DATA_ROOT: 'inherited-wrong-root' }
-    expect(configureProjectWorkspace(root, (_, path) => paths.push(path), [], env).dataRoot).toBe(
-      root
-    )
-    expect(paths).toEqual([])
-    expect(env.BASTION_PROJECT_WORKSPACE_DATA_ROOT).toBeUndefined()
   })
 
   it('refuses newer schema and redirected storage rather than opening another workspace', () => {

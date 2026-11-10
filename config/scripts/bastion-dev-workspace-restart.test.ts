@@ -12,18 +12,19 @@ it('accepts only the owning dev runner request and consumes it once', () => {
   try {
     mkdirSync(join(root, 'out'))
     const env = devWorkspaceRestartEnvironment(root, 123)
-    expect(consumeDevWorkspaceRestart(env)).toBe(false)
-    writeFileSync(
-      env.BASTION_DEV_RESTART_FILE,
-      JSON.stringify({ nonce: 'foreign', reason: 'project-workspace-switch' })
-    )
-    expect(consumeDevWorkspaceRestart(env)).toBe(false)
-    writeFileSync(
-      env.BASTION_DEV_RESTART_FILE,
-      JSON.stringify({ nonce: env.BASTION_DEV_RESTART_NONCE, reason: 'project-workspace-switch' })
-    )
-    expect(consumeDevWorkspaceRestart(env)).toBe(true)
-    expect(consumeDevWorkspaceRestart(env)).toBe(false)
+    expect(consumeDevWorkspaceRestart(env)).toBeNull()
+    const request = (nonce: string, target: string): void =>
+      writeFileSync(
+        env.BASTION_DEV_RESTART_FILE,
+        JSON.stringify({ nonce, reason: 'project-workspace-switch', target })
+      )
+    request('foreign', 'home')
+    expect(consumeDevWorkspaceRestart(env)).toBeNull()
+    request(env.BASTION_DEV_RESTART_NONCE, '../escape')
+    expect(consumeDevWorkspaceRestart(env)).toBeNull()
+    request(env.BASTION_DEV_RESTART_NONCE, 'home')
+    expect(consumeDevWorkspaceRestart(env)).toBe('home')
+    expect(consumeDevWorkspaceRestart(env)).toBeNull()
   } finally {
     rmSync(root, { recursive: true, force: true })
   }

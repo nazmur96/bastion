@@ -15,12 +15,19 @@ const mocks = vi.hoisted(() => ({
 }))
 vi.mock('./workspace-dev-restart', () => ({ requestDevWorkspaceRestart: () => false }))
 vi.mock('electron', () => ({
+  app: { on: vi.fn() },
   ipcMain: {
     handle: (name: string, handler: (...args: unknown[]) => unknown) =>
       mocks.handlers.set(name, handler)
   }
 }))
-vi.mock('../../persistence', () => ({ Store: class {} }))
+vi.mock('../../persistence', () => ({
+  Store: class {
+    getRepos(): unknown[] {
+      return [{}, {}]
+    }
+  }
+}))
 vi.mock('../../orca-profiles/profile-persistence-deadline', () => ({
   flushActiveProfileBeforeRelaunch: mocks.flush
 }))
@@ -47,8 +54,7 @@ it('refuses stale sources and failed checkpoints without changing selection, the
   try {
     const a = catalog.create('A'),
       b = catalog.create('B')
-    catalog.select(a.id)
-    configureProjectWorkspace(root, () => {}, [], {})
+    configureProjectWorkspace(root, () => {}, [`--bastion-project-workspace=${a.id}`], {})
     registerProjectWorkspaceHandlers(new Store())
     const switchWorkspace = mocks.handlers.get('bastionWorkspaces:switch')
     if (!switchWorkspace) {
@@ -78,6 +84,38 @@ it('refuses stale sources and failed checkpoints without changing selection, the
     expect(mocks.quit).toHaveBeenCalledOnce()
     const list = mocks.handlers.get('bastionWorkspaces:list')
     expect(list?.()).toMatchObject({ activeId: a.id })
+    expect(catalog.get(a.id).repoCount).toBe(2)
+    expect(() => mocks.handlers.get('bastionWorkspaces:create')?.({}, { name: 'Nested' })).toThrow(
+      /application home/
+    )
+  } finally {
+    catalog.close()
+  }
+})
+
+it('leaves a workspace for application home and creates new workspaces only there', async () => {
+  vi.useFakeTimers()
+  const root = mkdtempSync(join(tmpdir(), 'bastion-leave-'))
+  roots.push(root)
+  const catalog = new WorkspaceCatalog(root)
+  try {
+    const a = catalog.create('A')
+    configureProjectWorkspace(root, () => {}, [`--bastion-project-workspace=${a.id}`], {})
+    registerProjectWorkspaceHandlers(new Store())
+    const sender = { isDestroyed: () => false, send: vi.fn() }
+    await expect(
+      mocks.handlers.get('bastionWorkspaces:switch')?.({ sender }, { fromId: a.id, toId: 'home' })
+    ).resolves.toEqual({ status: 'relaunching' })
+    expect(catalog.atHome()).toBe(true)
+    await vi.advanceTimersByTimeAsync(150)
+    expect(mocks.relaunch).toHaveBeenCalledWith('project-workspace-switch', undefined, {
+      args: expect.arrayContaining(['--bastion-project-workspace=home'])
+    })
+    mocks.handlers.clear()
+    configureProjectWorkspace(root, () => {}, [], {})
+    registerProjectWorkspaceHandlers(new Store())
+    const created = mocks.handlers.get('bastionWorkspaces:create')?.({}, { name: 'B' })
+    expect(created).toMatchObject({ activeId: 'home' })
   } finally {
     catalog.close()
   }

@@ -646,8 +646,11 @@ function handleChildError(error) {
 }
 
 async function handleChildExit(code, signal) {
-  if (!isShuttingDown && !signal && code === 0 && consumeDevWorkspaceRestart(process.env)) {
+  const restartTarget =
+    !isShuttingDown && !signal && code === 0 ? consumeDevWorkspaceRestart(process.env) : null
+  if (restartTarget) {
     console.error('[bastion-dev] Reopening project workspace')
+    process.env.BASTION_PROJECT_WORKSPACE_LAUNCH = restartTarget
     forwardedArgs = await devWorkspaceForwardedArgs(forwardedRaw, repoRoot, devProfile)
     child = spawnDevChild()
     return

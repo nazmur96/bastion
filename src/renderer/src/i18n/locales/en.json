@@ -21173,12 +21173,34 @@
       "draftHint": "Opens an unsent request in this workspace. Review it before sending."
     },
     "projectWorkspaces": {
-      "manage": "Project workspaces",
-      "description": "Each workspace keeps its own projects, agents, terminals and settings. Opening another reopens the workbench.",
-      "renameLabel": "Rename current workspace",
-      "newLabel": "New empty workspace",
-      "rename": "Rename current",
-      "create": "Create workspace"
+      "menu": "Project workspace {{name}}",
+      "leave": "Leave workspace",
+      "switchTo": "Switch to"
+    },
+    "applicationHome": {
+      "product": "Engineering workspace",
+      "eyebrow": "Application home · Outside any workspace",
+      "title": "Where would you like to work?",
+      "subtitle": "Open a project workspace. Each one keeps its own repositories, agents, terminals and settings.",
+      "newWorkspace": "New workspace",
+      "yourWorkspaces": "Your workspaces",
+      "count": "{{count}} workspaces",
+      "repositoriesUnknown": "Repository count not recorded yet",
+      "noRepositories": "No repositories yet",
+      "oneRepository": "1 repository",
+      "repositories": "{{count}} repositories",
+      "neverOpened": "Not opened yet",
+      "lastOpened": "Last opened {{when}}",
+      "opening": "Opening…",
+      "open": "Open workspace",
+      "rename": "Rename {{name}}",
+      "renameLabel": "Workspace name",
+      "newLabel": "New workspace name",
+      "create": "Create and open",
+      "createCard": "Create a workspace",
+      "createCardHint": "A complete, independent project desktop",
+      "footnote": "Repositories, branches and worktrees are added inside a workspace. Opening a workspace reopens the app inside it.",
+      "status": "No workspace is open. Your project contexts stay separate."
     }
   },
   "dashboardPopout": {

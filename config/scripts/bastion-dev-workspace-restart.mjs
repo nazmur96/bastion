@@ -12,19 +12,24 @@ export function devWorkspaceRestartEnvironment(repoRoot, pid = process.pid) {
   }
 }
 
+const LAUNCH_TARGET = /^(?:home|existing|workspace-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/
+
+/** Returns the workspace the next Electron child must open, or null when no switch was requested. */
 export function consumeDevWorkspaceRestart(env) {
   const file = env.BASTION_DEV_RESTART_FILE
   if (!file || !env.BASTION_DEV_RESTART_NONCE) {
-    return false
+    return null
   }
   try {
     const request = JSON.parse(readFileSync(file, 'utf8'))
-    return (
-      request.nonce === env.BASTION_DEV_RESTART_NONCE &&
-      request.reason === 'project-workspace-switch'
-    )
+    return request.nonce === env.BASTION_DEV_RESTART_NONCE &&
+      request.reason === 'project-workspace-switch' &&
+      typeof request.target === 'string' &&
+      LAUNCH_TARGET.test(request.target)
+      ? request.target
+      : null
   } catch {
-    return false
+    return null
   } finally {
     rmSync(file, { force: true })
   }

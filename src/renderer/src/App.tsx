@@ -40,12 +40,16 @@ import { useWindowVisibilityEffects } from './app-shell/use-window-visibility-ef
 import { SpaceWindowStatePublisher } from './components/workspace-space/SpaceWindowStatePublisher'
 import { PlainSshTerminalPanels } from './components/plain-ssh-terminal/PlainSshTerminalPanels'
 import { installActiveWorktreeRemovalSuccessor } from './lib/active-worktree-removal-successor'
+// Fork: application home sits outside every project workspace.
+import { ApplicationHome } from './fork/project-workspaces/ApplicationHome'
+import { useProjectWorkspaceView } from './fork/project-workspaces/use-project-workspaces'
 
 function App(): React.JSX.Element {
   const layout = useAppChromeLayout()
   const floatingWorkspace = useFloatingWorkspacePanel()
   const onboardingGate = useOnboardingAndFeatureTips()
   const clearUnreadDockBadge = useUnreadDockBadge(floatingWorkspace.open)
+  const workspaceView = useProjectWorkspaceView()
 
   useAppShellServices()
   // Load drafts before the startup chain so no failed step can skip them.
@@ -106,11 +110,16 @@ function App(): React.JSX.Element {
           <LinkRoutingPreferenceDialogProvider>
             <AppBackgroundServices />
             <SpaceWindowStatePublisher />
-            <AppWorkspaceShell layout={layout} floatingWorkspace={floatingWorkspace} />
-            <AppRootSurfaces
-              floatingWorkspace={floatingWorkspace}
-              onboardingGate={onboardingGate}
-            />
+            {workspaceView === 'home' && <ApplicationHome />}
+            {workspaceView === 'workspace' && (
+              <>
+                <AppWorkspaceShell layout={layout} floatingWorkspace={floatingWorkspace} />
+                <AppRootSurfaces
+                  floatingWorkspace={floatingWorkspace}
+                  onboardingGate={onboardingGate}
+                />
+              </>
+            )}
             <BrowserWebAuthnAccountDialog />
             <BrowserExtensionInstallDialog />
           </LinkRoutingPreferenceDialogProvider>

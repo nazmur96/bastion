@@ -9,7 +9,9 @@ import {
   type ProjectWorkspace
 } from '../../../shared/fork-project-workspaces'
 
-const SCHEMA_VERSION = 1
+const SCHEMA_VERSION = 2
+const WORKSPACE_COLUMNS =
+  'w.id, w.name, w.kind, w.createdAt, w.updatedAt, s.repoCount, s.openedAt FROM workspaces w LEFT JOIN summary s ON s.workspaceId = w.id'
 
 export function workspaceCatalogDirectory(baseRoot: string): string {
   const path = join(baseRoot, 'bastion-project-workspaces')
@@ -22,6 +24,16 @@ function ensurePrivateDirectory(path: string): void {
     throw new Error('Workspace storage must be a private directory, not a redirected path.')
   }
   mkdirSync(path, { recursive: true, mode: 0o700 })
+}
+
+function optionalCount(value: unknown): number | null {
+  if (value === null || value === undefined) {
+    return null
+  }
+  if (typeof value !== 'number' || !Number.isInteger(value) || value < 0) {
+    throw new Error('Workspace catalog contains an invalid record.')
+  }
+  return value
 }
 
 function decodeWorkspace(row: Record<string, unknown> | undefined): ProjectWorkspace {
@@ -42,8 +54,50 @@ function decodeWorkspace(row: Record<string, unknown> | undefined): ProjectWorks
     name: row.name,
     kind: row.kind,
     createdAt: row.createdAt,
-    updatedAt: row.updatedAt
+    updatedAt: row.updatedAt,
+    repoCount: optionalCount(row.repoCount),
+    openedAt: optionalCount(row.openedAt)
   }
+}
+
+function createFirstVersion(db: Database.Database): void {
+  const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all()
+  if (tables.length > 0) {
+    throw new Error('Refusing to replace an unrecognized workspace catalog.')
+  }
+  db.exec(`
+    CREATE TABLE workspaces (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+      kind TEXT NOT NULL CHECK(kind IN ('existing','isolated')),
+      createdAt INTEGER NOT NULL,
+      updatedAt INTEGER NOT NULL
+    );
+    CREATE TABLE selection (slot INTEGER PRIMARY KEY CHECK(slot = 1),
+      workspaceId TEXT NOT NULL REFERENCES workspaces(id));
+  `)
+  const now = Date.now()
+  db.prepare('INSERT INTO workspaces VALUES (?, ?, ?, ?, ?)').run(
+    'existing',
+    'Existing projects',
+    'existing',
+    now,
+    now
+  )
+  db.prepare('INSERT INTO selection VALUES (1, ?)').run('existing')
+}
+
+// Version 2 adds application home and the per-workspace summary shown on its cards.
+function upgradeToSecondVersion(db: Database.Database): void {
+  db.exec(`
+    CREATE TABLE summary (workspaceId TEXT PRIMARY KEY REFERENCES workspaces(id) ON DELETE CASCADE,
+      repoCount INTEGER CHECK(repoCount IS NULL OR repoCount >= 0),
+      openedAt INTEGER);
+    CREATE TABLE launch (slot INTEGER PRIMARY KEY CHECK(slot = 1),
+      atHome INTEGER NOT NULL CHECK(atHome IN (0, 1)));
+    INSERT INTO launch VALUES (1, 1);
+    PRAGMA user_version = 2;
+  `)
 }
 
 export class WorkspaceCatalog {
@@ -56,8 +110,9 @@ export class WorkspaceCatalog {
     }
     this.db = new Database(file, { timeout: 5000 })
     try {
-      const version = this.db.pragma('user_version', { simple: true })
-      if (version !== 0 && version !== SCHEMA_VERSION) {
+      const supported = (version: unknown): boolean =>
+        version === 0 || version === 1 || version === SCHEMA_VERSION
+      if (!supported(this.db.pragma('user_version', { simple: true }))) {
         throw new Error('Unsupported workspace catalog version. Update Bastion before opening it.')
       }
       this.db.pragma('foreign_keys = ON')
@@ -66,36 +121,18 @@ export class WorkspaceCatalog {
       this.db.exec('BEGIN IMMEDIATE')
       try {
         const lockedVersion = this.db.pragma('user_version', { simple: true })
-        if (lockedVersion !== 0 && lockedVersion !== SCHEMA_VERSION) {
+        if (!supported(lockedVersion)) {
           throw new Error('Unsupported workspace catalog version.')
         }
         if (lockedVersion === 0) {
-          const tables = this.db
-            .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
-            .all()
-          if (tables.length > 0) {
-            throw new Error('Refusing to replace an unrecognized workspace catalog.')
-          }
-          this.db.exec(`
-            CREATE TABLE workspaces (
-              id TEXT PRIMARY KEY,
-              name TEXT NOT NULL COLLATE NOCASE UNIQUE,
-              kind TEXT NOT NULL CHECK(kind IN ('existing','isolated')),
-              createdAt INTEGER NOT NULL,
-              updatedAt INTEGER NOT NULL
-            );
-            CREATE TABLE selection (slot INTEGER PRIMARY KEY CHECK(slot = 1),
-              workspaceId TEXT NOT NULL REFERENCES workspaces(id));
-            PRAGMA user_version = 1;
-          `)
-          const now = Date.now()
-          this.db
-            .prepare('INSERT INTO workspaces VALUES (?, ?, ?, ?, ?)')
-            .run('existing', 'Existing projects', 'existing', now, now)
-          this.db.prepare('INSERT INTO selection VALUES (1, ?)').run('existing')
+          createFirstVersion(this.db)
+        }
+        if (lockedVersion !== SCHEMA_VERSION) {
+          upgradeToSecondVersion(this.db)
         }
         this.list()
         this.selected()
+        this.atHome()
         this.db.exec('COMMIT')
       } catch (error) {
         this.db.exec('ROLLBACK')
@@ -110,7 +147,7 @@ export class WorkspaceCatalog {
 
   list(): ProjectWorkspace[] {
     return this.db
-      .prepare('SELECT id, name, kind, createdAt, updatedAt FROM workspaces ORDER BY createdAt, id')
+      .prepare(`SELECT ${WORKSPACE_COLUMNS} ORDER BY w.createdAt, w.id`)
       .all()
       .map(decodeWorkspace)
   }
@@ -119,9 +156,7 @@ export class WorkspaceCatalog {
     if (!isProjectWorkspaceId(id)) {
       throw new Error('Invalid project workspace ID.')
     }
-    const row = this.db
-      .prepare('SELECT id, name, kind, createdAt, updatedAt FROM workspaces WHERE id = ?')
-      .get(id)
+    const row = this.db.prepare(`SELECT ${WORKSPACE_COLUMNS} WHERE w.id = ?`).get(id)
     if (!row) {
       throw new Error('Project workspace no longer exists.')
     }
@@ -134,6 +169,14 @@ export class WorkspaceCatalog {
       throw new Error('Workspace selection is missing or invalid.')
     }
     return this.get(row.workspaceId)
+  }
+
+  atHome(): boolean {
+    const row = this.db.prepare('SELECT atHome FROM launch WHERE slot = 1').get()
+    if (!row || (row.atHome !== 0 && row.atHome !== 1)) {
+      throw new Error('Workspace launch state is missing or invalid.')
+    }
+    return row.atHome === 1
   }
 
   create(rawName: unknown): ProjectWorkspace {
@@ -156,7 +199,40 @@ export class WorkspaceCatalog {
 
   select(id: string): void {
     this.get(id)
-    this.db.prepare('UPDATE selection SET workspaceId = ? WHERE slot = 1').run(id)
+    this.db.exec('BEGIN IMMEDIATE')
+    try {
+      this.db.prepare('UPDATE selection SET workspaceId = ? WHERE slot = 1').run(id)
+      this.db.prepare('UPDATE launch SET atHome = 0 WHERE slot = 1').run()
+      this.db.exec('COMMIT')
+    } catch (error) {
+      this.db.exec('ROLLBACK')
+      throw error
+    }
+  }
+
+  enterHome(): void {
+    this.db.prepare('UPDATE launch SET atHome = 1 WHERE slot = 1').run()
+  }
+
+  markOpened(id: string): void {
+    this.get(id)
+    this.db
+      .prepare(
+        'INSERT INTO summary (workspaceId, openedAt) VALUES (?, ?) ON CONFLICT(workspaceId) DO UPDATE SET openedAt = excluded.openedAt'
+      )
+      .run(id, Date.now())
+  }
+
+  recordRepoCount(id: string, repoCount: number): void {
+    this.get(id)
+    if (!Number.isInteger(repoCount) || repoCount < 0) {
+      throw new Error('Invalid repository count.')
+    }
+    this.db
+      .prepare(
+        'INSERT INTO summary (workspaceId, repoCount) VALUES (?, ?) ON CONFLICT(workspaceId) DO UPDATE SET repoCount = excluded.repoCount'
+      )
+      .run(id, repoCount)
   }
 
   dataRoot(id: string): string {
@@ -167,6 +243,12 @@ export class WorkspaceCatalog {
     const parent = join(workspaceCatalogDirectory(this.baseRoot), 'data')
     ensurePrivateDirectory(parent)
     const root = join(parent, workspace.id)
+    ensurePrivateDirectory(root)
+    return root
+  }
+
+  homeRoot(): string {
+    const root = join(workspaceCatalogDirectory(this.baseRoot), 'home')
     ensurePrivateDirectory(root)
     return root
   }

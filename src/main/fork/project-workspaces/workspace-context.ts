@@ -1,62 +1,73 @@
 import { WorkspaceCatalog } from './workspace-catalog'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
-import { isProjectWorkspaceId } from '../../../shared/fork-project-workspaces'
+import {
+  isProjectWorkspaceLaunchTarget,
+  PROJECT_WORKSPACE_HOME_ID
+} from '../../../shared/fork-project-workspaces'
 import type { ProjectWorkspace } from '../../../shared/fork-project-workspaces'
 
 export const PROJECT_WORKSPACE_SWITCH = '--bastion-project-workspace='
 export const PROJECT_WORKSPACE_ROOT_ENV = 'BASTION_PROJECT_WORKSPACE_DATA_ROOT'
+// One-shot target from the development runner; packaged relaunches use the switch instead.
+export const PROJECT_WORKSPACE_LAUNCH_ENV = 'BASTION_PROJECT_WORKSPACE_LAUNCH'
 
 export type ProjectWorkspaceContext = {
   baseRoot: string
   dataRoot: string
-  workspace: ProjectWorkspace
+  activeId: string
+  // Null while application home is open.
+  workspace: ProjectWorkspace | null
 }
 
 let context: ProjectWorkspaceContext | null = null
 
+function launchTarget(argv: readonly string[], env: NodeJS.ProcessEnv): string {
+  const flags = argv.filter((arg) => arg.startsWith(PROJECT_WORKSPACE_SWITCH))
+  if (flags.length > 1) {
+    throw new Error('Multiple project workspace selections are not supported.')
+  }
+  const requested =
+    flags[0]?.slice(PROJECT_WORKSPACE_SWITCH.length) ?? env[PROJECT_WORKSPACE_LAUNCH_ENV]
+  delete env[PROJECT_WORKSPACE_LAUNCH_ENV]
+  if (requested === undefined) {
+    return PROJECT_WORKSPACE_HOME_ID
+  }
+  if (!isProjectWorkspaceLaunchTarget(requested)) {
+    throw new Error('Invalid project workspace ID.')
+  }
+  return requested
+}
+
+/** A cold launch opens application home; only an explicit switch opens a workspace. */
 export function configureProjectWorkspace(
   baseRoot: string,
   setPath: (name: 'userData' | 'sessionData', path: string) => void,
   argv: readonly string[] = process.argv,
   env: NodeJS.ProcessEnv = process.env
 ): ProjectWorkspaceContext {
-  if (
-    !existsSync(join(baseRoot, 'bastion-project-workspaces', 'catalog.db')) &&
-    !argv.some((arg) => arg.startsWith(PROJECT_WORKSPACE_SWITCH))
-  ) {
-    delete env[PROJECT_WORKSPACE_ROOT_ENV]
-    context = {
-      baseRoot,
-      dataRoot: baseRoot,
-      workspace: {
-        id: 'existing',
-        name: 'Existing projects',
-        kind: 'existing',
-        createdAt: 0,
-        updatedAt: 0
-      }
-    }
-    return context
-  }
   const catalog = new WorkspaceCatalog(baseRoot)
   try {
-    const flags = argv.filter((arg) => arg.startsWith(PROJECT_WORKSPACE_SWITCH))
-    if (flags.length > 1) {
-      throw new Error('Multiple project workspace selections are not supported.')
+    const target = launchTarget(argv, env)
+    const workspace = target === PROJECT_WORKSPACE_HOME_ID ? null : catalog.get(target)
+    const dataRoot = workspace ? catalog.dataRoot(workspace.id) : catalog.homeRoot()
+    if (workspace) {
+      catalog.select(workspace.id)
+      catalog.markOpened(workspace.id)
+    } else {
+      catalog.enterHome()
     }
-    const workspace = flags[0]
-      ? catalog.get(flags[0].slice(PROJECT_WORKSPACE_SWITCH.length))
-      : catalog.selected()
-    const dataRoot = catalog.dataRoot(workspace.id)
     setPath('userData', dataRoot)
     setPath('sessionData', dataRoot)
-    if (workspace.kind === 'isolated') {
-      env[PROJECT_WORKSPACE_ROOT_ENV] = dataRoot
-    } else {
+    if (workspace?.kind === 'existing') {
       delete env[PROJECT_WORKSPACE_ROOT_ENV]
+    } else {
+      env[PROJECT_WORKSPACE_ROOT_ENV] = dataRoot
     }
-    context = { baseRoot, dataRoot, workspace }
+    context = {
+      baseRoot,
+      dataRoot,
+      activeId: workspace?.id ?? PROJECT_WORKSPACE_HOME_ID,
+      workspace
+    }
     return context
   } finally {
     catalog.close()
@@ -68,7 +79,7 @@ export function readProjectWorkspaceContext(): ProjectWorkspaceContext | null {
 }
 
 export function projectWorkspaceRelaunchArgs(argv: readonly string[], id: string): string[] {
-  if (!isProjectWorkspaceId(id)) {
+  if (!isProjectWorkspaceLaunchTarget(id)) {
     throw new Error('Invalid project workspace ID.')
   }
   return [

@@ -13,6 +13,7 @@ export function resolveProjectWorkspaceCliRoot(baseRoot: string, env: NodeJS.Pro
     const parts = suffix.split(/[\\/]/)
     if (
       !suffix ||
+      (parts.length === 2 && parts[0] === 'bastion-project-workspaces' && parts[1] === 'home') ||
       (parts.length === 3 &&
         parts[0] === 'bastion-project-workspaces' &&
         parts[1] === 'data' &&
@@ -28,8 +29,16 @@ export function resolveProjectWorkspaceCliRoot(baseRoot: string, env: NodeJS.Pro
   }
   const db = new DatabaseSync(file, { readOnly: true, timeout: 5000 })
   try {
-    if (db.prepare('PRAGMA user_version').get()?.user_version !== 1) {
+    const version = db.prepare('PRAGMA user_version').get()?.user_version
+    if (version !== 1 && version !== 2) {
       throw new Error('Unsupported project workspace catalog. Update Bastion before using its CLI.')
+    }
+    // Application home owns its own empty runtime; never fall through to the last workspace.
+    if (
+      version === 2 &&
+      db.prepare('SELECT atHome FROM launch WHERE slot = 1').get()?.atHome === 1
+    ) {
+      return join(baseRoot, 'bastion-project-workspaces', 'home')
     }
     const row = db
       .prepare(

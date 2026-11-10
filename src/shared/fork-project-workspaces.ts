@@ -1,12 +1,19 @@
+/** Application home runs in its own empty namespace, outside every project workspace. */
+export const PROJECT_WORKSPACE_HOME_ID = 'home'
+
 export type ProjectWorkspace = {
   id: string
   name: string
   kind: 'existing' | 'isolated'
   createdAt: number
   updatedAt: number
+  // Recorded by the workspace itself when it closes; null until then.
+  repoCount: number | null
+  openedAt: number | null
 }
 
 export type ProjectWorkspaceList = {
+  // PROJECT_WORKSPACE_HOME_ID while application home is open.
   activeId: string
   workspaces: ProjectWorkspace[]
   switchMode: 'relaunch'
@@ -27,6 +34,10 @@ export function isProjectWorkspaceId(value: unknown): value is string {
     (typeof value === 'string' &&
       /^workspace-[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(value))
   )
+}
+
+export function isProjectWorkspaceLaunchTarget(value: unknown): value is string {
+  return value === PROJECT_WORKSPACE_HOME_ID || isProjectWorkspaceId(value)
 }
 
 export function projectWorkspaceName(value: unknown): string {
