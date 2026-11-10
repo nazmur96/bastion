@@ -1,6 +1,7 @@
+// Fork: integration credentials are scoped to the owning project workspace.
+import { integrationCredentialDirectory } from '../fork/project-workspaces/workspace-credential-directory'
 import { getSecretStore } from '../../shared/secret-store'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import {
   hardenExistingSecureFile,
@@ -40,7 +41,7 @@ export function createEncryptedApiKeyFileStore({
   }
 
   function getOrcaDir(): string {
-    return join(homedir(), '.orca')
+    return integrationCredentialDirectory()
   }
 
   function getApiKeyPath(): string {

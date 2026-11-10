@@ -1,5 +1,6 @@
+// Fork: integration credentials are scoped to the owning project workspace.
+import { integrationCredentialDirectory } from '../fork/project-workspaces/workspace-credential-directory'
 import { existsSync, mkdirSync, readFileSync, unlinkSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import {
   CredentialDecryptionError,
@@ -46,7 +47,7 @@ let cachedSecret: BitbucketStoredSecret | null = null
 let credentialError: string | null = null
 
 function getOrcaDir(): string {
-  return join(homedir(), '.orca')
+  return integrationCredentialDirectory()
 }
 
 function getMetadataPath(): string {

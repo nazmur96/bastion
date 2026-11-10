@@ -1,6 +1,7 @@
+// Fork: integration credentials are scoped to the owning project workspace.
+import { integrationCredentialDirectory } from '../fork/project-workspaces/workspace-credential-directory'
 import { getSecretStore } from '../../shared/secret-store'
 import { existsSync, readFileSync, rmSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { hardenExistingSecureFile, writeSecureFile } from '../../shared/secure-file'
 import type { SecretAtRestProtection } from '../../shared/secret-at-rest-protection'
@@ -16,7 +17,7 @@ type MiniMaxCookieEnvelope = {
 }
 
 function getOrcaDir(): string {
-  return join(homedir(), '.orca')
+  return integrationCredentialDirectory()
 }
 
 export function getMiniMaxCookiePath(): string {

@@ -42,3 +42,11 @@ A cold launch now opens application home in its own empty namespace (`bastion-pr
 Validated in the real dev app: cold start → home; open Retail (two repositories, draft, terminals restored) → Leave → home shows Retail's recorded count; create Payments → opens empty; stop and cold start from Payments → home. A forced stop skips the quit hook, so that workspace's count stays unrecorded until a normal quit or switch.
 
 Not yet built: Incognito tasks and Archive. Orca's existing empty-state copy still calls worktrees "workspaces" and shows the ORCA name.
+
+## Integration credential storage checkpoint
+
+Bitbucket, Jira, Linear, MiniMax cookies and the shared MiniMax/OpenCode Go API-key file store now resolve their storage beneath the owning namespace's `integration-credentials` directory. Existing projects retains the original legacy directory. New workspaces do not automatically copy these saved sign-ins.
+
+A real temporary-filesystem test saves synthetic credentials in legacy storage and workspace A, verifies workspace B starts without them, writes and reopens B, deletes B, then reopens A and legacy storage to prove their values remain intact. Modules are reloaded between contexts to model the separate application processes, including their caches. The test exercises the actual provider read/write/delete paths and the generic API-key store; the secret-storage backend is a deterministic test double, so this is storage-boundary proof rather than OS keyring cryptography validation. All temporary roots and credentials are synthetic.
+
+Focused affected-store suite: 52 tests across five files passed. Main-process typecheck passed. The unfinished window-handoff test was preserved privately under `.handoff/pending-workspace-transition/` until its implementation exists; no transition implementation was removed. Smooth transitions, Incognito tasks and Archive remain pending. This checkpoint covers the named integration stores, not every external agent's host-managed credentials or OS-level isolation.

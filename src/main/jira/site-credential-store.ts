@@ -1,5 +1,6 @@
+// Fork: integration credentials are scoped to the owning project workspace.
+import { integrationCredentialDirectory } from '../fork/project-workspaces/workspace-credential-directory'
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { writeEncryptedCredential } from '../integration-credential-file'
 import { readCredentialFileProtection } from '../credential-file-protection'
@@ -27,7 +28,7 @@ export function getCredentialError(siteId: string): string | undefined {
 }
 
 function getOrcaDir(): string {
-  return join(homedir(), '.orca')
+  return integrationCredentialDirectory()
 }
 
 function getSiteFilePath(): string {

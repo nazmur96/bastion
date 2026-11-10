@@ -1,11 +1,12 @@
+// Fork: integration credentials are scoped to the owning project workspace.
+import { integrationCredentialDirectory } from '../fork/project-workspaces/workspace-credential-directory'
 import { existsSync, mkdirSync } from 'node:fs'
-import { homedir } from 'node:os'
 import { join } from 'node:path'
 
 export const LEGACY_WORKSPACE_ID = 'legacy'
 
 function getOrcaDir(): string {
-  return join(homedir(), '.orca')
+  return integrationCredentialDirectory()
 }
 
 function getLegacyTokenPath(): string {
