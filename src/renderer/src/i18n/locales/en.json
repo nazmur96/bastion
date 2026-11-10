@@ -21171,6 +21171,14 @@
       "scope": "This is a CLI lookup, not a language-server or infrastructure check. This hint does not send model requests or run Terraform.",
       "draft": "Draft a request for Claude",
       "draftHint": "Opens an unsent request in this workspace. Review it before sending."
+    },
+    "projectWorkspaces": {
+      "manage": "Project workspaces",
+      "description": "Each workspace keeps its own projects, agents, terminals and settings. Opening another reopens the workbench.",
+      "renameLabel": "Rename current workspace",
+      "newLabel": "New empty workspace",
+      "rename": "Rename current",
+      "create": "Create workspace"
     }
   },
   "dashboardPopout": {
@@ -21836,7 +21844,8 @@
   },
   "common": {
     "retry": "Retry",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "save": "Save"
   },
   "terminal": {
     "sessionSaveFailure": {

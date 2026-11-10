@@ -1,4 +1,6 @@
 import { antigravityHookService } from '../antigravity/hook-service'
+// Fork: choose the owning data namespace before any store, session or runtime captures paths.
+import { configureProjectWorkspaceStartup } from '../fork/project-workspaces/workspace-startup'
 import { getRelocatedDaemonHost } from '../daemon/daemon-host-relocation'
 import { app, ipcMain, powerMonitor, session } from 'electron'
 import os from 'node:os'
@@ -7,9 +9,7 @@ import { maybeRedirectCliLaunch } from './cli-launch-redirect'
 import { runProfileStateRecoveryPreflight } from './profile-state-recovery-preflight'
 import { argvRequestsServeMode, normalizeServeModeArgv } from './serve-mode-argv'
 import {
-  configureDevUserDataPath,
   configureElectronNetworkCompatibility,
-  configureOrcaUserDataPathEnv,
   disableUnsupportedChromiumFeatures,
   enableMainProcessGpuFeatures,
   installDevParentDisconnectQuit,
@@ -197,8 +197,7 @@ function initializeMainProcessPreflight(options: MainProcessPreflightOptions): b
   }
   // Register before spawning so CLI/relay-shared tree killing can reach main's gate and breadcrumbs.
   installMainProcessTreeKillGate()
-  configureDevUserDataPath(isDev)
-  configureOrcaUserDataPathEnv()
+  configureProjectWorkspaceStartup(isDev, state.isServeMode)
   // #16761: install the lazy environment accessor immediately after userData selection or early resolves can throw/memoize the wrong profile.
   setAppEnvironment(new ElectronAppEnvironment())
   // Capture after overrides, before ready-time app naming can change userData on case-sensitive filesystems.

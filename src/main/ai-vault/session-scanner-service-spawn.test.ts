@@ -85,3 +85,13 @@ describe('the shared scanner client', () => {
     expect(child.sent).toContainEqual({ type: 'shutdown' })
   })
 })
+
+it('forks the scanner inside the active project workspace history boundary', () => {
+  vi.stubEnv('BASTION_PROJECT_WORKSPACE_DATA_ROOT', '/data/workspace-a')
+  forkMock.mockReset()
+  forkMock.mockReturnValue({ pid: undefined, unref: vi.fn() } as unknown as ChildProcess)
+  spawnAiVaultServiceProcess()
+
+  expect(forkOptions().env?.BASTION_PROJECT_WORKSPACE_DATA_ROOT).toBe('/data/workspace-a')
+  vi.unstubAllEnvs()
+})

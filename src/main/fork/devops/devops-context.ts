@@ -1,3 +1,4 @@
+import { projectWorkspaceToolEnvironment } from '../project-workspaces/workspace-tool-environment'
 import { existsSync, readFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { delimiter, isAbsolute, join, normalize } from 'node:path'
@@ -59,7 +60,7 @@ export async function readDevopsContext(
   terraformDir: string | null
 ): Promise<DevopsContext> {
   const context: DevopsContext = {}
-  const env = { ...process.env, ...(await workspaceEnv(workspacePath)) }
+  const env = { ...projectWorkspaceToolEnvironment(), ...(await workspaceEnv(workspacePath)) }
   const sandbox = readDevopsSandbox(workspacePath)
   const kube = parseKubeContext(read(kubeconfigPath(env)) ?? '')
   if (kube) {
@@ -76,7 +77,7 @@ export async function readDevopsContext(
     const region =
       env.AWS_REGION ??
       env.AWS_DEFAULT_REGION ??
-      parseAwsRegion(read(join(homedir(), '.aws', 'config')) ?? '', profile)
+      parseAwsRegion(read(env.AWS_CONFIG_FILE ?? join(homedir(), '.aws', 'config')) ?? '', profile)
     context.aws = { profile, ...(region ? { region } : {}), tone: devopsTone(profile) }
   }
   if (terraformDir !== null) {

@@ -7,6 +7,7 @@ import type {
   MinimaxCredentialsApi,
   ZcodePlanCredentialsApi
 } from './api/agent-account-api'
+import type { ProjectWorkspacesApi } from '../shared/fork-project-workspaces'
 import type { HooksApi } from './api/agent-hook-api'
 import type { SkillsApi } from './api/agent-skill-api'
 import type { AgentAwakeApi, AgentStatusApi } from './api/agent-status-api'
@@ -78,6 +79,7 @@ type Merged<T> = { [K in keyof T]: T[K] }
 export type PreloadApi = {
   app: AppApi
   orcaProfiles: OrcaProfileApi
+  projectWorkspaces?: ProjectWorkspacesApi
   platform: PlatformApi
   e2e: E2EApi
   repos: RepositoryApi

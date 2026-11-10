@@ -1,3 +1,5 @@
+// Fork: fence cached and resumable reads as well as whole-file parses.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { createQoderSessionResumeState } from './session-scanner-qoder-parser'
 import type { AiVaultSession } from '../../shared/ai-vault-types'
 import { inSessionParseFileLane } from './session-parse-file-lane'
@@ -112,6 +114,9 @@ export async function parseAgentSessionFileCached(
   requireRead?: SessionParseReadRequirement,
   signal?: AbortSignal
 ): Promise<AiVaultSession | null> {
+  if (!isOwnedWorkspaceHistoryPath(candidate.file.path)) {
+    return null
+  }
   // Serialize lookup/read/store because overlapping parses share a resume point and message channel.
   return inSessionParseFileLane(candidate.file.path, () =>
     parseCachedInLane(candidate, platform, stats, requireRead, signal)

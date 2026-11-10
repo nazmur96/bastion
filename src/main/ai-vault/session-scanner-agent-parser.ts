@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { parseQoderSessionFile } from './session-scanner-qoder-parser'
 import { parseCodebuddySessionFile } from './session-scanner-codebuddy-parser'
 import type { AiVaultSession } from '../../shared/ai-vault-types'
@@ -73,6 +75,9 @@ export async function parseAgentSessionFile(
   messages?: TranscriptMessageSink,
   signal?: AbortSignal
 ): Promise<AiVaultSession | null> {
+  if (!isOwnedWorkspaceHistoryPath(candidate.file.path)) {
+    return null
+  }
   switch (candidate.agent) {
     case 'qoder':
       return parseQoderSessionFile(candidate.file, platform, messages)

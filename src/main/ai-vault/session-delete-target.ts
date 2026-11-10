@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { basename, dirname, extname, join, resolve } from 'node:path'
 import type { AiVaultAgent } from '../../shared/ai-vault-types'
 import {
@@ -44,7 +46,7 @@ export function validateAiVaultSessionDeleteTarget(
 ): AiVaultSessionDeleteValidationResult {
   const { agent } = args
   const filePath = typeof args.filePath === 'string' ? args.filePath.trim() : ''
-  if (!filePath) {
+  if (!filePath || !isOwnedWorkspaceHistoryPath(filePath)) {
     return rejected(agent, 'invalid-path')
   }
   if (!isAiVaultDeletableAgent(agent)) {

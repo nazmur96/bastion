@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
@@ -18,29 +20,31 @@ export function zcodeDiscoveries(
   const paths = options.zcodeDbPath
     ? [options.zcodeDbPath]
     : [homedir(), ...wslHomeDirs].map((home) => join(home, '.zcode', 'cli', 'db', 'db.sqlite'))
-  return paths.map(async (dbPath) => {
-    if (!(await zcodeDatabaseExists(dbPath, issues, options.signal))) {
-      return { agent: 'zcode' as const, rootDir: dbPath, files: [] }
-    }
-    const list = (scopePaths?: readonly string[]) =>
-      listZcodeSqliteSessionsViaWorker({
-        dbPaths: [dbPath],
-        limit,
-        issues,
-        scopePaths,
-        signal: options.signal
-      }).then((candidates) => candidates.map((candidate) => candidate.file))
-    const [files, scopeFiles] = await Promise.all([
-      list(),
-      scopeWalksAgentFiles('zcode', options.scopePaths) ? list(options.scopePaths) : undefined
-    ])
-    return {
-      agent: 'zcode' as const,
-      rootDir: dbPath,
-      files,
-      ...(scopeFiles ? { scopeFiles } : {})
-    }
-  })
+  return paths
+    .filter((path) => isOwnedWorkspaceHistoryPath(path))
+    .map(async (dbPath) => {
+      if (!(await zcodeDatabaseExists(dbPath, issues, options.signal))) {
+        return { agent: 'zcode' as const, rootDir: dbPath, files: [] }
+      }
+      const list = (scopePaths?: readonly string[]) =>
+        listZcodeSqliteSessionsViaWorker({
+          dbPaths: [dbPath],
+          limit,
+          issues,
+          scopePaths,
+          signal: options.signal
+        }).then((candidates) => candidates.map((candidate) => candidate.file))
+      const [files, scopeFiles] = await Promise.all([
+        list(),
+        scopeWalksAgentFiles('zcode', options.scopePaths) ? list(options.scopePaths) : undefined
+      ])
+      return {
+        agent: 'zcode' as const,
+        rootDir: dbPath,
+        files,
+        ...(scopeFiles ? { scopeFiles } : {})
+      }
+    })
 }
 
 async function zcodeDatabaseExists(

@@ -1,3 +1,5 @@
+// Fork: desktop workspace selection also owns CLI routing.
+import { resolveProjectWorkspaceCliRoot } from './project-workspace-root'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import { readFileSync } from 'node:fs'
@@ -44,9 +46,11 @@ export function getDefaultUserDataPath(
   homeDir = homedir()
 ): string {
   if (process.env.ORCA_USER_DATA_PATH) {
-    return process.env.ORCA_USER_DATA_PATH
+    return process.env.ORCA_DEV_CLI_INVOCATION === '1'
+      ? resolveProjectWorkspaceCliRoot(process.env.ORCA_USER_DATA_PATH, process.env)
+      : process.env.ORCA_USER_DATA_PATH
   }
-  return getPlatformUserDataPath(platform, homeDir)
+  return resolveProjectWorkspaceCliRoot(getPlatformUserDataPath(platform, homeDir), process.env)
 }
 
 /** The packaged app's own default profile, ignoring any CLI override. */

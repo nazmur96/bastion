@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import type {
   AiVaultAgent,
   AiVaultFirstUserPromptResult,
@@ -33,7 +35,7 @@ export async function readAiVaultFirstUserPrompt(
   args: ReadAiVaultFirstUserPromptArgs
 ): Promise<ReadAiVaultFirstUserPromptResult> {
   const filePath = args.filePath.trim()
-  if (!filePath || !args.agent) {
+  if (!filePath || !args.agent || !isOwnedWorkspaceHistoryPath(filePath)) {
     return { prompt: null }
   }
 

@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { resolve } from 'node:path'
 import { getAiVaultWslHomeDirs } from '../ai-vault/cached-session-list'
 import { listAiVaultSubagentSessionsInBackground } from '../ai-vault/session-scanner-background'
@@ -29,6 +31,9 @@ export async function listAiVaultSubagentSessions(
   }
   // Resolve .. before textual root checks so renderer paths cannot escape the agent's session roots.
   const parentFilePath = resolve(args.parentFilePath)
+  if (!isOwnedWorkspaceHistoryPath(parentFilePath)) {
+    return { sessions: [], issues: [] }
+  }
   const wslHomeDirs = await getAiVaultWslHomeDirs()
   const roots =
     args.agent === 'claude'

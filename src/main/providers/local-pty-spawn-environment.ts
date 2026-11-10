@@ -1,3 +1,5 @@
+// Bastion: keep unconfigured project shells away from inherited cloud contexts.
+import { projectWorkspaceToolEnvironment } from '../fork/project-workspaces/workspace-tool-environment'
 import { mergeGitConfigEnvProtocol } from '../../shared/git-credential-prompt-env'
 import { restoreManagedDataAccountEnvironment } from '../../shared/managed-data-account-environment'
 import {
@@ -56,7 +58,7 @@ export function buildInheritedLocalPtyEnvironment(
   explicitEnv: Record<string, string> | undefined,
   envToDelete: readonly string[] = []
 ): Record<string, string> {
-  const inheritedEnv = stripInheritedBuildModeEnv(process.env)
+  const inheritedEnv = stripInheritedBuildModeEnv(projectWorkspaceToolEnvironment(process.env))
   restoreManagedDataAccountEnvironment(inheritedEnv)
   const spawnEnv: Record<string, string> = {
     ...mergeGitConfigEnvProtocol(inheritedEnv, explicitEnv),

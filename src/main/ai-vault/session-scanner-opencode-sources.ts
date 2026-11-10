@@ -1,3 +1,5 @@
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import { basename, dirname, join } from 'node:path'
 import type { AiVaultScanIssue } from '../../shared/ai-vault-types'
 import type { WslTranscriptFsError } from '../native-chat/wsl-transcript-fs-gate'
@@ -24,26 +26,30 @@ export function opencodeDiscoveries(
   limit: number,
   issues: AiVaultScanIssue[]
 ): Promise<SessionFileDiscovery>[] {
-  return opencodeSources(options, wslHomeDirs, issues).flatMap((source) => {
-    const { storageDir } = source
-    const paths = source.dbPaths()
-    return [
-      paths.then((dbPaths) =>
-        discoverOpenCodeSessions({
-          storageDir,
-          dbPaths: dbPaths.filter((path) => !isOpenCodeV2DatabaseName(basename(path))),
-          limitPerAgent: limit,
-          issues,
-          scopePaths: options.scopePaths,
-          signal: options.signal
-        })
-      ),
-      // Current releases share opencode.db with v1; the worker checks for v2 tables.
-      paths.then((dbPaths) =>
-        discoverOpenCode2Sessions(storageDir, dbPaths, limit, issues, options)
-      )
-    ]
-  })
+  return opencodeSources(options, wslHomeDirs, issues)
+    .filter((source) => isOwnedWorkspaceHistoryPath(source.storageDir))
+    .flatMap((source) => {
+      const { storageDir } = source
+      const paths = source
+        .dbPaths()
+        .then((paths) => paths.filter((path) => isOwnedWorkspaceHistoryPath(path)))
+      return [
+        paths.then((dbPaths) =>
+          discoverOpenCodeSessions({
+            storageDir,
+            dbPaths: dbPaths.filter((path) => !isOpenCodeV2DatabaseName(basename(path))),
+            limitPerAgent: limit,
+            issues,
+            scopePaths: options.scopePaths,
+            signal: options.signal
+          })
+        ),
+        // Current releases share opencode.db with v1; the worker checks for v2 tables.
+        paths.then((dbPaths) =>
+          discoverOpenCode2Sessions(storageDir, dbPaths, limit, issues, options)
+        )
+      ]
+    })
 }
 
 function opencodeSources(

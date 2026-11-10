@@ -1,3 +1,6 @@
+import type { SessionFileDiscoveryArgs } from './session-file-discovery-args'
+// Bastion project workspace ownership boundary.
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 import type { Dirent } from 'node:fs'
 import { extname, join } from 'node:path'
 import { mapWithConcurrency } from '../../shared/map-with-concurrency'
@@ -36,19 +39,10 @@ async function withNativeDiscoverySlot<T>(read: () => Promise<T>): Promise<T> {
   }
 }
 
-export async function discoverFiles(args: {
-  rootDir: string
-  limit: number
-  agent: AiVaultAgent
-  issues: AiVaultScanIssue[]
-  extensions: string[]
-  filePredicate?: (path: string) => boolean
-  contentDependencyPath?: (path: string) => string | undefined | Promise<string | undefined>
-  directoryPredicate?: (name: string, depth: number) => boolean
-  // A scoped scan walks every file this agent has, not only the newest `limit`.
-  keepScopeFiles?: boolean
-  signal?: AbortSignal
-}): Promise<SessionFileDiscovery> {
+export async function discoverFiles(args: SessionFileDiscoveryArgs): Promise<SessionFileDiscovery> {
+  if (!isOwnedWorkspaceHistoryPath(args.rootDir)) {
+    return { agent: args.agent, rootDir: args.rootDir, files: [] }
+  }
   const files = new SessionNewestFiles(args.limit)
   const scopeFiles: FileWithMtime[] | undefined = args.keepScopeFiles ? [] : undefined
   let refusedSidecar = false
@@ -288,6 +282,9 @@ export async function forEachSessionFile(
   depth = 0
 ): Promise<void> {
   options.signal?.throwIfAborted()
+  if (!isOwnedWorkspaceHistoryPath(dirPath)) {
+    return
+  }
   let entries
   try {
     entries = options.readDirectory
@@ -308,6 +305,9 @@ export async function forEachSessionFile(
   for (const entry of entries) {
     options.signal?.throwIfAborted()
     const fullPath = join(dirPath, entry.name)
+    if (!isOwnedWorkspaceHistoryPath(fullPath)) {
+      continue
+    }
     if (entry.isDirectory()) {
       if (options.directoryPredicate?.(entry.name, depth) ?? true) {
         await forEachSessionFile(fullPath, agent, issues, options, onFile, depth + 1)

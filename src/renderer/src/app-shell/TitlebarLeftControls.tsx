@@ -1,3 +1,5 @@
+// Fork: project-workspace management lives above repository navigation.
+import { ProjectWorkspacePicker } from '../fork/project-workspaces/ProjectWorkspacePicker'
 import { ArrowLeft, ArrowRight, MoreHorizontal, PanelLeft } from 'lucide-react'
 import logo from '../../../../resources/icon-source/bastion.svg'
 import { translate } from '@/i18n/i18n'
@@ -84,6 +86,7 @@ export function TitlebarLeftControls({ layout }: { layout: AppChromeLayout }): R
             </ContextMenuContent>
           </ContextMenu>
         )}
+        <ProjectWorkspacePicker />
         {layout.showSidebar && (
           <Tooltip>
             <TooltipTrigger asChild>

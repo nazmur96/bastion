@@ -8,6 +8,7 @@ export type AppRelaunchReason =
   | 'admin-restart'
   | 'gpu-fallback'
   | 'profile-switch'
+  | 'project-workspace-switch'
   | 'profile-transfer'
   | 'renderer-request'
   | 'windows-administrator'

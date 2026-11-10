@@ -1,3 +1,5 @@
+// Fork: namespace-owned short endpoints for deeply nested project workspaces.
+import { boundedSocketDirectory } from '../../fork/project-workspaces/workspace-socket-directory'
 import { readdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import type { RuntimeTransportMetadata } from '../../../shared/runtime-bootstrap'
@@ -8,7 +10,7 @@ export const RUNTIME_SOCKET_NAME_REGEX = /^o-(\d+)-[A-Za-z0-9_-]+\.sock$/
 export function sweepOrphanedRuntimeSockets(userDataPath: string, ownPid: number): void {
   let entries: string[]
   try {
-    entries = readdirSync(userDataPath)
+    entries = readdirSync(boundedSocketDirectory(userDataPath))
   } catch {
     // First launch may have no userData to sweep.
     return
@@ -32,7 +34,7 @@ export function sweepOrphanedRuntimeSockets(userDataPath: string, ownPid: number
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ESRCH') {
         try {
-          rmSync(join(userDataPath, entry), { force: true })
+          rmSync(join(boundedSocketDirectory(userDataPath), entry), { force: true })
         } catch {
           // Sweep best-effort; later startup or reboot handles unlink failures.
         }
@@ -57,6 +59,9 @@ export function createRuntimeTransportMetadata(
   }
   return {
     kind: 'unix',
-    endpoint: join(userDataPath, `o-${pid}-${endpointSuffix}.sock`)
+    endpoint: join(
+      boundedSocketDirectory(userDataPath, platform),
+      `o-${pid}-${endpointSuffix}.sock`
+    )
   }
 }

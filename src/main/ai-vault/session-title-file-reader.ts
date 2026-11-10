@@ -6,6 +6,7 @@ import {
   type AiVaultSessionTitlesResult
 } from '../../shared/ai-vault-session-title'
 import { parseAgentSessionFileCached } from './session-scanner-parse-cache'
+import { isOwnedWorkspaceHistoryPath } from '../fork/project-workspaces/workspace-history-policy'
 
 const TITLE_PARSE_CONCURRENCY = 4
 
@@ -23,7 +24,10 @@ async function readOneTitle(
     return null
   }
   const transcriptPath = request.transcriptPath?.trim()
-  if (!transcriptPath) {
+  if (!transcriptPath || !isOwnedWorkspaceHistoryPath(transcriptPath)) {
+    if (transcriptPath) {
+      return null
+    }
     return cache?.get(request) ?? null
   }
   try {

@@ -1,3 +1,5 @@
+// Fork: daemon-backed shells receive the same project context as local provider shells.
+import { projectWorkspaceSpawnOverrides } from '../../fork/project-workspaces/workspace-tool-environment'
 import { withClaudeAgentViewPlugin } from '../../../shared/claude-agent-view-launch'
 import { resolveStartupShell } from '../../../shared/tui-agent-startup-shell'
 import { resolveLocalWindowsAgentStartupShell } from '../../../shared/windows-terminal-shell'
@@ -42,10 +44,14 @@ export function assemblePtySpawnEnvDeletions(input: {
   settings: GlobalSettings | undefined
 }): { env: Record<string, string> | undefined; envToDelete: string[] } {
   // Apply isolation at the common environment boundary used by every provider.
-  const env = withCodexTerminalServerIsolationEnv(input.env, input.settings)
+  const workspace = input.connectionId
+    ? { env: input.env, envToDelete: [] }
+    : projectWorkspaceSpawnOverrides(input.env)
+  const env = withCodexTerminalServerIsolationEnv(workspace.env, input.settings)
   let envToDelete =
     mergePtyEnvDeletions(
       input.callerEnvToDelete ?? [],
+      workspace.envToDelete,
       // Persistent daemons and older SSH hosts must not resurrect a parent Pi's ownership.
       PI_PROCESS_OWNER_ENV_KEYS,
       input.agentTeamsEnvToDelete,

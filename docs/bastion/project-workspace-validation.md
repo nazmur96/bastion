@@ -1,0 +1,36 @@
+# Project workspace foundation validation
+
+2026-11-10. Scope: milestones 1–2, local Linux desktop.
+
+## Results
+
+- Ownership audit and migration contract written; existing app data stays at its original root.
+- 46 focused tests pass across 11 files, including catalog concurrency, startup identity, CLI source pinning, two SQLite stores, history exclusion/direct-read regression, scanner worker propagation and daemon spawn environment assembly.
+- Node, renderer and CLI typechecks pass.
+- Changed-code quality gate passes against upstream/main.
+- Real UI switches repeatedly between Retail store and Platform engineering. Platform starts with no repos/files/terminals; adding a Platform repo does not appear in Retail.
+- Retail restores two repositories, an unsaved editor draft, terminal tabs and a browser page. The same draft, browser record and renderer storage survive stopping and restarting pnpm dev.
+- Renderer storage markers stay independent. Session cookies are not treated as durable across process quit; the product does not promise session cookies survive restart.
+- The real isolated scanner lists zero host-global sessions; search starts disabled with no indexed files. No search indexing of user history was enabled for proof.
+- Live daemon-backed shell has workspace-unconfigured AWS profile, namespace-local KUBECONFIG, no inherited AWS access key, and the originating workspace's runtime source identity.
+- Task labels/status and automation separation are proved using persisted fixtures, not real external task services or scheduled execution.
+
+## Repairs discovered by the proofs
+
+1. Scanner child environment lost the workspace root: passed explicitly through its safe allowlist.
+2. Direct title reads and resumable/cached transcript reads bypassed the first parser guard: added checks before stat/read/cache reuse.
+3. Dev restart reused a debugging port held by a surviving daemon: resolve and publish available development ports for each new child.
+4. Electron rebuild removed the CLI resolver module under out/main: moved the resolver into the CLI runtime graph.
+5. Daemon-backed terminals missed private context defaults: carry defaults and deletions through the common spawn request boundary.
+
+## Evidence and limits
+
+Private evidence: `.handoff/steps-1-2/`, including final-tests.log, final-typechecks.log, final-quality.log, platform-empty-proof.json, platform-after-draft.json, retail-draft-restored.json, cold-restart-proof.json and terminal-final-environment.json. Screenshots include platform-final.png, retail-restored-draft.png and cold-restart-retail.png.
+
+The checked-in regression uses only synthetic temporary transcripts. No real AWS operation, Terraform execution, agent inference or user project modification was performed.
+
+This is application-state isolation. Shared external filesystem paths are intentionally shared when explicitly opened twice. Runtime connections are scoped records, but a shared remote server remains an external owner. Native Windows/macOS UI, remote namespace placement and mobile end-to-end pairing are not validated by this local proof. Those require later supported-runtime validation; do not interpret this as an OS security sandbox.
+
+Home, explicit Leave and Incognito remain milestone 3. Native agent/automation continuity while switching is bounded by existing quit behavior. Cloud authentication, resource recipes, provider-neutral assistance and connected delivery remain later roadmap work.
+
+Final CLI ownership proof: while Platform is selected, an ordinary CLI lists only platform-tools. A still-running Retail terminal retains its original runtime identity; its CLI returns runtime_unavailable after the Retail desktop runtime exits, rather than silently targeting Platform. Returning to Retail restores its terminal surfaces. This refusal is an explicit continuity limitation of the initial relaunch design.

@@ -1,4 +1,6 @@
 import { app } from 'electron'
+// Fork: project workspaces pin the whole runtime to one data namespace.
+import { registerProjectWorkspaceHandlers } from '../../fork/project-workspaces/workspace-ipc'
 import { ORCA_LAYOUT_OWNER_IS_MAIN } from '../../../shared/layout-owner-switch'
 import { registerAppHandlers } from '../app'
 import { registerWslMoveWiring } from '../wsl-move-driver-wiring'
@@ -243,6 +245,7 @@ export function registerCoreHandlers(
     onBeforeSignOut: lifecycleOptions.onBeforeOrcaProfileSignOut,
     onAfterSignOut: lifecycleOptions.onAfterOrcaProfileSignOut
   })
+  registerProjectWorkspaceHandlers(store, lifecycleOptions.onBeforeRelaunch)
   registerBrowserHandlers()
   registerShellHandlers(store)
   registerPetHandlers()

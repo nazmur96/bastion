@@ -1,3 +1,4 @@
+import { projectWorkspaceToolEnvironment } from '../project-workspaces/workspace-tool-environment'
 import { execFile } from 'node:child_process'
 import { existsSync, openSync, readSync, closeSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -28,7 +29,7 @@ export function run(
     execFile(
       command,
       [...args],
-      { cwd, timeout, maxBuffer: 16 * 1024 * 1024 },
+      { cwd, timeout, env: projectWorkspaceToolEnvironment(), maxBuffer: 16 * 1024 * 1024 },
       (error, stdout, stderr) =>
         resolve({
           ok: !error,

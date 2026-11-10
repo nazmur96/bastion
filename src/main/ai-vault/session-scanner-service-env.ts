@@ -19,7 +19,9 @@ export const RUNTIME_ENV_ALLOWLIST = [
   'COMSPEC',
   'PATHEXT',
   'PROCESSOR_ARCHITECTURE',
-  'NUMBER_OF_PROCESSORS'
+  'NUMBER_OF_PROCESSORS',
+  // Bastion: plain-node helpers must honour the project workspace history boundary.
+  'BASTION_PROJECT_WORKSPACE_DATA_ROOT'
 ] as const
 
 // Preserve relocated agent homes for desktop discovery.

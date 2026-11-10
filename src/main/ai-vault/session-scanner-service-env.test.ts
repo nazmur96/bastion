@@ -166,3 +166,11 @@ it('preserves execution-host OpenCode roots in the relay service', () => {
     OPENCODE_DB: 'opencode-team.db'
   })
 })
+
+it('carries the project workspace history boundary into the forked scanner', () => {
+  const env = buildAiVaultServiceEnv(
+    { BASTION_PROJECT_WORKSPACE_DATA_ROOT: '/data/workspace-a', HOME: '/home/dev' },
+    'linux'
+  )
+  expect(env.BASTION_PROJECT_WORKSPACE_DATA_ROOT).toBe('/data/workspace-a')
+})

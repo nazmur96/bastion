@@ -1,3 +1,11 @@
+// Fork: project workspace switches reopen the development server and Electron together.
+import {
+  devWorkspaceForwardedArgs,
+  spawnDevWorkspaceChild,
+  terminateDevWorkspaceChild,
+  devWorkspaceRestartEnvironment,
+  consumeDevWorkspaceRestart
+} from './bastion-dev-workspace-restart.mjs'
 import { execFileSync, spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import {
@@ -569,13 +577,18 @@ if (!isHelpOrVersion) {
   forwardedExtras = ports.forwardedExtras
   announceDevInstance({ repoRoot, profile: devProfile, ...ports })
 }
-const forwardedArgs = ['dev', ...forwardedRaw, ...forwardedExtras]
-const child = spawn(process.execPath, [electronViteCli, ...forwardedArgs], {
-  stdio: 'inherit',
-  env: withDevRolldownRuntimeEnv(process.env),
-  // Own process group so Ctrl+C terminates electron-vite’s Electron descendants on macOS too.
-  detached: process.platform !== 'win32'
-})
+let forwardedArgs = ['dev', ...forwardedRaw, ...forwardedExtras]
+Object.assign(process.env, devWorkspaceRestartEnvironment(repoRoot))
+function spawnDevChild() {
+  return spawnDevWorkspaceChild(
+    process.execPath,
+    [electronViteCli, ...forwardedArgs],
+    withDevRolldownRuntimeEnv(process.env),
+    handleChildError,
+    handleChildExit
+  )
+}
+let child = spawnDevChild()
 
 let webClientBuild = null
 let isShuttingDown = false
@@ -600,27 +613,7 @@ function signalExitCode(signal) {
 }
 
 function terminateChild(signal) {
-  if (!child.pid) {
-    return
-  }
-
-  if (process.platform === 'win32') {
-    const taskkill = spawn('taskkill', ['/pid', String(child.pid), '/t', '/f'], {
-      stdio: 'ignore',
-      windowsHide: true
-    })
-    taskkill.unref()
-    return
-  }
-
-  try {
-    process.kill(-child.pid, signal)
-  } catch (error) {
-    const code = error && typeof error === 'object' && 'code' in error ? error.code : null
-    if (code !== 'ESRCH') {
-      throw error
-    }
-  }
+  terminateDevWorkspaceChild(child, signal)
 }
 
 function beginShutdown(signal) {
@@ -644,15 +637,21 @@ process.on('SIGTERM', () => {
   beginShutdown('SIGTERM')
 })
 
-child.on('error', (error) => {
+function handleChildError(error) {
   if (forcedKillTimer) {
     clearTimeout(forcedKillTimer)
   }
   console.error(error)
   process.exit(1)
-})
+}
 
-child.on('exit', (code, signal) => {
+async function handleChildExit(code, signal) {
+  if (!isShuttingDown && !signal && code === 0 && consumeDevWorkspaceRestart(process.env)) {
+    console.error('[bastion-dev] Reopening project workspace')
+    forwardedArgs = await devWorkspaceForwardedArgs(forwardedRaw, repoRoot, devProfile)
+    child = spawnDevChild()
+    return
+  }
   if (forcedKillTimer) {
     clearTimeout(forcedKillTimer)
   }
@@ -670,4 +669,4 @@ child.on('exit', (code, signal) => {
   }
 
   process.exit(code ?? 1)
-})
+}
