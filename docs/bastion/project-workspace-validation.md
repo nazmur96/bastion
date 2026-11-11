@@ -100,3 +100,11 @@ The commit hook additionally found file-length limits that the changed-code gate
 ## Archive label ordering — November 11
 
 The switch handler now archives the source Incognito task before opening its destination, so Home’s first catalog read sees Archived rather than Not closed normally. The before-quit fallback remains; a failed handoff restores the source task’s active state. Regression tests read the archive through a separate catalog connection during destination opening and cover failure rollback. Seven focused tests, the Node typecheck and changed-code quality gate passed.
+
+## 2026-11-11 — selectable workbench agents
+
+New agent and the workbench start composer reuse Orca's host-aware agent picker and launch funnel, including setup/model choices. Composer text uses draft delivery. The fork no longer creates a Claude panel on every workspace activation; new settings restore upstream's unset agent default, while existing user preferences remain intact. Explicit Claude actions and saved sessions remain available.
+
+Forty focused tests passed; after scoping sidebar picker lifetime to the active worktree, twenty-one focused tests passed again. Web and Node typechecks passed. Disposable Linux CDP checks observed the available agent menu, verified opening it left session tabs unchanged, and confirmed the trigger ancestors have no native drag region. Private screenshot and logs: .handoff/agent-picker-1111/. No agent inference, remote provisioning or real repository changes. This is a milestone-4 slice, not completion of the full workbench/remote validation matrix.
+
+Additional CDP proof: after opening a disposable terminal and closing its initial chat, the empty workbench showed Choose agent. Submitting an unsent draft opened the agent picker, and Escape preserved the draft. Screenshot: .handoff/agent-picker-1111/start-agent-picker.png.

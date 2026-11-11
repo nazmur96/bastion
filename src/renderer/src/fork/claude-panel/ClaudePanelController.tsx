@@ -2,13 +2,12 @@ import { useEffect } from 'react'
 import { useAppStore } from '@/store'
 import { getShortcutPlatform } from '@/lib/shortcut-platform'
 import { keybindingMatchesAction } from '../../../../shared/keybindings'
-import { ensureClaudePanel } from './ensure-claude-panel'
 import { runClaudePanelToggle, syncClaudePanelVisibility } from './claude-panel-actions'
 import { applyClaudeView, toggleClaudeView } from './claude-panel-view'
 import { newWorkbenchTerminal, showWorkbenchTerminals } from '../workbench/workbench-terminals'
 import { isIncognitoWindow } from '../project-workspaces/use-project-workspaces'
 
-/** Mounted once: gives each workspace its Claude panel and owns Ctrl+I. */
+/** Mounted once: restores saved panel layout and owns workbench shortcuts. */
 export function ClaudePanelController(): null {
   const worktreeId = useAppStore((s) => s.activeWorktreeId)
   const hasLayout = useAppStore((s) =>
@@ -21,7 +20,6 @@ export function ClaudePanelController(): null {
     if (isIncognitoWindow() || !worktreeId || !hasLayout || !sessionReady) {
       return undefined
     }
-    ensureClaudePanel(worktreeId)
     syncClaudePanelVisibility(worktreeId)
     applyClaudeView(worktreeId)
     // A new panel's moved-out groups are pruned a tick later, rebuilding the split.

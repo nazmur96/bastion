@@ -198,7 +198,7 @@ export function buildDefaultSettings(args: {
     terminalMainSideEffectAuthority: true,
     terminalHiddenDeliveryGate: true,
     terminalModelQueryAuthority: true,
-    defaultTuiAgent: 'claude',
+    defaultTuiAgent: null,
     disabledTuiAgents: [...DEFAULT_DISABLED_TUI_AGENTS],
     pluginSystemEnabled: true,
     pluginSystemDefaultedOn: true,

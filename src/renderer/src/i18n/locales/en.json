@@ -21139,7 +21139,10 @@
       "create": "New project",
       "switchFailed": "Could not switch environment",
       "createDescription": "Name it and Bastion will create a project with sensible defaults.",
-      "worktreeRootHelp": "Bastion will recognize worktrees beneath this folder."
+      "worktreeRootHelp": "Bastion will recognize worktrees beneath this folder.",
+      "askAgent": "Ask an agent",
+      "agentPlaceholder": "Ask an agent to plan, build or fix something in this project",
+      "chooseAgent": "Choose agent"
     },
     "customize": {
       "title": "Customize",

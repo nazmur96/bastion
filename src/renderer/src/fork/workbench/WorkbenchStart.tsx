@@ -13,8 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { launchClaudeChatInPanel } from '../claude-panel/ensure-claude-panel'
-import { draftForClaude } from '../devops/ask-claude'
+import { WorkbenchAgentMenu } from './WorkbenchAgentMenu'
 import { StartEnvironmentPicker } from './StartEnvironmentPicker'
 import { openStartProject } from './start-project-actions'
 import { getWorktreeExecutionHostId } from '../../../../shared/execution-host'
@@ -95,14 +94,8 @@ export function WorkbenchStart({
   groupId: string
 }): React.JSX.Element {
   const [text, setText] = useState('')
-  const start = (): void => {
-    launchClaudeChatInPanel(worktreeId, groupId, { focusComposer: true })
-    if (text.trim()) {
-      // The chat appears a moment later; draft into it, never start a second one.
-      draftForClaude(worktreeId, text.trim(), 1)
-    }
-    setText('')
-  }
+  const [agentMenuOpen, setAgentMenuOpen] = useState(false)
+  const start = (): void => setAgentMenuOpen(true)
   return (
     <div className="bx-start" data-workbench-start="">
       <div className="bx-start-inner">
@@ -120,10 +113,10 @@ export function WorkbenchStart({
           <textarea
             value={text}
             rows={2}
-            aria-label={translate('components.start.ask', 'Ask Claude')}
+            aria-label={translate('components.start.askAgent', 'Ask an agent')}
             placeholder={translate(
-              'components.start.placeholder',
-              'Ask Claude to plan, build or fix something in this project'
+              'components.start.agentPlaceholder',
+              'Ask an agent to plan, build or fix something in this project'
             )}
             onChange={(event) => setText(event.target.value)}
             onKeyDown={(event) => {
@@ -134,7 +127,20 @@ export function WorkbenchStart({
             }}
           />
           <div className="bx-composer-row">
-            <span>{translate('components.start.agent', 'Claude')}</span>
+            <WorkbenchAgentMenu
+              key={`${worktreeId}:${groupId}`}
+              worktreeId={worktreeId}
+              groupId={groupId}
+              open={agentMenuOpen}
+              onOpenChange={setAgentMenuOpen}
+              prompt={text.trim() || undefined}
+              onPromptDelivered={() => setText('')}
+            >
+              <button type="button" className="bx-picker">
+                {translate('components.start.chooseAgent', 'Choose agent')}
+                <ChevronDown aria-hidden />
+              </button>
+            </WorkbenchAgentMenu>
             <button
               type="submit"
               className="bx-send"

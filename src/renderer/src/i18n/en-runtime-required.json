@@ -1983,6 +1983,11 @@
       "noTerminal": "No terminal",
       "restoreTerminal": "Restore terminal size"
     },
+    "start": {
+      "agent": "Claude",
+      "ask": "Ask Claude",
+      "placeholder": "Ask Claude to plan, build or fix something in this project"
+    },
     "tab": {
       "bar": {
         "bulkClose": {
