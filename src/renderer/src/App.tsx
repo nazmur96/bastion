@@ -48,6 +48,8 @@ import { installActiveWorktreeRemovalSuccessor } from './lib/active-worktree-rem
 // Fork: application home sits outside every project workspace.
 import { ApplicationHome } from './fork/project-workspaces/ApplicationHome'
 import { useProjectWorkspaceView } from './fork/project-workspaces/use-project-workspaces'
+import { IncognitoBootstrap } from './fork/project-workspaces/IncognitoBootstrap'
+import { IncognitoTaskBar } from './fork/project-workspaces/IncognitoTaskBar'
 
 function App(): React.JSX.Element {
   const layout = useAppChromeLayout()
@@ -116,10 +118,12 @@ function App(): React.JSX.Element {
             <AppBackgroundServices />
             <SpaceWindowStatePublisher />
             <ProjectWorkspaceTransition />
+            <IncognitoBootstrap />
             {workspaceView === 'pending' && <ProjectWorkspaceLoading />}
             {workspaceView === 'home' && <ApplicationHome />}
             {workspaceView === 'workspace' && (
               <>
+                <IncognitoTaskBar />
                 <AppWorkspaceShell layout={layout} floatingWorkspace={floatingWorkspace} />
                 <AppRootSurfaces
                   floatingWorkspace={floatingWorkspace}

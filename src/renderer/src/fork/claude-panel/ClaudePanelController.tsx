@@ -6,6 +6,7 @@ import { ensureClaudePanel } from './ensure-claude-panel'
 import { runClaudePanelToggle, syncClaudePanelVisibility } from './claude-panel-actions'
 import { applyClaudeView, toggleClaudeView } from './claude-panel-view'
 import { newWorkbenchTerminal, showWorkbenchTerminals } from '../workbench/workbench-terminals'
+import { isIncognitoWindow } from '../project-workspaces/use-project-workspaces'
 
 /** Mounted once: gives each workspace its Claude panel and owns Ctrl+I. */
 export function ClaudePanelController(): null {
@@ -17,7 +18,7 @@ export function ClaudePanelController(): null {
   const sessionReady = useAppStore((s) => s.workspaceSessionReady)
 
   useEffect(() => {
-    if (!worktreeId || !hasLayout || !sessionReady) {
+    if (isIncognitoWindow() || !worktreeId || !hasLayout || !sessionReady) {
       return undefined
     }
     ensureClaudePanel(worktreeId)

@@ -11,6 +11,7 @@ export const PROJECT_WORKSPACE_ROOT_ENV = 'BASTION_PROJECT_WORKSPACE_DATA_ROOT'
 export const PROJECT_WORKSPACE_LAUNCH_ENV = 'BASTION_PROJECT_WORKSPACE_LAUNCH'
 
 export type ProjectWorkspaceContext = {
+  incognito?: boolean
   baseRoot: string
   dataRoot: string
   activeId: string
@@ -48,6 +49,9 @@ export function configureProjectWorkspace(
   try {
     const target = launchTarget(argv, env)
     const workspace = target === PROJECT_WORKSPACE_HOME_ID ? null : catalog.get(target)
+    if (workspace && catalog.incognito().get(workspace.id)?.deleting) {
+      throw new Error('This Incognito task is being deleted.')
+    }
     const dataRoot = workspace ? catalog.dataRoot(workspace.id) : catalog.homeRoot()
     if (workspace) {
       catalog.select(workspace.id)
@@ -63,6 +67,7 @@ export function configureProjectWorkspace(
       env[PROJECT_WORKSPACE_ROOT_ENV] = dataRoot
     }
     context = {
+      incognito: Boolean(catalog.incognito().get(target)),
       baseRoot,
       dataRoot,
       activeId: workspace?.id ?? PROJECT_WORKSPACE_HOME_ID,

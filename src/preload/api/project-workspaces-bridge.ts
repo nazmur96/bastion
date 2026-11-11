@@ -7,6 +7,11 @@ import { prepareAndInvokeAppRestart } from '../renderer-restart-wiring'
 import { awaitBeforeUnloadCheckpoint } from '../preload-runtime-support'
 
 export const projectWorkspacesApi: ProjectWorkspacesApi = {
+  incognito: {
+    create: (args) => ipcRenderer.invoke('bastionIncognito:create', args),
+    remove: (args) => ipcRenderer.invoke('bastionIncognito:remove', args),
+    prepare: () => ipcRenderer.invoke('bastionIncognito:prepare')
+  },
   ready: () => ipcRenderer.invoke('bastionWorkspaces:ready'),
   list: () => ipcRenderer.invoke('bastionWorkspaces:list'),
   create: (args) => ipcRenderer.invoke('bastionWorkspaces:create', args),

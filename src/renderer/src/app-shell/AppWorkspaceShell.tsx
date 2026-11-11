@@ -13,6 +13,7 @@ import { TitlebarLeftControls } from './TitlebarLeftControls'
 import { RightSidebarToggle, TitlebarMainStrip } from './TitlebarMainStrip'
 import type { AppChromeLayout } from './use-app-chrome-layout'
 import type { FloatingWorkspacePanelState } from './use-floating-workspace-panel'
+import { isIncognitoWindow } from '../fork/project-workspaces/use-project-workspaces'
 
 // Skips the shell render each workspace switch causes; its props only change on toggle.
 const MemoFloatingTerminalToggleButton = memo(FloatingTerminalToggleButton)
@@ -172,7 +173,9 @@ export function AppWorkspaceShell(props: {
               layout.activeView !== 'artifacts' ? (
                 <div className="titlebar">{titlebarMainStrip}</div>
               ) : null}
-              {layout.terminalWorkbenchVisible ? <WorkspaceInfraBar /> : null}
+              {layout.terminalWorkbenchVisible && !isIncognitoWindow() ? (
+                <WorkspaceInfraBar />
+              ) : null}
               <div className="relative flex flex-1 min-w-0 min-h-0 overflow-hidden">
                 {layout.terminalWorkbenchVisible ? <WorkspacePathColumn /> : null}
                 {/* Match the open sidebar header’s alignment to prevent toggle jitter. */}

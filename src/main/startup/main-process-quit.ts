@@ -1,4 +1,5 @@
 import { killWslChannelsInCloseGrace } from '../wsl/wsl-command-channel'
+import { readProjectWorkspaceContext } from '../fork/project-workspaces/workspace-context'
 import { markHostShuttingDown } from '../host-shutdown-state'
 import { app, type Event } from 'electron'
 import { closeAllWatchers } from '../ipc/filesystem/watchers/filesystem-watcher-shutdown'
@@ -260,7 +261,11 @@ function installWillQuitHandler(): void {
       rpcStopAndClear
     ]).then(() => state.runtime?.closeNotificationDismissals())
     // Normal quits preserve the detached daemon for warm reattach; dev-parent death leaves its temporary profile ownerless.
-    const daemonTeardown = isDevParentShutdownRequested() ? shutdownDaemon() : disconnectDaemon()
+    // Fork: Incognito closes its disposable terminal runtime.
+    const daemonTeardown =
+      isDevParentShutdownRequested() || readProjectWorkspaceContext()?.incognito
+        ? shutdownDaemon()
+        : disconnectDaemon()
     // Bound unsettled transports and final writes so quit cannot hang (#9447). Failures still exit; atomic swaps preserve old files if the final debounce is lost.
     settleTeardownWithinDeadline([
       { name: 'daemon', promise: daemonTeardown },

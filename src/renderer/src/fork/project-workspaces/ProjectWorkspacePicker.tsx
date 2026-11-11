@@ -24,7 +24,9 @@ export function ProjectWorkspacePicker(): React.JSX.Element | null {
   if (!api || !snapshot || snapshot.activeId === PROJECT_WORKSPACE_HOME_ID) {
     return null
   }
-  const active = snapshot.workspaces.find((workspace) => workspace.id === snapshot.activeId)
+  const active =
+    snapshot.activeTask?.workspace ??
+    snapshot.workspaces.find((workspace) => workspace.id === snapshot.activeId)
   const others = snapshot.workspaces.filter((workspace) => workspace.id !== snapshot.activeId)
 
   function go(toId: string): void {
@@ -59,7 +61,9 @@ export function ProjectWorkspacePicker(): React.JSX.Element | null {
       <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuItem disabled={busy} onSelect={() => go(PROJECT_WORKSPACE_HOME_ID)}>
           <LogOut className="size-4" />
-          {translate('components.projectWorkspaces.leave', 'Leave workspace')}
+          {snapshot.activeTask
+            ? translate('components.incognito.close', 'Archive and leave')
+            : translate('components.projectWorkspaces.leave', 'Leave workspace')}
         </DropdownMenuItem>
         {others.length > 0 && (
           <>

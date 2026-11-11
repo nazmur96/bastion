@@ -2,6 +2,7 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { useBastionLayout } from '../workbench/use-bastion-layout'
 import { InfraHome } from './InfraHome'
+import { isIncognitoWindow } from '../project-workspaces/use-project-workspaces'
 
 /** The active workspace's Project path, as a column at the left of the workbench. */
 export function WorkspacePathColumn(): React.JSX.Element | null {
@@ -10,7 +11,9 @@ export function WorkspacePathColumn(): React.JSX.Element | null {
       ? state.activeWorktreeId
       : null
   )
-  return worktreeId ? <PathColumn key={worktreeId} worktreeId={worktreeId} /> : null
+  return worktreeId && !isIncognitoWindow() ? (
+    <PathColumn key={worktreeId} worktreeId={worktreeId} />
+  ) : null
 }
 
 function PathColumn({ worktreeId }: { worktreeId: string }): React.JSX.Element {

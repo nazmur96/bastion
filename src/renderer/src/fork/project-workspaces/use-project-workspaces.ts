@@ -7,6 +7,10 @@ import {
 // One read per window: the owning namespace never changes inside a running renderer.
 let initial: Promise<ProjectWorkspaceList> | null = null
 let arrivalScheduled = false
+let incognitoWindow = false
+export function isIncognitoWindow(): boolean {
+  return incognitoWindow
+}
 
 export function useProjectWorkspaces(): {
   snapshot: ProjectWorkspaceList | null
@@ -25,7 +29,10 @@ export function useProjectWorkspaces(): {
     if (!api) {
       return
     }
-    initial ??= api.list()
+    initial ??= api.list().then((value) => {
+      incognitoWindow = Boolean(value.activeTask)
+      return value
+    })
     let live = true
     initial
       .then((value) => live && setLocalSnapshot(value))

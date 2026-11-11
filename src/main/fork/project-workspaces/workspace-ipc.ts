@@ -1,4 +1,5 @@
 import { openProjectWorkspaceDestination } from './workspace-destination'
+import { registerIncognitoHandlers } from './incognito-ipc'
 import { registerProjectWorkspaceArrival } from './workspace-arrival'
 import { app, ipcMain } from 'electron'
 import type { Store } from '../../persistence'
@@ -38,7 +39,13 @@ function withCatalog<T>(run: (catalog: WorkspaceCatalog, activeId: string) => T)
 }
 
 function list(catalog: WorkspaceCatalog, activeId: string): ProjectWorkspaceList {
-  return { activeId, workspaces: catalog.list(), switchMode: 'relaunch' }
+  return {
+    activeId,
+    workspaces: catalog.list(),
+    switchMode: 'relaunch',
+    incognitoTasks: catalog.incognito().list(),
+    activeTask: catalog.incognito().get(activeId)
+  }
 }
 
 // Home cards show what each workspace recorded about itself; home never reads another namespace.
@@ -55,9 +62,12 @@ export function registerProjectWorkspaceHandlers(
   onBeforeRelaunch?: () => void | Promise<void>
 ): void {
   registerProjectWorkspaceArrival()
+  withCatalog((catalog, activeId) => catalog.incognito().markActive(activeId))
+  registerIncognitoHandlers(withCatalog, list)
   app.on('before-quit', () => {
     try {
       recordOwnSummary(store)
+      withCatalog((catalog, activeId) => catalog.incognito().archiveOwn(activeId))
     } catch (error) {
       console.warn(
         '[project-workspaces] Summary not recorded:',

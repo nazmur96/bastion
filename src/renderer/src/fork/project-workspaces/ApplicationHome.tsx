@@ -9,6 +9,7 @@ import type {
   ProjectWorkspacesApi
 } from '../../../../shared/fork-project-workspaces'
 import { useProjectWorkspaces } from './use-project-workspaces'
+import { IncognitoTools } from './IncognitoTools'
 
 const DRAG: React.CSSProperties & { WebkitAppRegion: 'drag' } = { WebkitAppRegion: 'drag' }
 const NO_DRAG: React.CSSProperties & { WebkitAppRegion: 'no-drag' } = { WebkitAppRegion: 'no-drag' }
@@ -190,6 +191,15 @@ export function ApplicationHome(): React.JSX.Element {
               })}
             </span>
           </div>
+          {api?.incognito && snapshot && (
+            <IncognitoTools
+              api={api}
+              snapshot={snapshot}
+              busy={busy}
+              onSnapshot={setSnapshot}
+              onOpen={open}
+            />
+          )}
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {workspaces.map((workspace) =>
               form?.mode === 'rename' && form.id === workspace.id ? (

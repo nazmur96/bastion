@@ -1,6 +1,19 @@
 /** Application home runs in its own empty namespace, outside every project workspace. */
 export const PROJECT_WORKSPACE_HOME_ID = 'home'
 
+export type IncognitoKind = 'terminal' | 'browser' | 'agent' | 'file'
+export function isIncognitoKind(value: unknown): value is IncognitoKind {
+  return value === 'terminal' || value === 'browser' || value === 'agent' || value === 'file'
+}
+export type IncognitoTask = {
+  workspace: ProjectWorkspace
+  kind: IncognitoKind
+  archivedAt: number | null
+  deleting: boolean
+  fileName: string | null
+  agent: 'claude' | 'codex'
+}
+
 export type ProjectWorkspace = {
   id: string
   name: string
@@ -17,11 +30,22 @@ export type ProjectWorkspaceList = {
   activeId: string
   workspaces: ProjectWorkspace[]
   switchMode: 'relaunch'
+  incognitoTasks?: IncognitoTask[]
+  activeTask?: IncognitoTask | null
 }
 
 export type ProjectWorkspaceSwitchResult = { status: 'already-active' | 'relaunching' }
 
 export type ProjectWorkspacesApi = {
+  incognito?: {
+    create: (args: {
+      kind: IncognitoKind
+      fileName?: string
+      agent?: 'claude' | 'codex'
+    }) => Promise<{ task: IncognitoTask; snapshot: ProjectWorkspaceList }>
+    remove: (args: { id: string; confirmed: true }) => Promise<ProjectWorkspaceList>
+    prepare: () => Promise<{ task: IncognitoTask; root: string; filePath: string | null } | null>
+  }
   ready?: () => Promise<void>
   list: () => Promise<ProjectWorkspaceList>
   create: (args: { name: string }) => Promise<ProjectWorkspaceList>

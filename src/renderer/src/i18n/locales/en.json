@@ -21204,6 +21204,25 @@
       "createCardHint": "A complete, independent project desktop",
       "footnote": "Repositories, branches and worktrees are added inside a workspace. Opening a workspace reopens the app inside it.",
       "status": "No workspace is open. Your project contexts stay separate."
+    },
+    "incognito": {
+      "browserTitle": "Incognito browser",
+      "retry": "Retry Incognito setup",
+      "open": "Incognito",
+      "close": "Archive and leave",
+      "archive": "Archive",
+      "scope": "A separate one-off context. Closing saves it in Archive. Local tools still have host access; this is not a sandbox.",
+      "terminal": "Terminal",
+      "browser": "Browser",
+      "agent": "Agent",
+      "launchAgent": "Open agent",
+      "fileName": "File name",
+      "newFile": "New file",
+      "empty": "No Incognito tasks yet.",
+      "reopen": "Reopen",
+      "delete": "Delete permanently",
+      "confirmDelete": "Permanently delete this task, its files and saved sessions?",
+      "confirm": "Delete task"
     }
   },
   "dashboardPopout": {

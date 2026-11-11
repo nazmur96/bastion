@@ -1,6 +1,7 @@
 import { useAppStore } from '@/store'
 import type { TabGroupLayoutNode } from '../../../../shared/tab-types'
 import { containsGroup } from '../claude-panel/claude-panel-layout'
+import { isIncognitoWindow } from '../project-workspaces/use-project-workspaces'
 
 const KEY = 'orca-fork.terminalDock.v1'
 /** Share of the width the workbench keeps beside the side panel. */
@@ -92,6 +93,9 @@ function isBelowWorkbench(node: TabGroupLayoutNode, dock: string): boolean {
 /** The side panel right of the workbench that terminals open in, made on first use. A dock
  *  saved below the workbench (an older layout) hands its terminals to the new one. */
 export function ensureTerminalDock(worktreeId: string, workbenchId: string): string | null {
+  if (isIncognitoWindow()) {
+    return null
+  }
   const live = liveTerminalDockId(worktreeId)
   const layout = useAppStore.getState().layoutByWorktree[worktreeId]
   if (live && !(layout && isBelowWorkbench(layout, live))) {

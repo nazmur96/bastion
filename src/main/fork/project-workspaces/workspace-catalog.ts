@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { IncognitoCatalog, upgradeIncognitoCatalog } from './incognito-catalog'
 import { existsSync, lstatSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import Database from '../../sqlite/sync-database'
@@ -9,7 +10,7 @@ import {
   type ProjectWorkspace
 } from '../../../shared/fork-project-workspaces'
 
-const SCHEMA_VERSION = 2
+const SCHEMA_VERSION = 3
 const WORKSPACE_COLUMNS =
   'w.id, w.name, w.kind, w.createdAt, w.updatedAt, s.repoCount, s.openedAt FROM workspaces w LEFT JOIN summary s ON s.workspaceId = w.id'
 
@@ -111,7 +112,7 @@ export class WorkspaceCatalog {
     this.db = new Database(file, { timeout: 5000 })
     try {
       const supported = (version: unknown): boolean =>
-        version === 0 || version === 1 || version === SCHEMA_VERSION
+        version === 0 || version === 1 || version === 2 || version === SCHEMA_VERSION
       if (!supported(this.db.pragma('user_version', { simple: true }))) {
         throw new Error('Unsupported workspace catalog version. Update Bastion before opening it.')
       }
@@ -127,8 +128,11 @@ export class WorkspaceCatalog {
         if (lockedVersion === 0) {
           createFirstVersion(this.db)
         }
-        if (lockedVersion !== SCHEMA_VERSION) {
+        if (lockedVersion === 0 || lockedVersion === 1) {
           upgradeToSecondVersion(this.db)
+        }
+        if (lockedVersion !== SCHEMA_VERSION) {
+          upgradeIncognitoCatalog(this.db)
         }
         this.list()
         this.selected()
@@ -147,7 +151,9 @@ export class WorkspaceCatalog {
 
   list(): ProjectWorkspace[] {
     return this.db
-      .prepare(`SELECT ${WORKSPACE_COLUMNS} ORDER BY w.createdAt, w.id`)
+      .prepare(
+        `SELECT ${WORKSPACE_COLUMNS} WHERE NOT EXISTS (SELECT 1 FROM incognito i WHERE i.workspaceId = w.id) ORDER BY w.createdAt, w.id`
+      )
       .all()
       .map(decodeWorkspace)
   }
@@ -161,6 +167,10 @@ export class WorkspaceCatalog {
       throw new Error('Project workspace no longer exists.')
     }
     return decodeWorkspace(row)
+  }
+
+  incognito(): IncognitoCatalog {
+    return new IncognitoCatalog(this.db, this)
   }
 
   selected(): ProjectWorkspace {
@@ -201,6 +211,9 @@ export class WorkspaceCatalog {
     this.get(id)
     this.db.exec('BEGIN IMMEDIATE')
     try {
+      if (this.incognito().get(id)?.deleting) {
+        throw new Error('This Incognito task is being deleted.')
+      }
       this.db.prepare('UPDATE selection SET workspaceId = ? WHERE slot = 1').run(id)
       this.db.prepare('UPDATE launch SET atHome = 0 WHERE slot = 1').run()
       this.db.exec('COMMIT')

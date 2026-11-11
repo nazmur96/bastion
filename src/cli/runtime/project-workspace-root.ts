@@ -30,12 +30,12 @@ export function resolveProjectWorkspaceCliRoot(baseRoot: string, env: NodeJS.Pro
   const db = new DatabaseSync(file, { readOnly: true, timeout: 5000 })
   try {
     const version = db.prepare('PRAGMA user_version').get()?.user_version
-    if (version !== 1 && version !== 2) {
+    if (version !== 1 && version !== 2 && version !== 3) {
       throw new Error('Unsupported project workspace catalog. Update Bastion before using its CLI.')
     }
     // Application home owns its own empty runtime; never fall through to the last workspace.
     if (
-      version === 2 &&
+      (version === 2 || version === 3) &&
       db.prepare('SELECT atHome FROM launch WHERE slot = 1').get()?.atHome === 1
     ) {
       return join(baseRoot, 'bastion-project-workspaces', 'home')
