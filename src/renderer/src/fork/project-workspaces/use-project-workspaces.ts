@@ -7,6 +7,10 @@ import {
 // One read per window: the owning namespace never changes inside a running renderer.
 let initial: Promise<ProjectWorkspaceList> | null = null
 let incognitoWindow = false
+export function isProjectDesktopWindow(): boolean {
+  return Boolean(window.api.projectWorkspaces) && !incognitoWindow
+}
+
 export function isIncognitoWindow(): boolean {
   return incognitoWindow
 }

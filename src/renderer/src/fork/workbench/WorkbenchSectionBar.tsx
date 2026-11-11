@@ -1,7 +1,10 @@
+import { toggleWorkbenchFocus, useWorkbenchFocus } from './workbench-focus'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { setInfraView, useInfraView } from '../devops/infra-home-store'
 import {
+  Maximize2,
+  Minimize2,
   FileText,
   GitBranch,
   Globe,
@@ -66,6 +69,7 @@ export function WorkbenchSectionBar({
         ? 'dock'
         : null
   )
+  const focused = useWorkbenchFocus(worktreeId) === 'terminal'
   const view = useInfraView(worktreeId)
   const sideCollapsed = useAppStore(() => isSidePanelCollapsed(worktreeId))
   const pathCollapsed = usePathColumnCollapsed()
@@ -98,6 +102,23 @@ export function WorkbenchSectionBar({
         <button
           type="button"
           className="bx-icon-btn ml-auto"
+          aria-label={
+            focused
+              ? translate('components.workbench.restoreLayout', 'Restore previous layout')
+              : translate('workspaceDesktop.maximizePanel', 'Maximize side panel')
+          }
+          onClick={() => {
+            toggleWorkbenchFocus(worktreeId, 'terminal')
+            if (!focused) {
+              setSideSection(worktreeId, section)
+            }
+          }}
+        >
+          {focused ? <Minimize2 aria-hidden /> : <Maximize2 aria-hidden />}
+        </button>
+        <button
+          type="button"
+          className="bx-icon-btn"
           aria-label={translate('components.sidePanel.hide', 'Hide side panel')}
           title={translate('components.sidePanel.hide', 'Hide side panel')}
           onClick={() => toggleSidePanel(worktreeId)}

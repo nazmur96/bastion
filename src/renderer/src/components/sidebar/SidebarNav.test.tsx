@@ -29,6 +29,10 @@ const mocks = vi.hoisted(() => ({
   setSetupGuideSidebarDismissed: vi.fn()
 }))
 
+vi.mock('@/fork/project-workspaces/use-project-workspaces', () => ({
+  isProjectDesktopWindow: () => false
+}))
+
 vi.mock('@/store', () => ({
   useAppStore: (selector: (state: Record<string, unknown>) => unknown) => selector(mocks.state)
 }))

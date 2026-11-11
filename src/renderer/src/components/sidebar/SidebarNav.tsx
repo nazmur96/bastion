@@ -1,3 +1,5 @@
+import { WorkspaceNavigation } from '@/fork/workspace-desktop/WorkspaceNavigation'
+import { isProjectDesktopWindow } from '@/fork/project-workspaces/use-project-workspaces'
 import { NewAgentSidebarButton } from '@/fork/claude-panel/NewAgentSidebarButton'
 import React from 'react'
 import { BookOpen, CalendarClock, EyeOff, Files, Search, Smartphone } from 'lucide-react'
@@ -82,6 +84,10 @@ const SidebarNav = React.memo(function SidebarNav() {
   const hideSkillsButton = React.useCallback(() => {
     void updateSettings({ showSkillsButton: false })
   }, [updateSettings])
+
+  if (isProjectDesktopWindow()) {
+    return <WorkspaceNavigation />
+  }
 
   return (
     <div

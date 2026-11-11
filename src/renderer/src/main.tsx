@@ -4,6 +4,7 @@ import './lib/react-commit-cascade-observer'
 import './assets/main.css'
 import './fork/theme/claude-accent.css'
 import './fork/theme/bastion.css'
+import './fork/theme/workspace-desktop.css'
 
 import { StrictMode } from 'react'
 import { useTranslation } from 'react-i18next'

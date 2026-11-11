@@ -1,3 +1,6 @@
+import { WorkspacePages } from '../workspace-desktop/WorkspacePages'
+import { openWorkspacePage, useWorkspacePage } from '../workspace-desktop/workspace-desktop-state'
+import { isProjectDesktopWindow } from '../project-workspaces/use-project-workspaces'
 import { useCallback, useEffect, useRef } from 'react'
 import { useAppStore } from '@/store'
 import { workbenchGroupId } from '../workbench/workbench-terminals'
@@ -14,6 +17,8 @@ export function InfraHomeOverlay({
   worktreeId: string
   groupId: string
 }): React.JSX.Element | null {
+  const page = useWorkspacePage()
+  const desktopPage = isProjectDesktopWindow() && page !== 'editor' && page !== 'source'
   const view = useInfraView(worktreeId)
   const isWorkbench = useAppStore(() => workbenchGroupId(worktreeId) === groupId)
   const activeTabId = useAppStore(
@@ -27,7 +32,11 @@ export function InfraHomeOverlay({
   useEffect(() => {
     // Picking a tab in this group means the person wants that tab, not the map or Tools.
     if (seenTab.current !== activeTabId) {
+      const previous = seenTab.current
       seenTab.current = activeTabId
+      if (isWorkbench && previous && activeTabId && isProjectDesktopWindow()) {
+        openWorkspacePage('editor')
+      }
       if (isWorkbench) {
         setInfraView(worktreeId, null)
       }
@@ -42,8 +51,19 @@ export function InfraHomeOverlay({
   }
   return (
     <>
+      {desktopPage ? (
+        <div
+          className="absolute inset-0 z-30 overflow-hidden bg-background"
+          data-workspace-page={page}
+        >
+          <HidePaneSurfaces groupId={groupId} />
+          <WorkspacePages />
+        </div>
+      ) : null}
       {view ? <HidePaneSurfaces groupId={groupId} /> : null}
-      {empty && !view ? <WorkbenchStart worktreeId={worktreeId} groupId={groupId} /> : null}
+      {empty && !view && !desktopPage ? (
+        <WorkbenchStart worktreeId={worktreeId} groupId={groupId} />
+      ) : null}
       <div
         ref={register}
         hidden={!view}

@@ -21,6 +21,7 @@ export function WorkbenchAgentMenu({
   children,
   prompt,
   onPromptDelivered,
+  onLaunched,
   open,
   onOpenChange
 }: {
@@ -29,6 +30,7 @@ export function WorkbenchAgentMenu({
   children: ReactNode
   prompt?: string
   onPromptDelivered?: () => void
+  onLaunched?: () => void
   open: boolean
   onOpenChange: (open: boolean) => void
 }): React.JSX.Element {
@@ -43,10 +45,13 @@ export function WorkbenchAgentMenu({
     prompt,
     promptDelivery: 'draft',
     onPromptDelivered,
+    onFocusHostTerminal: () => onLaunched?.(),
     onFocusTerminal: (tabId) => {
+      onLaunched?.()
       pendingFocus.current = () => focusTerminalTabSurface(tabId)
     },
     onFocusChat: (tabId) => {
+      onLaunched?.()
       pendingFocus.current = () => requestNativeChatComposerFocus(tabId)
     }
   })

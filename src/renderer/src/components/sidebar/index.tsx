@@ -1,3 +1,6 @@
+import { WorkspaceLeaveButton } from '@/fork/workspace-desktop/WorkspaceNavigation'
+import { openWorkspacePage } from '@/fork/workspace-desktop/workspace-desktop-state'
+import { isProjectDesktopWindow } from '@/fork/project-workspaces/use-project-workspaces'
 import React, { useEffect, useMemo } from 'react'
 import { useAppStore } from '@/store'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -196,7 +199,12 @@ function Sidebar({
                   scrollOffsetRef={worktreeScrollOffsetRef}
                   scrollAnchorRef={worktreeScrollAnchorRef}
                   workspaceBoardOpen={workspaceBoardOpen}
-                  onWorktreeCardClick={closeWorkspaceBoard}
+                  onWorktreeCardClick={() => {
+                    closeWorkspaceBoard()
+                    if (isProjectDesktopWindow()) {
+                      openWorkspacePage('editor')
+                    }
+                  }}
                   onWorkspaceBoardDragPreviewStart={previewWorkspaceBoardFromDrag}
                   onWorkspaceBoardDragPreviewCommit={solidifyWorkspaceBoardFromDrag}
                   onWorkspaceBoardDragPreviewCancel={cancelWorkspaceBoardDragPreview}
@@ -206,8 +214,9 @@ function Sidebar({
             )}
 
             <div className="relative shrink-0">
-              <SetupScriptPromptCard />
+              {!isProjectDesktopWindow() ? <SetupScriptPromptCard /> : null}
 
+              {isProjectDesktopWindow() && <WorkspaceLeaveButton />}
               <SidebarToolbar
                 workspaceBoardOpen={workspaceBoardOpen}
                 workspaceBoardDragPreviewOpen={workspaceBoardDragPreviewOpen}
