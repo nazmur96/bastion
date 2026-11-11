@@ -58,3 +58,11 @@ The source window now stays open with a progress screen until the destination re
 Controlled Playwright/CDP checks used a separate empty temporary profile: Home → workspace took 8,482 ms; workspace → Home took 8,281 ms. Native window sampling never observed zero visible dev windows. The earlier leave baseline was 16,040 ms. These are single development measurements, not packaged performance guarantees. Eight seconds remains slow; cold startup has not been independently improved or proven by this checkpoint. Screenshots and timing records are private under `.handoff/workspace-transition/lab-*`.
 
 Focused handshake/IPC/dev-request tests and Node/web typechecks cover the implementation. Native packaged macOS/Windows transitions and failure recovery remain unverified. Application-state namespace boundaries remain in place; this is not an OS sandbox.
+
+## Home startup split — November 11
+
+Desktop entry resolves its pinned owner before loading the renderer. Home loads only its own UI, theme, language and window controls; the full IDE, terminals and session hydration load only inside a project workspace. Workspace hydration now stops StrictMode’s cancelled pass after fetching settings. Arrival acknowledgement runs after mount with a timer fallback because fully occluded windows may not receive animation frames.
+
+One development startup trace reached Home window visibility in 2,440 ms versus 5,032 ms in the earlier trace. End-to-end Leave measurements varied from 5,944 to 8,839 ms under load; opening a workspace still measured 9,333 ms in a direct API measurement. Do not describe the eight-second switching delay as solved. An earlier screenshot-based measurement was distorted by occluded-window capture waits.
+
+Web typecheck and the changed-code quality gate passed. Generated CLI output was rebuilt to include schema-v2 support. Packaged startup performance remains unmeasured.

@@ -6,6 +6,7 @@ import {
 
 // One read per window: the owning namespace never changes inside a running renderer.
 let initial: Promise<ProjectWorkspaceList> | null = null
+let arrivalScheduled = false
 
 export function useProjectWorkspaces(): {
   snapshot: ProjectWorkspaceList | null
@@ -24,14 +25,7 @@ export function useProjectWorkspaces(): {
     if (!api) {
       return
     }
-    initial ??= api.list().then((value) => {
-      requestAnimationFrame(() =>
-        requestAnimationFrame(() => {
-          void api.ready?.()
-        })
-      )
-      return value
-    })
+    initial ??= api.list()
     let live = true
     initial
       .then((value) => live && setLocalSnapshot(value))
@@ -40,6 +34,31 @@ export function useProjectWorkspaces(): {
       live = false
     }
   }, [api])
+  useEffect(() => {
+    if (!snapshot || !api || arrivalScheduled) {
+      return
+    }
+    arrivalScheduled = true
+    let acknowledged = false
+    const acknowledge = (): void => {
+      if (!acknowledged) {
+        acknowledged = true
+        void api.ready?.()
+      }
+    }
+    // Occluded desktop windows may never receive animation frames.
+    const timer = setTimeout(acknowledge, 250)
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(acknowledge)
+    })
+    return () => {
+      clearTimeout(timer)
+      cancelAnimationFrame(frame)
+      if (!acknowledged) {
+        arrivalScheduled = false
+      }
+    }
+  }, [api, snapshot])
   const refresh = useCallback(async () => {
     if (api) {
       setSnapshot(await api.list())

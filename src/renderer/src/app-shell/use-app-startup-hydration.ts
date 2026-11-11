@@ -78,6 +78,9 @@ export function useAppStartupHydration(onOnboardingLoaded: (state: OnboardingSta
         await timeRendererStartupStep('fetch-settings', () =>
           actions.fetchSettings({ deferOwnerWorktreeVisibilityDefaults: true })
         )
+        if (cancelled) {
+          return
+        }
         // Publish composed terminal appearance before panes mount so hidden startup PTYs can answer queries.
         const settings = useAppStore.getState().settings
         publishTerminalViewAttributesAtAppStart(settings, getSystemPrefersDark())
