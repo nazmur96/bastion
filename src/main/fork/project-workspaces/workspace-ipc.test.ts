@@ -123,3 +123,48 @@ it('leaves a workspace for application home and creates new workspaces only ther
     catalog.close()
   }
 })
+
+it.each([false, true])(
+  'publishes the Incognito archive before Home opens and restores active state on failure (%s)',
+  async (failDestination) => {
+    vi.useFakeTimers()
+    const root = mkdtempSync(join(tmpdir(), 'bastion-archive-handoff-'))
+    roots.push(root)
+    const catalog = new WorkspaceCatalog(root)
+    try {
+      const task = catalog.incognito().create('file', 'scratch.py', undefined)
+      const id = task.workspace.id
+      configureProjectWorkspace(root, () => {}, [`--bastion-project-workspace=${id}`], {})
+      registerProjectWorkspaceHandlers(new Store())
+      expect(catalog.incognito().get(id)?.archivedAt).toBeNull()
+      mocks.destination.mockImplementationOnce(async () => {
+        const homeCatalog = new WorkspaceCatalog(root)
+        try {
+          expect(homeCatalog.incognito().get(id)?.archivedAt).toEqual(expect.any(Number))
+          expect(mocks.quit).not.toHaveBeenCalled()
+        } finally {
+          homeCatalog.close()
+        }
+        if (failDestination) {
+          throw new Error('Home unavailable')
+        }
+      })
+      const sender = { isDestroyed: () => false, send: vi.fn() }
+      const result = mocks.handlers.get('bastionWorkspaces:switch')?.(
+        { sender },
+        { fromId: id, toId: 'home' }
+      )
+      if (failDestination) {
+        await expect(result).rejects.toThrow('Home unavailable')
+        expect(catalog.incognito().get(id)?.archivedAt).toBeNull()
+        expect(catalog.selected().id).toBe(id)
+        expect(mocks.quit).not.toHaveBeenCalled()
+      } else {
+        await expect(result).resolves.toEqual({ status: 'relaunching' })
+        expect(catalog.incognito().get(id)?.archivedAt).toEqual(expect.any(Number))
+      }
+    } finally {
+      catalog.close()
+    }
+  }
+)

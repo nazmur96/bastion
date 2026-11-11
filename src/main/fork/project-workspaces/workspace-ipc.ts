@@ -122,6 +122,7 @@ export function registerProjectWorkspaceHandlers(
             catalog.dataRoot(toId)
             catalog.select(toId)
           }
+          catalog.incognito().archiveOwn(fromId)
         })
         await openProjectWorkspaceDestination(event.sender, toId)
         await runBeforeRelaunchCleanup(onBeforeRelaunch)
@@ -140,6 +141,7 @@ export function registerProjectWorkspaceHandlers(
           } else {
             catalog.select(fromId)
           }
+          catalog.incognito().markActive(fromId)
         })
         throw error
       }
