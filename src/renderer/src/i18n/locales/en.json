@@ -21222,7 +21222,11 @@
       "reopen": "Reopen",
       "delete": "Delete permanently",
       "confirmDelete": "Permanently delete this task, its files and saved sessions?",
-      "confirm": "Delete task"
+      "confirm": "Delete task",
+      "archivedAt": "Archived {{when}}",
+      "notClosed": "Not closed normally",
+      "codexTask": "Codex agent",
+      "claudeTask": "Claude agent"
     }
   },
   "dashboardPopout": {

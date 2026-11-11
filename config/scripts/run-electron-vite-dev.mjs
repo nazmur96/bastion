@@ -2,12 +2,14 @@
 import { resolveDevWorkspacePorts } from './bastion-dev-workspace-ports.mjs'
 import {
   failDevWorkspaceChild,
+  shutdownDevWorkspaceChildren,
   devWorkspaceSignalExitCode,
   spawnDevWorkspaceChild,
   terminateDevWorkspaceChild,
   devWorkspaceRestartEnvironment,
   installDevWorkspaceHandoffPoll,
-  prepareDevWorkspaceHandoff
+  prepareDevWorkspaceHandoff,
+  watchDevWorkspaceDecision
 } from './bastion-dev-workspace-restart.mjs'
 import { execFileSync, spawn } from 'node:child_process'
 import { createHash } from 'node:crypto'
@@ -614,13 +616,7 @@ function beginShutdown(signal) {
   isShuttingDown = true
 
   webClientBuild?.kill()
-  terminateDevWorkspaceChild(child, signal)
-  if (previousChild) {
-    terminateDevWorkspaceChild(previousChild, signal)
-  }
-  forcedKillTimer = setTimeout(() => {
-    terminateDevWorkspaceChild(child, 'SIGKILL')
-  }, 5000)
+  forcedKillTimer = shutdownDevWorkspaceChildren(child, previousChild, signal)
 }
 
 installDevWorkspaceHandoffPoll(
@@ -631,7 +627,16 @@ installDevWorkspaceHandoffPoll(
     previousChild = child
     try {
       forwardedArgs = await prepareDevWorkspaceHandoff(request, forwardedRaw, repoRoot, devProfile)
-      child = spawnDevChild()
+      const destination = spawnDevChild()
+      child = destination
+      watchDevWorkspaceDecision(request.handoff, () => {
+        console.error('[bastion-dev] Source cancelled the switch; stopping its destination')
+        if (child === destination && previousChild) {
+          child = previousChild
+          previousChild = null
+        }
+        terminateDevWorkspaceChild(destination, 'SIGTERM')
+      })
     } catch (error) {
       previousChild = null
       throw error

@@ -1,3 +1,6 @@
+// Fork: a workspace switch completes only after this workbench has hydrated.
+import { acknowledgeWorkspaceArrival } from '../fork/project-workspaces/workspace-arrival-ready'
+import { isIncognitoWindow } from '../fork/project-workspaces/use-project-workspaces'
 import { restoreStructuredLaunchSurfaces } from '@/lib/structured-agent-session-launch-surface'
 import { useEffect, useRef } from 'react'
 import { restoreLocalStructuredChatsAtStartup } from '@/runtime/local-structured-chats'
@@ -282,6 +285,9 @@ export function useAppStartupHydration(onOnboardingLoaded: (state: OnboardingSta
           // Unlock writes only after all hydration/dependent steps succeed; never save partially restored state (#1158).
           actions.setHydrationSucceeded(true)
           actions.setTerminalStartupRestorationReady(true)
+          if (!isIncognitoWindow()) {
+            acknowledgeWorkspaceArrival()
+          }
           void startupWorktreeRefresh.then((results) => {
             if (!cancelled) {
               finishStartupWorktreeHydration(results)
@@ -310,6 +316,8 @@ export function useAppStartupHydration(onOnboardingLoaded: (state: OnboardingSta
           reconnectPersistedTerminals: actions.reconnectPersistedTerminals,
           abortSignal: abortController.signal
         })
+        // A degraded workbench is still this workspace's own; let its source window step aside.
+        acknowledgeWorkspaceArrival()
       }
       void actions.initGitHubCache()
     })()

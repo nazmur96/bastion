@@ -1,12 +1,28 @@
+import { workspaceErrorMessage } from './workspace-error-message'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { translate } from '@/i18n/i18n'
+import { getIntlLocale, translate } from '@/i18n/i18n'
 import type {
+  IncognitoTask,
   ProjectWorkspaceList,
   ProjectWorkspacesApi,
   IncognitoKind
 } from '../../../../shared/fork-project-workspaces'
+
+function incognitoTaskLabel(task: IncognitoTask): string {
+  if (task.kind === 'file') {
+    return task.fileName ?? translate('components.incognito.newFile', 'New file')
+  }
+  if (task.kind === 'agent') {
+    return task.agent === 'codex'
+      ? translate('components.incognito.codexTask', 'Codex agent')
+      : translate('components.incognito.claudeTask', 'Claude agent')
+  }
+  return task.kind === 'terminal'
+    ? translate('components.incognito.terminal', 'Terminal')
+    : translate('components.incognito.browser', 'Browser')
+}
 
 type Props = {
   api: ProjectWorkspacesApi
@@ -39,7 +55,7 @@ export function IncognitoTools({
       onSnapshot(result.snapshot)
       onOpen(result.task.workspace.id)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
+      setError(workspaceErrorMessage(cause))
     } finally {
       setPending(false)
     }
@@ -54,7 +70,7 @@ export function IncognitoTools({
       onSnapshot(await api.incognito.remove({ id, confirmed: true }))
       setDeleting(null)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
+      setError(workspaceErrorMessage(cause))
     } finally {
       setPending(false)
     }
@@ -157,7 +173,19 @@ export function IncognitoTools({
               key={task.workspace.id}
               className="flex flex-wrap items-center justify-between gap-3 border-b py-3"
             >
-              <span className="text-sm">{task.workspace.name}</span>
+              <span className="flex flex-col">
+                <span className="text-sm">{incognitoTaskLabel(task)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {task.archivedAt
+                    ? translate('components.incognito.archivedAt', 'Archived {{when}}', {
+                        when: new Date(task.archivedAt).toLocaleString(getIntlLocale(), {
+                          dateStyle: 'medium',
+                          timeStyle: 'short'
+                        })
+                      })
+                    : translate('components.incognito.notClosed', 'Not closed normally')}
+                </span>
+              </span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"

@@ -8,7 +8,8 @@ import type { WorkspaceCatalog } from './workspace-catalog'
 import { isIncognitoKind, type IncognitoTask } from '../../../shared/fork-project-workspaces'
 
 export function upgradeIncognitoCatalog(db: Database.Database): void {
-  db.exec(`CREATE TABLE incognito (
+  // IF NOT EXISTS: an interrupted or hand-repaired catalog must still open.
+  db.exec(`CREATE TABLE IF NOT EXISTS incognito (
     workspaceId TEXT PRIMARY KEY REFERENCES workspaces(id) ON DELETE CASCADE,
     taskKind TEXT NOT NULL CHECK(taskKind IN ('terminal','browser','agent','file')),
     archivedAt INTEGER,

@@ -1,3 +1,4 @@
+import { workspaceErrorMessage } from './workspace-error-message'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { ChevronDown, Layers, LogOut } from 'lucide-react'
@@ -36,7 +37,7 @@ export function ProjectWorkspacePicker(): React.JSX.Element | null {
     setBusy(true)
     api.switch({ fromId: snapshot.activeId, toId }).catch((cause: unknown) => {
       setBusy(false)
-      toast.error(cause instanceof Error ? cause.message : String(cause))
+      toast.error(workspaceErrorMessage(cause))
     })
   }
 

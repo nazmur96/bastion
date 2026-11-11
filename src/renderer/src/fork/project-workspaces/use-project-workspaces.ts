@@ -6,7 +6,6 @@ import {
 
 // One read per window: the owning namespace never changes inside a running renderer.
 let initial: Promise<ProjectWorkspaceList> | null = null
-let arrivalScheduled = false
 let incognitoWindow = false
 export function isIncognitoWindow(): boolean {
   return incognitoWindow
@@ -41,31 +40,6 @@ export function useProjectWorkspaces(): {
       live = false
     }
   }, [api])
-  useEffect(() => {
-    if (!snapshot || !api || arrivalScheduled) {
-      return
-    }
-    arrivalScheduled = true
-    let acknowledged = false
-    const acknowledge = (): void => {
-      if (!acknowledged) {
-        acknowledged = true
-        void api.ready?.()
-      }
-    }
-    // Occluded desktop windows may never receive animation frames.
-    const timer = setTimeout(acknowledge, 250)
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(acknowledge)
-    })
-    return () => {
-      clearTimeout(timer)
-      cancelAnimationFrame(frame)
-      if (!acknowledged) {
-        arrivalScheduled = false
-      }
-    }
-  }, [api, snapshot])
   const refresh = useCallback(async () => {
     if (api) {
       setSnapshot(await api.list())

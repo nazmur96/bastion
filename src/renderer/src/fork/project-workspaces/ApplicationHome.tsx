@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { workspaceErrorMessage } from './workspace-error-message'
+import { useEffect, useState } from 'react'
 import { ArrowUpRight, LayoutGrid, Loader2, Pencil, Plus } from 'lucide-react'
 import logo from '../../../../../resources/icon-source/bastion.svg'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import type {
 } from '../../../../shared/fork-project-workspaces'
 import { useProjectWorkspaces } from './use-project-workspaces'
 import { IncognitoTools } from './IncognitoTools'
+import { acknowledgeWorkspaceArrival } from './workspace-arrival-ready'
 
 const DRAG: React.CSSProperties & { WebkitAppRegion: 'drag' } = { WebkitAppRegion: 'drag' }
 const NO_DRAG: React.CSSProperties & { WebkitAppRegion: 'no-drag' } = { WebkitAppRegion: 'no-drag' }
@@ -46,6 +48,11 @@ function openedLine(workspace: ProjectWorkspace): string {
 export function ApplicationHome(): React.JSX.Element {
   const api = window.api.projectWorkspaces
   const { snapshot, error: loadError, setSnapshot } = useProjectWorkspaces()
+  useEffect(() => {
+    if (snapshot || loadError) {
+      acknowledgeWorkspaceArrival()
+    }
+  }, [snapshot, loadError])
   const [form, setForm] = useState<{ mode: 'create' } | { mode: 'rename'; id: string } | null>(null)
   const [name, setName] = useState('')
   const [opening, setOpening] = useState<string | null>(null)
@@ -65,7 +72,7 @@ export function ApplicationHome(): React.JSX.Element {
       await action(api, snapshot.activeId)
     } catch (cause) {
       setOpening(null)
-      setError(cause instanceof Error ? cause.message : String(cause))
+      setError(workspaceErrorMessage(cause))
     } finally {
       setBusy(false)
     }
@@ -181,6 +188,15 @@ export function ApplicationHome(): React.JSX.Element {
               {translate('components.applicationHome.newWorkspace', 'New workspace')}
             </Button>
           </div>
+          {api?.incognito && snapshot && (
+            <IncognitoTools
+              api={api}
+              snapshot={snapshot}
+              busy={busy}
+              onSnapshot={setSnapshot}
+              onOpen={open}
+            />
+          )}
           <div className="mt-10 flex items-baseline justify-between">
             <h2 className="text-sm font-medium">
               {translate('components.applicationHome.yourWorkspaces', 'Your workspaces')}
@@ -191,15 +207,6 @@ export function ApplicationHome(): React.JSX.Element {
               })}
             </span>
           </div>
-          {api?.incognito && snapshot && (
-            <IncognitoTools
-              api={api}
-              snapshot={snapshot}
-              busy={busy}
-              onSnapshot={setSnapshot}
-              onOpen={open}
-            />
-          )}
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             {workspaces.map((workspace) =>
               form?.mode === 'rename' && form.id === workspace.id ? (

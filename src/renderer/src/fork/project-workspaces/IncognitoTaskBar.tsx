@@ -1,7 +1,9 @@
+import { workspaceErrorMessage } from './workspace-error-message'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { translate } from '@/i18n/i18n'
 import { useProjectWorkspaces } from './use-project-workspaces'
+const DRAG: React.CSSProperties & { WebkitAppRegion: 'drag' } = { WebkitAppRegion: 'drag' }
 const NO_DRAG: React.CSSProperties & { WebkitAppRegion: 'no-drag' } = { WebkitAppRegion: 'no-drag' }
 
 export function IncognitoTaskBar(): React.JSX.Element | null {
@@ -14,7 +16,7 @@ export function IncognitoTaskBar(): React.JSX.Element | null {
   return (
     <div
       className="flex h-10 shrink-0 items-center gap-3 border-b px-3"
-      style={{ ...NO_DRAG, paddingRight: 'calc(8px + var(--window-controls-width, 0px))' }}
+      style={{ ...DRAG, paddingRight: 'calc(8px + var(--window-controls-width, 0px))' }}
     >
       <span className="text-xs text-muted-foreground">
         {translate('components.incognito.open', 'Incognito')}
@@ -22,6 +24,7 @@ export function IncognitoTaskBar(): React.JSX.Element | null {
       <Button
         variant="ghost"
         size="sm"
+        style={NO_DRAG}
         disabled={busy}
         onClick={() => {
           setBusy(true)
@@ -29,7 +32,7 @@ export function IncognitoTaskBar(): React.JSX.Element | null {
             ?.switch({ fromId: snapshot.activeId, toId: 'home' })
             .catch((cause: unknown) => {
               setBusy(false)
-              setError(String(cause))
+              setError(workspaceErrorMessage(cause))
             })
         }}
       >

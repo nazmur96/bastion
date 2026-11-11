@@ -1,6 +1,8 @@
+import { initializeUsagePaths } from './initialize-usage-paths'
 import { antigravityHookService } from '../antigravity/hook-service'
 // Fork: choose the owning data namespace before any store, session or runtime captures paths.
 import { configureProjectWorkspaceStartup } from '../fork/project-workspaces/workspace-startup'
+import { isMisroutedAppImageExtract } from '../fork/project-workspaces/appimage-extract-guard'
 import { getRelocatedDaemonHost } from '../daemon/daemon-host-relocation'
 import { app, ipcMain, powerMonitor, session } from 'electron'
 import os from 'node:os'
@@ -78,11 +80,6 @@ import { configureSessionParseCachePersistence } from '../ai-vault/session-parse
 import { initOrcaProfilePaths } from '../orca-profiles/profile-index-store'
 import { getProfileUserDataPath } from '../orca-profiles/profile-storage-paths'
 import { recoverPendingProfileProjectMoves } from '../orca-profiles/profile-project-move-intent'
-import { initStatsPath } from '../stats/collector'
-import { initClaudeUsagePath } from '../claude-usage/store'
-import { initCodexUsagePath } from '../codex-usage/store'
-import { initOpenCodeUsagePath } from '../opencode-usage/store'
-import { initMuseUsagePath } from '../muse-usage/store'
 import { registerDocPreviewSchemePrivileges } from '../browser/doc-preview-protocol'
 import { PRIVILEGED_CUSTOM_SCHEMES } from './privileged-custom-schemes'
 import { startCrashpadCapture } from '../crash-reporting/crashpad-capture'
@@ -128,6 +125,12 @@ export function runMainProcessPreflight(options: MainProcessPreflightOptions): b
 
 function initializeMainProcessPreflight(options: MainProcessPreflightOptions): boolean {
   const isDev = !app.isPackaged
+  // Fork: an extraction request routed through appimage-run must not start a second app.
+  if (isMisroutedAppImageExtract(process.argv, app.isPackaged)) {
+    console.error('[startup] Ignoring --appimage-extract: this launcher runs an extracted app')
+    app.exit(3)
+    return false
+  }
   // Resolve Windows appData before recovery/instance-lock steps can read userData.
   ensureWindowsAppDataPath(app)
   if (runProfileStateRecoveryPreflight()) {
@@ -301,11 +304,7 @@ function initializeMainProcessPreflight(options: MainProcessPreflightOptions): b
     getActiveProfileStateLocation(profileUserDataPath)?.profileId
   )
   // Capture stats/usage paths before app naming can shift userData.
-  initStatsPath()
-  initClaudeUsagePath()
-  initCodexUsagePath()
-  initOpenCodeUsagePath()
-  initMuseUsagePath()
+  initializeUsagePaths()
   // Register preview privileges before ready freezes the table or webviews lose fetch/secure-origin access.
   registerDocPreviewSchemePrivileges(PRIVILEGED_CUSTOM_SCHEMES)
   // Install Crashpad before first renderer; earlier CHECK failures have exit-code evidence only.

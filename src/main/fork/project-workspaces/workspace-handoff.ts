@@ -3,9 +3,11 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
   realpathSync,
-  unlinkSync,
+  rmSync,
+  statSync,
   writeFileSync
 } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -18,7 +20,10 @@ export type WorkspaceWindowBounds = {
   height: number
   maximized: boolean
 }
-type HandoffRecord = { bounds: WorkspaceWindowBounds; state: 'waiting' | 'claimed' | 'ready' }
+export type WorkspaceHandoffDecision = 'released' | 'cancelled'
+
+const HANDOFF_NAME = /^[0-9a-f-]{36}\.json$/
+const STALE_MS = 10 * 60_000
 
 function directory(root: string): string {
   const path = join(root, 'bastion-project-workspaces', 'handoffs')
@@ -28,70 +33,121 @@ function directory(root: string): string {
   }
   return path
 }
-function read(path: string): HandoffRecord | null {
+
+// Each party writes its own file exactly once, so a late arrival can never contradict a decision.
+const readyPath = (path: string): string => path.replace(/\.json$/, '.ready')
+export const decisionPath = (path: string): string => path.replace(/\.json$/, '.decision')
+
+function writeOnce(path: string, contents: string): boolean {
   try {
-    const value: unknown = JSON.parse(readFileSync(path, 'utf8'))
-    if (!value || typeof value !== 'object' || !('bounds' in value) || !('state' in value)) {
-      return null
+    writeFileSync(path, contents, { mode: 0o600, flag: 'wx' })
+    return true
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'EEXIST') {
+      return false
     }
-    const b = value.bounds
-    if (
-      !b ||
-      typeof b !== 'object' ||
-      !('x' in b) ||
-      !('y' in b) ||
-      !('width' in b) ||
-      !('height' in b) ||
-      !('maximized' in b)
-    ) {
-      return null
-    }
-    if (
-      typeof b.x !== 'number' ||
-      typeof b.y !== 'number' ||
-      typeof b.width !== 'number' ||
-      typeof b.height !== 'number' ||
-      typeof b.maximized !== 'boolean' ||
-      ![b.x, b.y, b.width, b.height].every(Number.isFinite) ||
-      b.width < 200 ||
-      b.height < 150
-    ) {
-      return null
-    }
-    if (value.state !== 'waiting' && value.state !== 'claimed' && value.state !== 'ready') {
-      return null
-    }
-    return {
-      bounds: { x: b.x, y: b.y, width: b.width, height: b.height, maximized: b.maximized },
-      state: value.state
-    }
+    throw error
+  }
+}
+
+export function readWorkspaceHandoffDecision(path: string): WorkspaceHandoffDecision | null {
+  try {
+    const value = readFileSync(decisionPath(path), 'utf8')
+    return value === 'released' || value === 'cancelled' ? value : null
   } catch {
     return null
   }
 }
-async function waitUntil(check: () => boolean, timeout: number): Promise<boolean> {
+
+function readBounds(path: string): WorkspaceWindowBounds | null {
+  try {
+    const value: unknown = JSON.parse(readFileSync(path, 'utf8'))
+    if (!value || typeof value !== 'object' || !('bounds' in value)) {
+      return null
+    }
+    const b = value.bounds
+    if (!b || typeof b !== 'object') {
+      return null
+    }
+    const x = Reflect.get(b, 'x')
+    const y = Reflect.get(b, 'y')
+    const width = Reflect.get(b, 'width')
+    const height = Reflect.get(b, 'height')
+    const maximized = Reflect.get(b, 'maximized')
+    if (
+      typeof x !== 'number' ||
+      typeof y !== 'number' ||
+      typeof width !== 'number' ||
+      typeof height !== 'number' ||
+      typeof maximized !== 'boolean' ||
+      ![x, y, width, height].every(Number.isFinite) ||
+      width < 200 ||
+      height < 150
+    ) {
+      return null
+    }
+    return { x, y, width, height, maximized }
+  } catch {
+    return null
+  }
+}
+
+async function waitUntil<T>(check: () => T | null, timeout: number): Promise<T | null> {
   const until = Date.now() + timeout
   do {
-    if (check()) {
-      return true
+    const value = check()
+    if (value !== null) {
+      return value
     }
     await new Promise((resolve) => setTimeout(resolve, 25))
   } while (Date.now() < until)
-  return false
+  return null
 }
-export function createWorkspaceHandoff(root: string, bounds: WorkspaceWindowBounds) {
-  const path = join(directory(root), `${randomUUID()}.json`)
-  writeFileSync(path, JSON.stringify({ bounds, state: 'waiting' }), { mode: 0o600, flag: 'wx' })
-  return {
-    path,
-    waitUntilReady: (timeout: number) => waitUntil(() => read(path)?.state === 'ready', timeout),
-    release: (): void => {
-      if (existsSync(path)) {
-        unlinkSync(path)
+
+function removeHandoff(path: string): void {
+  for (const file of [path, readyPath(path), decisionPath(path)]) {
+    rmSync(file, { force: true })
+  }
+}
+
+function sweepStaleHandoffs(parent: string): void {
+  for (const name of readdirSync(parent)) {
+    const file = join(parent, name)
+    try {
+      if (Date.now() - statSync(file).mtimeMs > STALE_MS) {
+        rmSync(file, { force: true })
       }
+    } catch {
+      // A concurrent switch may already have removed it.
     }
   }
 }
+
+export function createWorkspaceHandoff(root: string, bounds: WorkspaceWindowBounds) {
+  const parent = directory(root)
+  sweepStaleHandoffs(parent)
+  const path = join(parent, `${randomUUID()}.json`)
+  writeFileSync(path, JSON.stringify({ bounds }), { mode: 0o600, flag: 'wx' })
+  let decided: WorkspaceHandoffDecision | null = null
+  const decide = (decision: WorkspaceHandoffDecision): WorkspaceHandoffDecision => {
+    if (decided) {
+      return decided
+    }
+    decided = writeOnce(decisionPath(path), decision)
+      ? decision
+      : (readWorkspaceHandoffDecision(path) ?? decision)
+    return decided
+  }
+  return {
+    path,
+    /** True once the destination has loaded; it stays hidden until release(). */
+    waitUntilReady: async (timeout: number): Promise<boolean> =>
+      (await waitUntil(() => (existsSync(readyPath(path)) ? true : null), timeout)) === true,
+    release: (): WorkspaceHandoffDecision => decide('released'),
+    cancel: (): WorkspaceHandoffDecision => decide('cancelled')
+  }
+}
+
 export function acceptWorkspaceHandoff(root: string, env: NodeJS.ProcessEnv = process.env) {
   const path = env[WORKSPACE_HANDOFF_ENV]
   delete env[WORKSPACE_HANDOFF_ENV]
@@ -99,29 +155,29 @@ export function acceptWorkspaceHandoff(root: string, env: NodeJS.ProcessEnv = pr
     return null
   }
   const parent = directory(root)
-  if (dirname(path) !== parent || !/^[0-9a-f-]{36}\.json$/.test(path.slice(parent.length + 1))) {
+  if (dirname(path) !== parent || !HANDOFF_NAME.test(path.slice(parent.length + 1))) {
     return null
   }
   if (
     !existsSync(path) ||
     lstatSync(path).isSymbolicLink() ||
-    realpathSync(dirname(path)) !== realpathSync(parent)
+    realpathSync(dirname(path)) !== realpathSync(parent) ||
+    readWorkspaceHandoffDecision(path) !== null
   ) {
     return null
   }
-  const record = read(path)
-  if (!record || record.state !== 'waiting') {
+  const bounds = readBounds(path)
+  if (!bounds) {
     return null
   }
-  writeFileSync(path, JSON.stringify({ ...record, state: 'claimed' }), { mode: 0o600 })
   return {
-    bounds: record.bounds,
-    markReady: (timeout: number): Promise<boolean> => {
-      if (read(path)?.state !== 'claimed') {
-        return Promise.resolve(false)
-      }
-      writeFileSync(path, JSON.stringify({ ...record, state: 'ready' }), { mode: 0o600 })
-      return waitUntil(() => !existsSync(path), timeout)
+    bounds,
+    /** Signal readiness once, then learn whether to show this window or close it. */
+    markReady: async (timeout: number): Promise<WorkspaceHandoffDecision | null> => {
+      writeOnce(readyPath(path), 'ready')
+      const decision = await waitUntil(() => readWorkspaceHandoffDecision(path), timeout)
+      removeHandoff(path)
+      return decision
     }
   }
 }

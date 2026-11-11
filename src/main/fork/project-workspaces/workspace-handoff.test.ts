@@ -5,81 +5,63 @@ import { afterEach, expect, it } from 'vitest'
 import {
   acceptWorkspaceHandoff,
   createWorkspaceHandoff,
+  decisionPath,
   WORKSPACE_HANDOFF_ENV
 } from './workspace-handoff'
 
 const roots: string[] = []
+function temporary(): string {
+  const root = mkdtempSync(join(tmpdir(), 'bastion-handoff-'))
+  roots.push(root)
+  return root
+}
 afterEach(() => {
   for (const root of roots.splice(0)) {
     rmSync(root, { recursive: true, force: true })
   }
 })
+const bounds = { x: 10, y: 20, width: 1300, height: 700, maximized: false }
 
-it('keeps the leaving window until the arriving one is painted, then hands over its bounds', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'bastion-handoff-'))
-  roots.push(root)
-  const bounds = { x: 10, y: 20, width: 1300, height: 700, maximized: false }
+it('keeps the destination hidden until the loaded arrival is released, then hands over bounds', async () => {
+  const root = temporary()
   const leaving = createWorkspaceHandoff(root, bounds)
   const env: NodeJS.ProcessEnv = { [WORKSPACE_HANDOFF_ENV]: leaving.path }
   const arriving = acceptWorkspaceHandoff(root, env)
   expect(env[WORKSPACE_HANDOFF_ENV]).toBeUndefined()
   expect(arriving?.bounds).toEqual(bounds)
-
-  let ready = false
-  const waiting = leaving.waitUntilReady(2000).then((value) => (ready = value))
-  await new Promise((resolve) => setTimeout(resolve, 150))
-  expect(ready).toBe(false)
-  const released = arriving?.markReady(2000)
-  await waiting
-  expect(ready).toBe(true)
-  leaving.release()
-  expect(await released).toBe(true)
+  expect(await leaving.waitUntilReady(100)).toBe(false)
+  const decision = arriving?.markReady(2000)
+  expect(await leaving.waitUntilReady(2000)).toBe(true)
+  expect(leaving.release()).toBe('released')
+  expect(await decision).toBe('released')
   expect(existsSync(leaving.path)).toBe(false)
 })
 
-it('ignores a handoff outside the catalog or one that was already used', () => {
-  const root = mkdtempSync(join(tmpdir(), 'bastion-handoff-'))
-  roots.push(root)
-  const foreign = join(root, 'elsewhere.json')
-  writeFileSync(foreign, JSON.stringify({ x: 0, y: 0, width: 900, height: 600, maximized: false }))
-  expect(acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: foreign })).toBeNull()
-  const stale = createWorkspaceHandoff(root, {
-    x: 0,
-    y: 0,
-    width: 900,
-    height: 600,
-    maximized: true
-  })
-  stale.release()
-  rmSync(stale.path, { force: true })
-  expect(acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: stale.path })).toBeNull()
-})
-
-it('gives up waiting instead of leaving the user without a window', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'bastion-handoff-'))
-  roots.push(root)
-  const leaving = createWorkspaceHandoff(root, {
-    x: 0,
-    y: 0,
-    width: 900,
-    height: 600,
-    maximized: false
-  })
-  expect(await leaving.waitUntilReady(200)).toBe(false)
-})
-
-it('rejects a late arrival after its source cancelled the handoff', async () => {
-  const root = mkdtempSync(join(tmpdir(), 'bastion-handoff-'))
-  roots.push(root)
-  const leaving = createWorkspaceHandoff(root, {
-    x: 0,
-    y: 0,
-    width: 900,
-    height: 600,
-    maximized: false
-  })
+it('tells a late arrival to quit after its source cancelled, even when readiness races the decision', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
   const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
-  leaving.release()
-  expect(await arriving?.markReady(200)).toBe(false)
-  expect(existsSync(leaving.path)).toBe(false)
+  expect(await leaving.waitUntilReady(50)).toBe(false)
+  expect(leaving.cancel()).toBe('cancelled')
+  // A release attempted after the decision cannot overturn it.
+  expect(leaving.release()).toBe('cancelled')
+  expect(await arriving?.markReady(2000)).toBe('cancelled')
+})
+
+it('ignores a foreign or already decided handoff', () => {
+  const root = temporary()
+  const foreign = join(root, 'elsewhere.json')
+  writeFileSync(foreign, JSON.stringify({ bounds }))
+  expect(acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: foreign })).toBeNull()
+  const decided = createWorkspaceHandoff(root, bounds)
+  decided.cancel()
+  expect(existsSync(decisionPath(decided.path))).toBe(true)
+  expect(acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: decided.path })).toBeNull()
+})
+
+it('reports no decision when its source vanished instead of waiting forever', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
+  const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
+  expect(await arriving?.markReady(150)).toBeNull()
 })

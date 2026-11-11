@@ -1,3 +1,4 @@
+import { APPIMAGE_EXTRACT_FLAG } from './appimage-extract-guard'
 import { WorkspaceCatalog } from './workspace-catalog'
 import {
   isProjectWorkspaceLaunchTarget,
@@ -88,7 +89,9 @@ export function projectWorkspaceRelaunchArgs(argv: readonly string[], id: string
     throw new Error('Invalid project workspace ID.')
   }
   return [
-    ...argv.filter((arg) => !arg.startsWith(PROJECT_WORKSPACE_SWITCH)),
+    ...argv.filter(
+      (arg) => !arg.startsWith(PROJECT_WORKSPACE_SWITCH) && !arg.startsWith(APPIMAGE_EXTRACT_FLAG)
+    ),
     `${PROJECT_WORKSPACE_SWITCH}${id}`
   ]
 }

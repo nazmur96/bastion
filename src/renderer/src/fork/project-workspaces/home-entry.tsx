@@ -17,6 +17,7 @@ import {
   readCachedPluginAppTheme
 } from '../../lib/document-theme'
 import { i18n, loadRendererUiLanguage } from '../../i18n/i18n'
+import { dispatchWindowCloseRequest } from '../../components/window-close-request-coordinator'
 
 export async function renderApplicationHome(): Promise<void> {
   const settings = await window.api.settings.get()
@@ -26,6 +27,8 @@ export async function renderApplicationHome(): Promise<void> {
     applyCachedPluginAppTheme(cached)
   }
   await i18n.changeLanguage(await loadRendererUiLanguage(settings.uiLanguage ?? 'system'))
+  // Home skips the workbench, so it must answer close and quit itself or the window cannot close.
+  window.api.ui.onWindowCloseRequested(dispatchWindowCloseRequest)
   const root = document.getElementById('root')
   if (!root) {
     throw new Error('Application home root is unavailable.')

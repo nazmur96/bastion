@@ -1,4 +1,5 @@
 import { app, type BrowserWindow, type Event } from 'electron'
+import { isWorkspaceRevealHeld } from '../fork/project-workspaces/workspace-arrival'
 import type { Store } from '../persistence'
 import { uiZoomFactorFromLevel } from '../../shared/ui-zoom-level'
 import { isWindowlessLaunch, showWindowWithoutStealingFocus } from './foreground-activation-policy'
@@ -60,6 +61,10 @@ export function installMainWindowStateLifecycle(args: {
 
     // Keep headless E2E off screen; Playwright uses CDP.
     if (isWindowlessLaunch()) {
+      return
+    }
+    // Fork: a workspace destination appears only after its source window steps aside.
+    if (isWorkspaceRevealHeld()) {
       return
     }
     if (savedMaximized) {

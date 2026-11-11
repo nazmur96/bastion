@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process'
 import { announceDevInstance } from './dev-instance-isolation.mjs'
 import { resolveDevWorkspacePorts } from './bastion-dev-workspace-ports.mjs'
 import { randomUUID } from 'node:crypto'
-import { readFileSync, rmSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 
 /** One runner owns this request path; catalog selection remains the startup authority. */
@@ -43,7 +43,53 @@ export async function devWorkspaceForwardedArgs(forwardedRaw, repoRoot, profile)
     profile
   })
   announceDevInstance({ repoRoot, profile, ...ports })
-  return ['dev', '--rendererOnly', ...forwardedRaw, ...ports.forwardedExtras]
+  // Reuse built main/preload only while they are newer than every source they are built from.
+  const mode = devMainBuildIsCurrent(repoRoot) ? ['--rendererOnly'] : []
+  return ['dev', ...mode, ...forwardedRaw, ...ports.forwardedExtras]
+}
+
+function newestMtime(directory) {
+  let newest = 0
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name)
+    if (entry.isDirectory()) {
+      newest = Math.max(newest, newestMtime(path))
+    } else if (entry.isFile()) {
+      newest = Math.max(newest, statSync(path).mtimeMs)
+    }
+  }
+  return newest
+}
+
+export function devMainBuildIsCurrent(repoRoot) {
+  const outputs = ['out/main/index.js', 'out/preload/index.js'].map((file) => join(repoRoot, file))
+  if (!outputs.every((file) => existsSync(file))) {
+    return false
+  }
+  const built = Math.min(...outputs.map((file) => statSync(file).mtimeMs))
+  return ['src/main', 'src/preload', 'src/shared'].every(
+    (directory) => newestMtime(join(repoRoot, directory)) <= built
+  )
+}
+
+/** Stop a destination whose source gave up, so the runner can accept the next switch. */
+export function watchDevWorkspaceDecision(handoff, onCancelled) {
+  const file = handoff.replace(/\.json$/, '.decision')
+  const timer = setInterval(() => {
+    let decision = null
+    try {
+      decision = readFileSync(file, 'utf8')
+    } catch {
+      // Removed by a destination that already read it, or not decided yet.
+    }
+    if (decision === 'cancelled') {
+      clearInterval(timer)
+      onCancelled()
+    } else if (decision === 'released' || !existsSync(handoff)) {
+      clearInterval(timer)
+    }
+  }, 100)
+  timer.unref()
 }
 
 export function spawnDevWorkspaceChild(executable, args, env, onError, onExit) {
@@ -139,6 +185,14 @@ export function devWorkspaceSignalExitCode(signal) {
     return 143
   }
   return 1
+}
+
+export function shutdownDevWorkspaceChildren(child, previousChild, signal) {
+  terminateDevWorkspaceChild(child, signal)
+  if (previousChild) {
+    terminateDevWorkspaceChild(previousChild, signal)
+  }
+  return setTimeout(() => terminateDevWorkspaceChild(child, 'SIGKILL'), 5000)
 }
 
 export function failDevWorkspaceChild(error, forcedKillTimer) {
