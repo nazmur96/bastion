@@ -3,7 +3,8 @@ import { Plus, Sparkles, SquareTerminal } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { WorkbenchAgentMenu } from '../workbench/WorkbenchAgentMenu'
-import { newWorkbenchTerminal, workbenchGroupId } from '../workbench/workbench-terminals'
+import { showWorkbenchTerminals, workbenchGroupId } from '../workbench/workbench-terminals'
+import { readWorkbenchFocus } from '../workbench/workbench-focus'
 import { setInfraView } from '../devops/infra-home-store'
 import { openWorkspacePage } from './workspace-desktop-state'
 
@@ -35,7 +36,10 @@ export function WorkspaceQuickActions(): React.JSX.Element {
             return addWorkspaceProject()
           }
           showWorkspaceEditor()
-          newWorkbenchTerminal(id)
+          // Orca opens a first terminal with the project; show it instead of adding a duplicate.
+          if (readWorkbenchFocus(id) !== 'terminal') {
+            showWorkbenchTerminals(id)
+          }
         }}
       >
         <SquareTerminal className="size-3" aria-hidden />

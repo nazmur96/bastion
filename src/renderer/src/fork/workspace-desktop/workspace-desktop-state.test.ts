@@ -36,8 +36,9 @@ it('opening home leaves the existing panel selection and layout untouched', () =
   expect(mocks.toggle).not.toHaveBeenCalled()
   expect(mocks.infra).not.toHaveBeenCalled()
 })
-it('editor navigation dismisses an old infrastructure overlay and selects files', () => {
+it('editor navigation dismisses an old infrastructure overlay and keeps the chosen side section', () => {
   openWorkspacePage('editor')
   expect(mocks.infra).toHaveBeenCalledWith('alpha', null)
-  expect(mocks.section).toHaveBeenCalledWith('alpha', 'files')
+  // Returning to the editor must not replace a Terminal, Changes or Browser choice with Files.
+  expect(mocks.section).not.toHaveBeenCalled()
 })

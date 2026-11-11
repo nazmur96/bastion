@@ -1,4 +1,4 @@
-import { FileSearch, Sparkles } from 'lucide-react'
+import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { setInfraView } from '../devops/infra-home-store'
@@ -36,9 +36,6 @@ export function WorkspacePages(): React.JSX.Element | null {
   }
   if (page === 'discovery') {
     return id ? <WorkspaceDiscovery key={id} worktreeId={id} /> : <ProjectRequired />
-  }
-  if (page === 'agents') {
-    return <WorkspaceAgents />
   }
   const title = workspaceNavigation().find((item) => item.id === page)?.label
   return (
@@ -200,65 +197,6 @@ function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.E
           </button>
         </div>
       </section>
-    </div>
-  )
-}
-function WorkspaceAgents(): React.JSX.Element {
-  const tabs = useAppStore((s) => s.unifiedTabsByWorktree)
-  const sessions = Object.entries(tabs).flatMap(([worktreeId, items]) =>
-    items.filter((tab) => tab.contentType === 'agent-session').map((tab) => ({ tab, worktreeId }))
-  )
-  return (
-    <div className="workspace-page scrollbar-sleek">
-      <div className="workspace-eyebrow">
-        {translate('workspaceDesktop.agents', 'Agent dashboard')}
-      </div>
-      <header className="workspace-page-heading">
-        <div>
-          <h1>{translate('workspaceDesktop.workspaceAgents', 'Your workspace agents.')}</h1>
-          <p>
-            {translate(
-              'workspaceDesktop.agentsCopy',
-              'Open sessions from this workspace. Choose the agent that fits your task.'
-            )}
-          </p>
-        </div>
-        <WorkspaceQuickActions />
-      </header>
-      {sessions.length ? (
-        <section className="workspace-card">
-          {sessions.map(({ tab, worktreeId }) => (
-            <button
-              type="button"
-              key={`${worktreeId}:${tab.id}`}
-              className="workspace-repo"
-              onClick={() => {
-                useAppStore.getState().activateTab(tab.id, { worktreeId })
-                showWorkspaceEditor()
-              }}
-            >
-              <Sparkles className="size-4" aria-hidden />
-              <span>
-                {tab.customLabel ||
-                  tab.label ||
-                  translate('workspaceDesktop.agentSession', 'Agent session')}
-              </span>
-            </button>
-          ))}
-        </section>
-      ) : (
-        <section className="workspace-card workspace-empty">
-          <Sparkles className="size-6" aria-hidden />
-          <h2>{translate('workspaceDesktop.startTask', 'Start a task. Choose your agent.')}</h2>
-          <p>
-            {translate(
-              'workspaceDesktop.noAgents',
-              'No agent sessions are open in this workspace yet.'
-            )}
-          </p>
-          <WorkspaceQuickActions />
-        </section>
-      )}
     </div>
   )
 }

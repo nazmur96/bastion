@@ -4,9 +4,9 @@ import { quitProcess } from '../../startup/process-quit-request'
 import { acceptWorkspaceHandoff, type WorkspaceWindowBounds } from './workspace-handoff'
 import { readProjectWorkspaceContext } from './workspace-context'
 
-const DECISION_TIMEOUT_MS = 35_000
-// The source gives up at 30s; never leave a destination with no window if its source vanished.
-const ORPHAN_REVEAL_MS = 45_000
+// The source decides within its own maximum wait; never strand a destination without a window.
+const DECISION_TIMEOUT_MS = 30_000
+const ORPHAN_REVEAL_MS = 200_000
 
 let holdingReveal = false
 
@@ -45,6 +45,7 @@ export function registerProjectWorkspaceArrival(): void {
     return
   }
   holdingReveal = true
+  arrival.startHeartbeat()
   let target: BrowserWindow | null = null
   // A hidden destination must still hydrate at full speed.
   app.on('browser-window-created', (_event, window) => {

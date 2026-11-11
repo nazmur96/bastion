@@ -118,3 +118,18 @@ Home/discovery use main-group covers and hide that group's retained surfaces wit
 Cloud, recipes, delivery and observability navigation leads to honest capability pages and the existing infrastructure/settings tools. This appearance pass does not implement the prototype's simulated cloud inventory, shared delivery engine or verification timeline. No cloud resource, real repository or agent inference was used.
 
 Validation: renderer typecheck and 33 focused tests passed. CDP checks with two disposable Git repositories covered Home/editor navigation, source-control selection, stack discovery, Files/Browser selection, right-panel maximize/restore and collapse/restore, terminal launch/restore, selectable-agent picker without launching, native drag regions and a laptop viewport without document overflow. Screenshots and results: application checkout .handoff/workspace-desktop-1111/. Existing side-chat implementation was preserved; live conversations were not launched. Linux desktop UI was exercised; macOS/Windows and remote execution were not end-to-end tested in this appearance pass. No push.
+
+## Workspace navigation follow-up (2026-11-11)
+
+Fixes after an independent review of the prototype workspace navigation:
+
+- Leave and other switches no longer fail when a destination starts slowly. A starting destination sends a heartbeat; the source cancels only if no life appears within 30 seconds or the heartbeat goes stale, with a three-minute ceiling.
+- The Terminal action shows the project's existing terminal (Orca opens one with the project) instead of creating a duplicate.
+- Workspace pages render only in the active project's main workbench, not in the terminal dock or hidden projects.
+- Returning to Editor & files keeps the chosen right-panel section.
+- Compact sidebar navigation leaves room for repositories at laptop heights.
+- The project desktop bar again shows where kubectl and aws commands land, the billed-infrastructure cost meter and frame, the Project path toggle and the command deck. Orca's strip returns while a pane is expanded or the Agents view is open.
+- Agent dashboard opens Orca's Agents view, which includes agents running in terminals; Home counts those too.
+- A static loading screen appears before the renderer's code loads.
+
+Validated in the dev app on a disposable profile: one terminal after Terminal on a fresh project, one visible Home page, preserved Terminal section, four repositories visible at 1366×722, restored context bar, Agents view with its back control, and Leave to Home through the heartbeat. Remaining: dev switching still takes about 10–14 seconds under memory pressure, and Windows/macOS are untested.

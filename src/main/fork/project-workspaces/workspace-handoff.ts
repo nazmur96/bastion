@@ -36,6 +36,11 @@ function directory(root: string): string {
 
 // Each party writes its own file exactly once, so a late arrival can never contradict a decision.
 const readyPath = (path: string): string => path.replace(/\.json$/, '.ready')
+// A starting destination refreshes this so a slow but live start is not mistaken for a failure.
+const alivePath = (path: string): string => path.replace(/\.json$/, '.alive')
+const HEARTBEAT_MS = 2_000
+export const HANDOFF_STALE_MS = 15_000
+export const HANDOFF_MAX_WAIT_MS = 180_000
 export const decisionPath = (path: string): string => path.replace(/\.json$/, '.decision')
 
 function writeOnce(path: string, contents: string): boolean {
@@ -105,7 +110,7 @@ async function waitUntil<T>(check: () => T | null, timeout: number): Promise<T |
 }
 
 function removeHandoff(path: string): void {
-  for (const file of [path, readyPath(path), decisionPath(path)]) {
+  for (const file of [path, readyPath(path), decisionPath(path), alivePath(path)]) {
     rmSync(file, { force: true })
   }
 }
@@ -140,9 +145,34 @@ export function createWorkspaceHandoff(root: string, bounds: WorkspaceWindowBoun
   }
   return {
     path,
-    /** True once the destination has loaded; it stays hidden until release(). */
-    waitUntilReady: async (timeout: number): Promise<boolean> =>
-      (await waitUntil(() => (existsSync(readyPath(path)) ? true : null), timeout)) === true,
+    /**
+     * True once the destination has loaded; it stays hidden until release(). A destination must
+     * show life within startTimeout, then keep its heartbeat fresh until ready or maxWait.
+     */
+    waitUntilReady: async (
+      startTimeout: number,
+      maxWait = HANDOFF_MAX_WAIT_MS,
+      staleAfter = HANDOFF_STALE_MS
+    ): Promise<boolean> => {
+      const startedAt = Date.now()
+      const outcome = await waitUntil(() => {
+        if (existsSync(readyPath(path))) {
+          return true
+        }
+        const now = Date.now()
+        let alive: number | null = null
+        try {
+          alive = statSync(alivePath(path)).mtimeMs
+        } catch {
+          alive = null
+        }
+        if (alive === null) {
+          return now - startedAt > startTimeout ? false : null
+        }
+        return now - alive > staleAfter || now - startedAt > maxWait ? false : null
+      }, maxWait)
+      return outcome === true
+    },
     release: (): WorkspaceHandoffDecision => decide('released'),
     cancel: (): WorkspaceHandoffDecision => decide('cancelled')
   }
@@ -170,12 +200,33 @@ export function acceptWorkspaceHandoff(root: string, env: NodeJS.ProcessEnv = pr
   if (!bounds) {
     return null
   }
+  let heartbeat: ReturnType<typeof setInterval> | null = null
+  const stopHeartbeat = (): void => {
+    if (heartbeat) {
+      clearInterval(heartbeat)
+      heartbeat = null
+    }
+  }
   return {
     bounds,
+    /** Tell the waiting source this destination is alive while it starts. */
+    startHeartbeat: (): void => {
+      const beat = (): void => {
+        if (readWorkspaceHandoffDecision(path) !== null || !existsSync(path)) {
+          stopHeartbeat()
+          return
+        }
+        writeFileSync(alivePath(path), String(Date.now()), { mode: 0o600 })
+      }
+      beat()
+      heartbeat ??= setInterval(beat, HEARTBEAT_MS)
+      heartbeat.unref?.()
+    },
     /** Signal readiness once, then learn whether to show this window or close it. */
     markReady: async (timeout: number): Promise<WorkspaceHandoffDecision | null> => {
       writeOnce(readyPath(path), 'ready')
       const decision = await waitUntil(() => readWorkspaceHandoffDecision(path), timeout)
+      stopHeartbeat()
       removeHandoff(path)
       return decision
     }

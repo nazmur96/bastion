@@ -23,7 +23,10 @@ export function WorkspaceHomePage(): React.JSX.Element {
   const name = snapshot?.workspaces.find((entry) => entry.id === snapshot.activeId)?.name ?? ''
   const allTabs = Object.values(tabs).flat()
   const terminalCount = allTabs.filter((tab) => tab.contentType === 'terminal').length
-  const agentCount = allTabs.filter((tab) => tab.contentType === 'agent-session').length
+  // Chats are tabs; agents started in a terminal are tracked by their pane's live status.
+  const terminalAgents = useAppStore((s) => Object.keys(s.agentStatusByPaneKey).length)
+  const agentCount =
+    allTabs.filter((tab) => tab.contentType === 'agent-session').length + terminalAgents
   return (
     <div className="workspace-page scrollbar-sleek" data-workspace-home="">
       <div className="workspace-eyebrow">

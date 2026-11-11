@@ -32,9 +32,6 @@ export function openWorkspacePage(next: WorkspacePage): void {
       toggleSidePanel(id)
     }
   }
-  if (id && next === 'editor') {
-    setSideSection(id, 'files')
-  }
   page = next
   useAppStore.getState().setActiveView('terminal')
   for (const listener of listeners) {

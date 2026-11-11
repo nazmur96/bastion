@@ -65,3 +65,25 @@ it('reports no decision when its source vanished instead of waiting forever', as
   const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
   expect(await arriving?.markReady(150)).toBeNull()
 })
+
+it('keeps waiting for a slow destination while its heartbeat stays fresh', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
+  const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
+  arriving?.startHeartbeat()
+  // Past the 100ms start limit, yet alive: the source must not give up.
+  const waiting = leaving.waitUntilReady(100, 3000, 1000)
+  await new Promise((resolve) => setTimeout(resolve, 400))
+  const decision = arriving?.markReady(2000)
+  expect(await waiting).toBe(true)
+  leaving.release()
+  expect(await decision).toBe('released')
+})
+
+it('gives up quickly on a destination that never shows life', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
+  const startedAt = Date.now()
+  expect(await leaving.waitUntilReady(150, 5000, 1000)).toBe(false)
+  expect(Date.now() - startedAt).toBeLessThan(1000)
+})

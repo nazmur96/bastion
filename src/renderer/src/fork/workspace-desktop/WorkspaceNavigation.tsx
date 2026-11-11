@@ -48,8 +48,17 @@ export function WorkspaceNavigation(): React.JSX.Element {
                   type="button"
                   key={id}
                   className="workspace-nav-item"
-                  aria-current={page === id && view === 'terminal' ? 'page' : undefined}
-                  onClick={() => openWorkspacePage(id)}
+                  aria-current={
+                    (id === 'agents' ? view === 'activity' : page === id && view === 'terminal')
+                      ? 'page'
+                      : undefined
+                  }
+                  onClick={() =>
+                    // Orca's Agents view already covers chats and agents running in terminals.
+                    id === 'agents'
+                      ? useAppStore.getState().openActivityPage()
+                      : openWorkspacePage(id)
+                  }
                 >
                   <Icon aria-hidden className="size-4" />
                   <span>{label}</span>

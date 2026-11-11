@@ -18,9 +18,16 @@ export function InfraHomeOverlay({
   groupId: string
 }): React.JSX.Element | null {
   const page = useWorkspacePage()
-  const desktopPage = isProjectDesktopWindow() && page !== 'editor' && page !== 'source'
   const view = useInfraView(worktreeId)
   const isWorkbench = useAppStore(() => workbenchGroupId(worktreeId) === groupId)
+  const isActiveWorktree = useAppStore((state) => state.activeWorktreeId === worktreeId)
+  // Only the active project's main workbench shows a workspace page; its terminal dock keeps its terminals.
+  const desktopPage =
+    isWorkbench &&
+    isActiveWorktree &&
+    isProjectDesktopWindow() &&
+    page !== 'editor' &&
+    page !== 'source'
   const activeTabId = useAppStore(
     (state) =>
       state.groupsByWorktree[worktreeId]?.find((group) => group.id === groupId)?.activeTabId

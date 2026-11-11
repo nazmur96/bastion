@@ -8,6 +8,7 @@ import logo from '../../../../../resources/icon-source/bastion.svg'
 import { useProjectWorkspaces } from '../project-workspaces/use-project-workspaces'
 import { StartEnvironmentPicker } from '../workbench/StartEnvironmentPicker'
 import { WorkspaceQuickActions } from './WorkspaceQuickActions'
+import { WorkspaceInfraContext } from '../devops/WorkspaceInfraBar'
 import { openWorkspacePage, useWorkspacePage } from './workspace-desktop-state'
 import { workspaceNavigation } from './workspace-navigation'
 
@@ -72,10 +73,14 @@ export function WorkspaceDesktopBar(): React.JSX.Element {
             <span>{translate('workspaceDesktop.noProject', 'Choose a project')}</span>
           )}
           <span className="workspace-context-divider" />
-          <button type="button" onClick={() => openWorkspacePage('cloud')}>
-            {translate('workspaceDesktop.cloudTarget', 'Cloud target')}
-            <span>↗</span>
-          </button>
+          {id ? (
+            <WorkspaceInfraContext key={id} worktreeId={id} />
+          ) : (
+            <button type="button" onClick={() => openWorkspacePage('cloud')}>
+              {translate('workspaceDesktop.cloudTarget', 'Cloud target')}
+              <span>↗</span>
+            </button>
+          )}
         </div>
       </div>
       <div className="workspace-surface-bar">

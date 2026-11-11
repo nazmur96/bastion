@@ -192,6 +192,11 @@ export function AppWorkspaceShell(props: {
                   <div className="titlebar">{titlebarMainStrip}</div>
                 ) : null}
                 {isProjectDesktopWindow() && <WorkspaceDesktopBar />}
+                {/* Collapse-pane and activity controls still need Orca's strip when they apply. */}
+                {isProjectDesktopWindow() &&
+                (layout.showTitlebarExpandButton || layout.activeView === 'activity') ? (
+                  <div className="titlebar">{titlebarMainStrip}</div>
+                ) : null}
                 <div className="relative flex flex-1 min-w-0 min-h-0 overflow-hidden">
                   {layout.terminalWorkbenchVisible ? <WorkspacePathColumn /> : null}
                   {/* Match the open sidebar header’s alignment to prevent toggle jitter. */}
