@@ -66,3 +66,9 @@ Desktop entry resolves its pinned owner before loading the renderer. Home loads 
 One development startup trace reached Home window visibility in 2,440 ms versus 5,032 ms in the earlier trace. End-to-end Leave measurements varied from 5,944 to 8,839 ms under load; opening a workspace still measured 9,333 ms in a direct API measurement. Do not describe the eight-second switching delay as solved. An earlier screenshot-based measurement was distorted by occluded-window capture waits.
 
 Web typecheck and the changed-code quality gate passed. Generated CLI output was rebuilt to include schema-v2 support. Packaged startup performance remains unmeasured.
+
+## Stable development origins and populated isolation — November 11
+
+The populated proof found that warm development navigation picked whichever renderer port was free. Because localStorage is origin-scoped, revisiting a namespace at a different port missed its saved layout data. The dev runner now saves a renderer port per workspace and Home under the owning profile. A busy saved port refuses the launch rather than silently changing origin. A focused test covers namespace separation, reuse across new runner instances and collision refusal without overwriting the registry.
+
+Two disposable workspaces each contained separate app/infra Git repos, a shell, a Markdown file tab, a browser tab, distinct font settings, localStorage markers and persistent test cookies. The fresh second workspace had no first-workspace repos, storage or cookie. After the origin fix, revisiting Retail restored only its two repos, file/browser/terminal session records, font 15 and Retail storage/cookie; Platform independently retained font 17 and its own records. No real repos, credentials or paid agents were used. Evidence is private under `.handoff/foundation-2026-11-11/`. These checks do not prove every agent provider, task scheduler, remote host or OS sandbox boundary.

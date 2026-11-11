@@ -1,4 +1,5 @@
 // Fork: project workspace switches reopen the development server and Electron together.
+import { resolveDevWorkspacePorts } from './bastion-dev-workspace-ports.mjs'
 import {
   failDevWorkspaceChild,
   devWorkspaceSignalExitCode,
@@ -38,7 +39,6 @@ import { startDevStorageReclaim } from './dev-storage-reclaim.mjs'
 import {
   announceDevInstance,
   dropInheritedDevInstanceEnv,
-  resolveDevInstancePorts,
   resolveDevProfile,
   writeWorktreeProfileMarker
 } from './dev-instance-isolation.mjs'
@@ -572,9 +572,10 @@ if (!isHelpOrVersion && process.env.ORCA_BACKGROUND_LAUNCH === '1') {
 }
 let forwardedExtras = []
 if (!isHelpOrVersion) {
-  const ports = await resolveDevInstancePorts({
+  const ports = await resolveDevWorkspacePorts({
     forwardedArgs: forwardedRaw,
-    instanceKey: process.env.ORCA_DEV_INSTANCE_KEY || repoRoot
+    repoRoot,
+    profile: devProfile
   })
   forwardedExtras = ports.forwardedExtras
   announceDevInstance({ repoRoot, profile: devProfile, ...ports })

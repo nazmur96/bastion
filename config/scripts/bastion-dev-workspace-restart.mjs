@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
-import { resolveDevInstancePorts, announceDevInstance } from './dev-instance-isolation.mjs'
+import { announceDevInstance } from './dev-instance-isolation.mjs'
+import { resolveDevWorkspacePorts } from './bastion-dev-workspace-ports.mjs'
 import { randomUUID } from 'node:crypto'
 import { readFileSync, rmSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
@@ -36,9 +37,10 @@ export function consumeDevWorkspaceRestart(env) {
 }
 
 export async function devWorkspaceForwardedArgs(forwardedRaw, repoRoot, profile) {
-  const ports = await resolveDevInstancePorts({
+  const ports = await resolveDevWorkspacePorts({
     forwardedArgs: forwardedRaw,
-    instanceKey: process.env.ORCA_DEV_INSTANCE_KEY || repoRoot
+    repoRoot,
+    profile
   })
   announceDevInstance({ repoRoot, profile, ...ports })
   return ['dev', '--rendererOnly', ...forwardedRaw, ...ports.forwardedExtras]
