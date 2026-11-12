@@ -16525,7 +16525,8 @@
           "folderEmpty": "Folder path cannot be empty",
           "folderOutsideWorkspace": "Folder must be inside the current workspace",
           "nameTaken": "A file with that name already exists",
-          "saveFailed": "Failed to save file"
+          "saveFailed": "Failed to save file",
+          "nameFile": "Name your file and pick a folder."
         },
         "export": {
           "active": {
@@ -24005,6 +24006,7 @@
     "factChanged": "Changed since inspection",
     "reviewRefresh": "Source changed since this snapshot. Refresh discovery before relying on the review.",
     "reviewPartial": "This snapshot is partial (see Inspection scope and limits), so the saved review cannot be confirmed current.",
-    "copyFingerprint": "Copy fingerprint"
+    "copyFingerprint": "Copy fingerprint",
+    "moreLocations": "+{{count}} more locations"
   }
 }

@@ -10,12 +10,11 @@ import { UNRESOLVED_OWNER_HOST_ID } from '../../../../shared/execution-host'
 import {
   CONTRACT_FILE,
   discoveryFingerprint,
-  discoverySourceWanted,
   parseServiceContract,
-  sourceFacts,
   type DiscoverySnapshot,
   type ServiceContract
 } from './service-knowledge'
+import { discoverySourceWanted, groupDiscoveryFacts, sourceFacts } from './discovery-source-facts'
 
 export type ProjectDiscovery = {
   snapshot: DiscoverySnapshot
@@ -152,7 +151,8 @@ export async function readProjectDiscovery(worktreeId: string): Promise<ProjectD
     }
   }
   guard.assertCurrent()
-  if (facts.length > 300) {
+  const grouped = groupDiscoveryFacts(facts)
+  if (grouped.length > 300) {
     limits.push('Findings display reached its 300-fact limit.')
   }
   return {
@@ -162,7 +162,7 @@ export async function readProjectDiscovery(worktreeId: string): Promise<ProjectD
       hostId,
       fingerprint: discoveryFingerprint(versions),
       findings: stacks.findings,
-      facts: facts.slice(0, 300),
+      facts: grouped.slice(0, 300),
       limits
     },
     contract,

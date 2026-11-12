@@ -200,3 +200,14 @@ An independent crosscheck of b2243d7358 confirmed the owner routing and contract
 - A contract reviewed against older source shows the current snapshot fingerprint with a Copy action; the engineer re-reviews and updates `sourceFingerprint` in the normal editor, which remains the only writer. Partial snapshots say the review cannot be confirmed current. An invalid contract keeps an Edit contract action.
 
 Live proof on a disposable dev profile (workspace 5): no status change after 36 s plus a focus event; commented EXPOSE and variables ignored, both declared ports reported; a Dockerfile edit marked only the four Dockerfile-backed findings; the copied fingerprint made the review current with contract bytes unchanged across refresh; malformed JSON showed its error with Edit contract. Checks: 22 focused tests across four files and the renderer typecheck. The changed-code gate reports only the five pre-existing `SidebarHeader.tsx` design-system findings. Remote (Docker SSH) discovery, watcher reconnection, editor-UI renaming and packaged platforms were not re-run for these fixes. No push.
+
+## Milestone 6 follow-up proofs — November 12
+
+Live dev proofs after e46d8a0e8e, on a disposable profile (workspace 5):
+
+- Remote Docker SSH (managed server): a remote-only service repository produced port, start, probe, secret-reference and qualified dependency evidence. Planted values in `compose.yaml` and `k8s/db-secret.yaml` appeared nowhere in the rendered page; `db-secret.yaml` was not content-inspected.
+- Remote freshness: a remote edit was marked within seconds; dropping the host showed "Change notifications are unavailable"; a refresh while the host was down kept the previous snapshot with "could not be refreshed"; after the host returned and the target reconnected, refresh became current and a later remote edit was marked again.
+- Editor workflow: saving the draft through Orca's Save as dialog produced `bastion.service.json.md`, because the untitled-file dialog always appended `.md`. The dialog now keeps the untitled file's own extension (Markdown unchanged). Afterwards the full UI flow passed: create draft, edit with find/replace, Ctrl+S, name `bastion.service`, Discovery reads the answer as current, Edit contract reopens it.
+- Podinfo (upstream fd3a834): 66 findings, no inspection limits. CI pipeline variables (for example `GITHUB_SHA`) were listed as service configuration and each repeated declaration was its own card; pipelines no longer yield configuration references, and repeated statements collapse into one fact with up to 20 source links plus a count.
+
+Checks: 32 focused tests across six files and the renderer typecheck. Not proved here: macOS, Windows and packaged builds. No push.

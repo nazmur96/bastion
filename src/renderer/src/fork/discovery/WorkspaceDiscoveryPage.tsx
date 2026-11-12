@@ -159,7 +159,7 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
                     {translate('discovery.factChanged', 'Changed since inspection')}
                   </p>
                 )}
-                {fact.evidence.map((evidence) => {
+                {fact.evidence.slice(0, 6).map((evidence) => {
                   const label =
                     evidence.line === null ? evidence.path : `${evidence.path}:${evidence.line}`
                   return (
@@ -175,6 +175,13 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
                     </button>
                   )
                 })}
+                {fact.evidence.length + (fact.omitted ?? 0) > 6 && (
+                  <p className="text-xs text-muted-foreground">
+                    {translate('discovery.moreLocations', '+{{count}} more locations', {
+                      count: fact.evidence.length + (fact.omitted ?? 0) - 6
+                    })}
+                  </p>
+                )}
               </section>
             ))}
           </div>

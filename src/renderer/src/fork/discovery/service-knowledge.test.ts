@@ -1,12 +1,11 @@
 import { expect, it } from 'vitest'
 import {
   discoveryFingerprint,
-  discoverySourceWanted,
   draftServiceContract,
   parseServiceContract,
-  sourceFacts,
   type DiscoverySnapshot
 } from './service-knowledge'
+import { discoverySourceWanted, groupDiscoveryFacts, sourceFacts } from './discovery-source-facts'
 
 it('keeps evidence and reference names without copying secret or startup values', () => {
   const text =
@@ -104,4 +103,23 @@ it('points the start-script evidence at its declaration line', () => {
     'f'
   )
   expect(facts[0].evidence[0].line).toBe(3)
+})
+
+it('does not treat pipeline variables as service configuration', () => {
+  expect(
+    sourceFacts(
+      '.github/workflows/release.yml',
+      'run: echo ${GITHUB_SHA} ${PODINFO_VERSION}\n',
+      'f'
+    )
+  ).toEqual([])
+})
+it('collapses repeated statements into one fact with bounded evidence', () => {
+  const facts = Array.from({ length: 25 }, (_, index) =>
+    sourceFacts(`svc${index}/compose.yaml`, 'env: ${PODINFO_SVC}\n', 'f')
+  ).flat()
+  const grouped = groupDiscoveryFacts(facts)
+  expect(grouped).toHaveLength(1)
+  expect(grouped[0].evidence).toHaveLength(20)
+  expect(grouped[0].omitted).toBe(5)
 })
