@@ -3,16 +3,11 @@ import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { setInfraView } from '../devops/infra-home-store'
-import { useDevopsInspection } from '../devops/use-devops-inspection'
-import { useRuntimeDevopsStacks } from '../devops/use-runtime-devops-stacks'
+import { WorkspaceDiscoveryPage } from '../discovery/WorkspaceDiscoveryPage'
 import { WorkspaceHomePage } from './WorkspaceHomePage'
 import { workspaceNavigation } from './workspace-navigation'
 import { useWorkspacePage } from './workspace-desktop-state'
-import {
-  addWorkspaceProject,
-  showWorkspaceEditor,
-  WorkspaceQuickActions
-} from './WorkspaceQuickActions'
+import { addWorkspaceProject, showWorkspaceEditor } from './WorkspaceQuickActions'
 
 function openInfrastructure(): void {
   const id = useAppStore.getState().activeWorktreeId
@@ -40,7 +35,7 @@ export function WorkspacePages(): React.JSX.Element | null {
     return <WorkspaceHomePage />
   }
   if (page === 'discovery') {
-    return id ? <WorkspaceDiscovery key={id} worktreeId={id} /> : <ProjectRequired />
+    return id ? <WorkspaceDiscoveryPage key={id} worktreeId={id} /> : <ProjectRequired />
   }
   const title = workspaceNavigation().find((item) => item.id === page)?.label
   return (
@@ -115,89 +110,6 @@ function ProjectRequired(): React.JSX.Element {
         <button type="button" className="workspace-button" onClick={addWorkspaceProject}>
           {translate('workspaceDesktop.addProject', 'Add project')}
         </button>
-      </section>
-    </div>
-  )
-}
-function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.Element {
-  const inspection = useDevopsInspection(worktreeId)
-  const remote = useRuntimeDevopsStacks(worktreeId)
-  const host = remote.hostId
-  const remoteData = remote.result && 'data' in remote.result ? remote.result.data : null
-  const findings = host === 'local' ? inspection?.findings : remoteData?.findings
-  const pending = host === 'local' ? !inspection : remote.result === null
-  const error = remote.result && 'error' in remote.result ? remote.result.error : null
-  return (
-    <div className="workspace-page scrollbar-sleek">
-      {host !== 'local' && (
-        <p role="status">
-          {translate(
-            'workspaceEnvironments.remoteInspection',
-            'Stacks are read through this project’s owner. Tool availability, cloud and cluster checks are not available on this runtime.'
-          )}
-        </p>
-      )}
-      <div className="workspace-eyebrow">
-        {translate('workspaceDesktop.discovery', 'Project discovery')}
-      </div>
-      <header className="workspace-page-heading">
-        <div>
-          <h1>
-            {translate('workspaceDesktop.projectNeeds', 'Understand what this project needs.')}
-          </h1>
-          <p>
-            {translate(
-              'workspaceDesktop.discoveryCopy',
-              'Detected stacks and their source folders. Review the source before choosing infrastructure or running commands.'
-            )}
-          </p>
-        </div>
-        <WorkspaceQuickActions />
-      </header>
-      <div className="workspace-home-grid">
-        {findings?.map((finding) => (
-          <section className="workspace-card" key={finding.stack}>
-            <h3>{finding.stack}</h3>
-            {finding.dirs.map((dir) => (
-              <p className="font-mono break-all" key={dir}>
-                {dir || '.'}
-              </p>
-            ))}
-          </section>
-        ))}
-      </div>
-      {error ? (
-        <section className="workspace-card">
-          <p role="alert">{error}</p>
-        </section>
-      ) : pending || findings?.length === 0 ? (
-        <section className="workspace-card">
-          <p>
-            {!pending
-              ? translate(
-                  'workspaceDesktop.noStacks',
-                  'No supported infrastructure stacks detected in the selected project.'
-                )
-              : translate('workspaceDesktop.inspecting', 'Reading project requirements…')}
-          </p>
-        </section>
-      ) : null}
-      <section className="workspace-card mt-5">
-        <h3>{translate('workspaceDesktop.nextDecision', 'Choose your next step')}</h3>
-        <p>
-          {translate(
-            'workspaceDesktop.discoveryNext',
-            'Inspect the files, ask your chosen agent, or open the infrastructure toolbelt. Discovery does not create resources.'
-          )}
-        </p>
-        <div className="workspace-card-actions">
-          <button type="button" className="workspace-button" onClick={showWorkspaceEditor}>
-            {translate('workspaceDesktop.openEditor', 'Open editor')}
-          </button>
-          <button type="button" className="workspace-button" onClick={openInfrastructure}>
-            {translate('workspaceDesktop.infrastructureTools', 'Open infrastructure tools')}
-          </button>
-        </div>
       </section>
     </div>
   )

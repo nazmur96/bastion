@@ -23975,5 +23975,26 @@
     "recipeFilesReady": "DevPod recipe files prepared. Review them before launching an environment.",
     "hideConfigured": "Hide other configured hosts",
     "showConfigured": "Show other configured hosts"
+  },
+  "discovery": {
+    "scope": "Source evidence, reviewed service knowledge and the questions code cannot answer.",
+    "evidence": "Source evidence",
+    "refresh": "Refresh discovery",
+    "stale": "Needs refresh: source or connection may have changed.",
+    "inspected": "Inspected snapshot; live health is unknown.",
+    "observed": "Observed in source",
+    "inferred": "Inferred · needs confirmation",
+    "noEvidence": "No supported source evidence found. Operational requirements remain unknown.",
+    "contract": "Reviewed service contract",
+    "editContract": "Edit contract",
+    "draft": "Create contract draft",
+    "contractScope": "Answers are repository-owned human statements, not verified deployment facts. Edit the JSON draft, rename it to bastion.service.json, then return and refresh. Existing contracts are never regenerated or overwritten. Record references, never secret values.",
+    "reviewStale": "Source review needs refreshing. Saved answers are preserved; re-review them against current evidence.",
+    "reviewCurrent": "Saved answers refer to this source snapshot. Operational verification remains separate.",
+    "human": "Human-provided · operational verification separate",
+    "unknown": "Unknown · needs a human answer",
+    "limits": "Inspection scope and limits",
+    "less": "Show less evidence",
+    "more": "Show all evidence"
   }
 }

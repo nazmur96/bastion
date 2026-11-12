@@ -2580,6 +2580,9 @@
   "workspaceDesktop": {
     "agentSession": "Agent session",
     "agentsCopy": "Open sessions from this workspace. Choose the agent that fits your task.",
+    "discoveryCopy": "Detected stacks and their source folders. Review the source before choosing infrastructure or running commands.",
+    "discoveryNext": "Inspect the files, ask your chosen agent, or open the infrastructure toolbelt. Discovery does not create resources.",
+    "nextDecision": "Choose your next step",
     "noAgents": "No agent sessions are open in this workspace yet.",
     "runtimeDescription": "Use the execution picker for an existing runtime, or configure a remote host in Settings.",
     "runtimeTitle": "Choose where you work.",
@@ -2587,7 +2590,8 @@
     "workspaceAgents": "Your workspace agents."
   },
   "workspaceEnvironments": {
-    "recipePrepared": "DevPod recipe files prepared. Review them in Source control."
+    "recipePrepared": "DevPod recipe files prepared. Review them in Source control.",
+    "remoteInspection": "Stacks are read through this project’s owner. Tool availability, cloud and cluster checks are not available on this runtime."
   },
   "workspaceSpace": {
     "compact": {
