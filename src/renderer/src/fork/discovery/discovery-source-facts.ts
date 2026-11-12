@@ -1,13 +1,17 @@
 import type { DiscoveryFact } from './service-knowledge'
 
+export function isDiscoverySensitivePath(path: string): boolean {
+  return /(^|[\\/])\.env[^/\\]*$|\.tfvars(?:\.json)?$|\.enc\.[^/]+$|secret|credential|kubeconfig|htpasswd/i.test(
+    path
+  )
+}
+
 export function discoverySourceWanted(path: string): boolean {
   if (/(^|\/)(node_modules|vendor|dist|build|\.git|\.terraform|\.venv)\//.test(path)) {
     return false
   }
   // Anywhere in the path: Kubernetes Secret manifests and kubeconfigs are rarely named secret.yaml.
-  if (
-    /(^|\/)\.env[^/]*$|\.tfvars$|\.enc\.[^/]+$|secret|credential|kubeconfig|htpasswd/i.test(path)
-  ) {
+  if (isDiscoverySensitivePath(path)) {
     return false
   }
   return /(^|\/)(Dockerfile(?:\.[^/]+)?|Containerfile|package\.json|pyproject\.toml|go\.mod|Cargo\.toml|Procfile|(?:docker-)?compose[^/]*\.ya?ml|Chart\.yaml|[^/]+\.tf|[^/]+\.ya?ml)$/.test(

@@ -24008,5 +24008,26 @@
     "reviewPartial": "This snapshot is partial (see Inspection scope and limits), so the saved review cannot be confirmed current.",
     "copyFingerprint": "Copy fingerprint",
     "moreLocations": "+{{count}} more locations"
+  },
+  "assistance": {
+    "copyFailed": "Could not copy the draft.",
+    "refused": "Context or chat owner changed. Prepare a new draft.",
+    "trigger": "Review file context",
+    "unknown": "CLI availability unverified on this owner.",
+    "available": "CLI found by the last owner-scoped inspection.",
+    "missing": "CLI not found by the last owner-scoped inspection.",
+    "scope": "Source context and editor diagnostics only. No language-server, deployment or failed-run verification is implied.",
+    "stale": "Project context is missing, changed or incomplete. Review discovery before preparing a draft.",
+    "environment": "Review environment",
+    "discovery": "Review discovery",
+    "prepare": "Prepare an unsent draft",
+    "draftStale": "Draft context changed. Prepare a new draft before handing it off.",
+    "preview": "Unsent assistance draft",
+    "destination": "Draft destination",
+    "copyDestination": "Copy for any agent",
+    "routing": "Existing workspace chats accept unsent composer drafts. Other agents use copy-only handoff. No agent is launched and no message is submitted. Source, selection, diagnostic text and secret values are omitted.",
+    "copy": "Copy reviewed draft",
+    "append": "Append to unsent composer",
+    "editorOnly": "Editor diagnostics only; runtime capability is unverified."
   }
 }

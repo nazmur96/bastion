@@ -30,6 +30,7 @@ export type EditorContextMarker = {
 
 /** The live state of the last-focused code editor in a worktree. */
 export type EditorContextEntry = {
+  modelVersion?: number
   ownerId: string
   file: string
   language: string

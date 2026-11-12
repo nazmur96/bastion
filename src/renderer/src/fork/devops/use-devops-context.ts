@@ -16,7 +16,11 @@ export function useDevopsContext(
     (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
   )
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
-  const [result, setResult] = useState<{ path: string; context: DevopsContext } | null>(null)
+  const [result, setResult] = useState<{
+    path: string
+    terraformDir: string | null
+    context: DevopsContext
+  } | null>(null)
   useEffect(() => {
     if (!path || !local) {
       return
@@ -27,7 +31,7 @@ export function useDevopsContext(
         .readDevopsContext({ workspacePath: path, terraformDir })
         .then((next) => {
           if (current) {
-            setResult({ path, context: next })
+            setResult({ path, terraformDir, context: next })
           }
         })
     }
@@ -40,5 +44,7 @@ export function useDevopsContext(
       window.removeEventListener('focus', load)
     }
   }, [path, local, terraformDir, refreshKey])
-  return local && result && result.path === path ? result.context : {}
+  return local && result && result.path === path && result.terraformDir === terraformDir
+    ? result.context
+    : {}
 }

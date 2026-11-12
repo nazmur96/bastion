@@ -1,3 +1,4 @@
+import type { DevopsInspection } from '../../../../shared/fork-devops-inspection'
 import { joinPath } from '@/lib/path'
 import { listRuntimeFiles } from '@/runtime/runtime-file-search-client'
 import { readRuntimeDirectory } from '@/runtime/runtime-file-mutation-client'
@@ -17,6 +18,7 @@ import {
 import { discoverySourceWanted, groupDiscoveryFacts, sourceFacts } from './discovery-source-facts'
 
 export type ProjectDiscovery = {
+  inspection?: DevopsInspection | null
   snapshot: DiscoverySnapshot
   contract: ServiceContract | null
   contractError: string | null
@@ -33,10 +35,8 @@ export async function readProjectDiscovery(worktreeId: string): Promise<ProjectD
   if (hostId !== 'local' && context.target.kind !== 'environment') {
     throw new Error('Discovery requires a managed runtime for this remote host.')
   }
-  const stacks =
-    hostId === 'local'
-      ? await window.api.aiVault.inspectDevops(root)
-      : await readRuntimeDevopsStacks(worktreeId)
+  const inspection = hostId === 'local' ? await window.api.aiVault.inspectDevops(root) : null
+  const stacks = inspection ?? (await readRuntimeDevopsStacks(worktreeId))
   guard.assertCurrent()
   const files = (
     await listRuntimeFiles(context, {
@@ -156,6 +156,7 @@ export async function readProjectDiscovery(worktreeId: string): Promise<ProjectD
     limits.push('Findings display reached its 300-fact limit.')
   }
   return {
+    inspection,
     snapshot: {
       at: new Date().toISOString(),
       root,

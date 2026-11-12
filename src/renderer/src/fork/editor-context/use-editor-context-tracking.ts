@@ -1,7 +1,12 @@
+import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useEffect } from 'react'
 import * as monaco from 'monaco-editor'
 import type { editor } from 'monaco-editor'
-import { freezeEditorContextEntry, setEditorContextEntry } from './editor-context-store'
+import {
+  freezeEditorContextEntry,
+  setEditorContextEntry,
+  readEditorContextEntry
+} from './editor-context-store'
 import { installAddSelectionToChatShortcut } from './editor-context-add-selection'
 import { installInlineEditShortcut } from '../inline-edit/inline-edit-shortcut'
 import { installClaudeSuggestShortcut } from '../inline-edit/claude-suggest'
@@ -25,6 +30,9 @@ export function useEditorContextTracking({
   language: string
   enabled: boolean
 }): void {
+  const localScanOwner = useAppStore(
+    (state) => !!worktreeId && getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
+  )
   useEffect(() => {
     if (!codeEditor || !worktreeId || !enabled) {
       return
@@ -37,6 +45,7 @@ export function useEditorContextTracking({
       }
       setEditorContextEntry(worktreeId, {
         ownerId: codeEditor.getId(),
+        modelVersion: model.getVersionId(),
         file: relativePath,
         language,
         cursorLine: selection.positionLineNumber,
@@ -52,7 +61,25 @@ export function useEditorContextTracking({
       })
     }
     const subscriptions = [
+      monaco.editor.onDidChangeMarkers((uris) => {
+        const model = codeEditor.getModel()
+        if (
+          model &&
+          uris.some((uri) => uri.toString() === model.uri.toString()) &&
+          readEditorContextEntry(worktreeId)?.ownerId === codeEditor.getId()
+        ) {
+          publish()
+        }
+      }),
       codeEditor.onDidFocusEditorText(publish),
+      codeEditor.onDidChangeModelContent(() => {
+        if (
+          codeEditor.hasTextFocus() ||
+          readEditorContextEntry(worktreeId)?.ownerId === codeEditor.getId()
+        ) {
+          publish()
+        }
+      }),
       codeEditor.onDidChangeCursorSelection(() => {
         if (codeEditor.hasTextFocus()) {
           publish()
@@ -79,7 +106,8 @@ export function useEditorContextTracking({
     const removeGutter = installClaudeEditGutter(codeEditor, worktreeId, relativePath)
     const removeSecretMask = installSecretMask(codeEditor)
     const repo = selectKnownWorktreeById(useAppStore.getState(), worktreeId)?.path
-    const removeScanMarkers = repo ? installScanMarkers(codeEditor, repo, relativePath) : () => {}
+    const removeScanMarkers =
+      localScanOwner && repo ? installScanMarkers(codeEditor, repo, relativePath) : () => {}
     return () => {
       for (const subscription of subscriptions) {
         subscription.dispose()
@@ -92,5 +120,5 @@ export function useEditorContextTracking({
       removeScanMarkers()
       freezeEditorContextEntry(worktreeId, codeEditor.getId())
     }
-  }, [codeEditor, worktreeId, relativePath, language, enabled])
+  }, [codeEditor, worktreeId, relativePath, language, enabled, localScanOwner])
 }
