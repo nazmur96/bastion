@@ -100,6 +100,7 @@ export function registerDevopsDay2Handlers(): void {
       cancelSteps(runId)
     }
   })
+  // The writer re-checks the Dev Container, tool-owner and symlink rules; renderer checks are advisory.
   ipcMain.handle('aiVault:addDevpodRecipe', (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath)
       ? addDevpodRecipe(workspacePath)
