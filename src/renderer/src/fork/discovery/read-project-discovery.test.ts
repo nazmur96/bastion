@@ -87,3 +87,12 @@ it('does not read through source symlinks', async () => {
   expect(result.snapshot.limits).toContain('Not inspected: Dockerfile')
   expect(m.read).not.toHaveBeenCalled()
 })
+
+it('links stack findings to whole files rather than an invented line', async () => {
+  m.stacks.mockResolvedValue({
+    findings: [{ stack: 'containers', evidence: ['Dockerfile'], dirs: ['.'] }]
+  })
+  const result = await readProjectDiscovery('wt')
+  const stack = result.snapshot.facts.find((fact) => fact.id === 'stack:containers')
+  expect(stack?.evidence[0].line).toBeNull()
+})

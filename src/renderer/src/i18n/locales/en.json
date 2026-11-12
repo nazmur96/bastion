@@ -23980,7 +23980,6 @@
     "scope": "Source evidence, reviewed service knowledge and the questions code cannot answer.",
     "evidence": "Source evidence",
     "refresh": "Refresh discovery",
-    "stale": "Needs refresh: source or connection may have changed.",
     "inspected": "Inspected snapshot; live health is unknown.",
     "observed": "Observed in source",
     "inferred": "Inferred · needs confirmation",
@@ -23989,12 +23988,23 @@
     "editContract": "Edit contract",
     "draft": "Create contract draft",
     "contractScope": "Answers are repository-owned human statements, not verified deployment facts. Edit the JSON draft, rename it to bastion.service.json, then return and refresh. Existing contracts are never regenerated or overwritten. Record references, never secret values.",
-    "reviewStale": "Source review needs refreshing. Saved answers are preserved; re-review them against current evidence.",
+    "reviewStale": "Source changed since these answers were reviewed. Saved answers are preserved. After re-reviewing them, set sourceFingerprint to this snapshot in the editor:",
     "reviewCurrent": "Saved answers refer to this source snapshot. Operational verification remains separate.",
     "human": "Human-provided · operational verification separate",
     "unknown": "Unknown · needs a human answer",
     "limits": "Inspection scope and limits",
     "less": "Show less evidence",
-    "more": "Show all evidence"
+    "more": "Show all evidence",
+    "refreshFailed": "Discovery could not be refreshed; showing the previous snapshot.",
+    "readFailed": "Discovery could not read this project.",
+    "watchUnavailable": "Change notifications are unavailable for this project. Refresh to check for changes.",
+    "filesChanged": "{{count}} file(s) changed since this snapshot. Affected evidence is marked; refresh discovery.",
+    "projectChanged": "Project files changed since this snapshot. Refresh discovery.",
+    "fingerprintCopied": "Snapshot fingerprint copied.",
+    "copyFailed": "Could not copy the fingerprint.",
+    "factChanged": "Changed since inspection",
+    "reviewRefresh": "Source changed since this snapshot. Refresh discovery before relying on the review.",
+    "reviewPartial": "This snapshot is partial (see Inspection scope and limits), so the saved review cannot be confirmed current.",
+    "copyFingerprint": "Copy fingerprint"
   }
 }

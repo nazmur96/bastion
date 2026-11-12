@@ -18,11 +18,53 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
       id.startsWith('stack:') ? 0 : id.includes(':configuration:') ? 2 : 1
     return rank(a.id) - rank(b.id)
   })
-  const stale =
-    state?.stale ||
-    (data?.snapshot.limits.length ?? 0) > 1 ||
-    data?.contract?.sourceFingerprint !== data?.snapshot.fingerprint
-  const openSource = (path: string, line = 1): void => {
+  const partial = (data?.snapshot.limits.length ?? 0) > 1
+  const reviewMismatch =
+    !!data?.contract && data.contract.sourceFingerprint !== data.snapshot.fingerprint
+  const changedPaths = new Set(state?.changedPaths ?? [])
+  // Without notifications a draft is still safe: its fingerprint is checked on every refresh.
+  const draftBlocked =
+    !data || !state || state.pending || !!state.error || (state.stale && !state.watchFailed)
+  const statusText = (): string => {
+    if (!state || state.pending) {
+      return translate('workspaceDesktop.inspecting', 'Reading project requirements…')
+    }
+    if (state.error) {
+      return data
+        ? translate(
+            'discovery.refreshFailed',
+            'Discovery could not be refreshed; showing the previous snapshot.'
+          )
+        : translate('discovery.readFailed', 'Discovery could not read this project.')
+    }
+    if (state.watchFailed) {
+      return translate(
+        'discovery.watchUnavailable',
+        'Change notifications are unavailable for this project. Refresh to check for changes.'
+      )
+    }
+    if (state.stale && state.changedPaths && state.changedPaths.length > 0) {
+      return translate(
+        'discovery.filesChanged',
+        '{{count}} file(s) changed since this snapshot. Affected evidence is marked; refresh discovery.',
+        { count: state.changedPaths.length }
+      )
+    }
+    if (state.stale) {
+      return translate(
+        'discovery.projectChanged',
+        'Project files changed since this snapshot. Refresh discovery.'
+      )
+    }
+    return translate('discovery.inspected', 'Inspected snapshot; live health is unknown.')
+  }
+  const copyFingerprint = (fingerprint: string): void => {
+    void window.api.ui.writeClipboardText(fingerprint).then(
+      () => toast.success(translate('discovery.fingerprintCopied', 'Snapshot fingerprint copied.')),
+      () => toast.error(translate('discovery.copyFailed', 'Could not copy the fingerprint.'))
+    )
+  }
+  const openSource = (path: string, line: number | null = null): void => {
     try {
       const { root, guard } = captureProjectFileRoute(worktreeId)
       guard.assertCurrent()
@@ -36,7 +78,7 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
         throw new Error('Project path changed. Refresh discovery.')
       }
       showWorkspaceEditor()
-      openWorkspaceFile(worktreeId, path, line)
+      openWorkspaceFile(worktreeId, path, line ?? 1)
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error))
     }
@@ -71,16 +113,7 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
             {translate('discovery.refresh', 'Refresh discovery')}
           </button>
         </div>
-        <p role="status">
-          {!state || state.pending
-            ? translate('workspaceDesktop.inspecting', 'Reading project requirements…')
-            : state?.stale
-              ? translate(
-                  'discovery.stale',
-                  'Needs refresh: source or connection may have changed.'
-                )
-              : translate('discovery.inspected', 'Inspected snapshot; live health is unknown.')}
-        </p>
+        <p role="status">{statusText()}</p>
         {data && (
           <p className="break-all font-mono text-xs">
             {data.snapshot.root} · {new Date(data.snapshot.at).toLocaleString(getIntlLocale())}
@@ -121,18 +154,27 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
                     : translate('discovery.inferred', 'Inferred · needs confirmation')}
                 </div>
                 <p>{fact.summary}</p>
-                {fact.evidence.map((evidence) => (
-                  <button
-                    className="workspace-button max-w-full min-w-0 font-mono"
-                    type="button"
-                    key={`${evidence.path}:${evidence.line}`}
-                    onClick={() => openSource(evidence.path, evidence.line)}
-                  >
-                    <span className="truncate" title={`${evidence.path}:${evidence.line}`}>
-                      {evidence.path}:{evidence.line}
-                    </span>
-                  </button>
-                ))}
+                {fact.evidence.some((evidence) => changedPaths.has(evidence.path)) && (
+                  <p className="text-xs text-muted-foreground">
+                    {translate('discovery.factChanged', 'Changed since inspection')}
+                  </p>
+                )}
+                {fact.evidence.map((evidence) => {
+                  const label =
+                    evidence.line === null ? evidence.path : `${evidence.path}:${evidence.line}`
+                  return (
+                    <button
+                      className="workspace-button max-w-full min-w-0 font-mono"
+                      type="button"
+                      key={label}
+                      onClick={() => openSource(evidence.path, evidence.line)}
+                    >
+                      <span className="truncate" title={label}>
+                        {label}
+                      </span>
+                    </button>
+                  )
+                })}
               </section>
             ))}
           </div>
@@ -164,7 +206,7 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
         <section className="workspace-card mt-5">
           <div className="workspace-card-title">
             <h2>{translate('discovery.contract', 'Reviewed service contract')}</h2>
-            {data?.contract ? (
+            {data?.contract || data?.contractError ? (
               <button
                 type="button"
                 className="workspace-button"
@@ -176,7 +218,7 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
               <button
                 type="button"
                 className="workspace-button"
-                disabled={!data || state?.stale || state.pending || !!data.contractError}
+                disabled={draftBlocked}
                 onClick={() => {
                   if (!data) {
                     return
@@ -208,17 +250,49 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
             </p>
           )}
           {data?.contract && (
-            <p role="status">
-              {stale
-                ? translate(
-                    'discovery.reviewStale',
-                    'Source review needs refreshing. Saved answers are preserved; re-review them against current evidence.'
-                  )
-                : translate(
+            <div role="status">
+              {state?.stale ? (
+                <p>
+                  {translate(
+                    'discovery.reviewRefresh',
+                    'Source changed since this snapshot. Refresh discovery before relying on the review.'
+                  )}
+                </p>
+              ) : partial ? (
+                <p>
+                  {translate(
+                    'discovery.reviewPartial',
+                    'This snapshot is partial (see Inspection scope and limits), so the saved review cannot be confirmed current.'
+                  )}
+                </p>
+              ) : reviewMismatch ? (
+                <>
+                  <p>
+                    {translate(
+                      'discovery.reviewStale',
+                      'Source changed since these answers were reviewed. Saved answers are preserved. After re-reviewing them, set sourceFingerprint to this snapshot in the editor:'
+                    )}
+                  </p>
+                  <div className="workspace-card-actions">
+                    <code className="break-all font-mono text-xs">{data.snapshot.fingerprint}</code>
+                    <button
+                      type="button"
+                      className="workspace-button"
+                      onClick={() => copyFingerprint(data.snapshot.fingerprint)}
+                    >
+                      {translate('discovery.copyFingerprint', 'Copy fingerprint')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <p>
+                  {translate(
                     'discovery.reviewCurrent',
                     'Saved answers refer to this source snapshot. Operational verification remains separate.'
                   )}
-            </p>
+                </p>
+              )}
+            </div>
           )}
           {SERVICE_QUESTIONS.map((question) => {
             const answer = data?.contract?.answers[question.id]

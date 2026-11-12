@@ -2,8 +2,13 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 const m = vi.hoisted(() => {
-  const callbacks: { onChange?: (event: { worktreePath: string; connectionId?: string }) => void } =
-    {}
+  const callbacks: {
+    onChange?: (event: {
+      worktreePath: string
+      connectionId?: string
+      events: { kind: string; absolutePath: string }[]
+    }) => void
+  } = {}
   return { host: 'local', read: vi.fn(), watch: vi.fn(), stop: vi.fn(), callbacks }
 })
 vi.mock('@/store', () => ({
@@ -22,7 +27,7 @@ vi.mock('../environments/workspace-environment-files', () => ({
 }))
 vi.mock('@/runtime/runtime-file-watch-client', () => ({ subscribeRuntimeFileChanges: m.watch }))
 vi.mock('./read-project-discovery', () => ({ readProjectDiscovery: m.read }))
-import { useProjectDiscovery } from './use-project-discovery'
+import { changedProjectPaths, useProjectDiscovery } from './use-project-discovery'
 beforeEach(() => {
   vi.clearAllMocks()
   m.host = 'local'
@@ -36,9 +41,9 @@ afterEach(cleanup)
 it('invalidates source changes but keeps the evidence until explicit refresh', async () => {
   const view = renderHook(() => useProjectDiscovery('wt'))
   await waitFor(() => expect(view.result.current.state?.pending).toBe(false))
-  act(() => m.callbacks.onChange?.({ worktreePath: '/other' }))
+  act(() => m.callbacks.onChange?.({ worktreePath: '/other', events: [] }))
   expect(view.result.current.state?.stale).toBe(false)
-  act(() => m.callbacks.onChange?.({ worktreePath: '/repo' }))
+  act(() => m.callbacks.onChange?.({ worktreePath: '/repo', events: [] }))
   expect(view.result.current.state?.stale).toBe(true)
   expect(view.result.current.state?.data?.snapshot.fingerprint).toBe('first')
   m.read.mockResolvedValue({ snapshot: { fingerprint: 'changed' } })
@@ -67,4 +72,58 @@ it('keeps freshness uncertain when the owning file watcher cannot start', async 
   await waitFor(() => expect(view.result.current.state?.pending).toBe(false))
   expect(view.result.current.state?.stale).toBe(true)
   expect(view.result.current.state?.data?.snapshot.fingerprint).toBe('first')
+})
+
+it('marks only the changed files and ignores Git bookkeeping', async () => {
+  const view = renderHook(() => useProjectDiscovery('paths'))
+  await waitFor(() => expect(view.result.current.state?.pending).toBe(false))
+  act(() =>
+    m.callbacks.onChange?.({
+      worktreePath: '/repo',
+      events: [{ kind: 'update', absolutePath: '/repo/.git/index' }]
+    })
+  )
+  expect(view.result.current.state?.stale).toBe(false)
+  act(() =>
+    m.callbacks.onChange?.({
+      worktreePath: '/repo',
+      events: [{ kind: 'update', absolutePath: '/repo/Dockerfile' }]
+    })
+  )
+  expect(view.result.current.state?.stale).toBe(true)
+  expect(view.result.current.state?.changedPaths).toEqual(['Dockerfile'])
+})
+
+it('does not report a change on focus or after time passes without one', async () => {
+  vi.useFakeTimers({ shouldAdvanceTime: true })
+  try {
+    const view = renderHook(() => useProjectDiscovery('quiet'))
+    await waitFor(() => expect(view.result.current.state?.pending).toBe(false))
+    act(() => {
+      window.dispatchEvent(new Event('focus'))
+      vi.advanceTimersByTime(120_000)
+    })
+    expect(view.result.current.state?.stale).toBe(false)
+  } finally {
+    vi.useRealTimers()
+  }
+})
+
+it('treats overflow and resync as an unknown change', () => {
+  expect(
+    changedProjectPaths(
+      { worktreePath: '/r', events: [{ kind: 'overflow', absolutePath: '/r' }] },
+      '/r'
+    )
+  ).toBeNull()
+  expect(changedProjectPaths({ worktreePath: '/r', events: [], resync: true }, '/r')).toBeNull()
+  expect(
+    changedProjectPaths(
+      {
+        worktreePath: '/r',
+        events: [{ kind: 'rename', absolutePath: '/r/b.yaml', oldAbsolutePath: '/r/a.yaml' }]
+      },
+      '/r/'
+    )
+  ).toEqual(['b.yaml', 'a.yaml'])
 })

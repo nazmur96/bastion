@@ -136,7 +136,7 @@ export async function readProjectDiscovery(worktreeId: string): Promise<ProjectD
       summary: `Repository contains ${finding.stack} configuration; deployment is unverified.`,
       evidence: finding.evidence.map((path) => ({
         path,
-        line: 1,
+        line: null,
         fingerprint: versions.find(([name]) => name === path)?.[1] ?? 'path-only'
       }))
     })

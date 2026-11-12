@@ -26,7 +26,10 @@ it('excludes secret-value files and vendored source from content inspection', ()
     'secrets/db.yaml',
     'credentials.json',
     'node_modules/lib/package.json',
-    'secret.enc.yaml'
+    'secret.enc.yaml',
+    'k8s/db-secret.yaml',
+    'deploy/app-secrets.yml',
+    'kubeconfig.yaml'
   ]) {
     expect(discoverySourceWanted(path), path).toBe(false)
   }
@@ -78,4 +81,27 @@ it('rejects unsupported/malformed contracts without rewriting them', () => {
   ]) {
     expect(() => parseServiceContract(value)).toThrow()
   }
+})
+
+it('applies container rules only to container files and ignores comments', () => {
+  const summaries = (path: string, text: string) =>
+    sourceFacts(path, text, 'f').map((fact) => fact.summary)
+  expect(
+    summaries('docs/values.yaml', 'description: |\n  from the start\n  expose 9999\n')
+  ).toEqual([])
+  expect(
+    summaries('compose.yaml', '# example: ${DATABASE_URL}\nservices: {} # ${REDIS_URL}\n')
+  ).toEqual([])
+  expect(summaries('Dockerfile', 'from alpine\nRUN echo ${HOME}\nEXPOSE 8080/tcp 9090\n')).toEqual([
+    'Container base image is declared; inspect its source.',
+    'Container declares ports 8080, 9090. Public exposure is unknown.'
+  ])
+})
+it('points the start-script evidence at its declaration line', () => {
+  const facts = sourceFacts(
+    'package.json',
+    '{\n  "scripts": {\n    "start": "node x"\n  }\n}\n',
+    'f'
+  )
+  expect(facts[0].evidence[0].line).toBe(3)
 })
