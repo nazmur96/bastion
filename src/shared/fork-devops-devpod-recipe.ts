@@ -30,19 +30,22 @@ export const DEVPOD_RECIPE_SCRIPTS: Record<string, string> = {
   'devpod-create.sh': script([
     ...ID,
     '# DevPod output goes to stderr: stdout carries only the JSON result Orca reads.',
-    'devpod up "${ORCA_REPO_URL:-$ORCA_REPO_PATH}" --id "$id" --ide none ${ORCA_REPO_BRANCH:+--branch "$ORCA_REPO_BRANCH"} >&2',
+    'devpod up "${ORCA_REPO_URL:-$ORCA_REPO_PATH}" --id "$id" --provider docker --ide none ${ORCA_REPO_BRANCH:+--branch "$ORCA_REPO_BRANCH"} >&2',
     ...PRINT_RESULT
   ]),
   'devpod-suspend.sh': script([...ID, 'devpod stop "$id" >&2']),
-  'devpod-resume.sh': script([...ID, 'devpod up "$id" --ide none >&2', ...PRINT_RESULT]),
+  'devpod-resume.sh': script([
+    ...ID,
+    'devpod up "$id" --provider docker --ide none >&2',
+    ...PRINT_RESULT
+  ]),
   'devpod-destroy.sh': script([...ID, 'devpod delete "$id" --force >&2'])
 }
 
 export const DEVPOD_RECIPE = {
   id: 'devpod',
   name: 'DevPod dev container',
-  description:
-    "This repo's devcontainer.json on your DevPod provider (Docker, Podman, SSH, cloud).",
+  description: "This repo's devcontainer.json on DevPod's local Docker provider.",
   create: `sh ./${DEVPOD_RECIPE_DIR}/devpod-create.sh`,
   suspend: `sh ./${DEVPOD_RECIPE_DIR}/devpod-suspend.sh`,
   resume: `sh ./${DEVPOD_RECIPE_DIR}/devpod-resume.sh`,

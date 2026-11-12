@@ -1,3 +1,4 @@
+import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { useBastionLayout } from '../workbench/use-bastion-layout'
@@ -16,7 +17,10 @@ export function WorkspacePathColumn(): React.JSX.Element | null {
   ) : null
 }
 
-function PathColumn({ worktreeId }: { worktreeId: string }): React.JSX.Element {
+function PathColumn({ worktreeId }: { worktreeId: string }): React.JSX.Element | null {
   useBastionLayout(worktreeId)
-  return <InfraHome worktreeId={worktreeId} />
+  const local = useAppStore(
+    (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
+  )
+  return local ? <InfraHome worktreeId={worktreeId} /> : null
 }

@@ -105,7 +105,10 @@ describe('start page environment switching', () => {
   })
   it('routes SSH connection through the existing host chooser without changing to local', async () => {
     await selectStartEnvironment('ssh:demo')
-    expect(mocks.openModal).toHaveBeenCalledWith('add-repo', { preferredHostId: 'ssh:demo' })
+    expect(mocks.openModal).toHaveBeenCalledWith('add-repo', {
+      initialStep: 'server-path',
+      preferredHostId: 'ssh:demo'
+    })
     expect(mocks.switchRuntime).not.toHaveBeenCalled()
     expect(mocks.activate).not.toHaveBeenCalled()
   })
@@ -114,4 +117,17 @@ describe('start page environment switching', () => {
     expect(mocks.switchRuntime).toHaveBeenCalledWith(null)
     expect(mocks.activate).toHaveBeenCalledWith('local-worktree', { executionHostId: 'local' })
   })
+})
+
+it('opens an already attached SSH project without changing the local runtime preference', async () => {
+  mocks.state.repos.push({ id: 'ssh-repo', executionHostId: 'ssh:demo' })
+  mocks.state.worktreesByRepo.remote.push({ id: 'ssh-worktree', repoId: 'ssh-repo' })
+  await selectStartEnvironment('ssh:demo')
+  expect(mocks.activate).toHaveBeenCalledWith('ssh-worktree', { executionHostId: 'ssh:demo' })
+  expect(mocks.switchRuntime).not.toHaveBeenCalled()
+  expect(mocks.openModal).not.toHaveBeenCalled()
+})
+
+it('does not invent a local owner for a missing project', () => {
+  expect(startWorkspaceHost('removed-worktree')).toBe('runtime:unresolved-owner')
 })

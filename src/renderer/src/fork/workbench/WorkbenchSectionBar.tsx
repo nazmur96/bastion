@@ -1,3 +1,4 @@
+import { FileCapabilitiesButton } from '../environments/FileCapabilitiesButton'
 import { toggleWorkbenchFocus, useWorkbenchFocus } from './workbench-focus'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
@@ -157,6 +158,7 @@ export function WorkbenchSectionBar({
   if (!view) {
     return (
       <>
+        <FileCapabilitiesButton worktreeId={worktreeId} groupId={groupId} />
         <WorkbenchFocusButton worktreeId={worktreeId} target="workbench" />
         {restorePath}
         {restore}
@@ -166,6 +168,7 @@ export function WorkbenchSectionBar({
   // The view the Project path opened reads as the open tab, ahead of chat and files.
   return (
     <>
+      <FileCapabilitiesButton worktreeId={worktreeId} groupId={groupId} />
       <WorkbenchFocusButton worktreeId={worktreeId} target="workbench" />
       {restorePath}
       {restore}

@@ -1,3 +1,4 @@
+import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
@@ -11,10 +12,13 @@ export function useDevopsContext(
   terraformDir: string | null,
   refreshKey: string
 ): DevopsContext {
+  const local = useAppStore(
+    (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
+  )
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
-  const [context, setContext] = useState<DevopsContext>({})
+  const [result, setResult] = useState<{ path: string; context: DevopsContext } | null>(null)
   useEffect(() => {
-    if (!path) {
+    if (!path || !local) {
       return
     }
     let current = true
@@ -23,7 +27,7 @@ export function useDevopsContext(
         .readDevopsContext({ workspacePath: path, terraformDir })
         .then((next) => {
           if (current) {
-            setContext(next)
+            setResult({ path, context: next })
           }
         })
     }
@@ -35,6 +39,6 @@ export function useDevopsContext(
       window.clearInterval(timer)
       window.removeEventListener('focus', load)
     }
-  }, [path, terraformDir, refreshKey])
-  return context
+  }, [path, local, terraformDir, refreshKey])
+  return local && result && result.path === path ? result.context : {}
 }

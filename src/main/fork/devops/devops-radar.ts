@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { getAppEnvironment } from '../../../shared/app-environment'
 import { spawn, type ChildProcess } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join, sep } from 'node:path'
@@ -89,7 +89,7 @@ export async function startDevopsRadar(workspacePath: string): Promise<DevopsRad
   })
   if (!quitHooked) {
     quitHooked = true
-    app.on('before-quit', () => {
+    getAppEnvironment().onWillQuit(() => {
       for (const entry of running.values()) {
         entry.child.kill()
       }

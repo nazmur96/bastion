@@ -1,3 +1,4 @@
+import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
@@ -23,10 +24,13 @@ function inspect(path: string): Promise<DevopsInspection> {
 
 /** The workspace's stacks and tools, re-read at most once a minute and on window focus. */
 export function useDevopsInspection(worktreeId: string): DevopsInspection | null {
+  const local = useAppStore(
+    (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
+  )
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const [result, setResult] = useState<{ path: string; inspection: DevopsInspection } | null>(null)
   useEffect(() => {
-    if (!path) {
+    if (!path || !local) {
       return
     }
     let current = true
@@ -43,6 +47,6 @@ export function useDevopsInspection(worktreeId: string): DevopsInspection | null
       current = false
       window.removeEventListener('focus', load)
     }
-  }, [path])
-  return result && result.path === path ? result.inspection : null
+  }, [path, local])
+  return local && result && result.path === path ? result.inspection : null
 }

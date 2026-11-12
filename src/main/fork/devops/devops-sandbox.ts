@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { getAppEnvironment } from '../../../shared/app-environment'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, sep } from 'node:path'
 import { MISE_FILES, resolveTool, run } from './devops-inspect'
@@ -18,7 +18,7 @@ const TOOLS: Record<DevopsSandboxKind, string> = { aws: 'floci', cluster: 'vclus
 let states: Record<string, DevopsSandboxState> | null = null
 
 function storePath(): string {
-  return join(app.getPath('userData'), 'fork-devops-sandbox.json')
+  return join(getAppEnvironment().getPath('userData'), 'fork-devops-sandbox.json')
 }
 
 function load(): Record<string, DevopsSandboxState> {
@@ -70,7 +70,7 @@ function hermeticAwsEnv(awsEnv: Record<string, string>): Record<string, string> 
   if (Object.keys(awsEnv).length === 0) {
     return awsEnv
   }
-  const sealed = join(app.getPath('userData'), 'fork-floci-aws-config')
+  const sealed = join(getAppEnvironment().getPath('userData'), 'fork-floci-aws-config')
   // An empty AWS_PROFILE is rejected by the CLI, so a bare default profile is selected instead.
   writeFileSync(sealed, '[default]\n')
   return {

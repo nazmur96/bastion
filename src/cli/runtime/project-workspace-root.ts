@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
-import { DatabaseSync } from 'node:sqlite'
+import Database from '../../main/sqlite/sync-database'
 import { isProjectWorkspaceId } from '../../shared/fork-project-workspaces'
 import { readRuntimeSourceStamp } from '../../shared/runtime-source-env'
 
@@ -27,7 +27,7 @@ export function resolveProjectWorkspaceCliRoot(baseRoot: string, env: NodeJS.Pro
   if (!existsSync(file)) {
     return baseRoot
   }
-  const db = new DatabaseSync(file, { readOnly: true, timeout: 5000 })
+  const db = new Database(file, { readonly: true, fileMustExist: true, timeout: 5000 })
   try {
     const version = db.prepare('PRAGMA user_version').get()?.user_version
     if (version !== 1 && version !== 2 && version !== 3) {

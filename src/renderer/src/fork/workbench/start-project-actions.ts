@@ -2,7 +2,7 @@ import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { activateAndRevealWorkspace } from '@/lib/worktree-activation'
 import {
-  getSettingsFocusedExecutionHostId,
+  UNRESOLVED_OWNER_HOST_ID,
   getWorktreeExecutionHostId,
   parseExecutionHostId,
   type ExecutionHostId
@@ -26,12 +26,13 @@ export function startWorkspaceHost(workspaceId: string): ExecutionHostId {
   const folder = state.folderWorkspaces.find(
     (entry) => folderWorkspaceKey(entry.id) === workspaceId
   )
-  return folder
-    ? getFolderWorkspaceHostId(folder, state.projectGroups)
-    : (state.activeWorkspaceExecutionHostId ?? getSettingsFocusedExecutionHostId(state.settings))
+  return folder ? getFolderWorkspaceHostId(folder, state.projectGroups) : UNRESOLVED_OWNER_HOST_ID
 }
 
 export function openStartProject(action: 'open' | 'clone' | 'create', workspaceId: string): void {
+  if (startWorkspaceHost(workspaceId) === UNRESOLVED_OWNER_HOST_ID) {
+    return
+  }
   useAppStore.getState().openModal('add-repo', {
     initialStep: action === 'open' ? 'server-path' : action,
     preferredHostId: startWorkspaceHost(workspaceId)
@@ -40,17 +41,14 @@ export function openStartProject(action: 'open' | 'clone' | 'create', workspaceI
 
 export async function selectStartEnvironment(hostId: ExecutionHostId): Promise<void> {
   const host = parseExecutionHostId(hostId)
-  if (!host) {
+  if (!host || hostId === UNRESOLVED_OWNER_HOST_ID) {
     return
   }
-  // SSH connection and pairing stay in the existing host chooser until a server is available.
-  if (host.kind === 'ssh') {
-    useAppStore.getState().openModal('add-repo', { preferredHostId: hostId })
-    return
-  }
-  const switched = await useAppStore
-    .getState()
-    .setActiveRuntimeEnvironmentPreference(host.kind === 'runtime' ? host.environmentId : null)
+  const switched =
+    host.kind === 'ssh' ||
+    (await useAppStore
+      .getState()
+      .setActiveRuntimeEnvironmentPreference(host.kind === 'runtime' ? host.environmentId : null))
   if (!switched) {
     return
   }

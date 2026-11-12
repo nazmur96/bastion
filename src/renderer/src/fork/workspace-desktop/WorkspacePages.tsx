@@ -1,3 +1,5 @@
+import { startWorkspaceHost } from '../workbench/start-project-actions'
+import { WorkspaceEnvironmentsPage } from '../environments/WorkspaceEnvironmentsPage'
 import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
@@ -31,6 +33,9 @@ export function WorkspacePages(): React.JSX.Element | null {
   if (page === 'editor' || page === 'source') {
     return id ? null : <ProjectRequired />
   }
+  if (page === 'environments') {
+    return <WorkspaceEnvironmentsPage />
+  }
   if (page === 'home') {
     return <WorkspaceHomePage />
   }
@@ -56,21 +61,12 @@ export function WorkspacePages(): React.JSX.Element | null {
       </header>
       <div className="workspace-home-grid">
         <section className="workspace-card">
-          <h2>
-            {page === 'environments'
-              ? translate('workspaceDesktop.runtimeTitle', 'Choose where you work.')
-              : translate('workspaceDesktop.connectTools', 'Connect your existing tools.')}
-          </h2>
+          <h2>{translate('workspaceDesktop.connectTools', 'Connect your existing tools.')}</h2>
           <p>
-            {page === 'environments'
-              ? translate(
-                  'workspaceDesktop.runtimeDescription',
-                  'Use the execution picker for an existing runtime, or configure a remote host in Settings.'
-                )
-              : translate(
-                  'workspaceDesktop.capabilityDescription',
-                  'Open the existing infrastructure tools for detected stack commands, cloud configuration and deployment controls. Operations run only when you explicitly start them.'
-                )}
+            {translate(
+              'workspaceDesktop.capabilityDescription',
+              'Open the existing infrastructure tools for detected stack commands, cloud configuration and deployment controls. Operations run only when you explicitly start them.'
+            )}
           </p>
           <div className="workspace-card-actions">
             <button
@@ -80,19 +76,7 @@ export function WorkspacePages(): React.JSX.Element | null {
             >
               {translate('workspaceDesktop.infrastructureTools', 'Open infrastructure tools')}
             </button>
-            <button
-              type="button"
-              className="workspace-button"
-              onClick={() => {
-                if (page === 'environments') {
-                  const s = useAppStore.getState()
-                  s.openSettingsTarget({ pane: 'ssh', repoId: null })
-                  s.openSettingsPage()
-                } else {
-                  openConnectionSettings()
-                }
-              }}
-            >
+            <button type="button" className="workspace-button" onClick={openConnectionSettings}>
               {translate('workspaceDesktop.connectionSettings', 'Connection settings')}
             </button>
           </div>
@@ -137,8 +121,17 @@ function ProjectRequired(): React.JSX.Element {
 }
 function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const inspection = useDevopsInspection(worktreeId)
+  const host = useAppStore(() => startWorkspaceHost(worktreeId))
   return (
     <div className="workspace-page scrollbar-sleek">
+      {host !== 'local' && (
+        <p role="status">
+          {translate(
+            'workspaceEnvironments.remoteInspection',
+            'Infrastructure tool inspection is not available on this runtime. Environment configuration can still be read from its owner.'
+          )}
+        </p>
+      )}
       <div className="workspace-eyebrow">
         {translate('workspaceDesktop.discovery', 'Project discovery')}
       </div>
@@ -168,7 +161,7 @@ function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.E
           </section>
         ))}
       </div>
-      {!inspection || inspection.findings.length === 0 ? (
+      {host === 'local' && (!inspection || inspection.findings.length === 0) ? (
         <section className="workspace-card">
           <p>
             {inspection

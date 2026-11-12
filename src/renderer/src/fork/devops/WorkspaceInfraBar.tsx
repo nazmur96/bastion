@@ -1,3 +1,4 @@
+import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
 import { PanelLeft, PanelRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isSidePanelCollapsed, toggleSidePanel } from '../workbench/terminal-dock'
@@ -160,6 +161,19 @@ export function WorkspaceInfraBar(): React.JSX.Element | null {
 
 /** The same context and controls, inline in the project desktop's context bar. */
 export function WorkspaceInfraContext({ worktreeId }: { worktreeId: string }): React.JSX.Element {
+  const local = useAppStore(
+    (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === 'local'
+  )
+  if (!local) {
+    return (
+      <span className="text-xs text-muted-foreground">
+        {translate(
+          'workspaceEnvironments.remoteContext',
+          'Infrastructure context is not inspected on this runtime'
+        )}
+      </span>
+    )
+  }
   return (
     <span className="flex items-center gap-2" data-workspace-infra-context="">
       <InfraContextItems worktreeId={worktreeId} />

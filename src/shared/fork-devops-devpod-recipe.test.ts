@@ -27,7 +27,8 @@ describe('DevPod recipe', () => {
   })
 
   it('keeps stdout for the JSON result only', () => {
-    expect(DEVPOD_RECIPE_SCRIPTS['devpod-create.sh']).toContain('--ide none')
+    expect(DEVPOD_RECIPE_SCRIPTS['devpod-create.sh']).toContain('--provider docker --ide none')
+    expect(DEVPOD_RECIPE_SCRIPTS['devpod-resume.sh']).toContain('--provider docker --ide none')
     expect(DEVPOD_RECIPE_SCRIPTS['devpod-create.sh']).toMatch(/devpod up .*>&2/)
     expect(DEVPOD_RECIPE_SCRIPTS['devpod-create.sh']).toContain('"schemaVersion":1')
   })

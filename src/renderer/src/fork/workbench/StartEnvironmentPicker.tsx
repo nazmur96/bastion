@@ -15,7 +15,7 @@ import {
   indexExecutionHostsById,
   pickerExecutionHosts
 } from '../../../../shared/managed-orcad-execution-host'
-import type { ExecutionHostId } from '../../../../shared/execution-host'
+import { UNRESOLVED_OWNER_HOST_ID, type ExecutionHostId } from '../../../../shared/execution-host'
 import { selectStartEnvironment, startWorkspaceHost } from './start-project-actions'
 
 export function StartEnvironmentPicker({
@@ -28,9 +28,11 @@ export function StartEnvironmentPicker({
   const [busy, setBusy] = useState(false)
   const currentHost = indexExecutionHostsById(hostOptions).get(currentHostId)
   const label =
-    currentHostId === 'local'
-      ? translate('components.start.thisComputer', 'This computer')
-      : (currentHost?.label ?? currentHostId)
+    currentHostId === UNRESOLVED_OWNER_HOST_ID
+      ? translate('workspaceEnvironments.resolving', 'Resolving execution host…')
+      : currentHostId === 'local'
+        ? translate('components.start.thisComputer', 'This computer')
+        : (currentHost?.label ?? currentHostId)
   const choose = async (hostId: ExecutionHostId): Promise<void> => {
     setBusy(true)
     try {
@@ -46,7 +48,12 @@ export function StartEnvironmentPicker({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button type="button" className="bx-picker" disabled={busy} aria-busy={busy}>
+        <button
+          type="button"
+          className="bx-picker"
+          disabled={busy || currentHostId === UNRESOLVED_OWNER_HOST_ID}
+          aria-busy={busy}
+        >
           {currentHostId === 'local' ? <Laptop aria-hidden /> : <Server aria-hidden />}
           {label}
           <ChevronDown aria-hidden />

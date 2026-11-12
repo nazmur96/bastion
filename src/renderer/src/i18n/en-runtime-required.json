@@ -2577,6 +2577,18 @@
       "showLinked_other": "Show {{count}} linked reviews and tasks"
     }
   },
+  "workspaceDesktop": {
+    "agentSession": "Agent session",
+    "agentsCopy": "Open sessions from this workspace. Choose the agent that fits your task.",
+    "noAgents": "No agent sessions are open in this workspace yet.",
+    "runtimeDescription": "Use the execution picker for an existing runtime, or configure a remote host in Settings.",
+    "runtimeTitle": "Choose where you work.",
+    "startTask": "Start a task. Choose your agent.",
+    "workspaceAgents": "Your workspace agents."
+  },
+  "workspaceEnvironments": {
+    "recipePrepared": "DevPod recipe files prepared. Review them in Source control."
+  },
   "workspaceSpace": {
     "compact": {
       "linkedAndScannedCount_one": "{{size}} in linked worktrees · {{count}} workspace",
