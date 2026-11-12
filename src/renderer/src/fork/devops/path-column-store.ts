@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react'
 
 const KEY = 'orca-fork.pathColumn.collapsed.v1'
+const DESKTOP_KEY = 'orca-fork.pathColumn.desktop.v1'
+let desktopInitialized = false
 
 function load(): boolean {
   try {
@@ -12,6 +14,22 @@ function load(): boolean {
 
 let collapsed = load()
 const listeners = new Set<() => void>()
+
+export function initializeDesktopPathColumn(): void {
+  if (desktopInitialized) {
+    return
+  }
+  desktopInitialized = true
+  try {
+    if (localStorage.getItem(DESKTOP_KEY) === '1') {
+      return
+    }
+    localStorage.setItem(DESKTOP_KEY, '1')
+  } catch {
+    // Keep the initial desktop uncluttered even when storage is unavailable.
+  }
+  setPathColumnCollapsed(true)
+}
 
 /** Fold the Project path column to a thin strip, or open it again. */
 export function togglePathColumn(): void {

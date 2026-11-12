@@ -41,14 +41,14 @@ export function InfraHomeOverlay({
     if (seenTab.current !== activeTabId) {
       const previous = seenTab.current
       seenTab.current = activeTabId
-      if (isWorkbench && previous && activeTabId && isProjectDesktopWindow()) {
+      if (isWorkbench && isActiveWorktree && previous && activeTabId && isProjectDesktopWindow()) {
         openWorkspacePage('editor')
       }
       if (isWorkbench) {
         setInfraView(worktreeId, null)
       }
     }
-  }, [activeTabId, isWorkbench, worktreeId])
+  }, [activeTabId, isWorkbench, isActiveWorktree, worktreeId])
   const register = useCallback(
     (element: HTMLDivElement | null) => setInfraOverlayTarget(worktreeId, element),
     [worktreeId]

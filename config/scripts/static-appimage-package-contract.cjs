@@ -2,6 +2,8 @@ const { closeSync, fstatSync, openSync, readSync } = require('node:fs')
 const { basename } = require('node:path')
 
 const EXPECTED_ARCHITECTURE_BY_FILENAME = new Map([
+  ['bastion-linux.AppImage', 'x64'],
+  ['bastion-linux-arm64.AppImage', 'arm64'],
   ['orca-linux.AppImage', 'x64'],
   ['orca-linux-arm64.AppImage', 'arm64']
 ])

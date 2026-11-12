@@ -1,4 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useLayoutEffect } from 'react'
+import { initializeDesktopPathColumn } from '../devops/path-column-store'
+import { isProjectDesktopWindow } from '../project-workspaces/use-project-workspaces'
 import { useAppStore } from '@/store'
 import {
   isClaudePanelHidden,
@@ -50,6 +52,11 @@ function foldClaudePanel(worktreeId: string): void {
 }
 
 export function useBastionLayout(worktreeId: string): void {
+  useLayoutEffect(() => {
+    if (isProjectDesktopWindow()) {
+      initializeDesktopPathColumn()
+    }
+  }, [])
   useEffect(() => {
     const run = (): void => {
       if (busy) {

@@ -283,10 +283,12 @@ module.exports = {
     '!examples{,/**/*}',
     // Exclude gitignored local screenshot evidence defensively so packaging cannot pick up stray captures.
     '!pr-evidence{,/**/*}',
+    '!.handoff{,/**/*}',
+    '!dist{,/**/*}',
     // Local build logs and rollback copies are never application resources.
     '!notes{,/**/*}',
     // Local tooling directories are not runtime inputs and may contain symlink loops.
-    '!{.claude,.grok,.agents,.codex}{,/**/*}',
+    '!{.claude,.grok,.agents,.codex,.superpowers,.anti-slop-plugin,.cache,.tmp}{,/**/*}',
     '!Casks{,/**/*}',
     '!{AGENTS.md,CLAUDE.md,DEVELOPING.md,bundle-size-progress.md,ORCHESTRATION_IMPLEMENTATION_CHECKLIST.md,ORCHESTRATION_STRUCTURED_OUTPUT_DESIGN.md}',
     '!out/**/*.test.js',
@@ -305,7 +307,7 @@ module.exports = {
     '!electron.vite.config.{js,ts,mjs,cjs}',
     '!{.oxlintrc.json,.oxfmtrc.json,components.json,opencode.json,orca.yaml,pnpm-workspace.yaml,vite.web.config.ts}',
     '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,CHANGELOG.md,README.md}',
-    '!{.env,.env.*,.npmrc,pnpm-lock.yaml}',
+    '!{.env,.env.*,.npmrc,.mcp.json,pnpm-lock.yaml}',
     '!tsconfig.json',
     // Feature media is read from process.resourcesPath via extraResources; exclude duplicate sources.
     '!resources/onboarding/feature-wall/**',

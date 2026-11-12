@@ -87,3 +87,21 @@ it('gives up quickly on a destination that never shows life', async () => {
   expect(await leaving.waitUntilReady(150, 5000, 1000)).toBe(false)
   expect(Date.now() - startedAt).toBeLessThan(1000)
 })
+
+it('stops waiting when a destination heartbeat goes stale', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
+  const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
+  arriving?.startHeartbeat()
+  expect(await leaving.waitUntilReady(100, 3000, 150)).toBe(false)
+  leaving.cancel()
+})
+
+it('bounds the wait even when a destination heartbeat is still fresh', async () => {
+  const root = temporary()
+  const leaving = createWorkspaceHandoff(root, bounds)
+  const arriving = acceptWorkspaceHandoff(root, { [WORKSPACE_HANDOFF_ENV]: leaving.path })
+  arriving?.startHeartbeat()
+  expect(await leaving.waitUntilReady(100, 250, 1000)).toBe(false)
+  leaving.cancel()
+})

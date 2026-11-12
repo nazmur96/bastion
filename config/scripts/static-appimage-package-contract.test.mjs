@@ -15,6 +15,8 @@ const FIXTURE_BYTES = 384
 
 describe('static AppImage package contract', () => {
   it.each([
+    ['bastion-linux.AppImage', 0x3e, 1],
+    ['bastion-linux-arm64.AppImage', 0xb7, 'arm64'],
     ['orca-linux.AppImage', 0x3e, 1],
     ['orca-linux-arm64.AppImage', 0xb7, 'arm64']
   ])('accepts a dependency-free type-2 %s runtime', async (filename, machine, targetArch) => {
@@ -24,6 +26,8 @@ describe('static AppImage package contract', () => {
   })
 
   it.each([
+    ['Bastion x64 name for an arm64 runtime', 'bastion-linux.AppImage', 0xb7, 3],
+    ['Bastion arm64 name for an x64 runtime', 'bastion-linux-arm64.AppImage', 0x3e, 1],
     ['generic filename for an arm64 runtime and target', 'orca-linux.AppImage', 0xb7, 3],
     ['arm64 filename for an x64 runtime and target', 'orca-linux-arm64.AppImage', 0x3e, 1],
     ['generic x64 runtime for an arm64 target', 'orca-linux.AppImage', 0x3e, 3],

@@ -407,7 +407,7 @@
 .workspace-connection strong {
   font-weight: 400;
 }
-.workspace-desktop .bx-pathcol,
+.workspace-desktop .bx-pathcol.collapsed,
 .workspace-desktop .bx-path-restore {
   display: none;
 }
