@@ -24,9 +24,8 @@ export type WorkspaceEnvironmentFiles = {
   files: string[]
   assertCurrent: () => unknown
 }
-export async function readWorkspaceEnvironmentFiles(
-  worktreeId: string
-): Promise<WorkspaceEnvironmentFiles> {
+/** The project's root and its owner's file route, pinned so a later owner change is detected. */
+export function captureProjectFileRoute(worktreeId: string) {
   const state = useAppStore.getState()
   const root =
     selectKnownWorktreeById(state, worktreeId)?.path ??
@@ -37,7 +36,13 @@ export async function readWorkspaceEnvironmentFiles(
   }
   const owner = getFileExplorerOperationOwner(worktreeId)
   const guard = captureFileExplorerOperationGuard(worktreeId, owner)
-  const context = { ...guard.route, worktreeId, worktreePath: root }
+  return { root, guard, context: { ...guard.route, worktreeId, worktreePath: root } }
+}
+
+export async function readWorkspaceEnvironmentFiles(
+  worktreeId: string
+): Promise<WorkspaceEnvironmentFiles> {
+  const { root, guard, context } = captureProjectFileRoute(worktreeId)
   const entries = await readRuntimeDirectory(context, root)
   guard.assertCurrent()
   const files = entries

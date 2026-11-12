@@ -326,7 +326,8 @@ export function ActionsCard({
 }: {
   worktreeId: string
   inspection: DevopsInspection
-  sandbox: DevopsSandbox
+  /** Absent on remote owners: the local AWS sandbox never applies there. */
+  sandbox?: DevopsSandbox
   ranked: readonly RankedDevopsAction[]
 }): React.JSX.Element {
   const stacks = [...new Set(ranked.map((item) => item.action.stack))]
@@ -362,7 +363,7 @@ export function ActionsCard({
                         runInWorkbenchTerminal(
                           worktreeId,
                           devopsCommandLine(status, item.command, inspection.shell),
-                          sandbox.state.awsEnv
+                          sandbox?.state.awsEnv
                         )
                       }
                     >

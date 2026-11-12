@@ -1,10 +1,10 @@
-import { startWorkspaceHost } from '../workbench/start-project-actions'
 import { WorkspaceEnvironmentsPage } from '../environments/WorkspaceEnvironmentsPage'
 import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { setInfraView } from '../devops/infra-home-store'
 import { useDevopsInspection } from '../devops/use-devops-inspection'
+import { useRuntimeDevopsStacks } from '../devops/use-runtime-devops-stacks'
 import { WorkspaceHomePage } from './WorkspaceHomePage'
 import { workspaceNavigation } from './workspace-navigation'
 import { useWorkspacePage } from './workspace-desktop-state'
@@ -121,14 +121,19 @@ function ProjectRequired(): React.JSX.Element {
 }
 function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const inspection = useDevopsInspection(worktreeId)
-  const host = useAppStore(() => startWorkspaceHost(worktreeId))
+  const remote = useRuntimeDevopsStacks(worktreeId)
+  const host = remote.hostId
+  const remoteData = remote.result && 'data' in remote.result ? remote.result.data : null
+  const findings = host === 'local' ? inspection?.findings : remoteData?.findings
+  const pending = host === 'local' ? !inspection : remote.result === null
+  const error = remote.result && 'error' in remote.result ? remote.result.error : null
   return (
     <div className="workspace-page scrollbar-sleek">
       {host !== 'local' && (
         <p role="status">
           {translate(
             'workspaceEnvironments.remoteInspection',
-            'Infrastructure tool inspection is not available on this runtime. Environment configuration can still be read from its owner.'
+            'Stacks are read through this project’s owner. Tool availability, cloud and cluster checks are not available on this runtime.'
           )}
         </p>
       )}
@@ -150,7 +155,7 @@ function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.E
         <WorkspaceQuickActions />
       </header>
       <div className="workspace-home-grid">
-        {inspection?.findings.map((finding) => (
+        {findings?.map((finding) => (
           <section className="workspace-card" key={finding.stack}>
             <h3>{finding.stack}</h3>
             {finding.dirs.map((dir) => (
@@ -161,10 +166,14 @@ function WorkspaceDiscovery({ worktreeId }: { worktreeId: string }): React.JSX.E
           </section>
         ))}
       </div>
-      {host === 'local' && (!inspection || inspection.findings.length === 0) ? (
+      {error ? (
+        <section className="workspace-card">
+          <p role="alert">{error}</p>
+        </section>
+      ) : pending || findings?.length === 0 ? (
         <section className="workspace-card">
           <p>
-            {inspection
+            {!pending
               ? translate(
                   'workspaceDesktop.noStacks',
                   'No supported infrastructure stacks detected in the selected project.'

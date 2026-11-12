@@ -21101,6 +21101,14 @@
         "nothing": "Nothing is running yet.",
         "reading": "Reading the cluster…",
         "openFull": "Open full map ↗"
+      },
+      "remote": {
+        "title": "Runs on {{host}}",
+        "hint": "Stacks are read through this project’s owner. Tool availability, cloud and cluster context, plans and scans are not checked on this runtime; actions run visibly in this project’s terminal.",
+        "refresh": "Read stacks again",
+        "checkTools": "Check tools in terminal",
+        "reading": "Reading project stacks…",
+        "stacks": "Detected stacks"
       }
     },
     "sidePanel": {
@@ -23963,7 +23971,7 @@
     "noVSCode": "VS Code extensions are not directly supported. Runtime tools and language-server connections are separate from syntax packs; no tools are installed on the host automatically.",
     "plugins": "Review compatible plugins",
     "resolving": "Resolving execution host…",
-    "remoteInspection": "Infrastructure tool inspection is not available on this runtime. Environment configuration can still be read from its owner.",
+    "remoteInspection": "Stacks are read through this project’s owner. Tool availability, cloud and cluster checks are not available on this runtime.",
     "recipeFilesReady": "DevPod recipe files prepared. Review them before launching an environment.",
     "hideConfigured": "Hide other configured hosts",
     "showConfigured": "Show other configured hosts"
