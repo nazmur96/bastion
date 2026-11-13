@@ -62,7 +62,9 @@ export async function createOwnerSource(
     }
   }
   const temporary = join(root, `.bastion-proposal-${randomUUID()}.tmp`)
-  const file = await open(temporary, 'wx', 0o600)
+  // The published file is a hard link to this inode, so it takes this mode: honour the umask like
+  // any editor-created source file instead of leaving it readable by its owner only.
+  const file = await open(temporary, 'wx', 0o666)
   try {
     await file.writeFile(content, 'utf8')
     await file.sync()

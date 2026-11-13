@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import {
   existsSync,
+  lstatSync,
   mkdtempSync,
   readFileSync,
   readdirSync,
@@ -142,6 +143,16 @@ describe('owner execution and source publication', () => {
     expect(readFileSync(join(root, 'service.json'), 'utf8')).toBe('{"human":"kept"}')
     expect(readdirSync(root)).toEqual(['service.json'])
   })
+
+  it.skipIf(process.platform === 'win32')(
+    'creates source with the usual umask-derived mode, readable by build tools',
+    async () => {
+      const root = directory()
+      expect(await createOwnerSource(root, 'service.json', '{}')).toBe('created')
+      const umask = process.umask()
+      expect(lstatSync(join(root, 'service.json')).mode & 0o777).toBe(0o666 & ~umask)
+    }
+  )
 
   it.skipIf(process.platform === 'win32')(
     'refuses existing and dangling symlink destinations without touching their targets',

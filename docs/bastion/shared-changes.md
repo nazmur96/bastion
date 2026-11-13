@@ -111,3 +111,9 @@ Independent crosscheck of 7abf84d4a7. Live dev proof on a disposable profile (wo
 Fixed: path refusals surfaced a serialized schema error (`[{"code":"custom",…}]`) instead of an explanation; they now give a readable reason. The renderer-lifecycle hook read Electron's deprecated positional `did-start-navigation` arguments; it now uses the event details (`isMainFrame`, `isSameDocument`), re-verified live after a main-process rebuild.
 
 Design note: the record identity includes the runtime pairing revision, so a genuine re-pair opens a new record; earlier records remain stored but are not listed. A reconnect or managed-server restart did not change it in practice.
+
+## Completion crosscheck — November 13 (Claude)
+
+Crosscheck of cde69f9a1e. Change identity is now project plus intent, so history follows a project across re-pairs and a changed context invalidates the review in place; version 1 ledgers migrate by merging records. Create-only publication links a fully written temporary file into place, so an existing file or a dangling symlink at the destination is a conflict and nothing is written through it; no temporary file remains.
+
+Fixed: the temporary file was opened with mode 0600 and the published file is a hard link to it, so every created source file was readable by its owner only (for example, unreadable to a non-root process in a container built from the repository). It is now created with the umask-derived mode like any editor-created file. A real-filesystem regression test covers it, and a live dev run created `service.json` through Changes & runs as 0644 while a proposal for an existing `human.json` was refused at preparation with the file unchanged. 47 focused tests, Node/web/CLI typechecks and the changed-code gate (base 15a81ddb858a) pass. Remote proposal creation was not re-run by Claude after the fix; it uses the same writer.
