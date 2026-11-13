@@ -17,3 +17,20 @@
   production launch policy. Background terminal panes stay hidden.
 - The browser image-focus test also permits an isolated Docker Xvfb display, with
   `ORCA_E2E_BROWSER_NATIVE_XVFB=1`; desktop runs must skip it.
+
+# Bastion Project Workspaces
+
+- Bastion opens application Home on a cold launch, and Home loads no workbench or
+  `window.__store`. The `orca-app` fixture therefore seeds a project workspace and launches
+  straight into it (`bastionWorkspace`, default `'E2E workspace'`). Use
+  `test.use({ bastionWorkspace: null })` only for specs about Home itself.
+- Helpers live in [`bastion-workspace.ts`](e2e/helpers/bastion-workspace.ts): `openBastionPage`
+  navigates the workspace desktop, `activeBastionWorkspace` reports the active workspace.
+  Reuse the existing Docker SSH host fixtures for remote projects rather than new ones.
+- `window.__store` exists only in the e2e build; run without `SKIP_BUILD=1` after changing
+  renderer code, or the store will be missing.
+- Inherited upstream specs that drive Orca's original workbench UI (for example the Add
+  project dialog) may need updating for Bastion's workspace desktop.
+- Open issue: in local runs, three or more concurrent Bastion launches never exposed
+  `window.__store` (serial and two-way runs passed). Prefer `--workers=1`, as CI does,
+  until the cause is found.

@@ -16,6 +16,7 @@ import { recordElectronShutdownTiming } from './electron-shutdown-timing'
 import { getOrcaElectronLaunchArgs } from './electron-launch-args'
 import { retryTransientMainEvaluate } from './electron-main-evaluate-retry'
 import { getE2ECompletedOnboardingProfile } from './e2e-completed-onboarding-profile'
+import { bastionLaunchArgs } from './bastion-workspace'
 import {
   assertElectronResolvedIsolatedHome,
   createElectronHomeIsolation
@@ -44,6 +45,8 @@ type OrcaTestFixtures = {
   orcaAppExtraArgs: string[]
   // Keep PATH/token overrides fixture-owned so specs cannot alter the user’s shell or running Orca.
   launchEnv: NodeJS.ProcessEnv
+  // Bastion: launch inside this seeded project workspace; null opens application Home (no workbench).
+  bastionWorkspace: string | null
 }
 
 type OrcaWorkerFixtures = {
@@ -141,6 +144,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
       launchEnv,
       orcaAppExtraEnv,
       orcaAppExtraArgs,
+      bastionWorkspace,
       registerPostElectronShutdownCleanup
     },
     provideFixture,
@@ -158,6 +162,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
         `${JSON.stringify(getE2ECompletedOnboardingProfile(), null, 2)}\n`
       )
     }
+    const bastionArgs = bastionLaunchArgs(userDataDir, bastionWorkspace)
     const headful = shouldLaunchHeadful(testInfo)
     // Strip ELECTRON_RUN_AS_NODE or Node rejects Playwright’s remote-debugging switch before launch.
     const { ELECTRON_RUN_AS_NODE: _unused, ...cleanEnv } = process.env
@@ -176,7 +181,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
       mkdirSync(recordVideoDir, { recursive: true })
     }
     const app = await electron.launch({
-      args: [...orcaAppExtraArgs, ...getOrcaElectronLaunchArgs(mainPath, headful)],
+      args: [...orcaAppExtraArgs, ...getOrcaElectronLaunchArgs(mainPath, headful), ...bastionArgs],
       ...(slowMo > 0 ? { slowMo } : {}),
       ...(recordVideoDir ? { recordVideo: { dir: recordVideoDir } } : {}),
       // Use development/E2E helpers inside an isolated profile; background launch policy keeps automated desktop windows hidden.
@@ -213,6 +218,7 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
   launchEnv: [{}, { option: true }],
   orcaAppExtraEnv: [{}, { option: true }],
   orcaAppExtraArgs: [[], { option: true }],
+  bastionWorkspace: ['E2E workspace', { option: true }],
 
   sharedPage: async (
     { electronApp, minimumSeededWorktreeCount, seedTestRepo, seededRepoPath },
