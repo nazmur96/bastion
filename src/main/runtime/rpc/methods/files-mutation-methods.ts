@@ -1,4 +1,5 @@
 import { defineMethod } from '../core'
+import { OwnerRunExecute, OwnerRunGet } from '../../../../shared/fork-changes/owner-run-contract'
 import { FILE_REPLACE_WITH_UPLOAD_METHOD } from '../../../../shared/file-bytes-write'
 import {
   FileCommitUpload,
@@ -37,6 +38,18 @@ function sshMutationArguments(
 }
 
 export const FILE_MUTATION_METHODS = [
+  defineMethod({
+    name: 'changes.execute',
+    permission: 'workspace',
+    params: OwnerRunExecute,
+    handler: (params, { runtime }) => runtime.ownedChanges.execute(params)
+  }),
+  defineMethod({
+    name: 'changes.get',
+    permission: 'workspace',
+    params: OwnerRunGet,
+    handler: (params, { runtime }) => runtime.ownedChanges.get(params)
+  }),
   defineMethod({
     name: 'files.write',
     permission: 'workspace',

@@ -1,35 +1,51 @@
+import { SourceChecksPanel } from './SourceChecksPanel'
 import { useEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useAppStore } from '@/store'
-import { translate } from '@/i18n/i18n'
+import { createBrowserUuid } from '@/lib/browser-uuid'
+import { translate, getIntlLocale } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
-import { SecuritySurface } from '@/components/ui/security-surface'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { subscribeRuntimeFileChanges } from '@/runtime/runtime-file-watch-client'
 import {
-  currentChangeReview,
-  type ChangeRecord
+  type ChangeRecord,
+  type ChangeIntent,
+  SOURCE_CHECK_INTENT
 } from '../../../../shared/fork-changes/change-contract'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
-import { showWorkspaceEditor } from '../workspace-desktop/WorkspaceQuickActions'
-import { openWorkspaceFile } from '../devops/open-manifest'
 import { changedProjectPaths } from '../discovery/use-project-discovery'
 import { captureSourceCheckOwner } from './source-check-owner'
-import { changeEntrance, changeInitialPaths } from './change-navigation'
-import {
-  openProjectChange,
-  prepareSourceChange,
-  reviewSourceChange,
-  runSourceChange,
-  subscribeChangeProgress
-} from './change-controller'
+import { changeEntrance, changeInitialPaths, changeInitialIntent } from './change-navigation'
+import { changesApi } from './change-channel'
+import { refreshOwnerRuns } from './owner-execution-client'
+import { SourceProposalPanel } from './SourceProposalPanel'
+import { NewSourceChangeDialog } from './NewSourceChangeDialog'
+import { openProjectChange, subscribeChangeProgress } from './change-controller'
 import { ChangeRunEvidence } from './ChangeRunEvidence'
 
 export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const hostId = useAppStore(() => startWorkspaceHost(worktreeId))
+  const contextStamp = useAppStore(() => {
+    try {
+      return JSON.stringify(captureSourceCheckOwner(worktreeId).scope)
+    } catch {
+      return 'unresolved'
+    }
+  })
   const [record, setRecord] = useState<ChangeRecord | null>(null)
+  const [intent, setIntent] = useState<ChangeIntent>(() => changeInitialIntent(worktreeId))
+  const [records, setRecords] = useState<ChangeRecord[]>([])
   const [paths, setPaths] = useState('')
-  const [busy, setBusy] = useState(false)
+  const [busyKey, setBusyKey] = useState<string | null>(null)
+  const busy = !!record && busyKey === record.id
+  const selectedRecordId = useRef<string | null>(null)
+  selectedRecordId.current = record?.id ?? null
   const [error, setError] = useState('')
   const [freshnessUnknown, setFreshnessUnknown] = useState(true)
   const watchEpoch = useRef(0)
@@ -47,7 +63,7 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
         setRecord((current) => (current?.id === next.id ? next : current))
       }
     })
-    void openProjectChange(worktreeId, changeEntrance())
+    void openProjectChange(worktreeId, changeEntrance(), intent)
       .then((next) => {
         if (live) {
           setRecord((current) =>
@@ -57,8 +73,16 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
             next.validations
               .at(-1)
               ?.snapshot.files.map((file) => file.path)
-              .join('\n') ?? changeInitialPaths().join('\n')
+              .join('\n') ?? changeInitialPaths(worktreeId).join('\n')
           )
+          void changesApi()
+            .list({ projectId: worktreeId })
+            .then((items) => {
+              if (live) {
+                setRecords(items)
+              }
+            })
+            .catch(() => {})
         }
       })
       .catch((failure: unknown) => {
@@ -110,35 +134,62 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
       stopWatch?.()
       stopProgress()
     }
-  }, [worktreeId, hostId])
-  const perform = (operation: () => Promise<ChangeRecord>): void => {
+  }, [worktreeId, hostId, contextStamp, intent])
+  useEffect(() => {
+    if (!record || busy || !record.runs.some((run) => run.execution && run.status === 'running')) {
+      return
+    }
+    let live = true
+    let pending = false
+    const timer = setInterval(() => {
+      if (pending) {
+        return
+      }
+      pending = true
+      void refreshOwnerRuns(record)
+        .then((next) => {
+          if (live) {
+            setRecord((current) => (current?.id === next.id ? next : current))
+          }
+        })
+        .catch((failure: unknown) => {
+          if (live) {
+            setError(failure instanceof Error ? failure.message : String(failure))
+          }
+        })
+        .finally(() => {
+          pending = false
+        })
+    }, 1000)
+    return () => {
+      live = false
+      clearInterval(timer)
+    }
+  }, [record, busy])
+  const perform = (operation: () => Promise<ChangeRecord>, sourceRead = true): void => {
+    const operationRecordId = record?.id
+    if (!operationRecordId) {
+      return
+    }
     const epoch = watchEpoch.current
-    setBusy(true)
+    setBusyKey(operationRecordId)
     setError('')
     void operation()
       .then((next) => {
         setRecord((current) => (current?.id === next.id ? next : current))
-        if (watchReady.current && watchEpoch.current === epoch) {
+        if (sourceRead && watchReady.current && watchEpoch.current === epoch) {
           setFreshnessUnknown(false)
         }
       })
       .catch((failure: unknown) => {
+        if (selectedRecordId.current !== operationRecordId) {
+          return
+        }
         setFreshnessUnknown(true)
         setError(failure instanceof Error ? failure.message : String(failure))
       })
-      .finally(() => setBusy(false))
+      .finally(() => setBusyKey((current) => (current === operationRecordId ? null : current)))
   }
-  const validation = record?.validations.at(-1)
-  const review = record && currentChangeReview(record)
-  const running = record?.runs.some((run) => run.status === 'running')
-  const disabled = busy || running || !record
-  const selectionMatches =
-    paths
-      .trim()
-      .split('\n')
-      .map((path) => path.trim())
-      .sort()
-      .join('\n') === validation?.snapshot.files.map((file) => file.path).join('\n')
   return (
     <div className="workspace-page scrollbar-sleek" data-workspace-changes="">
       <header className="workspace-page-heading">
@@ -146,12 +197,71 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
           <h1>{translate('changes.title', 'Changes & runs')}</h1>
           <p>
             {translate(
-              'changes.scope',
-              'Prepare saved source, review the check plan, then run and verify it. Infrastructure execution adapters come later.'
+              'changes.workflowScope',
+              'Prepare source, review its plan, then execute through the project owner and inspect the evidence.'
             )}
           </p>
         </div>
       </header>
+      <div className="workspace-card-actions mb-5">
+        <Select
+          value={intent.id}
+          onValueChange={(id) => {
+            const next = records.find((item) => item.intent?.id === id)?.intent
+            setIntent(next ?? SOURCE_CHECK_INTENT)
+          }}
+        >
+          <SelectTrigger aria-label={translate('changes.selectChange', 'Select project change')}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="source-check">
+              {translate('changes.sourceChecks', 'Source checks')}
+            </SelectItem>
+            {records
+              .filter((item) => item.intent?.id !== 'source-check')
+              .map((item) => (
+                <SelectItem value={item.intent?.id ?? 'source-check'} key={item.id}>
+                  {item.intent?.label ??
+                    (item.intent?.kind === 'create-file'
+                      ? item.intent.id.slice(5)
+                      : item.intent?.id)}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          onClick={() =>
+            setIntent({
+              id: `checks:${createBrowserUuid()}`,
+              kind: 'source-check',
+              label: `${translate('changes.sourceChecks', 'Source checks')} · ${new Date().toLocaleString(getIntlLocale())}`
+            })
+          }
+        >
+          {translate('changes.newChecks', 'New check change')}
+        </Button>
+        <NewSourceChangeDialog
+          worktreeId={worktreeId}
+          onPrepared={(next) => {
+            if (next.intent) {
+              setIntent(next.intent)
+            }
+          }}
+        />
+        <Button
+          variant="outline"
+          disabled={busy || !record}
+          onClick={() => {
+            if (record) {
+              perform(() => refreshOwnerRuns(record), false)
+            }
+          }}
+        >
+          {translate('changes.refreshRuns', 'Refresh run evidence')}
+        </Button>
+      </div>
       {error && (
         <p role="alert" className="mb-4 text-destructive">
           {error}
@@ -176,125 +286,24 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
             <p className="break-all font-mono text-xs">{record.id}</p>
             <p>
               {translate(
-                'changes.sourceOnly',
-                'Target: saved source only. No cloud account is selected. Files stay in the repository; this record stores fingerprints and check results.'
+                'changes.repositoryTarget',
+                'Target: repository source. Cloud bindings are separate. Files remain ordinary project files; the ledger stores references and results.'
               )}
             </p>
           </section>
-          <section className="workspace-card mb-5">
-            <h2>{translate('changes.prepare', '1. Prepare source')}</h2>
-            <label htmlFor="change-source-paths">
-              {translate('changes.paths', 'Repository-relative files, one per line')}
-            </label>
-            <Textarea
-              id="change-source-paths"
-              variant="code"
-              className="mt-2"
-              value={paths}
-              disabled={disabled}
-              onChange={(event) => {
-                setPaths(event.target.value)
-                setFreshnessUnknown(true)
-              }}
+          {record.intent?.kind === 'create-file' ? (
+            <SourceProposalPanel key={record.id} record={record} busy={busy} perform={perform} />
+          ) : (
+            <SourceChecksPanel
+              record={record}
+              busy={busy}
+              paths={paths}
+              setPaths={setPaths}
+              freshnessUnknown={freshnessUnknown}
+              setFreshnessUnknown={setFreshnessUnknown}
+              setError={setError}
+              perform={perform}
             />
-            <p>
-              {translate(
-                'changes.fileLimits',
-                'Up to 20 saved UTF-8 configuration files, 64 KiB each. Secret-named files, state files and symlinks are excluded. Unsaved editor buffers are not included.'
-              )}
-            </p>
-            <Button
-              variant="outline"
-              disabled={disabled || !paths.trim()}
-              onClick={() =>
-                perform(() =>
-                  prepareSourceChange(
-                    record,
-                    paths
-                      .trim()
-                      .split('\n')
-                      .map((path) => path.trim())
-                  )
-                )
-              }
-            >
-              {translate('changes.prepareButton', 'Prepare saved files')}
-            </Button>
-          </section>
-          {validation && (
-            <SecuritySurface>
-              <section className="workspace-card mb-5">
-                <h2>{translate('changes.review', '2. Review check plan')}</h2>
-                <p>
-                  {translate(
-                    'changes.plan',
-                    'Adapter source-check/v1 reads through the project owner. JSON files receive a syntax check; other files receive a bounded UTF-8 readability check. No command runs and no file is written.'
-                  )}
-                </p>
-                {validation.snapshot.files.map((file) => (
-                  <div
-                    className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-2"
-                    key={file.path}
-                  >
-                    <Button
-                      variant="link"
-                      onClick={() => {
-                        try {
-                          const owner = captureSourceCheckOwner(worktreeId)
-                          owner.assertCurrent()
-                          if (JSON.stringify(owner.scope) !== JSON.stringify(record.scope)) {
-                            throw new Error('Project owner changed.')
-                          }
-                          showWorkspaceEditor()
-                          openWorkspaceFile(worktreeId, file.path, 1)
-                        } catch {
-                          setError(
-                            translate(
-                              'changes.ownerChanged',
-                              'Project owner changed. Reopen Changes & runs.'
-                            )
-                          )
-                        }
-                      }}
-                    >
-                      {file.path}
-                    </Button>
-                    <code className="text-xs text-muted-foreground">{file.fingerprint}</code>
-                  </div>
-                ))}
-                <p role="status">
-                  {review
-                    ? translate(
-                        'changes.reviewed',
-                        'Review recorded for this snapshot. Saved files and owner are rechecked before every run.'
-                      )
-                    : translate('changes.needsReview', 'Prepared snapshot needs review.')}
-                </p>
-                {freshnessUnknown && (
-                  <p>
-                    {translate(
-                      'changes.freshness',
-                      'Source freshness is unconfirmed. Review and Run re-read the selected files; changed source requires preparing and reviewing again.'
-                    )}
-                  </p>
-                )}
-                <div className="workspace-card-actions">
-                  <Button
-                    variant="outline"
-                    disabled={disabled || !selectionMatches}
-                    onClick={() => perform(() => reviewSourceChange(record))}
-                  >
-                    {translate('changes.reviewButton', 'Record source-check review')}
-                  </Button>
-                  <Button
-                    disabled={disabled || !review || !selectionMatches}
-                    onClick={() => perform(() => runSourceChange(record, () => {}))}
-                  >
-                    {translate('changes.runButton', 'Run source checks')}
-                  </Button>
-                </div>
-              </section>
-            </SecuritySurface>
           )}
           <section className="mb-5">
             <h2 className="mb-3 font-medium">

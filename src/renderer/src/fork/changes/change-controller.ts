@@ -1,38 +1,31 @@
 import {
   currentChangeReview,
   sameChangeSnapshot,
-  type ChangeCommand,
   type ChangeEntrance,
+  type ChangeIntent,
   type ChangeRecord
 } from '../../../../shared/fork-changes/change-contract'
-import { captureSourceCheckOwner, checkSourceText } from './source-check-owner'
+import { captureSourceCheckOwner } from './source-check-owner'
+import { executeReviewedOwnerRun, pinOwnerSnapshot } from './owner-execution-client'
 
-const listeners = new Set<(record: ChangeRecord) => void>()
-export function subscribeChangeProgress(listener: (record: ChangeRecord) => void): () => void {
-  listeners.add(listener)
-  return () => {
-    listeners.delete(listener)
-  }
-}
-
-export function changesApi() {
-  if (!window.api.changes) {
-    throw new Error('Change records require the desktop application.')
-  }
-  return window.api.changes
-}
-
+import { changesApi, updateChange } from './change-channel'
+export { subscribeChangeProgress } from './change-channel'
 export async function openProjectChange(
   projectId: string,
-  entrance: ChangeEntrance
+  entrance: ChangeEntrance,
+  intent?: ChangeIntent
 ): Promise<ChangeRecord> {
   const owner = captureSourceCheckOwner(projectId)
-  const record = await changesApi().ensure({ scope: owner.scope, entrance })
+  const record = await changesApi().ensure({
+    scope: owner.scope,
+    entrance,
+    ...(intent ? { intent } : {})
+  })
   owner.assertCurrent()
   return record
 }
 
-function matchingOwner(record: ChangeRecord) {
+export function matchingOwner(record: ChangeRecord) {
   const owner = captureSourceCheckOwner(record.scope.projectId)
   if (JSON.stringify(owner.scope) !== JSON.stringify(record.scope)) {
     throw new Error('Change owner or target changed. Reopen Changes & runs.')
@@ -40,23 +33,12 @@ function matchingOwner(record: ChangeRecord) {
   return owner
 }
 
-export async function updateChange(
-  record: ChangeRecord,
-  command: ChangeCommand
-): Promise<ChangeRecord> {
-  const next = await changesApi().command({ id: record.id, revision: record.revision, command })
-  for (const listener of listeners) {
-    listener(next)
-  }
-  return next
-}
-
 export async function prepareSourceChange(
   record: ChangeRecord,
   paths: string[]
 ): Promise<ChangeRecord> {
   const owner = matchingOwner(record)
-  const snapshot = await owner.snapshot(paths)
+  const snapshot = await pinOwnerSnapshot(owner, await owner.snapshot(paths))
   return updateChange(record, { kind: 'validate', snapshot })
 }
 
@@ -65,12 +47,18 @@ export async function reviewSourceChange(record: ChangeRecord): Promise<ChangeRe
   if (!validation) {
     throw new Error('Prepare source before reviewing it.')
   }
-  const snapshot = await matchingOwner(record).snapshot(
-    validation.snapshot.files.map((file) => file.path)
+  const owner = matchingOwner(record)
+  const snapshot = await pinOwnerSnapshot(
+    owner,
+    await owner.snapshot(validation.snapshot.files.map((file) => file.path))
   )
   if (!sameChangeSnapshot(snapshot, validation.snapshot)) {
     await updateChange(record, { kind: 'validate', snapshot })
-    throw new Error('Source changed. Prepare the saved files again before review.')
+    throw new Error(
+      snapshot.ownerRuntimeId !== validation.snapshot.ownerRuntimeId
+        ? 'Execution owner changed. Prepare and review the current configuration.'
+        : 'Source changed. Prepare the saved files again before review.'
+    )
   }
   return updateChange(record, { kind: 'review', validationId: validation.id, snapshot })
 }
@@ -84,44 +72,19 @@ export async function runSourceChange(
     throw new Error('Review the prepared source before running checks.')
   }
   const owner = matchingOwner(record)
-  const snapshot = await owner.snapshot(review.snapshot.files.map((file) => file.path))
+  const snapshot = await pinOwnerSnapshot(
+    owner,
+    await owner.snapshot(review.snapshot.files.map((file) => file.path))
+  )
   if (!sameChangeSnapshot(snapshot, review.snapshot)) {
     await updateChange(record, { kind: 'validate', snapshot })
-    throw new Error('Source changed. Prepare and review the saved files again.')
-  }
-  let current = await updateChange(record, { kind: 'start', reviewId: review.id, snapshot })
-  const run = current.runs.at(-1)
-  if (!run) {
-    throw new Error('Source check did not start.')
-  }
-  progress(current)
-  for (const file of snapshot.files) {
-    let code: ReturnType<typeof checkSourceText> = 'unavailable'
-    try {
-      code = checkSourceText(file.path, await owner.read(file.path), file.fingerprint)
-    } catch {
-      code = 'unavailable'
-    }
-    current = await updateChange(current, { kind: 'step', runId: run.id, path: file.path, code })
-    progress(current)
-    if (code !== 'readable' && code !== 'json-valid') {
-      break
-    }
-  }
-  current = await updateChange(current, { kind: 'finish', runId: run.id })
-  progress(current)
-  let verification: 'unchanged' | 'changed' | 'unavailable' = 'unavailable'
-  try {
-    verification = sameChangeSnapshot(
-      snapshot,
-      await owner.snapshot(snapshot.files.map((file) => file.path))
+    throw new Error(
+      snapshot.ownerRuntimeId !== review.snapshot.ownerRuntimeId
+        ? 'Execution owner changed. Prepare and review the current configuration.'
+        : 'Source changed. Prepare and review the saved files again.'
     )
-      ? 'unchanged'
-      : 'changed'
-  } catch {
-    verification = 'unavailable'
   }
-  current = await updateChange(current, { kind: 'verify', runId: run.id, code: verification })
+  const current = await executeReviewedOwnerRun(record, owner, snapshot)
   progress(current)
   return current
 }

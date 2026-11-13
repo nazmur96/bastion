@@ -1,67 +1,64 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getDiskBaselineSignature } from '../../../../shared/disk-baseline-signature'
 import { applyChangeCommand } from '../../../../shared/fork-changes/change-lifecycle'
-import type { ChangeRecord, ChangeSnapshot } from '../../../../shared/fork-changes/change-contract'
-import type * as SourceOwner from './source-check-owner'
+import {
+  currentChangeReview,
+  type ChangeRecord,
+  type ChangeSnapshot
+} from '../../../../shared/fork-changes/change-contract'
 
-type TestState = {
+type State = {
   host: string
-  current: boolean
+  runtimeId: string
   files: Map<string, string>
-  reads: string[]
   record: ChangeRecord | null
   sequence: number
   afterRead: (() => void) | undefined
+  execute: ReturnType<typeof vi.fn>
 }
-
-const state = vi.hoisted((): TestState => ({
+const state = vi.hoisted((): State => ({
   host: 'runtime:fixture',
-  current: true,
-  files: new Map<string, string>(),
-  reads: [],
+  runtimeId: 'owner-one',
+  files: new Map(),
   record: null,
   sequence: 0,
-  afterRead: undefined
+  afterRead: undefined,
+  execute: vi.fn()
 }))
-vi.mock('./source-check-owner', async (original) => {
-  const real = await original<typeof SourceOwner>()
-  return {
-    ...real,
-    captureSourceCheckOwner: (projectId: string) => {
-      const host = state.host
-      const assertCurrent = (): void => {
-        if (!state.current || state.host !== host) {
-          throw new Error('Owner changed')
-        }
+vi.mock('./source-check-owner', () => ({
+  captureSourceCheckOwner: (projectId: string) => {
+    const host = state.host
+    const assertCurrent = (): void => {
+      if (host !== state.host) {
+        throw new Error('Owner changed')
       }
-      const read = async (path: string): Promise<string> => {
+    }
+    return {
+      scope: { projectId, root: '/fixture', hostId: host, routeKey: host },
+      assertCurrent,
+      snapshot: async (paths: string[]): Promise<ChangeSnapshot> => {
         assertCurrent()
-        state.reads.push(`${host}:${path}`)
-        const text = state.files.get(path)
-        if (text === undefined) {
-          throw new Error('Missing')
-        }
+        const files = paths.sort().map((path) => {
+          const text = state.files.get(path)
+          if (text === undefined) {
+            throw new Error('Missing source')
+          }
+          return { path, fingerprint: getDiskBaselineSignature(text) }
+        })
         state.afterRead?.()
         assertCurrent()
-        return text
-      }
-      return {
-        scope: { projectId, root: '/remote-fixture', hostId: host, routeKey: host },
-        assertCurrent,
-        read,
-        snapshot: async (paths: string[]): Promise<ChangeSnapshot> => ({
-          adapter: 'source-check/v1',
-          files: await Promise.all(
-            [...paths].sort().map(async (path) => ({
-              path,
-              fingerprint: getDiskBaselineSignature(await read(path))
-            }))
-          )
-        })
+        return { adapter: 'source-check/v1', files }
       }
     }
   }
-})
+}))
+vi.mock('./owner-execution-client', () => ({
+  pinOwnerSnapshot: async (_owner: unknown, snapshot: ChangeSnapshot) => ({
+    ...snapshot,
+    ownerRuntimeId: state.runtimeId
+  }),
+  executeReviewedOwnerRun: state.execute
+}))
 import {
   openProjectChange,
   prepareSourceChange,
@@ -71,15 +68,12 @@ import {
 
 beforeEach(() => {
   state.host = 'runtime:fixture'
-  state.current = true
-  state.files = new Map([
-    ['a.json', '{}'],
-    ['b.json', '{']
-  ])
-  state.reads = []
+  state.runtimeId = 'owner-one'
+  state.files = new Map([['a.json', '{}']])
   state.record = null
   state.sequence = 0
   state.afterRead = undefined
+  state.execute.mockReset()
   vi.stubGlobal('window', {
     api: {
       changes: {
@@ -110,59 +104,47 @@ beforeEach(() => {
   })
 })
 async function reviewed(): Promise<ChangeRecord> {
-  const prepared = await prepareSourceChange(await openProjectChange('project', 'discovery'), [
-    'a.json',
-    'b.json'
-  ])
-  return reviewSourceChange(prepared)
+  return reviewSourceChange(
+    await prepareSourceChange(await openProjectChange('project', 'discovery'), ['a.json'])
+  )
 }
-describe('source check controller', () => {
-  it('retains real partial failure evidence and source verification without source text', async () => {
+
+describe('reviewed source handoff', () => {
+  it('invalidates persisted review after saved edits without sending an execution request', async () => {
     const record = await reviewed()
-    const result = await runSourceChange(record, () => {})
-    expect(result.runs[0]).toMatchObject({
-      status: 'failed',
-      steps: [
-        { path: 'a.json', code: 'json-valid' },
-        { path: 'b.json', code: 'json-invalid' }
-      ],
-      verification: { code: 'unchanged' }
-    })
-    expect(state.reads.every((path) => path.startsWith('runtime:fixture:'))).toBe(true)
-    expect(JSON.stringify(result)).not.toContain('sourceText')
-  })
-  it('blocks execution after an edit and requires preparing and reviewing the new saved source', async () => {
-    let record = await reviewed()
-    state.files.set('b.json', '{}')
+    state.files.set('a.json', '{"human":"edit"}')
     await expect(runSourceChange(record, () => {})).rejects.toThrow('Source changed')
+    expect(state.execute).not.toHaveBeenCalled()
+    expect(state.record && currentChangeReview(state.record)).toBeUndefined()
     expect(state.record?.runs).toHaveLength(0)
-    record = await openProjectChange('project', 'source')
-    record = await prepareSourceChange(record, ['a.json', 'b.json'])
-    await expect(runSourceChange(record, () => {})).rejects.toThrow('Review')
-    record = await reviewSourceChange(record)
-    expect((await runSourceChange(record, () => {})).runs[0].status).toBe('passed')
   })
-  it('does not retarget when the project host changes, including a change during the run', async () => {
+  it('invalidates review when the owner runtime restarts with identical source', async () => {
+    const record = await reviewed()
+    state.runtimeId = 'owner-two'
+    await expect(runSourceChange(record, () => {})).rejects.toThrow('Execution owner changed')
+    expect(state.execute).not.toHaveBeenCalled()
+    expect(state.record && currentChangeReview(state.record)).toBeUndefined()
+  })
+  it('refuses owner changes before and during source reads', async () => {
     const record = await reviewed()
     state.host = 'local'
     await expect(runSourceChange(record, () => {})).rejects.toThrow('owner or target changed')
     state.host = 'runtime:fixture'
-    const result = await runSourceChange(record, (next) => {
-      if (next.runs[0].steps.length === 1) {
-        state.host = 'local'
-      }
-    })
-    expect(result.runs[0]).toMatchObject({
-      status: 'failed',
-      steps: [{ code: 'json-valid' }, { code: 'unavailable' }],
-      verification: { code: 'unavailable' }
-    })
-    expect(state.reads.every((path) => path.startsWith('runtime:fixture:'))).toBe(true)
+    state.afterRead = () => {
+      state.host = 'local'
+    }
+    await expect(runSourceChange(record, () => {})).rejects.toThrow('Owner changed')
+    expect(state.execute).not.toHaveBeenCalled()
   })
-  it('finishes on its original project when another view is opened', async () => {
+  it('hands only the pinned source metadata to the owner adapter', async () => {
+    state.files.set('a.json', '{"value":"private-sentinel"}')
     const record = await reviewed()
-    const result = await runSourceChange(record, () => {})
-    expect(result.scope.projectId).toBe('project')
-    expect(result.runs[0].snapshot).toEqual(record.reviews[0].snapshot)
+    state.execute.mockResolvedValue(record)
+    await runSourceChange(record, () => {})
+    expect(state.execute).toHaveBeenCalledTimes(1)
+    const snapshot = state.execute.mock.calls[0][2]
+    expect(snapshot.ownerRuntimeId).toBe('owner-one')
+    expect(JSON.stringify(snapshot)).not.toContain('private-sentinel')
+    expect(snapshot.files.map((file) => file.path)).toEqual(['a.json'])
   })
 })

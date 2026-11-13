@@ -5,6 +5,7 @@ import { translate } from '@/i18n/i18n'
 import { setInfraView } from '../devops/infra-home-store'
 import { WorkspaceDiscoveryPage } from '../discovery/WorkspaceDiscoveryPage'
 import { WorkspaceChangesPage } from '../changes/WorkspaceChangesPage'
+import { openChanges } from '../changes/change-navigation'
 import { WorkspaceHomePage } from './WorkspaceHomePage'
 import { workspaceNavigation } from './workspace-navigation'
 import { useWorkspacePage } from './workspace-desktop-state'
@@ -68,6 +69,11 @@ export function WorkspacePages(): React.JSX.Element | null {
             )}
           </p>
           <div className="workspace-card-actions">
+            {(page === 'cloud' || page === 'recipes') && (
+              <button type="button" className="workspace-button" onClick={() => openChanges(page)}>
+                {translate('changes.open', 'Open project change')}
+              </button>
+            )}
             <button
               type="button"
               className="workspace-button workspace-button-primary"

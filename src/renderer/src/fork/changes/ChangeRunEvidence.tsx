@@ -13,9 +13,22 @@ function resultLabel(code: SourceCheckCode): string {
       return translate('changes.fileChanged', 'Source differs from the reviewed snapshot')
     case 'unavailable':
       return translate('changes.unavailable', 'Source or its owner is unavailable')
+    case 'created':
+      return translate('changes.created', 'Source file created')
+    case 'conflict':
+      return translate('changes.conflict', 'Destination already exists; no replacement was made')
   }
 }
-function runLabel(status: ChangeRun['status']): string {
+function runLabel(status: ChangeRun['status'], creating: boolean): string {
+  if (creating && status === 'passed') {
+    return translate('changes.creationPassed', 'File creation completed')
+  }
+  if (creating && status === 'failed') {
+    return translate('changes.creationFailed', 'File creation failed')
+  }
+  if (creating && status === 'running') {
+    return translate('changes.creating', 'Creating source file')
+  }
   switch (status) {
     case 'running':
       return translate('changes.running', 'Running source checks')
@@ -30,8 +43,13 @@ function runLabel(status: ChangeRun['status']): string {
 export function ChangeRunEvidence({ run }: { run: ChangeRun }): React.JSX.Element {
   return (
     <section className="workspace-card" data-change-run={run.id}>
-      <h3>{runLabel(run.status)}</h3>
+      <h3>{runLabel(run.status, run.snapshot.adapter === 'create-file/v1')}</h3>
       <p className="font-mono text-xs">{run.id}</p>
+      {run.scope && (
+        <p className="break-all font-mono text-xs">
+          {run.scope.root} · {run.scope.hostId}
+        </p>
+      )}
       <p>{new Date(run.at).toLocaleString(getIntlLocale())}</p>
       {run.snapshot.files.map((file) => {
         const step = run.steps.find((item) => item.path === file.path)

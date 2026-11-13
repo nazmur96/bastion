@@ -7,7 +7,7 @@ import { showWorkspaceEditor } from '../workspace-desktop/WorkspaceQuickActions'
 import { captureProjectFileRoute } from '../environments/workspace-environment-files'
 import { CONTRACT_FILE, SERVICE_QUESTIONS, draftServiceContract } from './service-knowledge'
 import { useProjectDiscovery } from './use-project-discovery'
-import { openChanges } from '../changes/change-navigation'
+import { openChanges, openFileProposal } from '../changes/change-navigation'
 
 export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const [view, setView] = useState<'evidence' | 'contract'>('evidence')
@@ -247,21 +247,22 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
                   if (current.activeWorktreeId !== worktreeId) {
                     return
                   }
-                  showWorkspaceEditor()
-                  void current.openSampleFileInActiveWorkspace({
-                    extension: '.json',
-                    content: draftServiceContract(data.snapshot)
-                  })
+                  openFileProposal(
+                    'discovery',
+                    worktreeId,
+                    CONTRACT_FILE,
+                    draftServiceContract(data.snapshot)
+                  )
                 }}
               >
-                {translate('discovery.draft', 'Create contract draft')}
+                {translate('changes.contractProposal', 'Prepare contract proposal')}
               </button>
             )}
           </div>
           <p>
             {translate(
-              'discovery.contractScope',
-              'Answers are repository-owned human statements, not verified deployment facts. Edit the JSON draft, rename it to bastion.service.json, then return and refresh. Existing contracts are never regenerated or overwritten. Record references, never secret values.'
+              'changes.contractWorkflow',
+              'Answers are repository-owned human statements, not verified deployment facts. Prepare and review a new contract in Changes & runs, create it explicitly, then refresh discovery. Existing contracts are edited normally and are never regenerated. Record references, never secret values.'
             )}
           </p>
           {data?.contractError && (

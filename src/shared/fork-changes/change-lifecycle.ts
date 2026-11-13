@@ -1,6 +1,7 @@
 import {
   currentChangeReview,
   sameChangeSnapshot,
+  sameChangeScope,
   type ChangeCommand,
   type ChangeRecord
 } from './change-contract'
@@ -19,26 +20,73 @@ export function applyChangeCommand(
     throw new Error('This change reached its history limit. Its evidence is preserved.')
   }
   const running = next.runs.find((run) => run.status === 'running')
-  if (command.kind === 'validate') {
+  if (command.kind === 'invalidate') {
+    next.invalidated = true
+  } else if (command.kind === 'reconcile') {
+    const receipt = command.receipt
+    const run = next.runs.find((item) => item.id === receipt.id)
+    if (
+      !run?.execution ||
+      run.execution.runtimeId !== receipt.runtimeId ||
+      (run.scope ?? next.scope).root !== receipt.root ||
+      !sameChangeSnapshot(run.snapshot, receipt.snapshot)
+    ) {
+      throw new Error('Owner receipt does not match the pinned run.')
+    }
+    if (
+      run.steps.some(
+        (step, index) => JSON.stringify(step) !== JSON.stringify(receipt.steps[index])
+      ) ||
+      (run.status !== 'running' && run.status !== 'interrupted' && run.status !== receipt.status) ||
+      (run.status === 'interrupted' && receipt.status === 'running') ||
+      (run.verification &&
+        JSON.stringify(run.verification) !== JSON.stringify(receipt.verification))
+    ) {
+      throw new Error('Owner receipt would replace settled execution evidence.')
+    }
+    run.steps = receipt.steps
+    run.status = receipt.status
+    run.finishedAt = receipt.finishedAt
+    run.verification = receipt.verification
+  } else if (command.kind === 'interrupt') {
+    const run = next.runs.find((item) => item.id === command.runId)
+    if (!run?.execution || run.status !== 'running') {
+      throw new Error('No unfinished owner run to interrupt.')
+    }
+    run.status = 'interrupted'
+    run.finishedAt = at
+  } else if (command.kind === 'validate') {
     if (running) {
       throw new Error('Wait for the active source check to finish.')
     }
-    next.validations.push({ id, at, snapshot: command.snapshot })
+    if ((next.intent?.kind === 'create-file') !== (command.snapshot.adapter === 'create-file/v1')) {
+      throw new Error('Adapter does not match this change intent.')
+    }
+    next.invalidated = false
+    next.validations.push({ id, at, snapshot: command.snapshot, scope: next.scope })
   } else if (command.kind === 'review') {
     const validation = next.validations.at(-1)
     if (
       running ||
       validation?.id !== command.validationId ||
+      !sameChangeScope(validation.scope ?? next.scope, next.scope) ||
       !sameChangeSnapshot(validation.snapshot, command.snapshot)
     ) {
       throw new Error('The prepared source changed. Prepare and review it again.')
     }
-    next.reviews.push({ id, at, validationId: validation.id, snapshot: command.snapshot })
+    next.reviews.push({
+      id,
+      at,
+      validationId: validation.id,
+      snapshot: command.snapshot,
+      scope: next.scope
+    })
   } else if (command.kind === 'start') {
     const review = currentChangeReview(next)
     if (
       running ||
       review?.id !== command.reviewId ||
+      (command.execution && command.snapshot.ownerRuntimeId !== command.execution.runtimeId) ||
       !sameChangeSnapshot(review.snapshot, command.snapshot)
     ) {
       throw new Error('The review is stale. Prepare and review the current source.')
@@ -48,6 +96,8 @@ export function applyChangeCommand(
       at,
       reviewId: review.id,
       snapshot: review.snapshot,
+      scope: next.scope,
+      ...(command.execution ? { execution: command.execution } : {}),
       steps: [],
       status: 'running',
       finishedAt: null,
@@ -57,6 +107,9 @@ export function applyChangeCommand(
     const run = next.runs.find((candidate) => candidate.id === command.runId)
     if (!run) {
       throw new Error('Source-check run not found.')
+    }
+    if (run.execution) {
+      throw new Error('Owner runs accept only owner receipts, not renderer-produced results.')
     }
     if (command.kind === 'verify') {
       if (run.status === 'running' || run.verification) {
@@ -74,7 +127,10 @@ export function applyChangeCommand(
     } else {
       run.status =
         run.steps.length === run.snapshot.files.length &&
-        run.steps.every((step) => step.code === 'readable' || step.code === 'json-valid')
+        run.steps.every(
+          (step) =>
+            step.code === 'readable' || step.code === 'json-valid' || step.code === 'created'
+        )
           ? 'passed'
           : 'failed'
       run.finishedAt = at

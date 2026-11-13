@@ -8,8 +8,7 @@ import {
   changeSnapshotSchema,
   isChangeSourcePath,
   type ChangeScope,
-  type ChangeSnapshot,
-  type SourceCheckCode
+  type ChangeSnapshot
 } from '../../../../shared/fork-changes/change-contract'
 import { captureProjectFileRoute } from '../environments/workspace-environment-files'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
@@ -101,20 +100,7 @@ export function captureSourceCheckOwner(projectId: string) {
     assertCurrent()
     return changeSnapshotSchema.parse({ adapter: 'source-check/v1', files })
   }
-  return { scope, read, snapshot, assertCurrent, context: route.context }
+  return { scope, read, snapshot, assertCurrent, context: route.context, route: route.guard.route }
 }
 
-export function checkSourceText(path: string, text: string, fingerprint: string): SourceCheckCode {
-  if (getDiskBaselineSignature(text) !== fingerprint) {
-    return 'changed'
-  }
-  if (path.endsWith('.json')) {
-    try {
-      JSON.parse(text)
-      return 'json-valid'
-    } catch {
-      return 'json-invalid'
-    }
-  }
-  return 'readable'
-}
+export { checkSourceText } from '../../../../shared/fork-changes/source-check-result'

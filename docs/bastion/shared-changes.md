@@ -1,85 +1,108 @@
-# Shared changes — Step 8, first slice
+# Shared change workflow — Step 8 foundation
 
-The current adapter checks **saved repository source**. It does not run Terraform,
-deploy, commit, push, reconcile infrastructure or verify a deployed service.
-Step 8 remains in progress.
+Supported adapters check saved source and create new source files through the
+project's owner, locally or through a managed runtime. They do not run shell
+commands, Terraform, cloud APIs, Git commits, pushes or reconciliation. Provider
+execution follows the target/binding milestones. Source checks do not prove
+Terraform validity or deployed health.
 
-## Owning record
+## Identity and review
 
-`Changes & runs`, Discovery's **Open project change**, and the editor's
-**File capabilities → Open project change** use one namespace-local ledger.
-The initial intent is one source-check change per project/root/owner route.
-An entrance may seed the initial file selection; it never replaces an existing
-prepared selection. There is no separate copy of desired source configuration.
+The namespace-local ledger owns intent, preparation, review and attempt history.
+A record is identified by project ID and intent ID inside its top-level workspace.
+Separately selectable check changes and file proposals use the same lifecycle.
+Discovery, editor File capabilities, Cloud/Recipes links and agent-assistance
+navigation enter that workflow. Navigation alone never executes it.
 
-The main process selects storage from the active project-workspace context,
-not a renderer-provided directory. Home and Incognito cannot open this ledger.
-Git worktrees and attached folder projects retain their existing identities.
-The ledger uses the existing SQLite adapter, transactions, private storage and
-database-file hardening. Its version is checked before changes are written.
-Optimistic record revisions reject concurrent stale writers.
+Root, host, transport route and pairing revision are context, not record identity.
+Every validation, review and attempt retains its captured context. Re-pairing
+preserves history and invalidates review. Returning to an earlier context cannot
+revive review; preparing again requires explicit review even if bytes match.
+The reviewed adapter configuration includes the owner runtime ID, so a runtime
+restart also invalidates execution preflight.
 
-Source preparation, review, individual execution attempts, per-file results and
-post-run source verification are separate records. Reviews and attempts retain
-their snapshots. Retrying appends an attempt; it cannot overwrite a failure.
-The current limits preserve history rather than pruning old evidence silently.
+Schema version 3 transactionally merges version-1 records previously split by
+pairing revision, preserving evidence, historical contexts and old IDs as aliases.
+Unsupported schemas are refused. The main process chooses storage from its active
+workspace context, never a renderer-provided directory. Home and Incognito are
+refused. Existing SQLite adapters, private directories, database hardening and
+optimistic revisions are reused. History limits preserve evidence and still allow
+started attempts to settle.
 
-## Source-check contract
+## Owner execution
 
-The source-check adapter:
+The client ledger owns review/history; the runtime owns durable execution receipts.
+This is not another desired-state store. The owner resolves the registered
+worktree/folder, checks expected root/host and refuses SSH routes it cannot serve.
+Remote work never falls back to the desktop filesystem.
 
-1. Captures the project's existing file route and execution owner. Unresolved
-   owners and unmanaged remote routes fail closed. Managed remote files use the
-   owning runtime's existing file transport. No local tool/cloud inspection is
-   involved.
-2. Reads 1–20 explicitly selected supported files, at most 64 KiB each, rejecting
-   secret-named paths, state, traversal, excluded generated directories and
-   symlink entries. These use the same directory/stat/range-read guards as
-   discovery, not a new security sandbox against a hostile concurrent filesystem.
-3. Prepares path/fingerprint metadata; source text is transient. The owning editor
-   remains responsible for file changes. Unsaved buffers are excluded explicitly.
-4. Re-reads selected source at review and run boundaries. A different root,
-   owner route, runtime pairing revision, selected file or saved content requires
-   preparation/review again. Existing operation-generation guards reject late
-   results after disconnect, re-pair or owner changes.
-5. Runs JSON syntax checks and UTF-8 readability checks for other supported
-   formats. Readability does **not** mean valid HCL/YAML/TOML, a Terraform plan or
-   valid infrastructure. No shell, provider API or external CLI is invoked.
-6. Stops at the first failure, preserves preceding results and shows remaining
-   files as not run. Verification separately re-reads the pinned source and
-   reports unchanged, changed or unavailable. An unchanged failed JSON document
-   remains a failed source check.
+Each run UUID is admitted once. A repeated identical request returns its receipt;
+substituting another project, runtime or snapshot is refused. Per-file results are
+checkpointed in private owner storage. Original targets remain pinned through view
+and project switches. Renderer reloads leave owner work alone, and the page
+retrieves its receipts afterward. Reconnect can recover evidence from the same
+stable target; re-pairing cannot redirect an old run to another machine.
 
-Runs keep the captured project and file owner even when another project or view
-becomes active. The controller continues outside the page component. A renderer
-reload/crash/window close interrupts its unfinished attempts. On process restart,
-unfinished attempts are marked interrupted rather than assumed successful.
-These short source checks are not a durable remote job scheduler.
+Recovery marks an unfinished owner receipt interrupted when its job is absent from
+this process or its owning process is proven exited. Otherwise completion remains
+unknown. Partial checkpoints survive. Retries append attempts; settled evidence
+cannot be rolled back. Renderer-produced step/finish results are refused for owner
+runs. Late authoritative terminal receipts can resolve an interrupted client view.
 
-The IPC surface stores bounded typed metadata and fixed result codes, not raw
-source, diagnostic messages, credentials, arbitrary commands, Terraform state or
-binary plans. This ledger records renderer-produced source checks; it is **not**
-an authorization capability for future infrastructure execution. Future execution
-adapters must resolve their own authoritative owner and review preconditions.
+Concurrency and receipt counts are bounded. Output consists of fixed result codes,
+paths and fingerprints: no source, parser messages, credentials, state, binary
+plans or arbitrary commands are stored. This source RPC is not authorization for
+future billed infrastructure; those adapters need authoritative target admission.
 
-## Work still required for Step 8
+## Source checks
 
-- Add explicit independently addressable change intents and reviewed adapter
-  configuration for generated/infrastructure changes, using this lifecycle.
-- Connect a generated-source proposal to existing atomic write preconditions and
-  prove edits/symlink conflicts preserve the human's source. This slice writes no
-  source and does not claim to have completed generation conflict handling.
-- Add an owner-run execution adapter with durable background completion, output
-  bounds/redaction and real verification, preserving interrupted/partial evidence.
-- Route the existing infrastructure step runner and later Cloud/recipe/agent
-  actions through the reviewed owner workflow. Existing infrastructure commands
-  have not been silently converted to reviewed runs by adding this page.
-- Bind real account/region/cluster identities in the later target milestones;
-  the current target is explicitly source-only.
-- Packaged, Windows, macOS and mobile validation remain open.
+The user explicitly selects 1–20 saved supported files, at most 64 KiB each.
+Secret-named, environment/state and excluded generated files, traversal and symlink
+entries are refused. Unsaved buffers are visibly excluded. Saved bytes and runtime
+identity are re-read before review/run and fingerprints checked by the owner.
+JSON receives syntax checks; other formats receive UTF-8 readability checks.
+Failure stops later files, which remain marked not run. Source verification is
+separate: unchanged, changed or unavailable. Unchanged invalid JSON still fails.
 
-Plugin reuse is recorded in the planning repository's `PLUGIN-REUSE-AUDIT.md`.
-No plugin installation or host tool installation is needed for this slice.
+## Guarded source proposals
+
+Discovery reuses the existing all-unknown service-contract generator. Existing
+contracts still open in the ordinary editor and are never regenerated. New file
+change supports a source filename at the project root. Nested-output generation
+and replacement are deliberately unsupported by this create-only adapter.
+
+Proposal text lives in bounded renderer memory scoped to project and destination.
+Reopening a template preserves edited text. Reload requires reopening a template
+or pasting text again; the ledger stores its fingerprint, not a hidden copy.
+Preparation and review create no file. Editing disables creation until preparation
+and review are repeated. Existing destinations invalidate review and are preserved.
+
+Explicit Create source file sends the reviewed bytes through the owner route.
+The owner stages a private regular file and publishes it using an exclusive hard
+link in the same directory. Existing files, directories and dangling symlinks,
+including destinations introduced after preflight, cause conflicts without
+replacement. Temporary names are removed after the attempt; a hard crash can leave
+a private staging file for inspection. Filesystems without hard-link support fail
+closed. As with existing file operations, this assumes a trusted workspace, not a
+hostile actor concurrently replacing ancestor directories. Generated files remain
+ordinary source for editor and Git review.
+
+## Proof and remaining support scope
+
+Linux dev proofs use disposable local folders and a managed Docker SSH runtime.
+Evidence is private in .handoff/step8-complete-1113/. Tests cover migrations and
+aliases, re-pair invalidation, pinned contexts, monotonic receipts, admission and
+recovery, partial failures, competing creations, edited/symlink destinations,
+proposal guards and project-scoped drafts/navigation. Live proof covers reload
+recovery, contract generation, remote-only creation and disconnected-owner refusal.
+
+Existing direct Orca infrastructure commands remain manual tools outside these
+source adapters; they are not relabeled as reviewed cloud executions. Cloud target
+bindings, provider plans, multi-file infrastructure recipes, CI/GitOps execution
+and deployed verification belong to Steps 9–12 and must extend this lifecycle.
+Packaged, Windows/macOS and mobile checks remain explicit support work. Plugin
+reuse is recorded in the planning repository's PLUGIN-REUSE-AUDIT.md; no plugin or
+host tool was installed.
 
 ## Crosscheck — November 13 (Claude)
 

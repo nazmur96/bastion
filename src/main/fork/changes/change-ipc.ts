@@ -2,6 +2,7 @@ import { app, ipcMain } from 'electron'
 import { z } from 'zod'
 import {
   changeCommandSchema,
+  changeIntentSchema,
   changeEntranceSchema,
   changeScopeSchema
 } from '../../../shared/fork-changes/change-contract'
@@ -24,7 +25,11 @@ export function registerChangeHandlers(): void {
   const watched = new Map<number, Set<string>>()
   ipcMain.handle('bastionChanges:ensure', (event, args: unknown) => {
     const parsed = z
-      .object({ scope: changeScopeSchema, entrance: changeEntranceSchema })
+      .object({
+        scope: changeScopeSchema,
+        entrance: changeEntranceSchema,
+        intent: changeIntentSchema.optional()
+      })
       .strict()
       .parse(args)
     const active = open()
@@ -44,7 +49,14 @@ export function registerChangeHandlers(): void {
         }
       })
     }
-    return active.ensure(parsed.scope, parsed.entrance)
+    return active.ensure(parsed.scope, parsed.entrance, parsed.intent)
+  })
+  ipcMain.handle('bastionChanges:list', (_event, args: unknown) => {
+    const parsed = z
+      .object({ projectId: z.string().min(1).max(4096) })
+      .strict()
+      .parse(args)
+    return open().list(parsed.projectId)
   })
   ipcMain.handle('bastionChanges:command', (event, args: unknown) => {
     const parsed = z
@@ -58,6 +70,13 @@ export function registerChangeHandlers(): void {
     const runIds = watched.get(event.sender.id)
     if (!runIds) {
       throw new Error('Open the change in this window before updating it.')
+    }
+    if (
+      'runId' in parsed.command &&
+      parsed.command.kind !== 'interrupt' &&
+      !runIds.has(parsed.command.runId)
+    ) {
+      throw new Error('This window does not own the running attempt.')
     }
     const result = open().command(parsed.id, parsed.revision, parsed.command)
     if (parsed.command.kind === 'start') {

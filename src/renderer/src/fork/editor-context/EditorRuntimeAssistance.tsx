@@ -24,6 +24,7 @@ import { useProjectDiscovery } from '../discovery/use-project-discovery'
 import { useDeckCommands } from '../devops/command-deck-store'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
 import { openWorkspacePage } from '../workspace-desktop/workspace-desktop-state'
+import { openChanges } from '../changes/change-navigation'
 import { captureProjectFileRoute } from '../environments/workspace-environment-files'
 import { draftAssistanceInOpenChat } from './assistance-chat-draft'
 import { readEditorContextEntry, useEditorContextEntry } from './editor-context-store'
@@ -328,6 +329,9 @@ function RuntimeHint({
               </div>
             )}
             <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => openChanges('agent', [file])}>
+                {translate('changes.assistanceEntry', 'Review a source change')}
+              </Button>
               <Button variant="outline" size="sm" onClick={() => openWorkspacePage('environments')}>
                 {translate('assistance.environment', 'Review environment')}
               </Button>
