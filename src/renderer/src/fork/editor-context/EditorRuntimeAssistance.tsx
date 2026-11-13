@@ -143,12 +143,7 @@ function RuntimeHint({
       assistanceSourceCurrent(data.snapshot, file, state)
     )
   }
-  const key = runtimeAssistanceKey(
-    worktreeId,
-    file,
-    suggestion ?? { tool: 'editor', available: null },
-    context
-  )
+  const key = runtimeAssistanceKey(worktreeId, file, suggestion, context)
   const dismissalKey = runtimeAssistanceKey(
     worktreeId,
     file,
@@ -164,6 +159,13 @@ function RuntimeHint({
   )
   const latest = useRef(key)
   latest.current = key
+  // Opening help after a save re-reads the owner's discovery instead of staying stale.
+  const refreshIfStale = useRef(() => {})
+  refreshIfStale.current = () => {
+    if (state && !state.pending && !sourceCurrent) {
+      refresh()
+    }
+  }
   const dismissed = useRuntimeAssistanceDismissed(dismissalKey)
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<{ key: string; text: string; current: () => boolean } | null>(
@@ -180,13 +182,14 @@ function RuntimeHint({
         run: () => {
           setRuntimeAssistanceDismissed(dismissalKey, false)
           setOpen(true)
+          refreshIfStale.current()
         }
       }
     ],
     [dismissalKey]
   )
   useDeckCommands(`editor-assistance:${worktreeId}`, commands)
-  if (!suggestion || dismissed) {
+  if (dismissed) {
     return null
   }
   const currentDraft = draft?.key === key && draft.current()
@@ -235,9 +238,12 @@ function RuntimeHint({
       return
     }
     if (chatId === 'copy') {
-      void navigator.clipboard
-        .writeText(draft.text)
-        .catch(() => toast.error(translate('assistance.copyFailed', 'Could not copy the draft.')))
+      // The renderer's Clipboard API is permission-denied in Orca; use the app's clipboard bridge.
+      void window.api.ui.writeClipboardText(draft.text).then(
+        () =>
+          toast.success(translate('assistance.copied', 'Draft copied. Review it before sending.')),
+        () => toast.error(translate('assistance.copyFailed', 'Could not copy the draft.'))
+      )
       return
     }
     if (!draftAssistanceInOpenChat(worktreeId, chatId, context.hostId, draft.text, draft.current)) {
@@ -251,7 +257,15 @@ function RuntimeHint({
       className="absolute right-3 bottom-3 z-20 flex items-center gap-1 rounded-md border border-border bg-popover text-popover-foreground shadow-xs"
       data-editor-runtime-assistance=""
     >
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          setOpen(next)
+          if (next) {
+            refreshIfStale.current()
+          }
+        }}
+      >
         <PopoverTrigger asChild>
           <Button variant="ghost" size="xs">
             <Sparkles className="size-4" aria-hidden />
@@ -297,12 +311,21 @@ function RuntimeHint({
               )}
             </p>
             {!context.valid && (
-              <p role="status" className="text-xs">
-                {translate(
-                  'assistance.stale',
-                  'Project context is missing, changed or incomplete. Review discovery before preparing a draft.'
+              <div className="space-y-2">
+                <p role="status" className="text-xs">
+                  {state?.pending
+                    ? translate('assistance.refreshing', 'Reading project context…')
+                    : translate(
+                        'assistance.stale',
+                        'Project context is missing, changed or incomplete. Review discovery before preparing a draft.'
+                      )}
+                </p>
+                {!state?.pending && (
+                  <Button variant="outline" size="sm" onClick={refresh}>
+                    {translate('assistance.refresh', 'Refresh project context')}
+                  </Button>
                 )}
-              </p>
+              </div>
             )}
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => openWorkspacePage('environments')}>

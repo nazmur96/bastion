@@ -93,9 +93,10 @@ beforeEach(() => {
   m.refresh.mockClear()
   m.changedPaths = []
   m.copy.mockReset()
-  Object.defineProperty(navigator, 'clipboard', {
+  // The renderer Clipboard API is permission-denied in Orca; drafts copy through the app bridge.
+  Object.defineProperty(window, 'api', {
     configurable: true,
-    value: { writeText: m.copy.mockResolvedValue(undefined) }
+    value: { ui: { writeClipboardText: m.copy.mockResolvedValue(undefined) } }
   })
 })
 afterEach(cleanup)
@@ -160,4 +161,13 @@ it('visibly disables a remote draft on disconnect and refreshes owner context', 
     true
   )
   expect(m.refresh).toHaveBeenCalledTimes(1)
+})
+
+it('re-reads stale project context when help is opened after a save', () => {
+  m.changedPaths = ['main.tf']
+  render(element())
+  fireEvent.click(screen.getByRole('button', { name: 'Review file context' }))
+  expect(m.refresh).toHaveBeenCalledTimes(1)
+  fireEvent.click(screen.getByRole('button', { name: 'Refresh project context' }))
+  expect(m.refresh).toHaveBeenCalledTimes(2)
 })

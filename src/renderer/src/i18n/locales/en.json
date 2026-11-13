@@ -24028,6 +24028,9 @@
     "routing": "Existing workspace chats accept unsent composer drafts. Other agents use copy-only handoff. No agent is launched and no message is submitted. Source, selection, diagnostic text and secret values are omitted.",
     "copy": "Copy reviewed draft",
     "append": "Append to unsent composer",
-    "editorOnly": "Editor diagnostics only; runtime capability is unverified."
+    "editorOnly": "Editor diagnostics only; runtime capability is unverified.",
+    "copied": "Draft copied. Review it before sending.",
+    "refreshing": "Reading project context…",
+    "refresh": "Refresh project context"
   }
 }

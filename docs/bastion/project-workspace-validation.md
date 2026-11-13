@@ -225,3 +225,13 @@ Validation checkpoint: 62 focused tests across 14 suites, renderer typecheck and
 Open scope: dependency bindings and failed-run cases await milestones 8–12; low-latency completion, source-adapter expansion, additional provider transports and packaged/other-platform proofs remain open. Existing Step 5/6 open items remain open. No push.
 
 Final live checks passed: disconnect disabled the prepared handoff, the stale status was visible after scrolling, secret-named files had no assistance, and new controls passed native drag/hit-target checks. Final checks after the source-input projection and dismissal refinements: 62 tests, renderer typecheck and full changed-code quality gate passed. Disposable preview/window watcher/daemon stopped; Docker cleanup was requested. No paid provider session or push.
+
+## Milestone 7 crosscheck — November 13
+
+Independent crosscheck of 7c93ef6e5f (Claude). Case registry, declared-input withholding, revision-only signatures, local/remote inspection split, draft privacy, stale-draft blocking, dismissal persistence and command-deck recovery held. Three defects found and fixed:
+
+- Saving the open file marked the hint's discovery stale permanently: the hint keeps its own discovery state and only refreshed on connection changes, so refreshing the Discovery page did not help. Opening the hint (or restoring it from the command deck) now re-reads stale owner context, and the stale message has a Refresh project context action.
+- Any inspection limit elsewhere in the project (for example one YAML file above 64 KiB) disabled assistance for every file and hid its CLI status. A partial snapshot no longer blocks an unrelated file; the draft states that the snapshot is partial without naming uninspected files.
+- "Copy reviewed draft", the only handoff for terminal-only or other agents, always failed: the renderer Clipboard API is permission-denied in Orca. It now uses the app's clipboard bridge with a confirmation.
+
+Live dev proof on a disposable profile (workspace 5): Terraform hint and bounded draft on a local project; save then open recovered Prepare; an 84 KB ConfigMap no longer blocked `main.tf`; copied text reached the system clipboard; an unsaved edit disabled Copy with "Draft context changed"; dismissal survived focus events and the command deck restored it. 75 focused tests across 19 files, renderer typecheck and the changed-code gate (base 15a81ddb858a) pass. The earlier five `SidebarHeader.tsx` findings came from a stale local `origin/main` (526ffe38ff), 1,728 commits behind the fork's upstream base; they are upstream code, not fork regressions. Not re-run by Claude: remote/disconnect assistance and native chat appending (no chat session was launched). No push.

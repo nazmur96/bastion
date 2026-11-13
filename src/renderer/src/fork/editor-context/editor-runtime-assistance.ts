@@ -53,13 +53,8 @@ export function assistanceSourceCurrent(
   file: string,
   state: { pending: boolean; error?: string; changedPaths: string[] | null; watchFailed: boolean }
 ): boolean {
-  if (
-    state.pending ||
-    state.error ||
-    state.watchFailed ||
-    state.changedPaths === null ||
-    snapshot.limits.length > 1
-  ) {
+  // A partial snapshot is still current: unrelated uninspected files must not block this file.
+  if (state.pending || state.error || state.watchFailed || state.changedPaths === null) {
     return false
   }
   return !state.changedPaths.some(
@@ -109,6 +104,9 @@ export function boundedAssistanceDraft(
         ? references.map((path) => JSON.stringify(path)).join(', ')
         : 'no inspected declaration for this file'
     }`,
+    ...(snapshot.limits.length > 1
+      ? ['Discovery snapshot is partial: some project files were not inspected.']
+      : []),
     'Deployment target is unverified. Confirm the execution environment and relevant source with the engineer before proposing a change.',
     'Use the declared development environment. Do not install host tools, run commands, retrieve secrets, contact cloud services or change infrastructure. Explain your proposal for human review.'
   ]

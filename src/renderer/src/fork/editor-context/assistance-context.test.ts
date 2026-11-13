@@ -102,3 +102,14 @@ it('changes draft identity for file version, editor owner, workspace, runtime, t
   }
   expect(runtimeAssistanceKey('other', 'main.tf', suggestion, context)).not.toBe(baseline)
 })
+
+it('keeps a partial snapshot usable for an unrelated file and says it is partial', () => {
+  const partial = { ...snapshot, limits: ['bounded', 'Not inspected: big-configmap.yaml'] }
+  expect(assistanceSourceCurrent(partial, 'main.tf', ready)).toBe(true)
+  const draft = boundedAssistanceDraft('main.tf', { tool: 'terraform', available: true }, partial, {
+    errors: 0,
+    warnings: 0
+  })
+  expect(draft).toContain('Discovery snapshot is partial')
+  expect(draft).not.toContain('big-configmap')
+})
