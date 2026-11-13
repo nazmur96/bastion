@@ -1,0 +1,15 @@
+{
+  "capturedAt": "2026-11-13T13:25:04.965Z",
+  "argv": [
+    "docker",
+    "inspect",
+    "bastion-step9-alpha",
+    "bastion-step9-beta",
+    "--format",
+    "{{json .NetworkSettings.Ports}}"
+  ],
+  "exit": 0,
+  "stdout": "{\"4566/tcp\":[{\"HostIp\":\"0.0.0.0\",\"HostPort\":\"14566\"},{\"HostIp\":\"::\",\"HostPort\":\"14566\"}]}\n{\"4566/tcp\":[{\"HostIp\":\"0.0.0.0\",\"HostPort\":\"24566\"},{\"HostIp\":\"::\",\"HostPort\":\"24566\"}]}\n",
+  "stderr": "",
+  "redactions": "Credential-shaped JSON fields removed before writing."
+}

@@ -1,0 +1,9 @@
+{
+  "observationDate": "2026-11-13",
+  "capture": "Transcribed from actual terminal result, session 58458, before engineer renewed login. No exact timestamp retained.",
+  "operation": "sts get-caller-identity",
+  "exit": 255,
+  "stdout": "",
+  "stderr": "\naws: [ERROR]: Your session has expired. Please reauthenticate using 'aws login'.\n",
+  "scope": "CLI credential-provider refusal before STS; not an observed STS ExpiredToken service response."
+}

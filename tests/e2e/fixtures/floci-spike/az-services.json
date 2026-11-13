@@ -1,0 +1,29 @@
+{
+  "capturedAt": "2026-11-13T13:24:50.406Z",
+  "argv": [
+    "docker",
+    "exec",
+    "--user",
+    "0",
+    "-e",
+    "PATH=/opt/docker:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "-e",
+    "DOCKER_HOST=unix:///sockets/docker.sock",
+    "bastion-step9-toolbox",
+    "/opt/floci-mise/installs/github-floci-io-floci-cli/0.4.0/floci",
+    "az",
+    "services",
+    "--container",
+    "bastion-step9-az",
+    "--endpoint",
+    "http://localhost:14577",
+    "--json"
+  ],
+  "exit": 0,
+  "stdout": {
+    "count": 0,
+    "services": []
+  },
+  "stderr": "",
+  "redactions": "Credential-shaped JSON fields removed before writing."
+}

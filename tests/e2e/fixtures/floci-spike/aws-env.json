@@ -1,0 +1,31 @@
+{
+  "capturedAt": "2026-11-13T13:24:49.108Z",
+  "argv": [
+    "docker",
+    "exec",
+    "--user",
+    "0",
+    "-e",
+    "PATH=/opt/docker:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "-e",
+    "DOCKER_HOST=unix:///sockets/docker.sock",
+    "bastion-step9-toolbox",
+    "/opt/floci-mise/installs/github-floci-io-floci-cli/0.4.0/floci",
+    "aws",
+    "env",
+    "--container",
+    "bastion-step9-alpha",
+    "--endpoint",
+    "http://localhost:14566",
+    "--json"
+  ],
+  "exit": 0,
+  "stdout": {
+    "AWS_ENDPOINT_URL": "http://localhost.floci.io:14566",
+    "AWS_ACCESS_KEY_ID": "<redacted>",
+    "AWS_SECRET_ACCESS_KEY": "<redacted>",
+    "AWS_DEFAULT_REGION": "us-east-1"
+  },
+  "stderr": "",
+  "redactions": "Credential-shaped JSON fields removed before writing."
+}

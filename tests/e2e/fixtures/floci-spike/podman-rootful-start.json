@@ -1,0 +1,14 @@
+{
+  "observationDate": "2026-11-13",
+  "socket": "unix:///sockets/podman-rootful.sock",
+  "containerProcessUser": "0 (explicit validation toolbox only)",
+  "exit": 0,
+  "stdout": {
+    "container": "bastion-step9-podman-rootful",
+    "id": "d4fb0a27330e96c153c56b54cc42b8fde2f9e67b48c3995e3cc531e315250d48",
+    "image": "floci/floci:latest",
+    "endpoint": "http://localhost:34566",
+    "state": "running"
+  },
+  "stderr": "Image pull progress omitted; no credential material captured."
+}

@@ -55,19 +55,22 @@ export default function globalSetup(): void {
   }
   if (process.env.SKIP_BUILD && existsSync(outCli)) {
     console.error('[e2e] SKIP_BUILD set and out/cli/index.js exists — skipping CLI build')
-    // Artifact downloads lose executable bits; each runner still needs its local dev launcher.
-    execSync('pnpm run prepare:cli-output', {
+    // Artifact downloads lose executable bits; validation must not install a host launcher.
+    execSync('node config/scripts/verify-cli-bin.mjs --fix-executable --fix-package-json', {
       cwd: root,
       stdio: 'inherit',
       timeout: CLI_E2E_BUILD_TIMEOUT_MS
     })
   } else {
     console.error('[e2e] Building bundled CLI...')
-    execSync('pnpm run build:cli', {
-      cwd: root,
-      stdio: 'inherit',
-      timeout: CLI_E2E_BUILD_TIMEOUT_MS
-    })
+    execSync(
+      'pnpm run build:packages && node config/scripts/build-cli.mjs && node config/scripts/verify-cli-bin.mjs --fix-executable --fix-package-json',
+      {
+        cwd: root,
+        stdio: 'inherit',
+        timeout: CLI_E2E_BUILD_TIMEOUT_MS
+      }
+    )
     console.error('[e2e] CLI build complete.')
   }
   if (process.env.ORCA_E2E_WEB_CLIENT === '1') {

@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-11-13T13:22:38.471Z",
+  "images": [
+    {
+      "requestedImage": "floci/floci:latest",
+      "repoDigests": [
+        "floci/floci@sha256:5ee85db604c4aa74ac76e07ea5cc83086f37bb472bf3dbb97e34019e48efae9c"
+      ]
+    },
+    {
+      "requestedImage": "floci/floci-az:latest",
+      "repoDigests": [
+        "floci/floci-az@sha256:f9d7552c9c02be84f12e266d6201ff52c1f23421af94943cbf687526ded89790"
+      ]
+    },
+    {
+      "requestedImage": "floci/floci-gcp:latest",
+      "repoDigests": [
+        "floci/floci-gcp@sha256:d02e70407d6b37c3e24e31b5ccf100606735cba4f84fd476708b35afd052abb3"
+      ]
+    },
+    {
+      "requestedImage": "floci/floci-oci:latest",
+      "repoDigests": [
+        "floci/floci-oci@sha256:7b976aabefd8a53ebf09df52b788a1b3c3cd4e71f2e0b29efe8f9d8b3954fbd3"
+      ]
+    },
+    {
+      "requestedImage": "public.ecr.aws/aws-cli/aws-cli:2.40.0",
+      "repoDigests": [
+        "public.ecr.aws/aws-cli/aws-cli@sha256:0da258e32b17cc468b2e8812c8d93f5732561b901357c43a207baae0567b195a"
+      ]
+    }
+  ]
+}

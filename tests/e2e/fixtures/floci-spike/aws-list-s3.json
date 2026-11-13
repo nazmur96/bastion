@@ -1,0 +1,33 @@
+{
+  "capturedAt": "2026-11-13T13:24:56.426Z",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "host",
+    "--label",
+    "bastion.validation=step9-spike-aws",
+    "public.ecr.aws/aws-cli/aws-cli:2.40.0",
+    "--endpoint-url",
+    "http://localhost:14566",
+    "--region",
+    "us-east-1",
+    "--no-sign-request",
+    "s3api",
+    "list-buckets",
+    "--output",
+    "json"
+  ],
+  "exit": 0,
+  "stdout": {
+    "Buckets": [],
+    "Owner": {
+      "DisplayName": "floci",
+      "ID": "f7b11509f4d675c3c44f0dd37ca830bb02e8cfa58f04c46283c4bfcbdce1ff45"
+    },
+    "Prefix": null
+  },
+  "stderr": "",
+  "redactions": "Credential-shaped JSON fields removed before writing."
+}

@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-11-13T13:26:17.499Z",
+  "podman": {
+    "podman-rootless.sock": {
+      "remainingOwnedNames": []
+    },
+    "podman-rootful.sock": {
+      "remainingOwnedNames": []
+    },
+    "rootfulRemovedEarlier": "bastion-step9-podman-rootful"
+  },
+  "docker": {
+    "ownedBeforeRemoval": [
+      "kind_cohen",
+      "bastion-step9-beta",
+      "bastion-step9-oci",
+      "bastion-step9-gcp",
+      "bastion-step9-az",
+      "bastion-step9-alpha",
+      "bastion-step9-toolbox"
+    ],
+    "remainingNames": "",
+    "remainingCliNames": ""
+  },
+  "hostLauncherInstalled": false
+}

@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-11-13T13:11:00.293Z",
+  "argv": [
+    "docker",
+    "exec",
+    "--user",
+    "0",
+    "-e",
+    "PATH=/opt/docker:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "-e",
+    "DOCKER_HOST=unix:///sockets/podman-rootless.sock",
+    "bastion-step9-toolbox",
+    "/opt/floci-mise/installs/github-floci-io-floci-cli/0.4.0/floci",
+    "start",
+    "--container",
+    "bastion-step9-podman",
+    "--port",
+    "34566",
+    "--json",
+    "--detach"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "Error response from daemon: no policy.json file found at any of the following: \"<home>/.config/containers/policy.json\", \"/etc/containers/policy.json\"\nError: Failed to pull image: docker command failed with exit code 1\nRun 'floci start --pull never' to skip pulling.\n",
+  "redactions": "Credential-shaped JSON fields and personal home paths removed before capture."
+}

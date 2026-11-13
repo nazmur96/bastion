@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-11-13T13:25:02.417Z",
+  "argv": [
+    "docker",
+    "run",
+    "--rm",
+    "--network",
+    "host",
+    "--label",
+    "bastion.validation=step9-spike-aws",
+    "public.ecr.aws/aws-cli/aws-cli:2.40.0",
+    "--endpoint-url",
+    "http://localhost:14566",
+    "--region",
+    "us-east-1",
+    "--no-sign-request",
+    "s3api",
+    "create-bucket",
+    "--bucket",
+    "bastion-spike-1794576301167",
+    "--output",
+    "json"
+  ],
+  "exit": 0,
+  "stdout": {
+    "Location": "/bastion-spike-1794576301167"
+  },
+  "stderr": "",
+  "redactions": "Credential-shaped JSON fields removed before writing."
+}
