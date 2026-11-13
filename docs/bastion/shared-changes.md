@@ -80,3 +80,11 @@ adapters must resolve their own authoritative owner and review preconditions.
 
 Plugin reuse is recorded in the planning repository's `PLUGIN-REUSE-AUDIT.md`.
 No plugin installation or host tool installation is needed for this slice.
+
+## Crosscheck — November 13 (Claude)
+
+Independent crosscheck of 7abf84d4a7. Live dev proof on a disposable profile (workspace 5): `.env`, a secret-named JSON file, a traversal path and a symlink were refused; a three-file run failed at invalid JSON with the remaining files shown as not run, and a retry preserved both attempts with verification; a saved edit after review blocked the run and invalidated the review; Discovery and File capabilities reopened the same record with the prepared selection kept; a managed Docker SSH project kept the same record across disconnect/reconnect and a killed-and-restarted managed server; a reload during a running remote check left that attempt "Interrupted; completion unknown"; review and run controls received native clicks.
+
+Fixed: path refusals surfaced a serialized schema error (`[{"code":"custom",…}]`) instead of an explanation; they now give a readable reason. The renderer-lifecycle hook read Electron's deprecated positional `did-start-navigation` arguments; it now uses the event details (`isMainFrame`, `isSameDocument`), re-verified live after a main-process rebuild.
+
+Design note: the record identity includes the runtime pairing revision, so a genuine re-pair opens a new record; earlier records remain stored but are not listed. A reconnect or managed-server restart did not change it in practice.

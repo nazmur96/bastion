@@ -37,8 +37,9 @@ export function registerChangeHandlers(): void {
         ledger?.interruptRunning(runIds)
       })
       event.sender.on('render-process-gone', () => ledger?.interruptRunning(runIds))
-      event.sender.on('did-start-navigation', (_navigation, _url, isInPlace, isMainFrame) => {
-        if (isMainFrame && !isInPlace) {
+      // Positional url/isInPlace/isMainFrame arguments are deprecated; read the event details.
+      event.sender.on('did-start-navigation', (details) => {
+        if (details.isMainFrame && !details.isSameDocument) {
           ledger?.interruptRunning(runIds)
         }
       })

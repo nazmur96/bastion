@@ -5,14 +5,23 @@ import { getRuntimeEnvironmentRevision } from '@/runtime/runtime-environment-rev
 import { getDiskBaselineSignature } from '../../../../shared/disk-baseline-signature'
 import { UNRESOLVED_OWNER_HOST_ID } from '../../../../shared/execution-host'
 import {
-  changePathSchema,
   changeSnapshotSchema,
+  isChangeSourcePath,
   type ChangeScope,
   type ChangeSnapshot,
   type SourceCheckCode
 } from '../../../../shared/fork-changes/change-contract'
 import { captureProjectFileRoute } from '../environments/workspace-environment-files'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
+
+/** A readable refusal instead of a raw schema error; the path is the engineer's own input. */
+function assertCheckablePath(path: string): void {
+  if (path.length > 512 || !isChangeSourcePath(path)) {
+    throw new Error(
+      `Cannot check "${path.slice(0, 120)}": use a repository-relative JSON, Terraform, YAML, TOML, Nix, Dockerfile or go.mod path. Secret-named, environment, state and generated files are excluded.`
+    )
+  }
+}
 
 export function captureSourceCheckOwner(projectId: string) {
   const hostId = startWorkspaceHost(projectId)
@@ -42,7 +51,7 @@ export function captureSourceCheckOwner(projectId: string) {
     }
   }
   const read = async (path: string): Promise<string> => {
-    changePathSchema.parse(path)
+    assertCheckablePath(path)
     assertCurrent()
     const parts = path.split('/')
     let directory = route.root
@@ -84,6 +93,7 @@ export function captureSourceCheckOwner(projectId: string) {
     if (!paths.length || paths.length > 20 || new Set(paths).size !== paths.length) {
       throw new Error('Choose between 1 and 20 unique source files.')
     }
+    paths.forEach(assertCheckablePath)
     const files: ChangeSnapshot['files'] = []
     for (const path of [...paths].sort()) {
       files.push({ path, fingerprint: getDiskBaselineSignature(await read(path)) })

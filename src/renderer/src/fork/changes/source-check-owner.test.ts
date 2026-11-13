@@ -66,6 +66,12 @@ describe('source-check file ownership', () => {
     const owner = captureSourceCheckOwner('wt')
     await expect(owner.read('../package.json')).rejects.toThrow()
     await expect(owner.read('secrets.json')).rejects.toThrow()
+    // Refusals are readable sentences, not serialized schema issues.
+    for (const path of ['.env', 'db-secret.json', '../outside.json']) {
+      await expect(owner.snapshot([path])).rejects.toThrow(
+        /^Cannot check ".*": use a repository-relative/
+      )
+    }
     m.dir.mockResolvedValue([{ name: 'package.json', isDirectory: false, isSymlink: true }])
     await expect(owner.read('package.json')).rejects.toThrow('symlinked')
     expect(m.read).not.toHaveBeenCalled()
