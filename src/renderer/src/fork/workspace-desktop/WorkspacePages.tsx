@@ -4,6 +4,7 @@ import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
 import { setInfraView } from '../devops/infra-home-store'
 import { WorkspaceDiscoveryPage } from '../discovery/WorkspaceDiscoveryPage'
+import { WorkspaceChangesPage } from '../changes/WorkspaceChangesPage'
 import { WorkspaceHomePage } from './WorkspaceHomePage'
 import { workspaceNavigation } from './workspace-navigation'
 import { useWorkspacePage } from './workspace-desktop-state'
@@ -36,6 +37,9 @@ export function WorkspacePages(): React.JSX.Element | null {
   }
   if (page === 'discovery') {
     return id ? <WorkspaceDiscoveryPage key={id} worktreeId={id} /> : <ProjectRequired />
+  }
+  if (page === 'changes') {
+    return id ? <WorkspaceChangesPage key={id} worktreeId={id} /> : <ProjectRequired />
   }
   const title = workspaceNavigation().find((item) => item.id === page)?.label
   return (

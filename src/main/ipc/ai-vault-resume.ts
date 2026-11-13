@@ -15,6 +15,7 @@ import { wakeNativeChatTranscriptDistro } from '../native-chat/native-chat-open-
 import { wslDistroForPath } from '../wsl/wsl-unc-access-gate'
 import { copyChatForSideChat } from '../fork/side-chat-conversation-copy'
 import { registerClaudeEditsHandlers } from '../fork/claude-edits/claude-edits-ipc'
+import { registerChangeHandlers } from '../fork/changes/change-ipc'
 import {
   registerDevopsContextHandlers,
   registerDevopsHandlers,
@@ -41,6 +42,7 @@ export function registerAiVaultResumeHandler(options: AiVaultResumeHandlerOption
     return copyChatForSideChat(source)
   })
   registerClaudeEditsHandlers()
+  registerChangeHandlers()
   registerDevopsHandlers()
   registerDevopsSandboxHandlers()
   registerDevopsContextHandlers()

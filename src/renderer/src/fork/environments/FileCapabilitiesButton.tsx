@@ -9,6 +9,7 @@ import { usePluginSyntaxes } from '@/store/plugin-syntax-packs'
 import { fileCapabilities } from './file-capabilities'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
 import { openWorkspacePage } from '../workspace-desktop/workspace-desktop-state'
+import { openChanges } from '../changes/change-navigation'
 
 export function FileCapabilitiesButton({
   worktreeId,
@@ -78,6 +79,16 @@ export function FileCapabilitiesButton({
               'Syntax support does not install project tools. Language-server connections are not available through Orca syntax packs.'
             )}
           </p>
+          <button
+            type="button"
+            className="workspace-button"
+            onClick={() => {
+              setOpen(false)
+              openChanges('source', [file.relativePath])
+            }}
+          >
+            {translate('changes.open', 'Open project change')}
+          </button>
           <button
             type="button"
             className="workspace-button"

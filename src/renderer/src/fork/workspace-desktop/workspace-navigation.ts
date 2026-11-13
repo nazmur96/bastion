@@ -4,6 +4,7 @@ import {
   Cloud,
   FileCode2,
   GitBranch,
+  ListChecks,
   LayoutGrid,
   Rocket,
   ScanSearch,
@@ -43,6 +44,12 @@ export function workspaceNavigation() {
       label: translate('workspaceDesktop.agents', 'Agent dashboard'),
       icon: Sparkles,
       group: 0
+    },
+    {
+      id: 'changes',
+      label: translate('changes.title', 'Changes & runs'),
+      icon: ListChecks,
+      group: 1
     },
     {
       id: 'environments',

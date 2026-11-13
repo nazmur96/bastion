@@ -8,6 +8,7 @@ import type {
   ZcodePlanCredentialsApi
 } from './api/agent-account-api'
 import type { ProjectWorkspacesApi } from '../shared/fork-project-workspaces'
+import type { ChangesApi } from '../shared/fork-changes/change-contract'
 import type { HooksApi } from './api/agent-hook-api'
 import type { SkillsApi } from './api/agent-skill-api'
 import type { AgentAwakeApi, AgentStatusApi } from './api/agent-status-api'
@@ -80,6 +81,7 @@ export type PreloadApi = {
   app: AppApi
   orcaProfiles: OrcaProfileApi
   projectWorkspaces?: ProjectWorkspacesApi
+  changes?: ChangesApi
   platform: PlatformApi
   e2e: E2EApi
   repos: RepositoryApi

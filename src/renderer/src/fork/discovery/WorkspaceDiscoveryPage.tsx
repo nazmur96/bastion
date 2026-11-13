@@ -7,6 +7,7 @@ import { showWorkspaceEditor } from '../workspace-desktop/WorkspaceQuickActions'
 import { captureProjectFileRoute } from '../environments/workspace-environment-files'
 import { CONTRACT_FILE, SERVICE_QUESTIONS, draftServiceContract } from './service-knowledge'
 import { useProjectDiscovery } from './use-project-discovery'
+import { openChanges } from '../changes/change-navigation'
 
 export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): React.JSX.Element {
   const [view, setView] = useState<'evidence' | 'contract'>('evidence')
@@ -126,6 +127,18 @@ export function WorkspaceDiscoveryPage({ worktreeId }: { worktreeId: string }): 
         )}
       </section>
       <div className="workspace-card-actions mb-5">
+        <button
+          type="button"
+          className="workspace-button"
+          onClick={() =>
+            openChanges(
+              'discovery',
+              facts.flatMap((fact) => fact.evidence.map((evidence) => evidence.path))
+            )
+          }
+        >
+          {translate('changes.open', 'Open project change')}
+        </button>
         <button
           type="button"
           className="workspace-button"

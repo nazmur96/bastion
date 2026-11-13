@@ -10,6 +10,7 @@ export type WorkspacePage =
   | 'discovery'
   | 'editor'
   | 'source'
+  | 'changes'
   | 'agents'
   | 'environments'
   | 'cloud'
