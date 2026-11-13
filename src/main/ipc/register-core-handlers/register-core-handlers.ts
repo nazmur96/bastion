@@ -85,6 +85,7 @@ import {
   setTrustedClipboardRendererWebContentsId
 } from '../../window/clipboard-ipc-handlers'
 import { isDashboardPopoutRenderer } from '../../window/dashboard-popout-window'
+import { registerCloudTargetHandlers } from '../../fork/cloud/cloud-target-ipc'
 import type { ClaudeUsageStore } from '../../claude-usage/store'
 import type { CodexUsageStore } from '../../codex-usage/store'
 import type { OpenCodeUsageStore } from '../../opencode-usage/store'
@@ -246,6 +247,7 @@ export function registerCoreHandlers(
     onAfterSignOut: lifecycleOptions.onAfterOrcaProfileSignOut
   })
   registerProjectWorkspaceHandlers(store, lifecycleOptions.onBeforeRelaunch)
+  registerCloudTargetHandlers(store, runtime)
   registerBrowserHandlers()
   registerShellHandlers(store)
   registerPetHandlers()

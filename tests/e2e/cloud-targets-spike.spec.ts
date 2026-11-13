@@ -6,8 +6,6 @@ import { expect, test } from '@playwright/test'
 
 const execute = promisify(execFile)
 const captureDirectory = process.env.ORCA_FLOCI_SPIKE_CAPTURE_DIR
-const toolbox = process.env.ORCA_FLOCI_SPIKE_TOOLBOX ?? 'bastion-step9-toolbox'
-const cli = '/opt/floci-mise/installs/github-floci-io-floci-cli/0.4.0/floci'
 const awsImage = 'public.ecr.aws/aws-cli/aws-cli:2.40.0'
 
 function redact(value: unknown, key = ''): unknown {
@@ -25,8 +23,8 @@ function redact(value: unknown, key = ''): unknown {
   return value
 }
 
-async function capture(name: string, args: string[]) {
-  const result = await execute('docker', args, { timeout: 60_000, maxBuffer: 2_000_000 }).then(
+async function capture(name: string, args: string[], command = 'docker', env = process.env) {
+  const result = await execute(command, args, { timeout: 60_000, maxBuffer: 2_000_000, env }).then(
     ({ stdout, stderr }) => ({ exit: 0, stdout, stderr }),
     (error: unknown) => {
       if (!(error instanceof Error)) {
@@ -52,29 +50,14 @@ async function capture(name: string, args: string[]) {
     await mkdir(captureDirectory, { recursive: true })
     await writeFile(
       path.join(captureDirectory, `${name}.json`),
-      `${JSON.stringify({ capturedAt: new Date().toISOString(), argv: ['docker', ...args], ...result, stdout: redact(output), redactions: 'Credential-shaped JSON fields removed before writing.' }, null, 2)}\n`
+      `${JSON.stringify({ capturedAt: new Date().toISOString(), argv: [command, ...args], ...result, stdout: redact(output), redactions: 'Credential-shaped JSON fields removed before writing.' }, null, 2)}\n`
     )
   }
   return result
 }
 
-function floci(
-  product: string,
-  command: string,
-  container: string,
-  port: number,
-  socket = 'docker.sock'
-) {
+function floci(product: string, command: string, container: string, port: number) {
   return [
-    'exec',
-    '--user',
-    '0',
-    '-e',
-    'PATH=/opt/docker:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-    '-e',
-    `DOCKER_HOST=unix:///sockets/${socket}`,
-    toolbox,
-    cli,
     product,
     command,
     '--container',
@@ -106,6 +89,19 @@ function aws(port: number, ...operation: string[]) {
 }
 
 test.describe('9.0 disposable Floci spike', () => {
+  test.beforeEach(async () => {
+    const available = await execute('floci', ['--version'], {
+      timeout: 10_000,
+      env: { ...process.env, MISE_AUTO_INSTALL: '0' }
+    }).then(
+      () => true,
+      () => false
+    )
+    test.skip(
+      !available,
+      'Requires floci on PATH from a dev shell or managed project; never installs tools.'
+    )
+  })
   test.skip(
     process.env.ORCA_FLOCI_SPIKE !== '1',
     'Requires explicitly provisioned disposable emulators; see fixture README.'
@@ -121,7 +117,8 @@ test.describe('9.0 disposable Floci spike', () => {
       for (const command of ['status', 'env', 'services']) {
         const result = await capture(
           `${product}-${command}`,
-          floci(product, command, container, port)
+          floci(product, command, container, port),
+          'floci'
         )
         expect(result.exit, `${product} ${command}: ${result.stderr}`).toBe(0)
         expect(() => JSON.parse(result.stdout)).not.toThrow()
@@ -129,7 +126,8 @@ test.describe('9.0 disposable Floci spike', () => {
     }
     const version = await capture(
       'aws-version',
-      floci('aws', 'version', 'bastion-step9-alpha', 14566)
+      floci('aws', 'version', 'bastion-step9-alpha', 14566),
+      'floci'
     )
     expect(version.exit, version.stderr).toBe(0)
   })
@@ -190,7 +188,9 @@ test.describe('9.0 disposable Floci spike', () => {
     )
     const result = await capture(
       'podman-rootful-status',
-      floci('aws', 'status', 'bastion-step9-podman-rootful', 34566, 'podman-rootful.sock')
+      floci('aws', 'status', 'bastion-step9-podman-rootful', 34566),
+      'floci',
+      { ...process.env, DOCKER_HOST: process.env.ORCA_FLOCI_SPIKE_PODMAN_SOCKET }
     )
     expect(result.exit, result.stderr).toBe(0)
     expect(JSON.parse(result.stdout)).toHaveProperty('reachable', true)

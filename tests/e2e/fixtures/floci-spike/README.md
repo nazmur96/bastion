@@ -1,6 +1,7 @@
 # Floci 9.0 captured fixtures
 
-Captured 2026-11-13 from Floci CLI **0.4.0**, pinned in root `mise.toml`.
+Captured 2026-11-13 from Floci CLI **0.4.0**. The temporary root mise pin used
+for the spike was removed during 9.1 review: this app uses flake.nix.
 These are observations, not mock claims or guarantees of full emulator API coverage.
 Every command capture records argv, exit status, stdout, stderr and timestamp where
 retained. Credential-shaped JSON values were redacted in memory **before writing**,
@@ -23,19 +24,16 @@ pinning the CLI alone does not pin emulator behavior.
 
 ## Reproducing the spike
 
-This is an explicitly provisioned Linux reference harness, not product setup. Do not
-install these tools on the host. Supply a disposable tooling container named
-`bastion-step9-toolbox` (override with `ORCA_FLOCI_SPIKE_TOOLBOX`) with host networking,
-the checkout as its working directory and Docker-compatible sockets mounted under
-`/sockets`. Inside it, use `mise use --pin github:floci-io/floci-cli@0.4.0`.
-The captured layout has the downloaded Floci binary at
-`/opt/floci-mise/installs/github-floci-io-floci-cli/0.4.0/floci` and Docker CLI 28.5.2
-under `/opt/docker`. Docker CLI is required: Floci shells out to it. All tool downloads
-must remain container-local. If a temporary mount is noexec, use executable storage
-inside that same disposable container, not a host install.
+This is an explicitly provisioned Linux reference harness, not product setup.
+The opt-in tests require `floci` on PATH and skip when it is unavailable. Supply it
+from an existing dev shell or a managed project's pinned environment; the tests never
+install it. This app's tooling owner is `flake.nix`, with no root mise.toml.
+The historical captures used a disposable toolbox and container-local binaries;
+the current test runner invokes the available CLI directly, without assuming that
+old toolbox, root process or filesystem layout exists.
 
-Using the pinned image digests, run Floci inside the toolbox with
-`DOCKER_HOST=unix:///sockets/docker.sock`, the recorded `--container` and `--port`:
+Using the pinned image digests, run Floci from the chosen environment using its authorized Docker-compatible socket
+and the recorded `--container` and `--port`:
 AWS Alpha 14566, AWS Beta 24566, Azure 14577, GCP 14588, OCI 14599.
 Start and wait for readiness before captures; `--detach` alone does not prove readiness.
 The CLI defaults bind published ports on all interfaces; isolate the test machine
@@ -51,7 +49,7 @@ ORCA_BACKGROUND_LAUNCH=1 ORCA_FLOCI_SPIKE=1 \
 
 Optional `ORCA_FLOCI_SPIKE_PODMAN=1` checks a separately provisioned rootful Podman
 instance named `bastion-step9-podman-rootful` on port 34566, through its explicit
-`/sockets/podman-rootful.sock`. Socket access must already be authorized; the harness
+`ORCA_FLOCI_SPIKE_PODMAN_SOCKET` environment value. Socket access must already be authorized; the harness
 neither reconfigures the workstation nor escalates the desktop app.
 
 AWS CLI 2.40.0 runs in disposable official containers with **no credential mount**,

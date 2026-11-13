@@ -7,7 +7,6 @@ import { cancelSteps, runSteps } from './devops-step-runner'
 import { addDevpodRecipe } from './devops-devpod-recipe'
 import { readWorkloadMetrics } from './devops-metrics'
 import { runRepoScan } from './devops-scan'
-import { readCloudReadiness } from './devops-cloud'
 import { readLocalDeployPlan } from './devops-local-deploy'
 import { readRepoDocs, setRepoTrackerItem } from './devops-docs'
 import { readPullRequest, readTimeline } from './devops-timeline'
@@ -116,11 +115,9 @@ export function registerDevopsDay2Handlers(): void {
       ? runRepoScan(workspacePath)
       : { ok: false, error: 'Needs a local workspace.' }
   )
-  ipcMain.handle('aiVault:cloudReadiness', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath)
-      ? readCloudReadiness(workspacePath)
-      : { error: 'Needs a local workspace.' }
-  )
+  ipcMain.handle('aiVault:cloudReadiness', () => ({
+    error: 'Cloud verification is unavailable. Manage target metadata in Cloud Connections.'
+  }))
   ipcMain.handle('aiVault:localDeployPlan', async (_event, request: unknown) => {
     const field = (key: string): unknown =>
       typeof request === 'object' && request !== null ? Reflect.get(request, key) : null

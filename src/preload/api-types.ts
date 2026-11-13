@@ -9,6 +9,7 @@ import type {
 } from './api/agent-account-api'
 import type { ProjectWorkspacesApi } from '../shared/fork-project-workspaces'
 import type { ChangesApi } from '../shared/fork-changes/change-contract'
+import type { CloudTargetsApi } from '../shared/fork-cloud/cloud-target-contract'
 import type { HooksApi } from './api/agent-hook-api'
 import type { SkillsApi } from './api/agent-skill-api'
 import type { AgentAwakeApi, AgentStatusApi } from './api/agent-status-api'
@@ -82,6 +83,7 @@ export type PreloadApi = {
   orcaProfiles: OrcaProfileApi
   projectWorkspaces?: ProjectWorkspacesApi
   changes?: ChangesApi
+  cloudTargets?: CloudTargetsApi
   platform: PlatformApi
   e2e: E2EApi
   repos: RepositoryApi

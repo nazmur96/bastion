@@ -3,6 +3,8 @@ import type { ElectronApplication } from '@stablyai/playwright-test'
 /** Per-launch options for `createRestartSession().launch`. */
 export type LaunchOptions = {
   extraArgs?: string[]
+  /** Home has no workbench store. */
+  waitForWorkbench?: boolean
   // Attach stderr before firstWindow so startup guard/metrics logs cannot be missed.
   onStderr?: (chunk: string) => void
   /** Merged into this launch only (not baked into the session's shared env). */

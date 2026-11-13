@@ -7,6 +7,7 @@ import { appApi } from './api/app-bridge'
 import { orcaProfilesApi } from './api/orca-profiles-bridge'
 import { projectWorkspacesApi } from './api/project-workspaces-bridge'
 import { changesApi } from './api/changes-bridge'
+import { cloudTargetsApi } from './api/cloud-targets-bridge'
 import { platformApi } from './api/platform-bridge'
 import { wslApi } from './api/wsl-bridge'
 import { wslMoveApi } from './api/wsl-move-bridge'
@@ -109,6 +110,7 @@ const api = {
   orcaProfiles: orcaProfilesApi,
   projectWorkspaces: projectWorkspacesApi,
   changes: changesApi,
+  cloudTargets: cloudTargetsApi,
   platform: platformApi,
   wsl: wslApi,
   wslMove: wslMoveApi,
