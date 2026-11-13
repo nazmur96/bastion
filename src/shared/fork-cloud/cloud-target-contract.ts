@@ -97,6 +97,7 @@ export type CloudTargetCode =
   | 'conflict'
   | 'workspace'
   | 'owner'
+  | 'limit'
   | 'storage'
 export const cloudTargetMessages: Record<CloudTargetCode, string> = {
   invalid: 'Invalid cloud target metadata.',
@@ -104,6 +105,7 @@ export const cloudTargetMessages: Record<CloudTargetCode, string> = {
   conflict: 'Cloud targets changed. Refresh and try again.',
   workspace: 'Cloud targets require a project workspace.',
   owner: 'Cloud targets are not available on this runtime.',
+  limit: 'This workspace already has 200 cloud targets. Remove one before adding another.',
   storage: 'Cloud target storage is unavailable.'
 }
 export class CloudTargetRefusal extends Error {

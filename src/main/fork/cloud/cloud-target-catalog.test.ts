@@ -64,6 +64,20 @@ describe('workspace cloud catalog', () => {
     a.mutate(2, { kind: 'remove', id: target.id })
     expect(a.snapshot().targets).toEqual([])
   })
+  it('counts only live targets toward the limit, so removed targets never block adding', () => {
+    const c = open()
+    let revision = 0
+    for (let i = 0; i < 205; i++) {
+      c.mutate(revision++, { kind: 'add', ...input })
+      c.mutate(revision++, { kind: 'remove', id: c.snapshot().targets[0].id })
+    }
+    c.mutate(revision++, { kind: 'add', ...input })
+    expect(c.snapshot().targets).toHaveLength(1)
+    for (let i = 1; i < 200; i++) {
+      c.mutate(revision++, { kind: 'add', ...input })
+    }
+    expect(() => c.mutate(revision, { kind: 'add', ...input })).toThrow('200 cloud targets')
+  })
   it('rejects stale writers and fences A-B-A selections with monotonic generations', () => {
     const p = root(),
       a = open(p),

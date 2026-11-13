@@ -120,6 +120,6 @@ test.describe('cloud metadata behavior', () => {
       return frame.toPNG().toString('base64')
     }, orcaPage.url())
     expect(png.length).toBeGreaterThan(20000)
-    writeFileSync('.handoff/step9-1/connections.png', Buffer.from(png, 'base64'))
+    writeFileSync(test.info().outputPath('connections.png'), Buffer.from(png, 'base64'))
   })
 })

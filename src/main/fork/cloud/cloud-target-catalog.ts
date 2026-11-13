@@ -121,9 +121,9 @@ export class CloudTargetCatalog {
     this.transaction(revision, () => {
       const now = Date.now()
       if (mutation.kind === 'add') {
-        const count = this.db.prepare('SELECT COUNT(*) AS count FROM targets').get()
-        if (!count || typeof count.count !== 'number' || count.count >= 200) {
-          throw new CloudTargetRefusal('storage')
+        // Removed targets stay as tombstones for history; only live targets count toward the limit.
+        if (this.snapshot().targets.length >= 200) {
+          throw new CloudTargetRefusal('limit')
         }
         this.saveTarget({
           id: randomUUID(),
