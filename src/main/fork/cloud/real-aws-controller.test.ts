@@ -146,6 +146,24 @@ describe('real AWS identity and batch fencing', () => {
     )
     await expect(controller.read(projectId, targetId, 'resources')).rejects.toThrow('identity')
   })
+  it('looks up an assumed role only to propose or match a role anchor', async () => {
+    const assumed = {
+      Account: '000000000000',
+      Arn: 'arn:aws:sts::000000000000:assumed-role/Fixture/fixture-session',
+      UserId: 'AROA00000000000000000:fixture-session'
+    }
+    call.mockImplementation(async (_tool, _env, _root, operation) => {
+      if (operation === 'role') {
+        throw new RealAwsFailure('cli-failed')
+      }
+      return structuredClone(operation === 'identity' ? assumed : responses[operation])
+    })
+    // An unreadable role lookup leaves an account-only anchor instead of blocking verification.
+    expect(await anchor()).toMatchObject({ roleArn: null, anchored: true })
+    call.mockClear()
+    await controller.read(projectId, targetId, 'resources')
+    expect(call.mock.calls.map((args) => args[3])).not.toContain('role')
+  })
   it('preserves independent denied results but aborts on classified service expiry', async () => {
     await anchor()
     call.mockImplementation(async (_tool, _env, _root, operation) => {

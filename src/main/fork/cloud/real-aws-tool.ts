@@ -34,10 +34,9 @@ function pin(root: string): { version: string; fingerprint: string } {
   if (!tools || typeof tools !== 'object' || Array.isArray(tools)) {
     throw new RealAwsFailure('tool-unavailable')
   }
-  const pins = Object.entries(tools).filter(
-    ([name]) => name === 'aws-cli' || name === 'aqua:aws/aws-cli'
-  )
-  if (pins.length !== 1) {
+  // Only the aws-cli registry backend has a known install layout; another AWS CLI backend refuses.
+  const pins = Object.entries(tools).filter(([name]) => name.includes('aws-cli'))
+  if (pins.length !== 1 || pins[0][0] !== 'aws-cli') {
     throw new RealAwsFailure('tool-unavailable')
   }
   const value = pins[0][1]

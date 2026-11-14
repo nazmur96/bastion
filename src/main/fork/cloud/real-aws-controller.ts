@@ -23,6 +23,15 @@ const identitySchema = z.object({
     .regex(/^arn:aws:(iam|sts)::\d{12}:/),
   UserId: z.string().min(1).max(256)
 })
+/** Failures that end the whole batch: authentication, identity, owner or tool changed. */
+const STICKY: string[] = [
+  'cli-session-expired',
+  'service-token-expired',
+  'auth-unavailable',
+  'identity-mismatch',
+  'owner-changed',
+  'tool-unavailable'
+]
 export class RealAwsController {
   private closed = false
   close(): void {
@@ -93,23 +102,14 @@ export class RealAwsController {
         context.current()
         return value
       } catch (error) {
-        if (
-          error instanceof RealAwsFailure &&
-          [
-            'cli-session-expired',
-            'service-token-expired',
-            'auth-unavailable',
-            'identity-mismatch',
-            'owner-changed',
-            'tool-unavailable'
-          ].includes(error.code)
-        ) {
+        if (error instanceof RealAwsFailure && STICKY.includes(error.code)) {
           failed ??= error
         }
         throw error
       }
     }
-    const check = async (): Promise<RealAwsIdentity> => {
+    // The IAM role lookup runs only to propose a role anchor or to match an expected one.
+    const check = async (proveRole: boolean): Promise<RealAwsIdentity> => {
       let observed
       try {
         observed = identitySchema.parse(await call('identity', {}))
@@ -128,7 +128,7 @@ export class RealAwsController {
       }
       let roleArn: string | null = null
       const role = /^arn:aws:sts::\d{12}:assumed-role\/([^/]+)\/[^/]+$/.exec(observed.Arn)
-      if (role) {
+      if (role && (proveRole || config.expectedRoleArn)) {
         try {
           const response = z
             .object({
@@ -146,8 +146,11 @@ export class RealAwsController {
           }
           roleArn = response.Role.Arn
         } catch (error) {
+          // Without a role expectation an unproven role leaves an account-only anchor.
           if (
-            !(error instanceof RealAwsFailure && error.code === 'denied' && !config.expectedRoleArn)
+            config.expectedRoleArn ||
+            !(error instanceof RealAwsFailure) ||
+            STICKY.includes(error.code)
           ) {
             throw error
           }
@@ -199,7 +202,7 @@ export class RealAwsController {
   async verify(projectId: string, targetId: string): Promise<RealAwsIdentity> {
     return this.exclusive(projectId, targetId, async () => {
       const session = await this.session(projectId, targetId),
-        identity = await session.check()
+        identity = await session.check(true)
       session.context.current()
       session.tool.assertCurrent()
       for (const [id, previous] of this.observations) {
@@ -237,7 +240,7 @@ export class RealAwsController {
       ) {
         throw new RealAwsFailure('owner-changed')
       }
-      const fresh = await session.check()
+      const fresh = await session.check(true)
       if (!this.sameIdentity(fresh, previous.identity)) {
         throw new RealAwsFailure('identity-mismatch')
       }
@@ -261,12 +264,12 @@ export class RealAwsController {
       if (!session.context.configuration.expectedAccountId) {
         throw new RealAwsFailure('identity-required')
       }
-      const before = await session.check()
+      const before = await session.check(false)
       const data =
         operation === 'resources'
           ? await listRealAwsResources(session.call, before.accountId)
           : await readRealAwsBudgets(session.call, before.accountId)
-      const after = await session.check()
+      const after = await session.check(false)
       if (!this.sameIdentity(before, after)) {
         throw new RealAwsFailure('identity-mismatch')
       }
