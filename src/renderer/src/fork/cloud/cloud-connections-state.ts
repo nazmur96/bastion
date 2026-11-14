@@ -1,3 +1,9 @@
+import {
+  performRealCloudAction,
+  sameRealSelection,
+  type RealCloudState,
+  type RealCloudAction
+} from './real-cloud-actions'
 import { createBrowserUuid } from '@/lib/browser-uuid'
 import type { FlociView, FlociAction } from '../../../../shared/fork-cloud/floci-contract'
 import type {
@@ -10,6 +16,7 @@ export type ConnectionsState = {
   snapshot: CloudConnectionsSnapshot | null
   pending: boolean
   runtime?: FlociView | null
+  real?: RealCloudState | null
   error: string | null
 }
 export class CloudConnectionsState {
@@ -43,6 +50,7 @@ export class CloudConnectionsState {
   }
   async load(projectId: string, scope: string, refresh = false): Promise<void> {
     const epoch = ++this.epoch
+    const previous = this.state
     const same = this.state.scope === scope
     this.publish({ scope, snapshot: same ? this.state.snapshot : null, pending: true, error: null })
     try {
@@ -75,6 +83,7 @@ export class CloudConnectionsState {
         scope,
         snapshot: result.snapshot,
         runtime: runtime?.ok ? runtime.runtime : null,
+        real: same && sameRealSelection(previous.snapshot, result.snapshot) ? previous.real : null,
         pending: false,
         error: runtime && !runtime.ok ? runtime.message : null
       })
@@ -129,6 +138,38 @@ export class CloudConnectionsState {
           ...this.state,
           pending: false,
           error: 'Lifecycle request could not be confirmed. Refresh this instance before retrying.'
+        })
+      }
+    } finally {
+      this.writing = false
+      if (this.dirty && this.state.scope === scope) {
+        this.dirty = false
+        void this.load(snapshot.projectId, scope)
+      }
+    }
+  }
+  async realAction(operation: RealCloudAction): Promise<void> {
+    const { snapshot, scope, real } = this.state,
+      api = this.api()
+    if (!snapshot || !api || this.state.pending) {
+      return
+    }
+    const epoch = ++this.epoch
+    this.writing = true
+    this.dirty = false
+    this.publish({ ...this.state, pending: true })
+    try {
+      const result = await performRealCloudAction(api, snapshot, real, operation)
+      if (epoch !== this.epoch) {
+        return
+      }
+      this.publish({ ...this.state, snapshot: result.snapshot, real: result.real, pending: false })
+    } catch {
+      if (epoch === this.epoch) {
+        this.publish({
+          ...this.state,
+          pending: false,
+          real: { identity: null, error: 'Real AWS context could not be confirmed. Verify again.' }
         })
       }
     } finally {

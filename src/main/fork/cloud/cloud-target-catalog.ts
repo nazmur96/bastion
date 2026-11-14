@@ -144,7 +144,13 @@ export class CloudTargetCatalog {
       if (!target) {
         throw new CloudTargetRefusal('unavailable')
       }
-      if (mutation.kind === 'rename') {
+      if (mutation.kind === 'update-real') {
+        if (target.configuration.kind !== 'real' || mutation.configuration.kind !== 'real') {
+          throw new CloudTargetRefusal('invalid')
+        }
+        target.configuration = mutation.configuration
+        target.configRevision++
+      } else if (mutation.kind === 'rename') {
         target.label = mutation.label
         target.displayRevision++
       } else {

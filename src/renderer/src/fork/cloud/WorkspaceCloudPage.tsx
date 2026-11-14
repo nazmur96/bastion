@@ -1,3 +1,4 @@
+import { RealAwsCard } from './RealAwsCard'
 import { FlociRuntimeCard } from './FlociRuntimeCard'
 import { FlociResourcesCard } from './FlociResourcesCard'
 import { useEffect, useState, useSyncExternalStore } from 'react'
@@ -69,6 +70,14 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           projectId={worktreeId}
           target={selected}
           runtime={runtime}
+        />
+      )}
+      {local && selected?.configuration.kind === 'real' && (
+        <RealAwsCard
+          key={selected.id}
+          target={selected}
+          state={state.scope === scope ? state.real : null}
+          pending={pending}
         />
       )}
       <section className="workspace-card space-y-4">

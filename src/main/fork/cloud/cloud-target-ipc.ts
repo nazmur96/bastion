@@ -1,3 +1,4 @@
+import { registerRealAwsHandlers } from './real-aws-ipc'
 import { z } from 'zod'
 import { CloudWorkspaceProvider } from './cloud-workspace-provider'
 import { setCloudBindingAuthority } from './cloud-binding-authority'
@@ -58,6 +59,7 @@ export function registerCloudTargetHandlers(
     )
     return provider
   }
+  registerRealAwsHandlers(requireProvider)
   setCloudBindingAuthority({
     capture: (scope) => {
       if (!provider) {

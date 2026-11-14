@@ -16,6 +16,9 @@ const mocks = vi.hoisted(() => ({
     workspace: { id: 'workspace-fixture' },
     incognito: false
   },
+  spawn: vi.fn(() => {
+    throw new Error('Direct child_process execution is forbidden')
+  }),
   run: vi.fn(async () => {
     throw new Error('This specification test must not start a process')
   })
@@ -26,6 +29,11 @@ vi.mock('electron', () => ({
     handle: (name: string, handler: (event: unknown, raw: unknown) => Promise<unknown>) =>
       mocks.handlers.set(name, handler)
   }
+}))
+vi.mock('node:child_process', async (load) => ({
+  ...(await load<Record<string, unknown>>()),
+  spawn: mocks.spawn,
+  execFile: mocks.spawn
 }))
 vi.mock('@orca/process-host', async (original) => ({
   ...(await original<typeof ProcessHost>()),
@@ -105,6 +113,7 @@ afterEach(() => {
   }
   mocks.quits.clear()
   mocks.handlers.clear()
+  expect(mocks.spawn).not.toHaveBeenCalled()
   rmSync(root, { recursive: true, force: true })
 })
 
@@ -155,6 +164,20 @@ describe('9.3 read-only AWS owner refusals (no AWS or mise execution)', () => {
         requestId: '20000000-0000-4000-8000-000000000001'
       })
     ).toMatchObject({ ok: false, code: 'consent-required' })
+    expect(mocks.run).not.toHaveBeenCalled()
+  })
+  it('RA-01 refuses Home and Incognito before owner or process resolution', async () => {
+    Object.assign(mocks.context, { workspace: null })
+    expect(await request('verifyRealTarget', { projectId, targetId })).toMatchObject({
+      ok: false,
+      code: 'workspace'
+    })
+    Object.assign(mocks.context, { workspace: { id: 'workspace-fixture' }, incognito: true })
+    expect(await request('verifyRealTarget', { projectId, targetId })).toMatchObject({
+      ok: false,
+      code: 'workspace'
+    })
+    expect(runtime.resolveRuntimeFileTarget).not.toHaveBeenCalled()
     expect(mocks.run).not.toHaveBeenCalled()
   })
   it('RA-01 refuses a child frame before project, tool or credential resolution', async () => {

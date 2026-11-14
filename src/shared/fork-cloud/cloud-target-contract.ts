@@ -1,3 +1,9 @@
+import type {
+  RealAwsResult,
+  RealAwsIdentity,
+  RealAwsResources,
+  RealAwsBudgets
+} from './real-aws-contract'
 import type { FlociAction, FlociResult } from './floci-contract'
 import type { CloudBinding } from './cloud-binding'
 import type { FlociResourcesResult, FlociTargetEnvResult } from './floci-resources-contract'
@@ -56,6 +62,13 @@ export const cloudConfigurationSchema = z.discriminatedUnion('kind', [
 ])
 export const cloudMutationSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('add'), label, configuration: cloudConfigurationSchema }).strict(),
+  z
+    .object({
+      kind: z.literal('update-real'),
+      id: z.string().uuid(),
+      configuration: cloudConfigurationSchema.refine((value) => value.kind === 'real')
+    })
+    .strict(),
   z.object({ kind: z.literal('rename'), id: z.string().uuid(), label }).strict(),
   z.object({ kind: z.literal('remove'), id: z.string().uuid() }).strict()
 ])
@@ -131,6 +144,28 @@ export const cloudRequestSchema = z
   .strict()
 export type CloudRequest = z.infer<typeof cloudRequestSchema>
 export type CloudTargetsApi = {
+  verifyRealTarget?: (args: {
+    projectId: string
+    targetId: string
+  }) => Promise<RealAwsResult<RealAwsIdentity>>
+  acceptRealIdentity?: (args: {
+    projectId: string
+    targetId: string
+    observationId: string
+    revision: number
+  }) => Promise<RealAwsResult<RealAwsIdentity>>
+  readRealTarget?: (args: {
+    projectId: string
+    targetId: string
+    requestId: string
+    operation: 'resources' | 'budgets' | 'cost-and-usage'
+  }) => Promise<
+    RealAwsResult<{
+      identity: RealAwsIdentity
+      data: RealAwsResources | RealAwsBudgets
+      operations: string[]
+    }>
+  >
   read: (projectId: string) => Promise<CloudTargetResult>
   update: (request: CloudRequest) => Promise<CloudTargetResult>
   readRuntime?: (args: {

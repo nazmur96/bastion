@@ -1,3 +1,8 @@
+# Deferred real AWS binding (9.7)
+
+G13 moves these three RA-07 contracts to 9.7. No real binding, authorization generation or migration is part of 9.3a. Original names and test bodies follow for reactivation before that implementation.
+
+```ts
 import { describe, expect, it } from 'vitest'
 import { cloudBindingSchema, sameCloudBinding } from '../../../shared/fork-cloud/cloud-binding'
 import { changeSnapshotSchema } from '../../../shared/fork-changes/change-contract'
@@ -68,3 +73,4 @@ describe('9.3 real AWS binding contracts (red until Part G implementation)', () 
     ).toBe(false)
   })
 })
+```

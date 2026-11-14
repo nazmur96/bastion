@@ -1,3 +1,5 @@
+import { RealAwsController } from './real-aws-controller'
+import { RealAwsFailure } from '../../../shared/fork-cloud/real-aws-contract'
 import { createHash } from 'node:crypto'
 import type { Store } from '../../persistence'
 import type { ChangeScope, ChangeSnapshot } from '../../../shared/fork-changes/change-contract'
@@ -19,6 +21,7 @@ import type { CloudTargetCatalog } from './cloud-target-catalog'
 
 type OwnerStore = Pick<Store, 'getRepos' | 'getFolderWorkspaces' | 'getProjectGroups'>
 export class CloudWorkspaceProvider {
+  readonly real: RealAwsController
   readonly ledger: ChangeLedger
   readonly controller: FlociController
   constructor(
@@ -29,6 +32,50 @@ export class CloudWorkspaceProvider {
     private readonly runtime: CloudProjectRuntime,
     notify: () => void
   ) {
+    this.real = new RealAwsController(
+      catalog,
+      async (projectId, targetId) => {
+        const context = await this.selected(projectId, targetId)
+        const snapshot = catalog.snapshot(projectId),
+          target = snapshot.targets.find((target) => target.id === targetId)
+        if (target?.configuration.kind !== 'real') {
+          throw new RealAwsFailure('invalid')
+        }
+        if (/^(cn-|us-gov-)/.test(target.configuration.region)) {
+          throw new RealAwsFailure('invalid')
+        }
+        const revision = target.configRevision,
+          runtimeId = runtime.getRuntimeId?.()
+        if (!runtimeId) {
+          throw new RealAwsFailure('owner-changed')
+        }
+        const current = () => {
+          context.assertAdmission()
+          if (
+            catalog.snapshot(projectId).targets.find((target) => target.id === targetId)
+              ?.configRevision !== revision ||
+            runtime.getRuntimeId?.() !== runtimeId
+          ) {
+            throw new RealAwsFailure('owner-changed')
+          }
+        }
+        return {
+          root: context.owner.root,
+          configuration: target.configuration,
+          stamp: JSON.stringify([
+            namespaceId,
+            projectId,
+            targetId,
+            snapshot.selection?.generation,
+            revision,
+            context.registration.stamp,
+            runtimeId
+          ]),
+          current
+        }
+      },
+      notify
+    )
     this.ledger = new ChangeLedger(root)
     this.controller = new FlociController(root, namespaceId, catalog, this.ledger, notify)
   }
@@ -162,7 +209,12 @@ export class CloudWorkspaceProvider {
     return this.controller.act(action, assertOwner, assertAdmission)
   }
   close(): void {
+    this.real.close()
     this.controller.close()
     this.ledger.close()
   }
 }
+
+export { resolveRealAwsTool } from './real-aws-tool'
+export { realAwsProfileEnv } from './real-aws-env'
+export { classifyRealAwsFailure, callRealAwsOperation } from './real-aws-operations'
