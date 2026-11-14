@@ -1,6 +1,8 @@
 import { RealAwsController } from './real-aws-controller'
+import { resolveRealAwsTool } from './real-aws-tool'
+import { callRealAwsOperation } from './real-aws-operations'
 import { RealAwsFailure } from '../../../shared/fork-cloud/real-aws-contract'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import type { Store } from '../../persistence'
 import type { ChangeScope, ChangeSnapshot } from '../../../shared/fork-changes/change-contract'
 import type { BoundCloud } from '../../../shared/fork-cloud/cloud-binding'
@@ -32,6 +34,10 @@ export class CloudWorkspaceProvider {
     private readonly runtime: CloudProjectRuntime,
     notify: () => void
   ) {
+    this.ledger = new ChangeLedger(root)
+    // One owner run per process: reads left running by an earlier process are unknown, never replayed.
+    const ownerRunId = randomUUID()
+    this.ledger.recoverForeignReadReceipts(ownerRunId)
     this.real = new RealAwsController(
       catalog,
       async (projectId, targetId) => {
@@ -71,12 +77,19 @@ export class CloudWorkspaceProvider {
             context.registration.stamp,
             runtimeId
           ]),
+          namespaceId,
           current
         }
       },
-      notify
+      notify,
+      {
+        environment: () => process.env,
+        tool: resolveRealAwsTool,
+        call: callRealAwsOperation,
+        ledger: this.ledger,
+        ownerRunId
+      }
     )
-    this.ledger = new ChangeLedger(root)
     this.controller = new FlociController(root, namespaceId, catalog, this.ledger, notify)
   }
   async owner(projectId: string) {

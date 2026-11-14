@@ -2,7 +2,10 @@ import type {
   RealAwsResult,
   RealAwsIdentity,
   RealAwsResources,
-  RealAwsBudgets
+  RealAwsBudgets,
+  RealAwsCostChallenge,
+  RealAwsCostGrant,
+  RealAwsCostView
 } from './real-aws-contract'
 import type { FlociAction, FlociResult } from './floci-contract'
 import type { CloudBinding } from './cloud-binding'
@@ -166,6 +169,27 @@ export type CloudTargetsApi = {
       operations: string[]
     }>
   >
+  /** Cost Explorer: prepare a challenge, confirm it into a one-use grant, then read once. */
+  prepareRealCost?: (args: {
+    projectId: string
+    targetId: string
+    requestId: string
+  }) => Promise<RealAwsResult<RealAwsCostChallenge>>
+  confirmRealCost?: (args: {
+    projectId: string
+    targetId: string
+    challengeId: string
+  }) => Promise<RealAwsResult<RealAwsCostGrant>>
+  readRealCost?: (args: {
+    projectId: string
+    targetId: string
+    requestId: string
+    grantId?: string
+  }) => Promise<RealAwsResult<RealAwsCostView>>
+  cachedRealCost?: (args: {
+    projectId: string
+    targetId: string
+  }) => Promise<RealAwsResult<RealAwsCostView | null>>
   read: (projectId: string) => Promise<CloudTargetResult>
   update: (request: CloudRequest) => Promise<CloudTargetResult>
   readRuntime?: (args: {

@@ -7,13 +7,24 @@ import {
   realAwsRefSchema,
   realAwsReadSchema,
   realAwsAcceptSchema,
+  realAwsCostPrepareSchema,
+  realAwsCostConfirmSchema,
+  realAwsCostReadSchema,
   type RealAwsCode
 } from '../../../shared/fork-cloud/real-aws-contract'
 import type { CloudWorkspaceProvider } from './cloud-workspace-provider'
 export function registerRealAwsHandlers(
   requireProvider: (sender: WebContents) => CloudWorkspaceProvider
 ): void {
-  for (const operation of ['verifyRealTarget', 'acceptRealIdentity', 'readRealTarget'] as const) {
+  for (const operation of [
+    'verifyRealTarget',
+    'acceptRealIdentity',
+    'readRealTarget',
+    'prepareRealCost',
+    'confirmRealCost',
+    'readRealCost',
+    'cachedRealCost'
+  ] as const) {
     ipcMain.handle(`bastionCloud:${operation}`, async (event, raw: unknown) => {
       try {
         const context = readProjectWorkspaceContext()
@@ -57,17 +68,65 @@ export function registerRealAwsHandlers(
           assertCurrent()
           return { ok: true, kind: 'real-aws', value }
         }
+        const provider = requireProvider(event.sender),
+          windowId = String(event.sender.id)
+        if (operation === 'prepareRealCost') {
+          const parsed = realAwsCostPrepareSchema.safeParse(raw)
+          if (!parsed.success) {
+            throw new RealAwsFailure('invalid')
+          }
+          const { projectId, targetId, requestId } = parsed.data
+          const value = await provider.real.prepareCost(projectId, targetId, requestId, windowId)
+          assertCurrent()
+          return { ok: true, kind: 'real-aws', value }
+        }
+        if (operation === 'confirmRealCost') {
+          const parsed = realAwsCostConfirmSchema.safeParse(raw)
+          if (!parsed.success) {
+            throw new RealAwsFailure('invalid')
+          }
+          const { projectId, targetId, challengeId } = parsed.data
+          const value = provider.real.confirmCost(projectId, targetId, challengeId, windowId)
+          return { ok: true, kind: 'real-aws', value }
+        }
+        if (operation === 'readRealCost') {
+          const parsed = realAwsCostReadSchema.safeParse(raw)
+          if (!parsed.success) {
+            throw new RealAwsFailure('invalid')
+          }
+          const { projectId, targetId, requestId, grantId } = parsed.data
+          const value = await provider.real.readCost(
+            projectId,
+            targetId,
+            requestId,
+            grantId,
+            windowId
+          )
+          assertCurrent()
+          return { ok: true, kind: 'real-aws', value }
+        }
+        if (operation === 'cachedRealCost') {
+          const parsed = realAwsRefSchema.safeParse(raw)
+          if (!parsed.success) {
+            throw new RealAwsFailure('invalid')
+          }
+          const value = await provider.real.cachedCost(parsed.data.projectId, parsed.data.targetId)
+          assertCurrent()
+          return { ok: true, kind: 'real-aws', value }
+        }
         const parsed = realAwsReadSchema.safeParse(raw)
         if (!parsed.success) {
           throw new RealAwsFailure('invalid')
         }
+        // Billing never goes through the ordinary read path.
         if (parsed.data.operation === 'cost-and-usage') {
           throw new RealAwsFailure('consent-required')
         }
-        const value = await requireProvider(event.sender).real.read(
+        const value = await provider.real.read(
           parsed.data.projectId,
           parsed.data.targetId,
-          parsed.data.operation
+          parsed.data.operation,
+          parsed.data.requestId
         )
         assertCurrent()
         return { ok: true, kind: 'real-aws', value }

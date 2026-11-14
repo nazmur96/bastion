@@ -1,58 +1,72 @@
 import { randomUUID } from 'node:crypto'
-import { z } from 'zod'
-import { RealAwsFailure, type RealAwsIdentity } from '../../../shared/fork-cloud/real-aws-contract'
+import {
+  RealAwsFailure,
+  type RealAwsIdentity,
+  type RealAwsResources,
+  type RealAwsBudgets
+} from '../../../shared/fork-cloud/real-aws-contract'
 import type { CloudTarget } from '../../../shared/fork-cloud/cloud-target-contract'
+import type { ChangeLedger } from '../changes/change-ledger'
 import type { CloudTargetCatalog } from './cloud-target-catalog'
 import { resolveRealAwsTool } from './real-aws-tool'
 import { realAwsProfileEnv } from './real-aws-env'
 import { callRealAwsOperation } from './real-aws-operations'
-import { listRealAwsResources, type RealAwsCall } from './real-aws-resources'
-import { readRealAwsBudgets } from './real-aws-budgets'
+import type { RealAwsCall } from './real-aws-resources'
+import { identityCheck, STICKY } from './real-aws-identity'
+import { RealAwsCostDesk } from './real-aws-cost'
+import { readRealAwsBatch } from './real-aws-read-batch'
 export type RealAwsContext = {
   root: string
   configuration: Extract<CloudTarget['configuration'], { kind: 'real' }>
   stamp: string
+  namespaceId?: string
   current(): void
 }
-const identitySchema = z.object({
-  Account: z.string().regex(/^\d{12}$/),
-  Arn: z
-    .string()
-    .min(1)
-    .max(2048)
-    .regex(/^arn:aws:(iam|sts)::\d{12}:/),
-  UserId: z.string().min(1).max(256)
-})
-/** Failures that end the whole batch: authentication, identity, owner or tool changed. */
-const STICKY: string[] = [
-  'cli-session-expired',
-  'service-token-expired',
-  'auth-unavailable',
-  'identity-mismatch',
-  'owner-changed',
-  'tool-unavailable'
-]
+type Dependencies = {
+  environment: () => NodeJS.ProcessEnv
+  tool: typeof resolveRealAwsTool
+  call: typeof callRealAwsOperation
+  /** Durable read receipts; required for Cost Explorer. */
+  ledger?: ChangeLedger
+  ownerRunId?: string
+  /** Default window for direct callers; the IPC layer passes the sender's window. */
+  windowId?: string
+}
 export class RealAwsController {
   private closed = false
   close(): void {
     this.closed = true
     this.observations.clear()
+    this.cost.close()
   }
   private observations = new Map<
     string,
     { context: string; tool: string; identity: RealAwsIdentity }
   >()
   private active = new Set<string>()
+  private results = new Map<
+    string,
+    { identity: RealAwsIdentity; data: RealAwsResources | RealAwsBudgets; operations: string[] }
+  >()
+  private readonly cost: RealAwsCostDesk
+  private readonly ownerRunId: string
   constructor(
     private readonly catalog: CloudTargetCatalog,
     private readonly resolve: (projectId: string, targetId: string) => Promise<RealAwsContext>,
     private readonly notify: () => void,
-    private readonly dependencies = {
+    private readonly dependencies: Dependencies = {
       environment: () => process.env,
       tool: resolveRealAwsTool,
       call: callRealAwsOperation
     }
-  ) {}
+  ) {
+    this.ownerRunId = dependencies.ownerRunId ?? randomUUID()
+    this.cost = new RealAwsCostDesk(
+      (projectId, targetId) => this.session(projectId, targetId),
+      dependencies.ledger,
+      this.ownerRunId
+    )
+  }
   private async session(projectId: string, targetId: string) {
     if (this.closed) {
       throw new RealAwsFailure('owner-changed')
@@ -108,71 +122,7 @@ export class RealAwsController {
         throw error
       }
     }
-    // The IAM role lookup runs only to propose a role anchor or to match an expected one.
-    const check = async (proveRole: boolean): Promise<RealAwsIdentity> => {
-      let observed
-      try {
-        observed = identitySchema.parse(await call('identity', {}))
-      } catch (error) {
-        if (error instanceof RealAwsFailure) {
-          throw error
-        }
-        throw new RealAwsFailure('unreadable')
-      }
-      if (observed.Arn.split(':')[4] !== observed.Account) {
-        throw new RealAwsFailure('identity-mismatch')
-      }
-      const config = context.configuration
-      if (config.expectedAccountId && config.expectedAccountId !== observed.Account) {
-        throw new RealAwsFailure('identity-mismatch')
-      }
-      let roleArn: string | null = null
-      const role = /^arn:aws:sts::\d{12}:assumed-role\/([^/]+)\/[^/]+$/.exec(observed.Arn)
-      if (role && (proveRole || config.expectedRoleArn)) {
-        try {
-          const response = z
-            .object({
-              Role: z.object({
-                Arn: z.string().regex(/^arn:aws:iam::\d{12}:role\/[\w+=,.@/-]+$/),
-                RoleId: z.string().min(1).max(256)
-              })
-            })
-            .parse(await call('role', { RoleName: role[1] }))
-          if (
-            response.Role.Arn.split(':')[4] !== observed.Account ||
-            response.Role.RoleId !== observed.UserId.split(':')[0]
-          ) {
-            throw new RealAwsFailure('identity-mismatch')
-          }
-          roleArn = response.Role.Arn
-        } catch (error) {
-          // Without a role expectation an unproven role leaves an account-only anchor.
-          if (
-            config.expectedRoleArn ||
-            !(error instanceof RealAwsFailure) ||
-            STICKY.includes(error.code)
-          ) {
-            throw error
-          }
-        }
-      }
-      if (config.expectedRoleArn && config.expectedRoleArn !== roleArn) {
-        throw new RealAwsFailure('identity-mismatch')
-      }
-      return {
-        observationId: randomUUID(),
-        accountId: observed.Account,
-        arn: observed.Arn,
-        userId: observed.UserId,
-        roleArn,
-        profileName: config.profileName,
-        region: config.region,
-        checkedAt: Date.now(),
-        expiresAt: null,
-        anchored: Boolean(config.expectedAccountId),
-        toolVersion: tool.version
-      }
-    }
+    const check = identityCheck(call, context, tool)
     return { context, tool, call, check, operations }
   }
   private sameIdentity(a: RealAwsIdentity, b: RealAwsIdentity): boolean {
@@ -258,24 +208,78 @@ export class RealAwsController {
       return { ...fresh, anchored: true }
     })
   }
-  async read(projectId: string, targetId: string, operation: 'resources' | 'budgets') {
-    return this.exclusive(projectId, targetId, async () => {
-      const session = await this.session(projectId, targetId)
-      if (!session.context.configuration.expectedAccountId) {
-        throw new RealAwsFailure('identity-required')
+  async read(
+    projectId: string,
+    targetId: string,
+    operation: 'resources' | 'budgets',
+    requestId?: string
+  ) {
+    const ledger = this.dependencies.ledger
+    const existing = requestId && ledger ? ledger.readReceipt(requestId) : null
+    if (requestId && existing) {
+      // A repeated request returns its own result once; it never starts a second batch.
+      const previous = this.results.get(requestId)
+      if (
+        existing.operation !== operation ||
+        existing.projectId !== projectId ||
+        existing.targetId !== targetId
+      ) {
+        throw new RealAwsFailure('invalid')
       }
-      const before = await session.check(false)
-      const data =
-        operation === 'resources'
-          ? await listRealAwsResources(session.call, before.accountId)
-          : await readRealAwsBudgets(session.call, before.accountId)
-      const after = await session.check(false)
-      if (!this.sameIdentity(before, after)) {
-        throw new RealAwsFailure('identity-mismatch')
+      if (!previous) {
+        throw new RealAwsFailure('duplicate')
       }
-      session.context.current()
-      session.tool.assertCurrent()
-      return { identity: after, data, operations: session.operations }
-    })
+      return previous
+    }
+    const result = await this.exclusive(projectId, targetId, async () =>
+      readRealAwsBatch(await this.session(projectId, targetId), {
+        projectId,
+        targetId,
+        operation,
+        requestId,
+        ledger,
+        ownerRunId: this.ownerRunId
+      })
+    )
+    if (requestId) {
+      if (this.results.size >= 200) {
+        this.results.delete(this.results.keys().next().value ?? '')
+      }
+      this.results.set(requestId, result)
+    }
+    return result
+  }
+  prepareCost(projectId: string, targetId: string, requestId: string, windowId = this.window()) {
+    return this.exclusive(projectId, targetId, () =>
+      this.cost.prepare(projectId, targetId, requestId, windowId)
+    )
+  }
+  confirmCost(projectId: string, targetId: string, challengeId: string, windowId = this.window()) {
+    return this.cost.confirm(projectId, targetId, challengeId, windowId)
+  }
+  readCost(
+    projectId: string,
+    targetId: string,
+    requestId: string,
+    grantId: unknown,
+    windowId = this.window()
+  ) {
+    if (this.closed) {
+      return Promise.reject(new RealAwsFailure('owner-changed'))
+    }
+    return this.cost.read(projectId, targetId, requestId, grantId, windowId)
+  }
+  /** Passive cache lookup: no tool, identity or billing request. */
+  async cachedCost(projectId: string, targetId: string) {
+    try {
+      return this.closed
+        ? null
+        : this.cost.cached(projectId, targetId, await this.resolve(projectId, targetId))
+    } catch {
+      return null
+    }
+  }
+  private window(): string {
+    return this.dependencies.windowId ?? 'main'
   }
 }

@@ -82,3 +82,24 @@ Controlled tests use an installed fake CLI, a shadow host AWS executable, inject
 9.3b retains Cost Explorer and durable read receipts. 9.7 retains real execution bindings/auth generations and the catalog migration. Remote real-AWS owners, packaged/macOS/Windows and exhaustive credential-provider coverage remain separate proofs. Nothing here enables a cloud write or creates a billed resource.
 
 Validation for 9.3a: 83 focused unit tests across 16 suites, 13 serial UI acceptance cases, a separate isolated-display screenshot case, all three typechecks, max-lines ratchet and the changed-code quality gate (base 15a81ddb858a) passed. The authorized opt-in production-adapter proof used already installed AWS CLI 2.38.1: all five resource operations succeeded and account-wide budget alert evidence was present. An omitted empty SQS array is normalized in the fixed CLI projection. No Cost Explorer call, cloud write, host install or container startup was performed. The reviewed screenshot uses synthetic profile, account and resource values.
+
+## Slice 9.3b — Cost Explorer consent and durable read receipts
+
+Cost Explorer stays off until the engineer asks for it. **Fetch Cost Explorer data** is available only after the target's identity is verified and accepted. It opens a confirmation for that target showing the account, profile, principal and the fixed query: DAILY `UnblendedCost` filtered to the verified linked account, the current UTC month to date (end exclusive), sent to the commercial billing endpoint `us-east-1`. The confirmation also warns that AWS may charge for the request. Cancelling sends nothing. On the first day of a UTC month there is no complete day to ask for, so nothing is offered.
+
+Confirming turns the main-held challenge into a one-use grant. The grant lasts 60 seconds and is bound to the window, project, target, selection, configuration revision, owner, tool, verified identity, query and request UUID. The read then:
+
+1. records a durable receipt,
+2. checks identity with a fresh STS call,
+3. makes exactly one Cost Explorer request (no retries, no automatic next page),
+4. checks identity again before showing anything.
+
+A continuation token is shown only as "more data exists". Fetching another page needs another confirmation. Results are cached in main-process memory for one hour, with their observation time and the Estimated flag. Reload, focus, timers, resource refreshes and cache misses never request billing. Refreshing always needs a new confirmation.
+
+Explicit resource, budget and Cost Explorer reads write a receipt to the namespace's change ledger (schema 4→5, additive, transactional). A receipt holds only fixed codes, counts, truncation flags and fingerprints of admitted metadata. It never holds payloads, names, amounts, tokens, grants or credentials.
+
+- **Duplicate request UUID:** a second read with the same UUID returns the existing evidence and never starts a second attempt.
+- **Lost result:** if a paid read's result is lost after launch (timeout, crash or owner change), it is recorded as **unknown**, never as success, and is never replayed. At startup the owner marks reads left running by an earlier process as unknown.
+- **Limits:** history is capped at 10,000 receipts; at the cap new reads are refused while existing receipts stay readable and running reads can still finish.
+
+The opt-in live proof keeps the paid read behind its own flag (`ORCA_AWS_REAL_COST_PROOF=1`), on top of the read-only proof flag. Its log records the row count, units and status, but no amounts.

@@ -87,8 +87,10 @@ test('RA-06/08 verifies, confirms and reads through a controlled installed CLI w
   await expect(card.getByLabel('Real AWS resources')).toContainText('fixture-bucket')
   await clickCloudControl(card.getByRole('button', { name: 'Read budgets', exact: true }))
   await expect(card.getByLabel('Real AWS budgets')).toContainText('Budget status: absent')
+  // 9.3b: an anchored identity enables the paid read, but nothing is requested without a confirmation.
   await expect(
     card.getByRole('button', { name: 'Fetch Cost Explorer data', exact: true })
-  ).toBeDisabled()
+  ).toBeEnabled()
+  await expect(card.getByTestId('real-aws-costs')).toContainText('Not requested')
   await captureCloudWindow(electronApp, orcaPage, info, 'real-aws-controlled.png')
 })

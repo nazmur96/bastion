@@ -23,6 +23,13 @@ import {
 } from '../../../shared/fork-changes/change-contract'
 import { applyChangeCommand } from '../../../shared/fork-changes/change-lifecycle'
 import { changeIdentity, decodeChange, upgradeChangeLedger } from './change-ledger-migration'
+import type { RealAwsReadReceipt } from '../../../shared/fork-cloud/real-aws-contract'
+import {
+  admitRealAwsReceipt,
+  readRealAwsReceipt,
+  recoverRealAwsReceipts,
+  settleRealAwsReceipt
+} from './real-aws-read-receipts'
 
 export class ChangeLedger {
   private db: Database.Database
@@ -221,6 +228,26 @@ export class ChangeLedger {
         .prepare('INSERT OR REPLACE INTO cloud_lifecycle_receipts VALUES (?, ?)')
         .run(receipt.id, JSON.stringify(receipt))
     })
+  }
+  readReceipt(requestId: string): RealAwsReadReceipt | null {
+    return readRealAwsReceipt(this.db, requestId)
+  }
+  admitReadReceipt(receipt: RealAwsReadReceipt): {
+    receipt: RealAwsReadReceipt
+    created: boolean
+  } {
+    return this.transaction(() => admitRealAwsReceipt(this.db, receipt))
+  }
+  settleReadReceipt(receipt: RealAwsReadReceipt): void {
+    this.transaction(() => settleRealAwsReceipt(this.db, receipt))
+  }
+  /** Settles a confirmed dead owner's running reads as unknown. */
+  recoverReadReceipts(deadOwnerRunId: string): void {
+    this.transaction(() => recoverRealAwsReceipts(this.db, (owner) => owner === deadOwnerRunId))
+  }
+  /** At owner start: every running read not owned by this process was interrupted. */
+  recoverForeignReadReceipts(liveOwnerRunId: string): void {
+    this.transaction(() => recoverRealAwsReceipts(this.db, (owner) => owner !== liveOwnerRunId))
   }
   private save(record: ChangeRecord): void {
     this.db

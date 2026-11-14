@@ -7,16 +7,29 @@ import type {
   RealAwsIdentity,
   RealAwsResources,
   RealAwsBudgets,
-  RealAwsCode
+  RealAwsCode,
+  RealAwsCostChallenge,
+  RealAwsCostView
 } from '../../../../shared/fork-cloud/real-aws-contract'
 export type RealCloudState = {
   identity: RealAwsIdentity | null
   resources?: RealAwsResources
   budgets?: RealAwsBudgets
+  /** A pending paid-read confirmation; cancelled by dropping it, never sent. */
+  challenge?: RealAwsCostChallenge
+  cost?: RealAwsCostView
+  costError?: string
   error: string | null
   code?: RealAwsCode
 }
-export type RealCloudAction = 'verify' | 'accept' | 'resources' | 'budgets'
+export type RealCloudAction =
+  | 'verify'
+  | 'accept'
+  | 'resources'
+  | 'budgets'
+  | 'cost-prepare'
+  | 'cost-confirm'
+  | 'cost-cancel'
 export function sameRealSelection(
   a: CloudConnectionsSnapshot | null,
   b: CloudConnectionsSnapshot
@@ -33,6 +46,55 @@ export function sameRealSelection(
     target?.configRevision === selected?.configRevision
   )
 }
+// A failed paid read keeps the verified identity; the error explains whether it may have been charged.
+async function performRealCostAction(
+  api: CloudTargetsApi,
+  snapshot: CloudConnectionsSnapshot,
+  previous: RealCloudState,
+  operation: 'cost-prepare' | 'cost-confirm' | 'cost-cancel',
+  targetId: string
+): Promise<RealCloudState> {
+  const args = { projectId: snapshot.projectId, targetId }
+  const base: RealCloudState = { ...previous, challenge: undefined, costError: undefined }
+  if (operation === 'cost-cancel') {
+    return base
+  }
+  if (operation === 'cost-prepare') {
+    const prepared = await api.prepareRealCost?.({ ...args, requestId: createBrowserUuid() })
+    return prepared?.ok
+      ? { ...base, challenge: prepared.value }
+      : { ...base, costError: prepared?.message ?? 'Cost Explorer is unavailable in this client.' }
+  }
+  const challenge = previous.challenge
+  if (!challenge) {
+    return base
+  }
+  const grant = await api.confirmRealCost?.({ ...args, challengeId: challenge.challengeId })
+  if (!grant?.ok) {
+    return {
+      ...base,
+      costError: grant?.message ?? 'The confirmation expired. Nothing was charged.'
+    }
+  }
+  const read = await api.readRealCost?.({
+    ...args,
+    requestId: challenge.requestId,
+    grantId: grant.value.grantId
+  })
+  if (read?.ok) {
+    return { ...base, cost: read.value }
+  }
+  const uncertain = read?.code === 'timeout' || read?.code === 'owner-changed'
+  return {
+    ...base,
+    cost: undefined,
+    costError: `${read?.message ?? 'The Cost Explorer read failed.'}${
+      uncertain
+        ? ' The request may have been charged; it is recorded as unknown and is not retried.'
+        : ''
+    }`
+  }
+}
 export async function performRealCloudAction(
   api: CloudTargetsApi,
   snapshot: CloudConnectionsSnapshot,
@@ -42,6 +104,20 @@ export async function performRealCloudAction(
   const targetId = snapshot.selection?.targetId
   if (!targetId) {
     throw new Error('Select a real AWS target.')
+  }
+  if (operation === 'cost-prepare' || operation === 'cost-confirm' || operation === 'cost-cancel') {
+    const real = await performRealCostAction(
+      api,
+      snapshot,
+      previous ?? { identity: null, error: null },
+      operation,
+      targetId
+    )
+    const refreshed = await api.read(snapshot.projectId)
+    if (!refreshed.ok || !sameRealSelection(snapshot, refreshed.snapshot)) {
+      throw new Error('The selected target changed. Verify again.')
+    }
+    return { snapshot: refreshed.snapshot, real }
   }
   const args = { projectId: snapshot.projectId, targetId }
   const result =

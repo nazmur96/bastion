@@ -5,11 +5,13 @@ import { join } from 'node:path'
 import { test, expect } from './helpers/orca-app'
 import { ownerMiseDataDir } from '../../src/main/fork/cloud/real-aws-tool'
 const enabled = process.env.ORCA_AWS_REAL_PROOF === '1'
+// A separate opt-in: one Cost Explorer request is billed by AWS.
+const costEnabled = process.env.ORCA_AWS_REAL_COST_PROOF === '1'
 const dataDir = ownerMiseDataDir()
 test.use({ orcaAppExtraEnv: { MISE_DATA_DIR: dataDir, MISE_AUTO_INSTALL: '0', MISE_OFFLINE: '1' } })
 test.describe('opt-in real AWS read-only proof', () => {
   test.skip(!enabled, 'Requires explicit sign-in confirmation and owner-supplied profile/region')
-  test('RA-12 uses the registered disposable project and production adapter without Cost Explorer', async ({
+  test('RA-12 uses the registered disposable project and production adapter; Cost Explorer only on its own opt-in', async ({
     electronApp,
     orcaPage,
     seededRepoPath
@@ -43,7 +45,14 @@ test.describe('opt-in real AWS read-only proof', () => {
       })
       pinned = true
       const report = await orcaPage.evaluate(
-        async ({ profileName, region, resourceRequestId, budgetRequestId }) => {
+        async ({
+          profileName,
+          region,
+          resourceRequestId,
+          budgetRequestId,
+          costRequestId,
+          cost
+        }) => {
           const api = window.api.cloudTargets,
             projectId = window.__store?.getState().activeWorktreeId
           if (
@@ -110,7 +119,46 @@ test.describe('opt-in real AWS read-only proof', () => {
           if (!budgets.ok) {
             throw new Error(budgets.message)
           }
+          let costSummary = null
+          if (cost) {
+            const prepared = await api.prepareRealCost?.({
+              projectId,
+              targetId,
+              requestId: costRequestId
+            })
+            if (!prepared?.ok) {
+              throw new Error(prepared?.message ?? 'Cost Explorer bridge unavailable')
+            }
+            const grant = await api.confirmRealCost?.({
+              projectId,
+              targetId,
+              challengeId: prepared.value.challengeId
+            })
+            if (!grant?.ok) {
+              throw new Error(grant?.message ?? 'Cost Explorer bridge unavailable')
+            }
+            const read = await api.readRealCost?.({
+              projectId,
+              targetId,
+              requestId: costRequestId,
+              grantId: grant.value.grantId
+            })
+            if (!read?.ok) {
+              throw new Error(read?.message ?? 'Cost Explorer bridge unavailable')
+            }
+            // Amounts are the engineer's spend: the log keeps only shape and status.
+            const rows = read.value.data?.results ?? []
+            costSummary = {
+              status: read.value.status,
+              rows: rows.length,
+              units: [...new Set(rows.map((row) => row.unit))],
+              estimatedRows: rows.filter((row) => row.estimated).length,
+              moreAvailable: read.value.data?.moreAvailable ?? null,
+              query: read.value.query ?? null
+            }
+          }
           return {
+            costSummary,
             toolVersion: verified.value.toolVersion,
             accountMatched:
               verified.value.accountId === resources.value.identity.accountId &&
@@ -128,7 +176,14 @@ test.describe('opt-in real AWS read-only proof', () => {
             operations: [...resources.value.operations, ...budgets.value.operations]
           }
         },
-        { profileName, region, resourceRequestId: randomUUID(), budgetRequestId: randomUUID() }
+        {
+          profileName,
+          region,
+          resourceRequestId: randomUUID(),
+          budgetRequestId: randomUUID(),
+          costRequestId: randomUUID(),
+          cost: costEnabled
+        }
       )
       expect(report.accountMatched).toBe(true)
       expect(report.toolVersion).toBe(version)
@@ -154,6 +209,7 @@ test.describe('opt-in real AWS read-only proof', () => {
           ].includes(operation)
         )
       ).toBe(true)
+      expect(report.costSummary?.status ?? null).toBe(costEnabled ? 'completed' : null)
       const sanitized = JSON.stringify(report, null, 2)
       console.log('READ_ONLY_OPERATION_LOG', sanitized)
       writeFileSync(info.outputPath('read-only-operation-log.json'), sanitized)

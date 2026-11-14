@@ -23,16 +23,24 @@ export function decodeChange(row: Record<string, unknown> | undefined): ChangeRe
 }
 export function upgradeChangeLedger(db: Database.Database): void {
   const version = db.pragma('user_version', { simple: true })
-  if (version !== 0 && version !== 1 && version !== 2 && version !== 3 && version !== 4) {
+  if (![0, 1, 2, 3, 4, 5].includes(Number(version))) {
     throw new Error('Unsupported change ledger version.')
   }
+  if (version === 5) {
+    return
+  }
   if (version === 4) {
+    // Additive: real AWS read receipts. Existing records and receipts are not touched.
+    db.exec(
+      'CREATE TABLE real_aws_read_receipts (requestId TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 5;'
+    )
     return
   }
   if (version === 3) {
     db.exec(
       'CREATE TABLE IF NOT EXISTS cloud_lifecycle_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 4;'
     )
+    upgradeChangeLedger(db)
     return
   }
   if (version === 2) {
@@ -95,4 +103,5 @@ export function upgradeChangeLedger(db: Database.Database): void {
   db.exec(
     'CREATE TABLE owner_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); CREATE TABLE cloud_lifecycle_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 4'
   )
+  upgradeChangeLedger(db)
 }

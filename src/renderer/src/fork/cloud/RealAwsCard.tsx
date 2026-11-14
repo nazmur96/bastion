@@ -7,6 +7,7 @@ import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-con
 import { realAwsMessages } from '../../../../shared/fork-cloud/real-aws-contract'
 import type { RealCloudState } from './real-cloud-actions'
 import { cloudConnections } from './cloud-connections-state'
+import { RealAwsCostSection } from './RealAwsCostSection'
 export function RealAwsCard({
   target,
   state,
@@ -141,15 +142,11 @@ export function RealAwsCard({
           </p>
         </div>
       )}
-      <div className="space-y-2 border-t border-border pt-3" data-testid="real-aws-costs">
-        <h3>Cost Explorer</h3>
-        <p className="text-xs">
-          Not requested · May incur AWS API charges. Cost Explorer is disabled in this version.
-        </p>
-        <Button variant="outline" disabled>
-          Fetch Cost Explorer data
-        </Button>
-      </div>
+      <RealAwsCostSection
+        state={state}
+        pending={pending}
+        eligible={Boolean(identity?.anchored && config.expectedAccountId)}
+      />
       {accepting && identity && (
         <Dialog open onOpenChange={setAccepting}>
           <DialogContent surface="security">

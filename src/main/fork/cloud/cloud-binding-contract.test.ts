@@ -171,7 +171,7 @@ describe('9.2a cloud binding contracts', () => {
     })
     const reopened = new ChangeLedger(root)
     opened.push(reopened)
-    expect(old.pragma('user_version', { simple: true })).toBe(4)
+    expect(old.pragma('user_version', { simple: true })).toBe(5)
     const restored = reopened.list(scope.projectId)[0]
     expect(restored.id).toBe(expected.id)
     expect(restored.runs).toEqual(expected.runs)

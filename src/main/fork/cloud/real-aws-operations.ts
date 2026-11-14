@@ -76,6 +76,32 @@ const operations = {
     params: z.object(budget).strict(),
     query: '{Notifications:Notifications,NextToken:NextToken}'
   },
+  // Paid: one attempt per confirmed grant. Every field is a literal or the verified account.
+  'cost-and-usage': {
+    service: 'ce',
+    action: 'get-cost-and-usage',
+    params: z
+      .object({
+        TimePeriod: z
+          .object({
+            Start: z.string().regex(/^\d{4}-\d{2}-01$/),
+            End: z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
+          })
+          .strict(),
+        Granularity: z.literal('DAILY'),
+        Metrics: z.tuple([z.literal('UnblendedCost')]),
+        Filter: z
+          .object({
+            Dimensions: z
+              .object({ Key: z.literal('LINKED_ACCOUNT'), Values: z.tuple([account]) })
+              .strict()
+          })
+          .strict()
+      })
+      .strict(),
+    query:
+      '{ResultsByTime:ResultsByTime[].{TimePeriod:TimePeriod,Total:Total,Estimated:Estimated},NextPageToken:NextPageToken}'
+  },
   subscribers: {
     service: 'budgets',
     action: 'describe-subscribers-for-notification',
@@ -148,7 +174,8 @@ export async function callRealAwsOperation(
       'lambda',
       'budgets',
       'notifications',
-      'subscribers'
+      'subscribers',
+      'cost-and-usage'
     ])
     .parse(rawOperation)
   const operation = operations[id],
@@ -157,7 +184,7 @@ export async function callRealAwsOperation(
     throw new RealAwsFailure('invalid')
   }
   tool.assertCurrent()
-  const region = ['budgets', 'notifications', 'subscribers', 'role'].includes(id)
+  const region = ['budgets', 'notifications', 'subscribers', 'role', 'cost-and-usage'].includes(id)
     ? 'us-east-1'
     : env.AWS_REGION
   audit.push(id)
