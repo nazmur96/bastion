@@ -16,6 +16,20 @@ import {
 } from '../../../shared/fork-devops-launchpad'
 import { readDevopsSandbox, runDevopsSandbox } from './devops-sandbox'
 import { readDevopsContext } from './devops-context'
+import { resolveFlociEnv } from '../cloud/floci-env-authority'
+import { FlociFailure, flociMessages } from '../../../shared/fork-cloud/floci-contract'
+
+/** A selected emulated target's env; a malformed or unavailable target refuses the command. */
+async function terraformCloudEnv(
+  request: unknown
+): Promise<{ env: Record<string, string> } | { error: string }> {
+  try {
+    const raw = request && typeof request === 'object' ? Reflect.get(request, 'cloudTarget') : null
+    return { env: await resolveFlociEnv(raw) }
+  } catch (error) {
+    return { error: flociMessages[error instanceof FlociFailure ? error.code : 'owner-changed'] }
+  }
+}
 import { readDevopsRadar, startDevopsRadar, stopDevopsRadar } from './devops-radar'
 import type { DevopsInspection } from '../../../shared/fork-devops-inspection'
 
@@ -90,18 +104,24 @@ export function registerDevopsHandlers(): void {
     const workspacePath: unknown =
       request && typeof request === 'object' ? Reflect.get(request, 'workspacePath') : null
     const dir: unknown = request && typeof request === 'object' ? Reflect.get(request, 'dir') : null
-    return isLocalDirectory(workspacePath) && typeof dir === 'string'
-      ? runTerraformPlan(workspacePath, dir, planMode(request))
-      : { ok: false, error: 'Terraform plan needs a local workspace.' }
+    if (!isLocalDirectory(workspacePath) || typeof dir !== 'string') {
+      return { ok: false, error: 'Terraform plan needs a local workspace.' }
+    }
+    const cloud = await terraformCloudEnv(request)
+    return 'error' in cloud
+      ? { ok: false, error: cloud.error }
+      : runTerraformPlan(workspacePath, dir, planMode(request), cloud.env)
   })
   ipcMain.handle('aiVault:terraformOutputs', async (_event, request: unknown) => {
     const workspacePath: unknown =
       typeof request === 'object' && request !== null ? Reflect.get(request, 'workspacePath') : null
     const dir: unknown =
       typeof request === 'object' && request !== null ? Reflect.get(request, 'dir') : null
-    return isLocalDirectory(workspacePath) && typeof dir === 'string'
-      ? readTerraformOutputs(workspacePath, dir)
-      : { error: 'Needs a local workspace.' }
+    if (!isLocalDirectory(workspacePath) || typeof dir !== 'string') {
+      return { error: 'Needs a local workspace.' }
+    }
+    const cloud = await terraformCloudEnv(request)
+    return 'error' in cloud ? cloud : readTerraformOutputs(workspacePath, dir, cloud.env)
   })
   ipcMain.handle('aiVault:findManifest', async (_event, request: unknown) => {
     const field = (key: string): unknown =>

@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import { CloudWorkspaceProvider } from './cloud-workspace-provider'
 import { setCloudBindingAuthority } from './cloud-binding-authority'
+import { setFlociEnvResolver } from './floci-env-authority'
+import { flociResourcesRequestSchema } from '../../../shared/fork-cloud/floci-resources-contract'
 import {
   flociReadSchema,
   flociActionSchema,
@@ -106,6 +108,35 @@ export function registerCloudTargetHandlers(
       }
     )
   }
+  setFlociEnvResolver((projectId, targetId) => {
+    if (!provider) {
+      throw new FlociFailure('owner-changed')
+    }
+    return provider.targetEnv(projectId, targetId)
+  })
+  for (const operation of ['targetEnv', 'listResources'] as const) {
+    ipcMain.handle(`bastionCloud:${operation}`, async (event, raw: unknown) => {
+      try {
+        if (event.senderFrame !== event.sender.mainFrame) {
+          throw new FlociFailure('owner-changed')
+        }
+        const parsed = flociResourcesRequestSchema.safeParse(raw)
+        if (!parsed.success) {
+          throw new FlociFailure('invalid')
+        }
+        const owner = requireProvider(event.sender)
+        return operation === 'targetEnv'
+          ? { ok: true, env: await owner.targetEnv(parsed.data.projectId, parsed.data.targetId) }
+          : {
+              ok: true,
+              resources: await owner.listResources(parsed.data.projectId, parsed.data.targetId)
+            }
+      } catch (error) {
+        const code = error instanceof FlociFailure ? error.code : 'storage'
+        return { ok: false, code, message: flociMessages[code] }
+      }
+    })
+  }
   ipcMain.handle('bastionCloud:captureBinding', (event, raw: unknown) => {
     if (event.senderFrame !== event.sender.mainFrame) {
       throw new FlociFailure('owner-changed')
@@ -206,6 +237,7 @@ export function registerCloudTargetHandlers(
   app.once('will-quit', () => {
     subscribers.clear()
     setCloudBindingAuthority(undefined)
+    setFlociEnvResolver(undefined)
     provider?.close()
     catalog?.close()
     catalog = undefined

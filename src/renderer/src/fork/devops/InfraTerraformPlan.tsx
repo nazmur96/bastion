@@ -1,11 +1,11 @@
 import { useState } from 'react'
+import { runTargetedCommand } from './use-floci-target'
 import { Flame, GitCompare, Layers, MessageSquare, Play, ShieldAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
-import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import { draftForClaude } from './ask-claude'
 import { InfraCard } from './InfraHomeCards'
 import { startCostMeter, stopCostMeter } from './cost-meter-store'
@@ -68,7 +68,13 @@ export function InfraTerraformPlan({
     setDrift(refreshOnly)
     setDestroying(destroy)
     void window.api.aiVault
-      .terraformPlan({ workspacePath: path, dir: terraformDir, refreshOnly, destroy })
+      .terraformPlan({
+        workspacePath: path,
+        dir: terraformDir,
+        refreshOnly,
+        destroy,
+        ...(sandbox.floci.cloudTarget ? { cloudTarget: sandbox.floci.cloudTarget } : {})
+      })
       .then(setResult)
       .finally(() => setRunning(false))
   }
@@ -294,7 +300,7 @@ export function InfraTerraformPlan({
                       return
                     }
                     setArmed(false)
-                    runInWorkbenchTerminal(
+                    runTargetedCommand(
                       worktreeId,
                       platformRepo
                         ? // The sibling repo's own mise pin, from its own folder.
@@ -304,7 +310,7 @@ export function InfraTerraformPlan({
                             `terraform -chdir=${shellQuote(result.dir)} apply ${shellQuote(result.planFile)}`,
                             inspection?.shell
                           ),
-                      sandbox.state.awsEnv
+                      sandbox.floci
                     )
                     // Floci and other local AWS bill nothing, so they never start the meter.
                     if (path && (destroying || context.aws?.tone !== 'local')) {

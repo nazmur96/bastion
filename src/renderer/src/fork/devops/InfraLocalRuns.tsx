@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { openWorkspacePage } from '../workspace-desktop/workspace-desktop-state'
 import { LogOut, Monitor, RefreshCw, Ship, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -107,9 +108,9 @@ export function InfraLocalRuns({
 }): React.JSX.Element {
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const { runs, refresh } = useLocalRuns(path)
-  const { awsEnv, cluster } = sandbox.state
+  const { cluster } = sandbox.state
+  const awsEnv = sandbox.floci.env
   const remove = translate('components.devops.runs.remove', 'Remove')
-  const stop = translate('components.devops.runs.stop', 'Stop')
   const empty = runs !== null && runs.length === 0 && !awsEnv && !cluster
   const launched = readLaunched()
   const startedHere = (runs ?? []).filter((item) =>
@@ -146,8 +147,8 @@ export function InfraLocalRuns({
               icon={Monitor}
               label="floci"
               detail={translate('components.devops.runs.floci', 'local AWS')}
-              removeLabel={stop}
-              onRemove={() => sandbox.run('aws', 'stop')}
+              removeLabel={translate('components.devops.home.openCloud', 'Manage in Cloud')}
+              onRemove={() => openWorkspacePage('cloud')}
             />
           ) : null}
           {cluster ? (

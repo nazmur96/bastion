@@ -12,6 +12,8 @@ export type StepsRequest = {
   /** Each a full command line (already wrapped for the repo's mise when needed). */
   steps: string[]
   env?: Record<string, string>
+  /** A selected emulated target; main derives its environment and refuses if it is unavailable. */
+  cloudTarget?: { projectId: string; targetId: string }
 }
 
 export const STEP_OUTPUT_LIMIT = 200_000

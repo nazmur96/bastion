@@ -74,6 +74,38 @@ test.describe('9.2a Floci AWS target', () => {
     await clickCloudControl(dialog.getByRole('button', { name: 'Cancel', exact: true }))
     await expect(dialog).toHaveCount(0)
   })
+  test('FL-13 shows read-only resources only for a running target and never offers creation', async ({
+    orcaPage
+  }) => {
+    const resources = orcaPage.getByTestId('floci-target-resources')
+    await expect(resources).toBeVisible()
+    await expect(resources).toContainText('Start this target to list resources')
+    await expect(resources).not.toContainText('No resources found')
+    await expect(
+      resources.getByRole('button', { name: 'Create resource', exact: true })
+    ).toHaveCount(0)
+    // FL-09: a stopped target offers no terminal that could fall back to real credentials.
+    await expect(
+      resources.getByRole('button', { name: 'Open terminal for this target', exact: true })
+    ).toHaveCount(0)
+  })
+  test('FL-08/09 a stopped target refuses its environment and listing in main', async ({
+    orcaPage
+  }) => {
+    const refusals = await orcaPage.evaluate(async () => {
+      const projectId = window.__store?.getState().activeWorktreeId ?? ''
+      const read = await window.api.cloudTargets?.read(projectId)
+      const targetId = read?.ok ? (read.snapshot.selection?.targetId ?? '') : ''
+      const api = window.api.cloudTargets
+      return [
+        await api?.targetEnv?.({ projectId, targetId }),
+        await api?.listResources?.({ projectId, targetId })
+      ]
+    })
+    for (const refusal of refusals) {
+      expect(refusal).toMatchObject({ ok: false, code: 'not-ready' })
+    }
+  })
   for (const unsafe of [
     { endpoint: 'https://example.invalid' },
     { engineSocket: 'unix:///arbitrary.sock' },

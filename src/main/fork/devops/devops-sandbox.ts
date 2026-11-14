@@ -1,10 +1,17 @@
 import { getAppEnvironment } from '../../../shared/app-environment'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { dirname, join, sep } from 'node:path'
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  writeFileSync
+} from 'node:fs'
+import { dirname, join } from 'node:path'
 import { MISE_FILES, resolveTool, run } from './devops-inspect'
 import {
   SANDBOX_TOOL_HINTS,
-  parseShellEnv,
   sandboxClusterContext,
   sandboxClusterName,
   type DevopsSandboxKind,
@@ -21,71 +28,81 @@ function storePath(): string {
   return join(getAppEnvironment().getPath('userData'), 'fork-devops-sandbox.json')
 }
 
+function writeStore(all: Record<string, DevopsSandboxState>): void {
+  const path = storePath()
+  mkdirSync(dirname(path), { recursive: true })
+  const temporary = `${path}.${process.pid}.tmp`
+  writeFileSync(temporary, `${JSON.stringify(all, null, 2)}\n`, { mode: 0o600 })
+  renameSync(temporary, path)
+}
+
+/**
+ * Cluster state only. Older versions also kept local AWS endpoints and credentials here, keyed by
+ * folder path for one machine-wide emulator; those fields are dropped on first read and never
+ * reused. Local AWS now runs as a workspace Floci target in Cloud Connections.
+ */
 function load(): Record<string, DevopsSandboxState> {
   if (states) {
     return states
   }
+  states = {}
+  const path = storePath()
+  if (!existsSync(path)) {
+    return states
+  }
+  const stat = lstatSync(path)
+  if (!stat.isFile() || stat.isSymbolicLink()) {
+    return states
+  }
+  let legacy = false
   try {
-    const parsed: unknown = JSON.parse(readFileSync(storePath(), 'utf8'))
-    states = parsed && typeof parsed === 'object' ? Object.fromEntries(Object.entries(parsed)) : {}
+    const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'))
+    for (const [workspacePath, value] of Object.entries(
+      parsed && typeof parsed === 'object' ? parsed : {}
+    )) {
+      const cluster: unknown =
+        value && typeof value === 'object' ? Reflect.get(value, 'cluster') : undefined
+      legacy ||= Boolean(value && typeof value === 'object' && 'awsEnv' in value)
+      if (
+        cluster &&
+        typeof cluster === 'object' &&
+        typeof Reflect.get(cluster, 'name') === 'string' &&
+        typeof Reflect.get(cluster, 'context') === 'string' &&
+        typeof Reflect.get(cluster, 'paused') === 'boolean'
+      ) {
+        states[workspacePath] = {
+          cluster: {
+            name: Reflect.get(cluster, 'name'),
+            context: Reflect.get(cluster, 'context'),
+            paused: Reflect.get(cluster, 'paused')
+          }
+        }
+      }
+    }
   } catch {
-    states = {}
+    legacy = true
+  }
+  if (legacy) {
+    writeStore(states)
+    // The old sealed AWS config held no secrets, but it only served the retired path.
+    rmSync(join(getAppEnvironment().getPath('userData'), 'fork-floci-aws-config'), { force: true })
   }
   return states
 }
 
 function save(workspacePath: string, state: DevopsSandboxState): DevopsSandboxState {
   const all = load()
-  if (state.awsEnv || state.cluster) {
-    all[workspacePath] = state
+  if (state.cluster) {
+    all[workspacePath] = { cluster: state.cluster }
   } else {
     delete all[workspacePath]
   }
-  mkdirSync(dirname(storePath()), { recursive: true })
-  writeFileSync(storePath(), `${JSON.stringify(all, null, 2)}\n`)
+  writeStore(all)
   return state
-}
-
-/** Floci is one emulator per machine, so stopping it ends local AWS for every workspace. */
-function forgetLocalAwsEverywhere(workspacePath: string): DevopsSandboxState {
-  for (const [path, state] of Object.entries(load())) {
-    if (state.awsEnv) {
-      save(path, { ...state, awsEnv: undefined })
-    }
-  }
-  return readDevopsSandbox(workspacePath)
 }
 
 export function readDevopsSandbox(workspacePath: string): DevopsSandboxState {
   return load()[workspacePath] ?? {}
-}
-
-/** Local AWS endpoints for a process started inside a sandboxed workspace (Claude chats). */
-/**
- * Floci's env, sealed off from the person's real AWS setup: their ~/.aws profiles
- * (SSO, `aws login`, credential_process) must neither leak into local runs nor break
- * them, so config and credentials point at a file with only a bare default profile.
- */
-function hermeticAwsEnv(awsEnv: Record<string, string>): Record<string, string> {
-  if (Object.keys(awsEnv).length === 0) {
-    return awsEnv
-  }
-  const sealed = join(getAppEnvironment().getPath('userData'), 'fork-floci-aws-config')
-  // An empty AWS_PROFILE is rejected by the CLI, so a bare default profile is selected instead.
-  writeFileSync(sealed, '[default]\n')
-  return {
-    ...awsEnv,
-    AWS_CONFIG_FILE: sealed,
-    AWS_SHARED_CREDENTIALS_FILE: sealed,
-    AWS_PROFILE: 'default'
-  }
-}
-
-export function devopsSandboxEnvFor(cwd: string): Record<string, string> {
-  const match = Object.entries(load())
-    .filter(([path]) => cwd === path || cwd.startsWith(`${path}${sep}`))
-    .sort((a, b) => b[0].length - a[0].length)[0]
-  return match?.[1].awsEnv ?? {}
 }
 
 async function cli(
@@ -127,23 +144,12 @@ export async function runDevopsSandbox(
 ): Promise<DevopsSandboxResult> {
   const state = readDevopsSandbox(workspacePath)
   if (kind === 'aws') {
-    if (action === 'stop') {
-      const stopped = await cli(workspacePath, 'aws', ['stop'])
-      // Without the CLI nothing of ours can still be running; forget the endpoints either way.
-      return stopped.ok || stopped.missing !== undefined
-        ? { ok: true, state: forgetLocalAwsEverywhere(workspacePath) }
-        : failed(state, 'Stopping Floci', stopped)
+    // Path-only requests cannot identify a workspace target or prove its owner.
+    return {
+      ok: false,
+      state,
+      error: 'Local AWS now runs as a private Floci target. Open Cloud to add and start one.'
     }
-    const started = await cli(workspacePath, 'aws', ['start'])
-    // One emulator serves every workspace: already running (from another one) is a start.
-    if (!started.ok && !/already running/i.test(started.stdout)) {
-      return failed(state, 'Starting Floci', started)
-    }
-    const env = await cli(workspacePath, 'aws', ['env'], 30_000)
-    const awsEnv = hermeticAwsEnv(parseShellEnv(env.stdout))
-    return Object.keys(awsEnv).length > 0
-      ? { ok: true, state: save(workspacePath, { ...state, awsEnv }) }
-      : failed(state, 'Reading `floci env`', env)
   }
   const name = state.cluster?.name ?? sandboxClusterName(workspacePath)
   const command =

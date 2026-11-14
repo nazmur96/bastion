@@ -11,6 +11,7 @@ import { FlociController } from '../../../../src/main/fork/cloud/floci-controlle
 import { ownerEngineRunner } from '../../../../src/main/fork/cloud/floci-paths'
 import { inspectContainer, engineCall } from '../../../../src/main/fork/cloud/floci-engine'
 import type { FlociAction } from '../../../../src/shared/fork-cloud/floci-contract'
+import { listFlociResources } from '../../../../src/main/fork/cloud/floci-resources'
 
 function http(
   port: number,
@@ -154,6 +155,29 @@ async function main(): Promise<void> {
     await refused(nonLoopback, bi.port)
     assert.equal((await http(ai.port, 'PUT', '/bastion-persistence-proof')).status, 200)
     assert(!(await http(bi.port, 'GET', '/')).body.includes('bastion-persistence-proof'))
+    // The production read-only listers against the real pinned emulator.
+    const listed = await listFlociResources(ai.port)
+    const s3 = listed.results.find((result) => result.service === 's3')
+    assert.equal(s3?.status, 'ok', JSON.stringify(s3))
+    assert(s3.items.some((item) => item.name === 'bastion-persistence-proof'))
+    for (const result of listed.results) {
+      assert(
+        ['ok', 'unimplemented'].includes(result.status),
+        `${result.service} listing: ${result.status}`
+      )
+    }
+    const otherListed = await listFlociResources(bi.port)
+    assert(
+      !otherListed.results.some((result) =>
+        result.items.some((item) => item.name === 'bastion-persistence-proof')
+      )
+    )
+    console.log(
+      'LISTED',
+      JSON.stringify(
+        listed.results.map((result) => [result.service, result.status, result.items.length])
+      )
+    )
     await action(a, 'stop')
     assert.equal((await action(a, 'start')).state, 'ready')
     assert((await http(ai.port, 'GET', '/')).body.includes('bastion-persistence-proof'))
@@ -168,6 +192,7 @@ async function main(): Promise<void> {
         nonLoopbackRefused: true,
         persistenceAcrossStop: true,
         resetScoped: true,
+        listersAgainstEmulator: true,
         receiptsIdempotent: true
       })
     )

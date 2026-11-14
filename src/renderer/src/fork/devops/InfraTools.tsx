@@ -1,6 +1,6 @@
 import { translate } from '@/i18n/i18n'
+import { runTargetedCommand } from './use-floci-target'
 import { useEditorContextEntry } from '../editor-context/editor-context-store'
-import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import {
   ActionsCard,
   ContextCard,
@@ -143,10 +143,10 @@ export function InfraTools({
               onWhoAmI={
                 whoAmI
                   ? () =>
-                      runInWorkbenchTerminal(
+                      runTargetedCommand(
                         worktreeId,
                         devopsCommandLine(inspection.tools.aws, whoAmI.command, inspection.shell),
-                        sandbox.state.awsEnv
+                        sandbox.floci
                       )
                   : null
               }

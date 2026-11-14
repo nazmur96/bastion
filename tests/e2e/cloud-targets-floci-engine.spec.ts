@@ -58,6 +58,7 @@ test('FL-03/04 direct lifecycle on a disposable engine', async ({ playwright }, 
     console.log(output)
     await testInfo.attach('lifecycle-proof', { body: output, contentType: 'text/plain' })
     expect(output).toContain('"nonLoopbackRefused":true')
+    expect(output).toContain('"listersAgainstEmulator":true')
     expect(output).toContain('CLEANUP containers=0')
   } finally {
     await docker(['rm', '-fv', name])

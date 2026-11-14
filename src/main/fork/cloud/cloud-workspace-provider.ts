@@ -11,6 +11,10 @@ import {
 } from './cloud-target-owner'
 import { FlociController } from './floci-controller'
 import { captureCatalogBinding, cloudSnapshotHash } from './cloud-binding-authority'
+import { flociHealthy } from './floci-health'
+import { flociTargetEnv } from './floci-target-env'
+import { listFlociResources } from './floci-resources'
+import type { FlociResources } from '../../../shared/fork-cloud/floci-resources-contract'
 import type { CloudTargetCatalog } from './cloud-target-catalog'
 
 type OwnerStore = Pick<Store, 'getRepos' | 'getFolderWorkspaces' | 'getProjectGroups'>
@@ -117,6 +121,41 @@ export class CloudWorkspaceProvider {
     }
     await this.controller.ensure(selection.targetId)
     return (await this.capture({ projectId, ...owner, routeKey: 'local' })).binding
+  }
+  /** The selected target's admitted instance, ready and answering on its own loopback port. */
+  private async readyInstance(projectId: string, targetId: string) {
+    const { assertAdmission } = await this.selected(projectId, targetId)
+    const instance = await this.controller.ensure(targetId)
+    if (instance.state !== 'ready' || !(await flociHealthy(instance.port))) {
+      throw new FlociFailure('not-ready')
+    }
+    assertAdmission()
+    const assertSameInstance = () => {
+      assertAdmission()
+      const current = this.catalog.instances.get(targetId)
+      if (
+        current?.id !== instance.id ||
+        current.epoch !== instance.epoch ||
+        current.port !== instance.port ||
+        current.state !== 'ready'
+      ) {
+        throw new FlociFailure('owner-changed')
+      }
+    }
+    return { instance, assertSameInstance }
+  }
+  async targetEnv(projectId: string, targetId: string): Promise<Record<string, string>> {
+    const { instance, assertSameInstance } = await this.readyInstance(projectId, targetId)
+    const env = flociTargetEnv(this.root, instance)
+    assertSameInstance()
+    return env
+  }
+  async listResources(projectId: string, targetId: string): Promise<FlociResources> {
+    const { instance, assertSameInstance } = await this.readyInstance(projectId, targetId)
+    const resources = await listFlociResources(instance.port)
+    // A listing that outlived its instance or selection is discarded, never shown as current.
+    assertSameInstance()
+    return resources
   }
   async act(action: FlociAction) {
     const { assertOwner, assertAdmission } = await this.selected(action.projectId, action.targetId)

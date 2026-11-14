@@ -60,6 +60,8 @@ export function startSteps(input: {
   workspacePath: string
   steps: string[]
   env?: Record<string, string>
+  /** A selected emulated target; main derives its environment and refuses if unavailable. */
+  cloudTarget?: { projectId: string; targetId: string }
   thenInTerminal?: (command: string) => void
   onSuccess?: () => void
 }): void {
@@ -98,7 +100,8 @@ export function startSteps(input: {
     runId,
     workspacePath: input.workspacePath,
     steps: finite,
-    env: input.env
+    env: input.env,
+    ...(input.cloudTarget ? { cloudTarget: input.cloudTarget } : {})
   })
 }
 

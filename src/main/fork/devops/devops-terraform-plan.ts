@@ -5,7 +5,6 @@ import { tmpdir } from 'node:os'
 import { isAbsolute, join, normalize } from 'node:path'
 import { MISE_FILES, resolveTool } from './devops-inspect'
 import { workspaceEnv } from './devops-context'
-import { devopsSandboxEnvFor } from './devops-sandbox'
 import { runPlanGates } from './devops-plan-gates'
 import {
   parseTerraformOutputs,
@@ -24,7 +23,9 @@ export async function runTerraformPlan(
   workspacePath: string,
   dir: string,
   /** refresh-only: drift check; destroy: what tearing it all down would remove. */
-  mode: 'plan' | 'refresh-only' | 'destroy' = 'plan'
+  mode: 'plan' | 'refresh-only' | 'destroy' = 'plan',
+  /** A selected emulated target's environment, resolved in main. */
+  cloudEnv: Record<string, string> = {}
 ): Promise<TerraformPlanResult> {
   const refreshOnly = mode === 'refresh-only'
   const relative = normalize(dir)
@@ -39,7 +40,7 @@ export async function runTerraformPlan(
   const env = {
     ...process.env,
     ...(await workspaceEnv(workspacePath)),
-    ...devopsSandboxEnvFor(workspacePath),
+    ...cloudEnv,
     TF_IN_AUTOMATION: '1'
   }
   const exec = (args: string[]): Promise<{ ok: boolean; out: string }> =>
@@ -96,7 +97,8 @@ export async function runTerraformPlan(
 /** `terraform output -json` as plain strings; read-only, from the same env as plans. */
 export async function readTerraformOutputs(
   workspacePath: string,
-  dir: string
+  dir: string,
+  cloudEnv: Record<string, string> = {}
 ): Promise<Record<string, string> | { error: string }> {
   const relative = normalize(dir)
   if (isAbsolute(relative) || relative.startsWith('..')) {
@@ -110,7 +112,7 @@ export async function readTerraformOutputs(
   const env = {
     ...process.env,
     ...(await workspaceEnv(workspacePath)),
-    ...devopsSandboxEnvFor(workspacePath)
+    ...cloudEnv
   }
   const args = [`-chdir=${relative}`, 'output', '-json', '-no-color']
   return new Promise((resolve) => {

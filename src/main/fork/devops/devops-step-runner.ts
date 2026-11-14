@@ -1,7 +1,8 @@
 import { spawn, type ChildProcess } from 'node:child_process'
 import type { WebContents } from 'electron'
 import { workspaceEnv } from './devops-context'
-import { devopsSandboxEnvFor } from './devops-sandbox'
+import { resolveFlociEnv } from '../cloud/floci-env-authority'
+import { flociMessages, FlociFailure } from '../../../shared/fork-cloud/floci-contract'
 import type { StepsEvent, StepsRequest } from '../../../shared/fork-devops-steps'
 
 const STEP_TIMEOUT_MS = 30 * 60_000
@@ -9,10 +10,13 @@ const running = new Map<string, { child: ChildProcess | null; cancelled: boolean
 
 /**
  * Runs the steps in order through the platform shell (sh, or cmd on Windows), with the
- * repo's mise env and Floci's env, streaming each step's state and output. The first
+ * repo's mise env and a selected Floci target's env, streaming each step's state and output. The first
  * failure stops the run; cancel kills the current step.
  */
-export async function runSteps(sender: WebContents, request: StepsRequest): Promise<void> {
+export async function runSteps(
+  sender: Pick<WebContents, 'isDestroyed' | 'send'>,
+  request: StepsRequest
+): Promise<void> {
   const send = (event: StepsEvent): void => {
     if (!sender.isDestroyed()) {
       sender.send('aiVault:stepsEvent', event)
@@ -20,11 +24,26 @@ export async function runSteps(sender: WebContents, request: StepsRequest): Prom
   }
   const run: { child: ChildProcess | null; cancelled: boolean } = { child: null, cancelled: false }
   running.set(request.runId, run)
+  let cloudEnv: Record<string, string>
+  try {
+    cloudEnv = await resolveFlociEnv(request.cloudTarget)
+  } catch (error) {
+    running.delete(request.runId)
+    const code = error instanceof FlociFailure ? error.code : 'owner-changed'
+    send({ runId: request.runId, kind: 'step', index: 0, state: 'failed' })
+    send({ runId: request.runId, kind: 'output', index: 0, text: `${flociMessages[code]}\n` })
+    send({ runId: request.runId, kind: 'finished', ok: false })
+    return
+  }
+  // Cloud routing comes only from main's target resolution, never from renderer-supplied env.
+  const requested = Object.fromEntries(
+    Object.entries(request.env ?? {}).filter(([name]) => !/^AWS_/i.test(name))
+  )
   const env = {
     ...process.env,
     ...(await workspaceEnv(request.workspacePath)),
-    ...devopsSandboxEnvFor(request.workspacePath),
-    ...request.env
+    ...requested,
+    ...cloudEnv
   }
   let ok = true
   for (const [index, step] of request.steps.entries()) {

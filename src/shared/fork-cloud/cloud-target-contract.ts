@@ -1,5 +1,6 @@
 import type { FlociAction, FlociResult } from './floci-contract'
 import type { CloudBinding } from './cloud-binding'
+import type { FlociResourcesResult, FlociTargetEnvResult } from './floci-resources-contract'
 import { z } from 'zod'
 
 function printable(value: string): boolean {
@@ -139,5 +140,7 @@ export type CloudTargetsApi = {
   }) => Promise<FlociResult>
   runLifecycle?: (args: FlociAction) => Promise<FlociResult>
   captureBinding?: (projectId: string) => Promise<CloudBinding>
+  targetEnv?: (args: { projectId: string; targetId: string }) => Promise<FlociTargetEnvResult>
+  listResources?: (args: { projectId: string; targetId: string }) => Promise<FlociResourcesResult>
   onChanged: (callback: () => void) => () => void
 }

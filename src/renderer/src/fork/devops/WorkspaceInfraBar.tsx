@@ -1,4 +1,5 @@
 import { getKnownExecutionHostIdForWorktree } from '@/lib/worktree-runtime-owner'
+import { withFlociContext } from './use-floci-target'
 import { PanelLeft, PanelRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { isSidePanelCollapsed, toggleSidePanel } from '../workbench/terminal-dock'
@@ -34,7 +35,10 @@ function useInfraContextState(worktreeId: string) {
   const worktree = useAppStore((state) => selectKnownWorktreeById(state, worktreeId))
   const findings = inspection?.findings ?? []
   const terraformDir = findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
-  const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
+  const context = withFlociContext(
+    useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state)),
+    sandbox.floci
+  )
   const project = useDevopsProject(worktreeId)
   const meter = useProjectCostMeter([
     ...(worktree ? [worktree.path] : []),

@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { withFlociContext } from './use-floci-target'
 import { createPortal } from 'react-dom'
 import { InfraViewHeader } from './InfraHomeHeader'
 import { setInfraView, useInfraOverlayTarget, useInfraView } from './infra-home-store'
@@ -43,7 +44,10 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
   const has = (...stacks: DevopsStack[]) =>
     findings.some((finding) => stacks.includes(finding.stack))
   const terraformDir = findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
-  const context = useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state))
+  const context = withFlociContext(
+    useDevopsContext(worktreeId, terraformDir, JSON.stringify(sandbox.state)),
+    sandbox.floci
+  )
   const offersCluster = has('kubernetes', 'helm', 'argocd')
   const [deckOpen, setDeckOpen] = useState(false)
   const view = useInfraView(worktreeId)
@@ -104,7 +108,7 @@ export function InfraHome({ worktreeId }: { worktreeId: string }): React.JSX.Ele
     platformRepo?.findings.find((finding) => finding.stack === 'terraform')?.dirs[0] ?? null
   const planRepo = terraformDir !== null ? path : platformRepo?.path
   const planDir = terraformDir ?? platformDir
-  const tfOutputs = useTerraformOutputs(planRepo, planDir)
+  const tfOutputs = useTerraformOutputs(planRepo, planDir, sandbox.floci.cloudTarget)
   const eks = eksFromOutputs(tfOutputs.outputs, context.aws?.region ?? null)
   // EKS applies take 10-20 minutes; re-read the outputs a few times instead of polling forever.
   const afterApply = useCallback(() => {

@@ -5,6 +5,7 @@ import { readRadarFindings } from './devops-radar-feed'
 import { readEnvironments } from './devops-environments'
 import { cancelSteps, runSteps } from './devops-step-runner'
 import { addDevpodRecipe } from './devops-devpod-recipe'
+import { cloudTargetRefSchema } from '../cloud/floci-env-authority'
 import { readWorkloadMetrics } from './devops-metrics'
 import { runRepoScan } from './devops-scan'
 import { readLocalDeployPlan } from './devops-local-deploy'
@@ -75,7 +76,14 @@ export function registerDevopsDay2Handlers(): void {
     const workspacePath = field('workspacePath')
     const steps = field('steps')
     const env = field('env')
+    const rawTarget = field('cloudTarget')
+    // A present but malformed target must refuse, not silently run against ambient cloud config.
+    const cloudTarget =
+      rawTarget === null || rawTarget === undefined
+        ? undefined
+        : cloudTargetRefSchema.safeParse(rawTarget)
     if (
+      cloudTarget?.success === false ||
       typeof runId !== 'string' ||
       !isLocalDirectory(workspacePath) ||
       !Array.isArray(steps) ||
@@ -91,7 +99,13 @@ export function registerDevopsDay2Handlers(): void {
             )
           )
         : undefined
-    void runSteps(event.sender, { runId, workspacePath, steps, env: extra })
+    void runSteps(event.sender, {
+      runId,
+      workspacePath,
+      steps,
+      env: extra,
+      ...(cloudTarget?.success ? { cloudTarget: cloudTarget.data } : {})
+    })
     return true
   })
   ipcMain.handle('aiVault:cancelSteps', (_event, runId: unknown) => {

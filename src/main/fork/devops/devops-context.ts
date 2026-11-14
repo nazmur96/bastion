@@ -69,17 +69,12 @@ export async function readDevopsContext(
       /^(kind-|vcluster-docker_|k3d-|minikube$|docker-desktop$)/.test(kube.context)
     context.kube = { ...kube, tone: devopsTone(kube.context, local) }
   }
-  if (sandbox.awsEnv) {
-    const region = sandbox.awsEnv.AWS_REGION ?? sandbox.awsEnv.AWS_DEFAULT_REGION
-    context.aws = { profile: 'floci', ...(region ? { region } : {}), tone: 'local' }
-  } else {
-    const profile = env.AWS_PROFILE ?? 'default'
-    const region =
-      env.AWS_REGION ??
-      env.AWS_DEFAULT_REGION ??
-      parseAwsRegion(read(env.AWS_CONFIG_FILE ?? join(homedir(), '.aws', 'config')) ?? '', profile)
-    context.aws = { profile, ...(region ? { region } : {}), tone: devopsTone(profile) }
-  }
+  const profile = env.AWS_PROFILE ?? 'default'
+  const region =
+    env.AWS_REGION ??
+    env.AWS_DEFAULT_REGION ??
+    parseAwsRegion(read(env.AWS_CONFIG_FILE ?? join(homedir(), '.aws', 'config')) ?? '', profile)
+  context.aws = { profile, ...(region ? { region } : {}), tone: devopsTone(profile) }
   if (terraformDir !== null) {
     const dir = normalize(terraformDir)
     if (!isAbsolute(dir) && !dir.startsWith('..')) {

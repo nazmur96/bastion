@@ -1,4 +1,5 @@
 import { FlociRuntimeCard } from './FlociRuntimeCard'
+import { FlociResourcesCard } from './FlociResourcesCard'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -61,6 +62,14 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
       </header>
       {runtime && local && selected && (
         <FlociRuntimeCard key={selected.id} target={selected} runtime={runtime} pending={pending} />
+      )}
+      {runtime && local && selected && (
+        <FlociResourcesCard
+          key={`resources-${selected.id}`}
+          projectId={worktreeId}
+          target={selected}
+          runtime={runtime}
+        />
       )}
       <section className="workspace-card space-y-4">
         <p data-testid="cloud-target-owner-status" className="text-sm">

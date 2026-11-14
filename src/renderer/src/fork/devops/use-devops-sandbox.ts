@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { useAppStore } from '@/store'
 import { selectKnownWorktreeById } from '@/store/selectors'
 import { translate } from '@/i18n/i18n'
+import { useFlociTarget, type FlociTarget } from './use-floci-target'
 import type {
   DevopsSandboxKind,
   DevopsSandboxRequest,
@@ -11,6 +12,8 @@ import type {
 
 export type DevopsSandbox = {
   state: DevopsSandboxState
+  /** Local AWS: the project's selected Floci target (Cloud), not a machine-wide emulator. */
+  floci: FlociTarget
   busy: DevopsSandboxKind | null
   run: (kind: DevopsSandboxKind, action: DevopsSandboxRequest['action']) => void
 }
@@ -20,6 +23,7 @@ export function useDevopsSandbox(worktreeId: string): DevopsSandbox {
   const path = useAppStore((state) => selectKnownWorktreeById(state, worktreeId)?.path)
   const [state, setState] = useState<DevopsSandboxState>({})
   const [busy, setBusy] = useState<DevopsSandboxKind | null>(null)
+  const floci = useFlociTarget(worktreeId)
   useEffect(() => {
     if (!path) {
       return
@@ -67,5 +71,5 @@ export function useDevopsSandbox(worktreeId: string): DevopsSandbox {
     },
     [busy, path]
   )
-  return { state, busy, run }
+  return { state, busy, run, floci }
 }

@@ -1,8 +1,10 @@
 import { CheckCircle2, CircleAlert, Cloud, Layers, Play, Ship, Wrench } from 'lucide-react'
+import { runTargetedCommand } from './use-floci-target'
+import { openWorkspacePage } from '../workspace-desktop/workspace-desktop-state'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { translate } from '@/i18n/i18n'
-import { openInWorkbenchBrowser, runInWorkbenchTerminal } from '../workbench/workbench-terminals'
+import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 import type { DevopsSandbox } from './use-devops-sandbox'
 import { TONE_CLASS, toneTitle } from './DevopsContextBar'
 import type { DevopsContext, DevopsContextTone } from '../../../../shared/fork-devops-context'
@@ -12,7 +14,6 @@ import {
   type DevopsInspection
 } from '../../../../shared/fork-devops-inspection'
 import type { RankedDevopsAction } from '../../../../shared/fork-devops-actions'
-import { FLOCI_DASHBOARD_URL } from '../../../../shared/fork-devops-sandbox'
 import type { DevopsStack } from '../../../../shared/fork-devops-stacks'
 
 export const STACK_LABELS: Record<DevopsStack, string> = {
@@ -239,7 +240,6 @@ function Tile({
 
 /** "Where can I try this safely?" — free local AWS and Kubernetes, one click each. */
 export function SandboxCard({
-  worktreeId,
   sandbox,
   offersAws,
   offersCluster
@@ -268,22 +268,20 @@ export function SandboxCard({
         {offersAws ? (
           <Tile
             title="AWS · Floci"
-            running={Boolean(state.awsEnv)}
-            status={state.awsEnv ? (state.awsEnv.AWS_DEFAULT_REGION ?? 'running') : off}
+            running={Boolean(sandbox.floci.env)}
+            status={
+              sandbox.floci.env
+                ? (sandbox.floci.env.AWS_REGION ?? 'running')
+                : sandbox.floci.cloudTarget
+                  ? translate('components.devops.home.flociSelected', 'selected, not running')
+                  : translate('components.devops.home.flociNone', 'no target selected')
+            }
           >
-            {state.awsEnv ? (
-              <>
-                {button(translate('components.devops.home.dashboard', 'Dashboard'), () =>
-                  openInWorkbenchBrowser(worktreeId, FLOCI_DASHBOARD_URL, 'Floci')
-                )}
-                {button(translate('components.devops.home.stop', 'Stop'), () =>
-                  sandbox.run('aws', 'stop')
-                )}
-              </>
-            ) : (
-              button(translate('components.devops.home.start', 'Start'), () =>
-                sandbox.run('aws', 'start')
-              )
+            {/* Each workspace runs its own private Floci target, managed in Cloud. */}
+            {button(
+              translate('components.devops.home.openCloud', 'Manage in Cloud'),
+              () => openWorkspacePage('cloud'),
+              false
             )}
           </Tile>
         ) : null}
@@ -360,10 +358,10 @@ export function ActionsCard({
                       disabled={missing !== null}
                       title={missing ?? `${item.action.description}\n${item.command}`}
                       onClick={() =>
-                        runInWorkbenchTerminal(
+                        runTargetedCommand(
                           worktreeId,
                           devopsCommandLine(status, item.command, inspection.shell),
-                          sandbox?.state.awsEnv
+                          sandbox?.floci
                         )
                       }
                     >

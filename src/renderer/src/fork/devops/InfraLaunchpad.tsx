@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { runTargetedCommand } from './use-floci-target'
 import {
   Cloud,
   FlaskConical,
@@ -193,9 +194,8 @@ export function InfraLaunchpad({
         steps: launchpadSteps(tile, { name, tfdir: terraformDir ?? '.', files }).map((step) =>
           devopsCommandLine(status, step, inspection?.shell)
         ),
-        env: sandbox.state.awsEnv,
-        thenInTerminal: (command) =>
-          runInWorkbenchTerminal(worktreeId, command, sandbox.state.awsEnv)
+        cloudTarget: sandbox.floci.cloudTarget,
+        thenInTerminal: (command) => runTargetedCommand(worktreeId, command, sandbox.floci)
       })
     }
   }
