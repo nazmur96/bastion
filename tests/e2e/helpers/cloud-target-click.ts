@@ -1,7 +1,13 @@
 import { expect, type Locator } from '@stablyai/playwright-test'
 
-// Hidden renderers may suspend locator.click's stability frames; security dialogs also use frames.
-export async function clickCloudControl(control: Locator): Promise<void> {
+/**
+ * Scrolls a control into view and waits until it is enabled, uncovered at its centre, stable
+ * and outside native drag regions. Hit-testing works in hidden windows, unlike toBeInViewport,
+ * whose intersection observer may never report while the renderer is not painting.
+ */
+export async function expectUsableCloudControl(
+  control: Locator
+): Promise<{ x: number; y: number }> {
   await expect(control).toBeVisible()
   await expect(control).toBeEnabled()
   await control.evaluate((element) =>
@@ -47,5 +53,11 @@ export async function clickCloudControl(control: Locator): Promise<void> {
       }
     )
     .toBe(true)
+  return point
+}
+
+// Hidden renderers may suspend locator.click's stability frames; security dialogs also use frames.
+export async function clickCloudControl(control: Locator): Promise<void> {
+  const point = await expectUsableCloudControl(control)
   await control.page().mouse.click(point.x, point.y)
 }

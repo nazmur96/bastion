@@ -1,7 +1,7 @@
 import { captureCloudWindow } from './helpers/cloud-target-capture'
 import { expect, test } from './helpers/orca-app'
 import { openBastionPage } from './helpers/bastion-workspace'
-import { clickCloudControl } from './helpers/cloud-target-click'
+import { clickCloudControl, expectUsableCloudControl } from './helpers/cloud-target-click'
 
 test.use({
   orcaAppExtraArgs: process.env.ORCA_E2E_ISOLATED_X11 === '1' ? ['--ozone-platform=x11'] : []
@@ -56,8 +56,7 @@ test.describe('9.2a Floci AWS target', () => {
     await expect(runtime).toContainText('127.0.0.1')
     await expect(runtime).toContainText('sha256:')
     await expect(runtime).not.toContainText(':latest')
-    await expect(runtime.getByRole('button', { name: 'Start', exact: true })).toBeEnabled()
-    await expect(runtime.getByRole('button', { name: 'Start', exact: true })).toBeInViewport()
+    await expectUsableCloudControl(runtime.getByRole('button', { name: 'Start', exact: true }))
     await captureCloudWindow(electronApp, orcaPage, test.info(), 'floci-runtime.png')
   })
 
