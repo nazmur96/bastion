@@ -32,7 +32,7 @@ export function CloudTargetForm({
   const [provider, setProvider] = useState('aws')
   const [profileName, setProfile] = useState('')
   const [region, setRegion] = useState('')
-  const [version, setVersion] = useState('')
+  const [engine, setEngine] = useState('docker')
   const [port, setPort] = useState('')
   const [invalid, setInvalid] = useState(false)
   async function submit(event: React.FormEvent): Promise<void> {
@@ -44,7 +44,7 @@ export function CloudTargetForm({
             kind,
             provider,
             emulator: 'floci',
-            cliVersion: version,
+            engine,
             runtimeId: 'local',
             ...(port ? { requestedPort: Number(port) } : {})
           }
@@ -145,16 +145,16 @@ export function CloudTargetForm({
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="cloud-version">Floci CLI version</Label>
-                    <Input
-                      id="cloud-version"
-                      value={version}
-                      onChange={(event) => setVersion(event.target.value)}
-                      placeholder="0.4.0"
-                      required
-                      maxLength={32}
-                      aria-invalid={invalid}
-                    />
+                    <Label htmlFor="cloud-engine">Container engine</Label>
+                    <Select value={engine} onValueChange={setEngine}>
+                      <SelectTrigger id="cloud-engine">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="docker">Docker</SelectItem>
+                        <SelectItem value="podman">Rootless Podman</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cloud-port">Requested port (optional)</Label>
@@ -178,8 +178,7 @@ export function CloudTargetForm({
           )}
           {invalid && (
             <p role="alert" className="text-sm text-destructive">
-              Check the label and target metadata. Use a region identifier or a version such as
-              0.4.0.
+              Check the label, region identifier and requested port.
             </p>
           )}
           <div className="flex justify-end gap-2">

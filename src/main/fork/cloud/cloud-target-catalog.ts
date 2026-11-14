@@ -1,3 +1,4 @@
+import { FlociJournal } from './floci-journal'
 import { randomUUID } from 'node:crypto'
 import { chmodSync, existsSync, lstatSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -23,6 +24,7 @@ function recordValue(row: unknown): unknown {
 }
 export class CloudTargetCatalog {
   private db: Database.Database
+  readonly instances: FlociJournal
   constructor(namespaceRoot: string) {
     const directory = join(namespaceRoot, 'bastion-cloud')
     if (
@@ -51,16 +53,17 @@ export class CloudTargetCatalog {
     this.db = new Database(file)
     try {
       const version = this.db.pragma('user_version', { simple: true })
-      if (version !== 0 && version !== 1) {
+      if (version !== 0 && version !== 1 && version !== 2) {
         throw new Error('Cloud target storage is newer than this application.')
       }
       this.db.pragma('busy_timeout = 5000')
       this.db.pragma('journal_mode = WAL')
       this.db.pragma('synchronous = FULL')
       this.db.exec(
-        'CREATE TABLE IF NOT EXISTS targets (id TEXT PRIMARY KEY, record TEXT NOT NULL); CREATE TABLE IF NOT EXISTS selections (project_id TEXT PRIMARY KEY, record TEXT NOT NULL); CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY CHECK(id = 1), revision INTEGER NOT NULL); INSERT OR IGNORE INTO meta VALUES (1, 0); PRAGMA user_version = 1;'
+        'CREATE TABLE IF NOT EXISTS targets (id TEXT PRIMARY KEY, record TEXT NOT NULL); CREATE TABLE IF NOT EXISTS selections (project_id TEXT PRIMARY KEY, record TEXT NOT NULL); CREATE TABLE IF NOT EXISTS meta (id INTEGER PRIMARY KEY CHECK(id = 1), revision INTEGER NOT NULL); INSERT OR IGNORE INTO meta VALUES (1, 0); CREATE TABLE IF NOT EXISTS cloud_instances (target_id TEXT PRIMARY KEY, record TEXT NOT NULL); CREATE TABLE IF NOT EXISTS cloud_source_admissions (id TEXT PRIMARY KEY, target_id TEXT NOT NULL, binding TEXT NOT NULL, snapshot_hash TEXT NOT NULL, pid INTEGER NOT NULL, expires INTEGER NOT NULL, state TEXT NOT NULL); PRAGMA user_version = 2;'
       )
       hardenSqliteDatabaseFiles(file)
+      this.instances = new FlociJournal(this.db)
     } catch (error) {
       this.db.close()
       throw error
@@ -145,6 +148,7 @@ export class CloudTargetCatalog {
         target.label = mutation.label
         target.displayRevision++
       } else {
+        this.instances.assertRemovable(target.id)
         target.deletedAt = now
         for (const row of this.db.prepare('SELECT record FROM selections').all()) {
           const selection = cloudSelectionSchema.parse(recordValue(row))

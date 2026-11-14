@@ -1,7 +1,7 @@
 import { expect, test } from './helpers/orca-app'
 import { clickCloudControl } from './helpers/cloud-target-click'
 import { openBastionPage } from './helpers/bastion-workspace'
-import { writeFileSync } from 'node:fs'
+import { captureCloudWindow } from './helpers/cloud-target-capture'
 
 test.use({
   orcaAppExtraArgs: process.env.ORCA_E2E_ISOLATED_X11 === '1' ? ['--ozone-platform=x11'] : []
@@ -101,25 +101,6 @@ test.describe('cloud metadata behavior', () => {
     await openBastionPage(orcaPage, 'Cloud')
     await expect(orcaPage.getByRole('button', { name: 'Selected', exact: true })).toBeVisible()
     await expect(orcaPage.getByTestId('cloud-target-row')).toContainText('Not verified')
-    if (process.env.ORCA_E2E_ISOLATED_X11 !== '1') {
-      return
-    }
-    const png = await electronApp.evaluate(async ({ BrowserWindow }, url) => {
-      const window = BrowserWindow.getAllWindows().find(
-        (window) => window.webContents.getURL() === url
-      )
-      if (!window) {
-        throw new Error('Owned renderer window missing')
-      }
-      const [width, height] = window.getSize()
-      window.setSize(width + 1, height)
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      window.setSize(width, height)
-      window.webContents.invalidate()
-      const frame = await window.capturePage(undefined, { stayHidden: true, stayAwake: true })
-      return frame.toPNG().toString('base64')
-    }, orcaPage.url())
-    expect(png.length).toBeGreaterThan(20000)
-    writeFileSync(test.info().outputPath('connections.png'), Buffer.from(png, 'base64'))
+    await captureCloudWindow(electronApp, orcaPage, test.info(), 'connections.png')
   })
 })

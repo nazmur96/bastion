@@ -1,3 +1,4 @@
+import { flociReceiptSchema, type FlociReceipt } from '../../../shared/fork-cloud/floci-contract'
 import { randomUUID } from 'node:crypto'
 import { existsSync, lstatSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
@@ -77,7 +78,10 @@ export class ChangeLedger {
       const row = this.db.prepare('SELECT record FROM change_records WHERE identity = ?').get(key)
       if (row) {
         const record = decodeChange(row)
-        if (record.intent?.kind !== intent.kind) {
+        if (
+          record.intent?.kind !== intent.kind ||
+          (record.intent?.targetMode ?? 'none') !== (intent.targetMode ?? 'none')
+        ) {
           throw new Error('Change intent kind cannot be replaced.')
         }
         if (!sameChangeScope(record.scope, scope)) {
@@ -180,6 +184,44 @@ export class ChangeLedger {
       .run(JSON.stringify(receipt), receipt.id)
   }
 
+  lifecycleReceipts(targetId: string): FlociReceipt[] {
+    return this.db
+      .prepare(
+        "SELECT receipt FROM cloud_lifecycle_receipts WHERE json_extract(receipt, '$.targetId') = ? ORDER BY rowid DESC LIMIT 20"
+      )
+      .all(targetId)
+      .map((row) => flociReceiptSchema.parse(JSON.parse(String(row.receipt))))
+  }
+  lifecycleReceipt(id: string): FlociReceipt | null {
+    const row = this.db.prepare('SELECT receipt FROM cloud_lifecycle_receipts WHERE id = ?').get(id)
+    return row ? flociReceiptSchema.parse(JSON.parse(String(row.receipt))) : null
+  }
+  saveLifecycleReceipt(raw: FlociReceipt): void {
+    const receipt = flociReceiptSchema.parse(raw)
+    this.transaction(() => {
+      const previous = this.lifecycleReceipt(receipt.id)
+      if (
+        previous &&
+        (previous.targetId !== receipt.targetId ||
+          previous.operation !== receipt.operation ||
+          previous.instanceId !== receipt.instanceId ||
+          previous.status !== 'running')
+      ) {
+        throw new Error('Lifecycle receipt is already settled or belongs to another request.')
+      }
+      if (
+        !previous &&
+        Number(
+          this.db.prepare('SELECT COUNT(*) AS count FROM cloud_lifecycle_receipts').get()?.count
+        ) >= 10000
+      ) {
+        throw new Error('Lifecycle history limit reached.')
+      }
+      this.db
+        .prepare('INSERT OR REPLACE INTO cloud_lifecycle_receipts VALUES (?, ?)')
+        .run(receipt.id, JSON.stringify(receipt))
+    })
+  }
   private save(record: ChangeRecord): void {
     this.db
       .prepare('UPDATE change_records SET record = ? WHERE id = ?')

@@ -23,16 +23,23 @@ export function decodeChange(row: Record<string, unknown> | undefined): ChangeRe
 }
 export function upgradeChangeLedger(db: Database.Database): void {
   const version = db.pragma('user_version', { simple: true })
-  if (version !== 0 && version !== 1 && version !== 2 && version !== 3) {
+  if (version !== 0 && version !== 1 && version !== 2 && version !== 3 && version !== 4) {
     throw new Error('Unsupported change ledger version.')
   }
+  if (version === 4) {
+    return
+  }
   if (version === 3) {
+    db.exec(
+      'CREATE TABLE IF NOT EXISTS cloud_lifecycle_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 4;'
+    )
     return
   }
   if (version === 2) {
     db.exec(
       'CREATE TABLE owner_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 3;'
     )
+    upgradeChangeLedger(db)
     return
   }
   if (
@@ -86,6 +93,6 @@ export function upgradeChangeLedger(db: Database.Database): void {
     db.exec('DROP TABLE changes')
   }
   db.exec(
-    'CREATE TABLE owner_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 3'
+    'CREATE TABLE owner_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); CREATE TABLE cloud_lifecycle_receipts (id TEXT PRIMARY KEY, receipt TEXT NOT NULL); PRAGMA user_version = 4'
   )
 }

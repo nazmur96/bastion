@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { cloudBindingSchema } from '../fork-cloud/cloud-binding'
 
 const text = z
   .string()
@@ -18,7 +19,8 @@ export const changeIntentSchema = z
   .object({
     id: z.string().min(1).max(160),
     kind: z.enum(['source-check', 'create-file']),
-    label: z.string().min(1).max(120).optional()
+    label: z.string().min(1).max(120).optional(),
+    targetMode: z.enum(['none', 'selected-cloud']).optional()
   })
   .strict()
 export type ChangeIntent = z.infer<typeof changeIntentSchema>
@@ -48,6 +50,7 @@ export const changeSnapshotSchema = z
   .object({
     adapter: z.enum(['source-check/v1', 'create-file/v1']),
     ownerRuntimeId: text.optional(),
+    cloudBinding: cloudBindingSchema.optional(),
     files: z.array(sourceSchema).min(1).max(20)
   })
   .strict()
@@ -262,9 +265,16 @@ export type ChangesApi = {
 }
 
 export function sameChangeSnapshot(a: ChangeSnapshot, b: ChangeSnapshot): boolean {
-  return (
-    JSON.stringify(changeSnapshotSchema.parse(a)) === JSON.stringify(changeSnapshotSchema.parse(b))
-  )
+  const normalized = (value: ChangeSnapshot) => {
+    const parsed = changeSnapshotSchema.parse(value)
+    return {
+      adapter: parsed.adapter,
+      ownerRuntimeId: parsed.ownerRuntimeId,
+      files: parsed.files,
+      cloudBinding: parsed.cloudBinding ?? { kind: 'none' }
+    }
+  }
+  return JSON.stringify(normalized(a)) === JSON.stringify(normalized(b))
 }
 
 export function currentChangeReview(record: ChangeRecord): ChangeReview | undefined {

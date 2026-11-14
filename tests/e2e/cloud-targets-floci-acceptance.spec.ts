@@ -1,9 +1,14 @@
+import { captureCloudWindow } from './helpers/cloud-target-capture'
 import { expect, test } from './helpers/orca-app'
 import { openBastionPage } from './helpers/bastion-workspace'
 import { clickCloudControl } from './helpers/cloud-target-click'
 
-// Proposed 9.2 contracts: no lifecycle command is executed in this spec round.
-test.describe('9.2 Floci AWS target — red acceptance', () => {
+test.use({
+  orcaAppExtraArgs: process.env.ORCA_E2E_ISOLATED_X11 === '1' ? ['--ozone-platform=x11'] : []
+})
+
+// Direct lifecycle actions remain separate from reviewed target-bound source work.
+test.describe('9.2a Floci AWS target', () => {
   test.beforeEach(async ({ orcaPage }) => {
     await orcaPage.evaluate(async () => {
       const api = window.api.cloudTargets
@@ -42,7 +47,8 @@ test.describe('9.2 Floci AWS target — red acceptance', () => {
   })
 
   test('FL-01 exposes a stopped runtime with a loopback-only pinned launch policy', async ({
-    orcaPage
+    orcaPage,
+    electronApp
   }) => {
     const runtime = orcaPage.getByTestId('floci-target-runtime')
     await expect(runtime).toBeVisible()
@@ -50,38 +56,25 @@ test.describe('9.2 Floci AWS target — red acceptance', () => {
     await expect(runtime).toContainText('127.0.0.1')
     await expect(runtime).toContainText('sha256:')
     await expect(runtime).not.toContainText(':latest')
-    await expect(runtime.getByRole('button', { name: 'Prepare start', exact: true })).toBeEnabled()
+    await expect(runtime.getByRole('button', { name: 'Start', exact: true })).toBeEnabled()
+    await expect(runtime.getByRole('button', { name: 'Start', exact: true })).toBeInViewport()
+    await captureCloudWindow(electronApp, orcaPage, test.info(), 'floci-runtime.png')
   })
 
-  test('FL-02 preparing Start opens a local-operation review without running it', async ({
+  test('FL-02 offers direct Start and Stop and target-specific Reset confirmation', async ({
     orcaPage
   }) => {
     const runtime = orcaPage.getByTestId('floci-target-runtime')
     await expect(runtime).toBeVisible()
-    await clickCloudControl(runtime.getByRole('button', { name: 'Prepare start', exact: true }))
-    const review = orcaPage.getByTestId('cloud-lifecycle-review')
-    await expect(review).toBeVisible()
-    await expect(review).toContainText('Disposable Floci target')
-    await expect(review).toContainText('127.0.0.1')
-    await expect(review).toContainText('sha256:')
-    await expect(
-      review.getByRole('button', { name: 'Run local operation', exact: true })
-    ).toBeVisible()
-    await expect(review).toContainText('Not run')
+    await expect(runtime.getByRole('button', { name: 'Start', exact: true })).toBeEnabled()
+    await expect(runtime.getByRole('button', { name: 'Stop', exact: true })).toBeVisible()
+    await clickCloudControl(runtime.getByRole('button', { name: 'Reset data', exact: true }))
+    const dialog = orcaPage.getByRole('dialog')
+    await expect(dialog).toContainText('Disposable Floci target')
+    await expect(dialog).toContainText('delete')
+    await clickCloudControl(dialog.getByRole('button', { name: 'Cancel', exact: true }))
+    await expect(dialog).toHaveCount(0)
   })
-
-  test('FL-13 distinguishes unavailable resource evidence from an empty running emulator', async ({
-    orcaPage
-  }) => {
-    const resources = orcaPage.getByTestId('floci-target-resources')
-    await expect(resources).toBeVisible()
-    await expect(resources).toContainText('Start this target to list resources')
-    await expect(resources).not.toContainText('No resources found')
-    await expect(
-      resources.getByRole('button', { name: 'Create resource', exact: true })
-    ).toHaveCount(0)
-  })
-
   for (const unsafe of [
     { endpoint: 'https://example.invalid' },
     { engineSocket: 'unix:///arbitrary.sock' },

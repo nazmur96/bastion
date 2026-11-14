@@ -1,3 +1,4 @@
+import { CloudBindingSummary } from '../cloud/CloudBindingSummary'
 import { translate } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -94,6 +95,7 @@ export function SourceChecksPanel({
                 'Adapter source-check/v1 reads through the project owner. JSON files receive a syntax check; other files receive a bounded UTF-8 readability check. No command runs and no file is written.'
               )}
             </p>
+            <CloudBindingSummary binding={validation.snapshot.cloudBinding} />
             {validation.snapshot.files.map((file) => (
               <div
                 className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-2"

@@ -54,7 +54,7 @@ afterEach(() => {
   }
 })
 
-describe('9.2 proposed binding contracts — deliberately red until reviewed implementation', () => {
+describe('9.2a cloud binding contracts', () => {
   it('represents explicit targetless source separately from a missing legacy binding', () => {
     expect(
       changeSnapshotSchema.safeParse({ ...source, cloudBinding: { kind: 'none' } }).success
@@ -63,24 +63,17 @@ describe('9.2 proposed binding contracts — deliberately red until reviewed imp
   it('captures an explicit cloud-bound source snapshot for CT-05', () => {
     expect(changeSnapshotSchema.safeParse({ ...source, cloudBinding: binding }).success).toBe(true)
   })
-  it('represents a local lifecycle snapshot without fake source files', () => {
-    expect(
-      changeSnapshotSchema.safeParse({
-        adapter: 'floci-aws-lifecycle/v1',
-        operation: 'start',
-        cloudBinding: binding,
-        policy: { cliVersion: '0.4.0', imageDigest, bindAddress: '127.0.0.1' }
-      }).success
-    ).toBe(true)
-  })
-  it('registers cloud lifecycle intents with explicit target mode', () => {
+  it('registers cloud-bound source checks without making lifecycle a reviewed intent', () => {
     expect(
       changeIntentSchema.safeParse({
-        id: 'cloud:floci-aws:start',
-        kind: 'cloud-lifecycle',
+        id: 'source-check:cloud',
+        kind: 'source-check',
         targetMode: 'selected-cloud'
       }).success
     ).toBe(true)
+    expect(
+      changeIntentSchema.safeParse({ id: 'cloud:start', kind: 'cloud-lifecycle' }).success
+    ).toBe(false)
   })
   it('CT-05 detects an A-B-A selection even when target and source bytes return unchanged', () => {
     const root = mkdtempSync(join(tmpdir(), 'cloud-binding-roundtrip-'))

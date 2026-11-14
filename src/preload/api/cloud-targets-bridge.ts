@@ -2,6 +2,9 @@ import { ipcRenderer } from 'electron'
 import type { CloudTargetsApi } from '../../shared/fork-cloud/cloud-target-contract'
 
 export const cloudTargetsApi: CloudTargetsApi = {
+  readRuntime: (args) => ipcRenderer.invoke('bastionCloud:readRuntime', args),
+  runLifecycle: (args) => ipcRenderer.invoke('bastionCloud:runLifecycle', args),
+  captureBinding: (projectId) => ipcRenderer.invoke('bastionCloud:captureBinding', { projectId }),
   read: (projectId) => ipcRenderer.invoke('bastionCloud:read', { projectId }),
   update: (request) => ipcRenderer.invoke('bastionCloud:update', request),
   onChanged: (callback) => {

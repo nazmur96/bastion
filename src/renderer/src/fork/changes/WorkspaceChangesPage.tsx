@@ -285,10 +285,12 @@ export function WorkspaceChangesPage({ worktreeId }: { worktreeId: string }): Re
             </p>
             <p className="break-all font-mono text-xs">{record.id}</p>
             <p>
-              {translate(
-                'changes.repositoryTarget',
-                'Target: repository source. Cloud bindings are separate. Files remain ordinary project files; the ledger stores references and results.'
-              )}
+              {record.intent?.targetMode === 'selected-cloud'
+                ? 'Target: repository source with an explicit Floci AWS binding. The prepared plan records its selection and instance; no cloud operation is run.'
+                : translate(
+                    'changes.repositoryTarget',
+                    'Target: repository source. Cloud bindings are separate. Files remain ordinary project files; the ledger stores references and results.'
+                  )}
             </p>
           </section>
           {record.intent?.kind === 'create-file' ? (

@@ -42,3 +42,13 @@ export function changeInitialPaths(projectId: string): string[] {
 export function changeEntrance(): ChangeEntrance {
   return entrance
 }
+
+export function openCloudSourceChecks(): void {
+  openChanges('cloud')
+  initialIntent = {
+    id: 'source-check:cloud',
+    kind: 'source-check',
+    targetMode: 'selected-cloud',
+    label: 'Targeted source checks'
+  }
+}

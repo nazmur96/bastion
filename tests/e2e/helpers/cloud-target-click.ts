@@ -4,6 +4,9 @@ import { expect, type Locator } from '@stablyai/playwright-test'
 export async function clickCloudControl(control: Locator): Promise<void> {
   await expect(control).toBeVisible()
   await expect(control).toBeEnabled()
+  await control.evaluate((element) =>
+    element.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
+  )
   let point = { x: 0, y: 0 }
   let previous: { x: number; y: number } | null = null
   await expect

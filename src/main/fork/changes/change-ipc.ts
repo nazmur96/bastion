@@ -1,3 +1,5 @@
+import { admitCloudChange } from '../cloud/cloud-binding-authority'
+import { isTrustedUIRenderer } from '../../ipc/ui'
 import { app, ipcMain } from 'electron'
 import { z } from 'zod'
 import {
@@ -58,7 +60,10 @@ export function registerChangeHandlers(): void {
       .parse(args)
     return open().list(parsed.projectId)
   })
-  ipcMain.handle('bastionChanges:command', (event, args: unknown) => {
+  ipcMain.handle('bastionChanges:command', async (event, args: unknown) => {
+    if (!isTrustedUIRenderer(event.sender) || event.senderFrame !== event.sender.mainFrame) {
+      throw new Error('Untrusted change sender.')
+    }
     const parsed = z
       .object({
         id: z.string().uuid(),
@@ -78,7 +83,16 @@ export function registerChangeHandlers(): void {
     ) {
       throw new Error('This window does not own the running attempt.')
     }
-    const result = open().command(parsed.id, parsed.revision, parsed.command)
+    const active = open()
+    const record = active.get(parsed.id)
+    const result = await admitCloudChange(
+      record,
+      parsed.command,
+      () => active.command(parsed.id, parsed.revision, parsed.command),
+      () => {
+        active.command(record.id, record.revision, { kind: 'invalidate' })
+      }
+    )
     if (parsed.command.kind === 'start') {
       const run = result.runs.at(-1)
       if (run) {

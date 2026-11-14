@@ -1,3 +1,4 @@
+import { requireCloudBindingAuthority } from '../../fork/cloud/cloud-binding-authority'
 import { realpath } from 'node:fs/promises'
 import { join } from 'node:path'
 import { getDiskBaselineSignature } from '../../../shared/disk-baseline-signature'
@@ -117,11 +118,31 @@ export class RuntimeOwnedChangeRuns {
       verification: null
     }
     const store = this.storage()
-    const admitted = store.admitReceipt(receipt)
+    const previous = store.receipt(receipt.id)
+    if (previous) {
+      return store.admitReceipt(receipt).receipt
+    }
+    const release =
+      params.snapshot.cloudBinding?.kind === 'emulated-aws'
+        ? requireCloudBindingAuthority().claim(params.runId, params.snapshot, {
+            projectId: target.worktree.id,
+            root: params.expectedRoot,
+            runtimeId: this.host.getRuntimeId()
+          })
+        : () => {}
+    let admitted: ReturnType<ChangeLedger['admitReceipt']>
+    try {
+      admitted = store.admitReceipt(receipt)
+    } catch (error) {
+      release()
+      throw error
+    }
     if (!admitted.created) {
+      release()
       return admitted.receipt
     }
     if (jobs.size >= 4) {
+      release()
       receipt.status = 'interrupted'
       receipt.finishedAt = Date.now()
       store.saveReceipt(receipt)
@@ -140,7 +161,10 @@ export class RuntimeOwnedChangeRuns {
           console.warn('[changes] Owner receipt could not be persisted; completion is unknown.')
         }
       })
-      .finally(() => jobs.delete(receipt.id))
+      .finally(() => {
+        release()
+        jobs.delete(receipt.id)
+      })
     jobs.set(receipt.id, job)
     return admitted.receipt
   }

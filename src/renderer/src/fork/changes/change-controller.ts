@@ -3,6 +3,7 @@ import {
   sameChangeSnapshot,
   type ChangeEntrance,
   type ChangeIntent,
+  type ChangeSnapshot,
   type ChangeRecord
 } from '../../../../shared/fork-changes/change-contract'
 import { captureSourceCheckOwner } from './source-check-owner'
@@ -33,13 +34,27 @@ export function matchingOwner(record: ChangeRecord) {
   return owner
 }
 
+async function bindSnapshot(
+  record: ChangeRecord,
+  snapshot: ChangeSnapshot
+): Promise<ChangeSnapshot> {
+  if (record.intent?.targetMode !== 'selected-cloud') {
+    return { ...snapshot, cloudBinding: { kind: 'none' } }
+  }
+  const capture = window.api.cloudTargets?.captureBinding
+  if (!capture) {
+    throw new Error('This client cannot prepare cloud-bound changes.')
+  }
+  return { ...snapshot, cloudBinding: await capture(record.scope.projectId) }
+}
+
 export async function prepareSourceChange(
   record: ChangeRecord,
   paths: string[]
 ): Promise<ChangeRecord> {
   const owner = matchingOwner(record)
   const snapshot = await pinOwnerSnapshot(owner, await owner.snapshot(paths))
-  return updateChange(record, { kind: 'validate', snapshot })
+  return updateChange(record, { kind: 'validate', snapshot: await bindSnapshot(record, snapshot) })
 }
 
 export async function reviewSourceChange(record: ChangeRecord): Promise<ChangeRecord> {
@@ -48,9 +63,12 @@ export async function reviewSourceChange(record: ChangeRecord): Promise<ChangeRe
     throw new Error('Prepare source before reviewing it.')
   }
   const owner = matchingOwner(record)
-  const snapshot = await pinOwnerSnapshot(
-    owner,
-    await owner.snapshot(validation.snapshot.files.map((file) => file.path))
+  const snapshot = await bindSnapshot(
+    record,
+    await pinOwnerSnapshot(
+      owner,
+      await owner.snapshot(validation.snapshot.files.map((file) => file.path))
+    )
   )
   if (!sameChangeSnapshot(snapshot, validation.snapshot)) {
     await updateChange(record, { kind: 'validate', snapshot })
@@ -72,9 +90,12 @@ export async function runSourceChange(
     throw new Error('Review the prepared source before running checks.')
   }
   const owner = matchingOwner(record)
-  const snapshot = await pinOwnerSnapshot(
-    owner,
-    await owner.snapshot(review.snapshot.files.map((file) => file.path))
+  const snapshot = await bindSnapshot(
+    record,
+    await pinOwnerSnapshot(
+      owner,
+      await owner.snapshot(review.snapshot.files.map((file) => file.path))
+    )
   )
   if (!sameChangeSnapshot(snapshot, review.snapshot)) {
     await updateChange(record, { kind: 'validate', snapshot })

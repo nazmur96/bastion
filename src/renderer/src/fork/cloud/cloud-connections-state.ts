@@ -1,3 +1,5 @@
+import { createBrowserUuid } from '@/lib/browser-uuid'
+import type { FlociView, FlociAction } from '../../../../shared/fork-cloud/floci-contract'
 import type {
   CloudConnectionsSnapshot,
   CloudMutation,
@@ -7,6 +9,7 @@ export type ConnectionsState = {
   scope: string
   snapshot: CloudConnectionsSnapshot | null
   pending: boolean
+  runtime?: FlociView | null
   error: string | null
 }
 export class CloudConnectionsState {
@@ -38,7 +41,7 @@ export class CloudConnectionsState {
     }
     void this.load(projectId, scope)
   }
-  async load(projectId: string, scope: string): Promise<void> {
+  async load(projectId: string, scope: string, refresh = false): Promise<void> {
     const epoch = ++this.epoch
     const same = this.state.scope === scope
     this.publish({ scope, snapshot: same ? this.state.snapshot : null, pending: true, error: null })
@@ -56,7 +59,25 @@ export class CloudConnectionsState {
         })
         return
       }
-      this.publish({ scope, snapshot: result.snapshot, pending: false, error: null })
+      const selected = result.snapshot.targets.find(
+        (target) => target.id === result.snapshot.selection?.targetId
+      )
+      const runtime =
+        result.snapshot.owner === 'local' &&
+        selected?.configuration.kind === 'emulated' &&
+        selected.configuration.provider === 'aws'
+          ? await this.api()?.readRuntime?.({ projectId, targetId: selected.id, refresh })
+          : undefined
+      if (epoch !== this.epoch) {
+        return
+      }
+      this.publish({
+        scope,
+        snapshot: result.snapshot,
+        runtime: runtime?.ok ? runtime.runtime : null,
+        pending: false,
+        error: runtime && !runtime.ok ? runtime.message : null
+      })
     } catch {
       if (epoch === this.epoch) {
         this.publish({
@@ -65,6 +86,56 @@ export class CloudConnectionsState {
           pending: false,
           error: 'Cloud targets could not be loaded.'
         })
+      }
+    }
+  }
+  async refreshRuntime(): Promise<void> {
+    const { snapshot, scope } = this.state
+    if (snapshot) {
+      await this.load(snapshot.projectId, scope, true)
+    }
+  }
+  async lifecycle(
+    operation: FlociAction['operation'],
+    confirmation?: FlociAction['confirmation']
+  ): Promise<void> {
+    const { snapshot, scope, runtime } = this.state
+    if (!snapshot || !runtime || this.state.pending) {
+      return
+    }
+    this.writing = true
+    const epoch = ++this.epoch
+    this.publish({ ...this.state, pending: true, error: null })
+    try {
+      const result = await this.api()?.runLifecycle?.({
+        projectId: snapshot.projectId,
+        targetId: runtime.instance.targetId,
+        requestId: createBrowserUuid(),
+        operation,
+        ...(confirmation ? { confirmation } : {})
+      })
+      if (epoch !== this.epoch) {
+        return
+      }
+      this.publish({
+        ...this.state,
+        pending: false,
+        runtime: result?.ok ? result.runtime : runtime,
+        error: result && !result.ok ? result.message : null
+      })
+    } catch {
+      if (epoch === this.epoch) {
+        this.publish({
+          ...this.state,
+          pending: false,
+          error: 'Lifecycle request could not be confirmed. Refresh this instance before retrying.'
+        })
+      }
+    } finally {
+      this.writing = false
+      if (this.dirty && this.state.scope === scope) {
+        this.dirty = false
+        void this.load(snapshot.projectId, scope)
       }
     }
   }
@@ -89,6 +160,8 @@ export class CloudConnectionsState {
       }
       if (result?.ok) {
         this.publish({ scope, snapshot: result.snapshot, pending: false, error: null })
+        this.dirty = false
+        await this.load(snapshot.projectId, scope)
         return true
       }
       const error = result?.message ?? 'Cloud targets could not be updated.'

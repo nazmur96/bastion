@@ -1,3 +1,4 @@
+import { FlociRuntimeCard } from './FlociRuntimeCard'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -41,6 +42,8 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
   const snapshot = state.scope === scope ? state.snapshot : null
   const local = startWorkspaceHost(worktreeId) === 'local' && snapshot?.owner === 'local'
   const pending = state.pending || !snapshot
+  const selected = snapshot?.targets.find((target) => target.id === snapshot.selection?.targetId)
+  const runtime = state.scope === scope ? state.runtime : null
   return (
     <div className="workspace-page scrollbar-sleek" data-testid="cloud-target-connections">
       <header className="workspace-page-heading">
@@ -48,27 +51,30 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           <div className="workspace-eyebrow">Cloud</div>
           <h1>Connections</h1>
           <p>
-            Keep cloud target metadata inside this workspace. Verification and resource access are
-            not available yet.
+            Keep cloud targets inside this workspace. Start a private local Floci AWS instance; real
+            cloud access is not available yet.
           </p>
         </div>
         <Button onClick={() => setEditing('new')} disabled={pending}>
           Add target
         </Button>
       </header>
+      {runtime && local && selected && (
+        <FlociRuntimeCard key={selected.id} target={selected} runtime={runtime} pending={pending} />
+      )}
       <section className="workspace-card space-y-4">
         <p data-testid="cloud-target-owner-status" className="text-sm">
           {snapshot
             ? local
-              ? 'Local runtime · target metadata only'
+              ? 'Local runtime · cloud targets'
               : 'Cloud targets are not available on this runtime.'
             : state.pending
               ? 'Loading target metadata…'
               : 'Cloud target metadata is unavailable.'}
         </p>
         <p className="text-xs text-muted-foreground">
-          Selections apply to this project. They do not change running terminals, agents or
-          source-check reviews.
+          Selections apply to this project. Running work stays pinned; targeted source checks need a
+          fresh review after selection changes.
         </p>
         {state.error && (
           <div role="alert" className="space-y-2 text-sm text-destructive">
@@ -109,7 +115,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
               <p className="mt-2 break-all text-xs text-muted-foreground">
                 {target.configuration.kind === 'real'
                   ? `${target.configuration.profileName} · ${target.configuration.region}`
-                  : `CLI ${target.configuration.cliVersion} · local runtime${target.configuration.requestedPort ? ` · requested port ${target.configuration.requestedPort}` : ''}`}
+                  : `${target.configuration.engine ?? 'docker'} · local runtime${target.configuration.requestedPort ? ` · requested port ${target.configuration.requestedPort}` : ''}`}
               </p>
             </div>
             <Button

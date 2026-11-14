@@ -1,0 +1,5 @@
+FROM node:24.11.1-alpine3.22 AS node
+FROM docker:28.5.2-dind
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+RUN apk add --no-cache libstdc++
+ENTRYPOINT ["/usr/local/bin/dind", "dockerd", "--host=unix:///var/run/docker.sock", "--storage-driver=vfs"]

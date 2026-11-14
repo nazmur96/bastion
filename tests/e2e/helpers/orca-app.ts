@@ -228,7 +228,10 @@ export const test = base.extend<OrcaTestFixtures, OrcaWorkerFixtures>({
     const page = await electronApp.firstWindow({ timeout: 120_000 })
     await page.waitForLoadState('domcontentloaded')
 
-    await page.waitForFunction(() => Boolean(window.__store), null, { timeout: 30_000 })
+    await page.waitForFunction(() => Boolean(window.__store), null, {
+      timeout: 30_000,
+      polling: 100
+    })
 
     if (!seedTestRepo) {
       await page.waitForFunction(

@@ -9,6 +9,7 @@ import {
 
 type CatalogStore = Pick<Store, 'getRepos' | 'getFolderWorkspaces' | 'getProjectGroups'>
 export type CloudProjectRuntime = {
+  getRuntimeId?(): string
   resolveRuntimeFileTarget(
     selector: string
   ): Promise<{ executionHostId: string; worktree: { id: string; path: string } }>

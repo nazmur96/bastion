@@ -1,3 +1,5 @@
+import type { FlociAction, FlociResult } from './floci-contract'
+import type { CloudBinding } from './cloud-binding'
 import { z } from 'zod'
 
 function printable(value: string): boolean {
@@ -43,8 +45,10 @@ export const cloudConfigurationSchema = z.discriminatedUnion('kind', [
       cliVersion: z
         .string()
         .max(32)
-        .regex(/^\d+\.\d+\.\d+$/),
+        .regex(/^\d+\.\d+\.\d+$/)
+        .optional(),
       runtimeId: z.literal('local'),
+      engine: z.enum(['docker', 'podman']).optional(),
       requestedPort: z.number().int().min(1024).max(65535).optional()
     })
     .strict()
@@ -128,5 +132,12 @@ export type CloudRequest = z.infer<typeof cloudRequestSchema>
 export type CloudTargetsApi = {
   read: (projectId: string) => Promise<CloudTargetResult>
   update: (request: CloudRequest) => Promise<CloudTargetResult>
+  readRuntime?: (args: {
+    projectId: string
+    targetId: string
+    refresh?: boolean
+  }) => Promise<FlociResult>
+  runLifecycle?: (args: FlociAction) => Promise<FlociResult>
+  captureBinding?: (projectId: string) => Promise<CloudBinding>
   onChanged: (callback: () => void) => () => void
 }

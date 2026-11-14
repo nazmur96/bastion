@@ -1,3 +1,13 @@
+import { z } from 'zod'
+import { CloudWorkspaceProvider } from './cloud-workspace-provider'
+import { setCloudBindingAuthority } from './cloud-binding-authority'
+import {
+  flociReadSchema,
+  flociActionSchema,
+  FlociFailure,
+  flociMessages,
+  type FlociResult
+} from '../../../shared/fork-cloud/floci-contract'
 import { app, ipcMain, type WebContents } from 'electron'
 import type { Store } from '../../persistence'
 import { isTrustedUIRenderer } from '../../ipc/ui'
@@ -22,6 +32,90 @@ export function registerCloudTargetHandlers(
 ): void {
   let catalog: CloudTargetCatalog | undefined
   const subscribers = new Set<WebContents>()
+  let provider: CloudWorkspaceProvider | undefined
+  const notify = () => {
+    for (const sender of subscribers) {
+      if (!sender.isDestroyed()) {
+        sender.send('bastionCloud:changed')
+      }
+    }
+  }
+  const requireProvider = (sender: WebContents) => {
+    const context = readProjectWorkspaceContext()
+    if (!isTrustedUIRenderer(sender) || !context?.workspace || context.incognito) {
+      throw new FlociFailure('owner-changed')
+    }
+    catalog ??= new CloudTargetCatalog(context.dataRoot)
+    provider ??= new CloudWorkspaceProvider(
+      context.dataRoot,
+      context.activeId,
+      catalog,
+      store,
+      runtime,
+      notify
+    )
+    return provider
+  }
+  setCloudBindingAuthority({
+    capture: (scope) => {
+      if (!provider) {
+        throw new Error('Open Cloud before preparing a target-bound change.')
+      }
+      return provider.capture(scope)
+    },
+    claim: (id, snapshot, scope) => {
+      if (!provider) {
+        throw new Error('Cloud owner unavailable.')
+      }
+      return provider.claim(id, snapshot, scope)
+    }
+  })
+  for (const operation of ['readRuntime', 'runLifecycle'] as const) {
+    ipcMain.handle(
+      `bastionCloud:${operation}`,
+      async (event, raw: unknown): Promise<FlociResult> => {
+        try {
+          if (event.senderFrame !== event.sender.mainFrame) {
+            throw new FlociFailure('owner-changed')
+          }
+          if (operation === 'runLifecycle') {
+            const parsed = flociActionSchema.safeParse(raw)
+            if (!parsed.success) {
+              throw new FlociFailure('invalid')
+            }
+            return { ok: true, runtime: await requireProvider(event.sender).act(parsed.data) }
+          }
+          const parsed = flociReadSchema.safeParse(raw)
+          if (!parsed.success) {
+            throw new FlociFailure('invalid')
+          }
+          const owner = requireProvider(event.sender)
+          const context = await owner.selected(parsed.data.projectId, parsed.data.targetId)
+          const instance = await owner.controller.ensure(parsed.data.targetId)
+          context.assertAdmission()
+          return {
+            ok: true,
+            runtime: parsed.data.refresh
+              ? await owner.controller.refresh(parsed.data.targetId)
+              : owner.controller.view(instance)
+          }
+        } catch (error) {
+          const code = error instanceof FlociFailure ? error.code : 'storage'
+          return { ok: false, code, message: flociMessages[code] }
+        }
+      }
+    )
+  }
+  ipcMain.handle('bastionCloud:captureBinding', (event, raw: unknown) => {
+    if (event.senderFrame !== event.sender.mainFrame) {
+      throw new FlociFailure('owner-changed')
+    }
+    const { projectId } = z
+      .object({ projectId: z.string().min(1).max(4096) })
+      .strict()
+      .parse(raw)
+    return requireProvider(event.sender).captureProject(projectId)
+  })
   async function request(
     sender: WebContents,
     raw: unknown,
@@ -111,6 +205,8 @@ export function registerCloudTargetHandlers(
   )
   app.once('will-quit', () => {
     subscribers.clear()
+    setCloudBindingAuthority(undefined)
+    provider?.close()
     catalog?.close()
     catalog = undefined
   })
