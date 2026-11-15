@@ -4,6 +4,7 @@ export const FLOCI_IMAGE =
 export const flociOperationSchema = z.enum(['start', 'stop', 'reset'])
 export const flociCodes = z.enum([
   'complete',
+  'unsupported',
   'interrupted',
   'engine-unavailable',
   'container-policy-missing',
@@ -21,6 +22,8 @@ export const flociCodes = z.enum([
 export type FlociCode = z.infer<typeof flociCodes>
 export const flociMessages: Record<FlociCode, string> = {
   complete: 'Operation completed.',
+  unsupported:
+    'This provider supports emulator lifecycle only. Client environments and resource listings are not available yet.',
   interrupted: 'Operation interrupted; refresh to inspect the instance.',
   'engine-unavailable':
     'The selected local container engine is unavailable. Configure Docker or rootless Podman on the owner.',

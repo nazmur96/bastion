@@ -1,3 +1,10 @@
+import {
+  flociContainerEnvironment,
+  flociImageEnvironment,
+  flociApplicationArgs,
+  flociProduct
+} from '../../../shared/fork-cloud/floci-products'
+import { flociContainerUser, FLOCI_IMAGE } from './floci-engine'
 import { FLOCI_NETWORK_POLICY } from './floci-network-policy'
 import { describe, expect, it } from 'vitest'
 import { checkFlociInspection } from './floci-inspection'
@@ -84,4 +91,63 @@ describe('fresh engine admission inspection', () => {
   ])('refuses substituted image, ownership, exposure or mount', (input) => {
     expect(() => checkFlociInspection(input, instance, 'sha256:fixture')).toThrow('does not match')
   })
+})
+
+describe('provider-specific engine inspection', () => {
+  it.each(['azure', 'gcp', 'oci'] as const)(
+    'matches %s image, non-root user, service switches and provider port',
+    (provider) => {
+      const p = flociProduct(provider)
+      const fixture = {
+        ...raw,
+        Config: {
+          ...raw.Config,
+          Image: p.image,
+          User: flociContainerUser(),
+          Cmd: flociApplicationArgs(provider),
+          Env: [
+            ...new Set([
+              ...flociImageEnvironment(provider),
+              ...flociContainerEnvironment(provider, instance.port)
+            ])
+          ]
+        },
+        HostConfig: {
+          ...raw.HostConfig,
+          PortBindings: {
+            [`${p.port}/tcp`]: [{ HostIp: '127.0.0.1', HostPort: String(instance.port) }]
+          }
+        }
+      }
+      expect(checkFlociInspection(fixture, instance, 'sha256:fixture', provider).running).toBe(true)
+      for (const config of [
+        { ...fixture.Config, User: '0:0' },
+        { ...fixture.Config, Image: FLOCI_IMAGE },
+        {
+          ...fixture.Config,
+          Env: [...fixture.Config.Env, `${p.prefix}_SERVICES_FUNCTIONS_ENABLED=true`]
+        }
+      ]) {
+        expect(() =>
+          checkFlociInspection({ ...fixture, Config: config }, instance, 'sha256:fixture', provider)
+        ).toThrow()
+      }
+      expect(() =>
+        checkFlociInspection(
+          {
+            ...fixture,
+            HostConfig: {
+              ...fixture.HostConfig,
+              PortBindings: {
+                '4566/tcp': [{ HostIp: '127.0.0.1', HostPort: String(instance.port) }]
+              }
+            }
+          },
+          instance,
+          'sha256:fixture',
+          provider
+        )
+      ).toThrow()
+    }
+  )
 })

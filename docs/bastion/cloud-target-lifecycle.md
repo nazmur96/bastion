@@ -31,3 +31,39 @@ The disposable-engine harness and its build instructions are in `tests/e2e/fixtu
 Focused tests cover migration, bindings, stale admission, concurrent writers, interrupted evidence, delayed refresh, argument/inspection substitution, private environment and symlink refusals. Electron acceptance uses hidden CDP/native-coordinate clicks with hit/drag checks; screenshots are captured on an isolated display. Linux Docker is the live-supported proof. Successful rootless Podman, Desktop engines, packaged, Windows/macOS and mobile checks are not claimed.
 
 Slice 9.2b remains separate: sealed terminal/agent contexts, five read-only resource listers, legacy sandbox migration/fold-in and dead readiness removal. Deferred red contracts remain opt-in under `tests/e2e/planned/` and are not counted as 9.2a passes. Earlier milestone open items remain open. Nothing in this slice accesses real AWS or performs Terraform apply/destroy.
+
+## Slice 9.6a: Azure, GCP and OCI lifecycle
+
+The existing FlociController now uses shared product descriptors for the three pinned
+images in STEP-9-PLAN.md J1. Each descriptor fixes its port, persistence prefix,
+readiness predicate, service switches and unavailable client capabilities. There is
+one engine/instance/receipt path, not separate provider lifecycle stores. Existing
+operation IDs and policy entries are unchanged.
+
+Restricted boot was proved first, before product implementation, on a disposable
+Docker engine with linux/amd64 images: non-root UID, readonly root, cap-drop ALL,
+no-new-privileges, the existing outbound-blocking seccomp policy, one private data
+mount and one literal loopback publish. No restriction was relaxed. Azure requires
+`/ready` status UP; GCP/OCI require their product init route's completed.ready=true.
+Only Blob, GCS/PubSub and OCI Identity/Object Storage are enabled respectively;
+sidecar services, Azure UI, TLS extra listeners and DNS container fallback are off.
+Image/root filesystem defaults and service switches are checked during inspection.
+Non-AWS startup requires a Linux amd64 owner/engine/image; arm64 and other platforms
+are unavailable. Linux Docker is the live proof; successful Podman remains unproven.
+
+Start/Stop/Reset retain the existing admission, target/instance/epoch confirmation,
+receipt replay and recovery behavior. The live production driver verifies two
+namespaces per provider, actual inspect, fresh readiness, Stop/Start retention and
+scoped Reset. Retention uses a private-directory sentinel; it is not a claim of
+provider-resource persistence or listing correctness. Proof scripts use the existing
+9.2 disposable-daemon image; the non-root driver receives only that daemon's existing
+socket group. Emulator restrictions remain unchanged. The daemon and every inner
+container are removed by recorded IDs.
+
+9.6b remains separate. Non-AWS client-environment/listing calls refuse in main before
+AWS readiness, transport or configuration can run. The existing resources section
+shows those limits. The terminal button stays visible and disabled with its product
+reason, including OCI's unreviewed signing-key requirement. No dummy key is generated
+or persisted. A per-instance disposable OCI signing key is only a possible separately
+reviewed follow-up. Non-AWS target-bound source execution is also unavailable; existing
+AWS and targetless source workflows remain separate.

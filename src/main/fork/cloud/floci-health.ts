@@ -1,11 +1,18 @@
+import { flociProduct, type FlociProvider } from '../../../shared/fork-cloud/floci-products'
 import { z } from 'zod'
 import { request } from 'node:http'
 
 // The pinned image probes /_floci/init; require ready=true rather than its timed fallback.
-export function flociHealthy(port: number): Promise<boolean> {
+export function flociHealthy(port: number, provider: FlociProvider = 'aws'): Promise<boolean> {
   return new Promise((resolve) => {
     const req = request(
-      { hostname: '127.0.0.1', port, path: '/_floci/init', method: 'GET', agent: false },
+      {
+        hostname: '127.0.0.1',
+        port,
+        path: flociProduct(provider).readyPath,
+        method: 'GET',
+        agent: false
+      },
       (res) => {
         let size = 0,
           body = ''
@@ -22,8 +29,10 @@ export function flociHealthy(port: number): Promise<boolean> {
             const value: unknown = JSON.parse(body)
             resolve(
               res.statusCode === 200 &&
-                z.object({ completed: z.object({ ready: z.literal(true) }) }).safeParse(value)
-                  .success
+                (flociProduct(provider).readyKind === 'status-up'
+                  ? z.object({ status: z.literal('UP') })
+                  : z.object({ completed: z.object({ ready: z.literal(true) }) })
+                ).safeParse(value).success
             )
           } catch {
             resolve(false)

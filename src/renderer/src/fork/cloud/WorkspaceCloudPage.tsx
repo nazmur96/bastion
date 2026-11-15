@@ -57,7 +57,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           <div className="workspace-eyebrow">Cloud</div>
           <h1>Connections</h1>
           <p>
-            Keep cloud targets inside this workspace. Start a private local Floci AWS emulator, or
+            Keep cloud targets inside this workspace. Start a private local Floci emulator, or
             verify a real AWS profile for fixed read-only checks.
           </p>
         </div>

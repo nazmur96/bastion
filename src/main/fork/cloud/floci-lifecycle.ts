@@ -1,13 +1,10 @@
+import { flociProduct, type FlociProvider } from '../../../shared/fork-cloud/floci-products'
 import { writeFlociNetworkPolicy } from './floci-network-policy'
 import { flociEngineIdentity } from './floci-engine-identity'
 import { ensureFlociNetwork, ownedFlociNetwork } from './floci-network'
 import { dirname } from 'node:path'
 import { z } from 'zod'
-import {
-  FLOCI_IMAGE,
-  FlociFailure,
-  type FlociInstance
-} from '../../../shared/fork-cloud/floci-contract'
+import { FlociFailure, type FlociInstance } from '../../../shared/fork-cloud/floci-contract'
 import {
   engineCall,
   flociCreateArgs,
@@ -19,9 +16,10 @@ import { checkFlociInspection } from './floci-inspection'
 import { privateFlociDirectory } from './floci-paths'
 import { flociHealthy } from './floci-health'
 import { availableFlociPort } from './floci-port'
-function manifest(instance: FlociInstance): EngineManifest {
+function manifest(instance: FlociInstance, provider: FlociProvider): EngineManifest {
   return {
     namespaceId: instance.namespaceId,
+    provider,
     targetId: instance.targetId,
     id: instance.id,
     name: instance.name,
@@ -34,40 +32,56 @@ export async function startFloci(
   instance: FlociInstance,
   run: EngineRunner,
   assertOwner: () => void,
-  save: (instance: FlociInstance) => void
+  save: (instance: FlociInstance) => void,
+  provider: FlociProvider = 'aws'
 ): Promise<void> {
   assertOwner()
-  instance.engineId = await flociEngineIdentity(run, instance)
-  let image = await run(['image', 'inspect', FLOCI_IMAGE])
+  const imageDigest = flociProduct(provider).image
+  instance.engineId = await flociEngineIdentity(run, instance, provider)
+  let image = await run(['image', 'inspect', imageDigest])
   if (image.code !== 0) {
-    await engineCall(run, ['pull', FLOCI_IMAGE])
-    image = await run(['image', 'inspect', FLOCI_IMAGE])
+    await engineCall(run, [
+      'pull',
+      ...(provider === 'aws' ? [] : ['--platform', 'linux/amd64']),
+      imageDigest
+    ])
+    image = await run(['image', 'inspect', imageDigest])
   }
   const images = z
-    .array(z.object({ Id: z.string(), RepoDigests: z.array(z.string()) }))
+    .array(
+      z.object({
+        Id: z.string(),
+        RepoDigests: z.array(z.string()),
+        Os: z.string().optional(),
+        Architecture: z.string().optional()
+      })
+    )
     .parse(JSON.parse(image.stdout))
-  if (image.code !== 0 || images.length !== 1 || !images[0].RepoDigests.includes(FLOCI_IMAGE)) {
+  if (image.code !== 0 || images.length !== 1 || !images[0].RepoDigests.includes(imageDigest)) {
+    throw new FlociFailure('image-unavailable')
+  }
+  if (provider !== 'aws' && (images[0].Os !== 'linux' || images[0].Architecture !== 'amd64')) {
     throw new FlociFailure('image-unavailable')
   }
   instance.imageId = images[0].Id
   let existing = await inspectContainer(run, instance.containerId ?? instance.name)
   if (existing) {
-    checkFlociInspection(existing, instance, instance.imageId)
+    checkFlociInspection(existing, instance, instance.imageId, provider)
   } else {
     assertOwner()
     await availableFlociPort(instance.port)
     privateFlociDirectory(dirname(instance.dataPath))
     privateFlociDirectory(instance.dataPath)
     writeFlociNetworkPolicy(instance.dataPath, instance.targetId)
-    await ensureFlociNetwork(run, instance, manifest(instance))
-    const id = await engineCall(run, flociCreateArgs(manifest(instance)))
+    await ensureFlociNetwork(run, instance, manifest(instance, provider))
+    const id = await engineCall(run, flociCreateArgs(manifest(instance, provider)))
     if (!/^[a-f0-9]{64}$/.test(id)) {
       throw new FlociFailure('instance-conflict')
     }
     instance.containerId = id
     save(instance)
     existing = await inspectContainer(run, id)
-    checkFlociInspection(existing, instance, instance.imageId)
+    checkFlociInspection(existing, instance, instance.imageId, provider)
   }
   assertOwner()
   await engineCall(run, ['start', instance.containerId ?? instance.name])
@@ -76,9 +90,10 @@ export async function startFloci(
     const c = checkFlociInspection(
       await inspectContainer(run, instance.containerId ?? instance.name),
       instance,
-      instance.imageId
+      instance.imageId,
+      provider
     )
-    if (c.running && (await flociHealthy(instance.port))) {
+    if (c.running && (await flociHealthy(instance.port, provider))) {
       instance.state = 'ready'
       return
     }
@@ -89,16 +104,17 @@ export async function startFloci(
 export async function stopFloci(
   instance: FlociInstance,
   run: EngineRunner,
-  assertOwner: () => void
+  assertOwner: () => void,
+  provider: FlociProvider = 'aws'
 ): Promise<void> {
   assertOwner()
-  await flociEngineIdentity(run, instance)
+  await flociEngineIdentity(run, instance, provider)
   const existing = await inspectContainer(run, instance.containerId ?? instance.name)
   if (existing) {
     if (!instance.imageId) {
       throw new FlociFailure('instance-conflict')
     }
-    const verified = checkFlociInspection(existing, instance, instance.imageId)
+    const verified = checkFlociInspection(existing, instance, instance.imageId, provider)
     if (verified.running) {
       await engineCall(run, [
         'stop',

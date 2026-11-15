@@ -1,3 +1,11 @@
+import { flociContainerUser } from './floci-engine'
+import {
+  flociProduct,
+  flociContainerEnvironment,
+  flociImageEnvironment,
+  flociApplicationArgs,
+  type FlociProvider
+} from '../../../shared/fork-cloud/floci-products'
 import { hasFlociNetworkPolicy } from './floci-network-policy'
 import { z } from 'zod'
 import { FlociFailure, type FlociInstance } from '../../../shared/fork-cloud/floci-contract'
@@ -7,6 +15,8 @@ const inspected = z.object({
   Name: z.string(),
   State: z.object({ Running: z.boolean() }),
   Config: z.object({
+    User: z.string().optional(),
+    Image: z.string().optional(),
     Entrypoint: z.array(z.string()),
     Cmd: z.array(z.string()),
     Env: z.array(z.string()),
@@ -31,7 +41,12 @@ const inspected = z.object({
     z.object({ Type: z.string(), Source: z.string(), Destination: z.string(), RW: z.boolean() })
   )
 })
-export function checkFlociInspection(raw: unknown, instance: FlociInstance, imageId: string) {
+export function checkFlociInspection(
+  raw: unknown,
+  instance: FlociInstance,
+  imageId: string,
+  provider: FlociProvider = 'aws'
+) {
   const result = inspected.safeParse(raw)
   if (!result.success) {
     throw new FlociFailure('instance-conflict')
@@ -39,7 +54,10 @@ export function checkFlociInspection(raw: unknown, instance: FlociInstance, imag
   const c = result.data,
     labels = c.Config.Labels
   const ports = c.HostConfig.PortBindings
-  const binds = ports['4566/tcp']
+  const product = flociProduct(provider),
+    requiredEnv = flociContainerEnvironment(provider, instance.port)
+  const allowedEnv = [...flociImageEnvironment(provider), ...requiredEnv]
+  const binds = ports[`${product.port}/tcp`]
   if (
     c.Name.replace(/^\//, '') !== instance.name ||
     c.Image !== imageId ||
@@ -47,29 +65,16 @@ export function checkFlociInspection(raw: unknown, instance: FlociInstance, imag
     labels?.['bastion.workspace'] !== instance.namespaceId ||
     labels?.['bastion.target'] !== instance.targetId ||
     labels?.['bastion.instance'] !== instance.id ||
+    (provider !== 'aws' &&
+      (c.Config.User !== flociContainerUser() || c.Config.Image !== product.image)) ||
     c.HostConfig.Privileged ||
     !c.HostConfig.ReadonlyRootfs ||
     !c.HostConfig.CapDrop.includes('ALL') ||
     !c.HostConfig.SecurityOpt.includes('no-new-privileges') ||
     JSON.stringify(c.Config.Entrypoint) !== JSON.stringify(['/app/application']) ||
-    JSON.stringify(c.Config.Cmd) !==
-      JSON.stringify([
-        '-Dquarkus.http.host=0.0.0.0',
-        '-Dfloci.security.allow-unsafe-network-exposure=true'
-      ]) ||
-    c.Config.Env.some(
-      (value) =>
-        ![
-          'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
-          'FLOCI_VERSION=2.4.0',
-          'FLOCI_STORAGE_PERSISTENT_PATH=/app/data',
-          'LD_LIBRARY_PATH=/app',
-          'FLOCI_STORAGE_MODE=persistent',
-          'AWS_EC2_METADATA_DISABLED=true'
-        ].includes(value)
-    ) ||
-    !c.Config.Env.includes('FLOCI_STORAGE_MODE=persistent') ||
-    !c.Config.Env.includes('AWS_EC2_METADATA_DISABLED=true') ||
+    JSON.stringify(c.Config.Cmd) !== JSON.stringify(flociApplicationArgs(provider)) ||
+    c.Config.Env.some((value) => !allowedEnv.includes(value)) ||
+    requiredEnv.some((value) => !c.Config.Env.includes(value)) ||
     Object.keys(c.NetworkSettings.Networks).length !== 1 ||
     !(instance.network in c.NetworkSettings.Networks) ||
     !hasFlociNetworkPolicy(c.HostConfig.SecurityOpt) ||

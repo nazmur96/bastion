@@ -185,6 +185,10 @@ export class CloudWorkspaceProvider {
   /** The selected target's admitted instance, ready and answering on its own loopback port. */
   private async readyInstance(projectId: string, targetId: string) {
     const { assertAdmission } = await this.selected(projectId, targetId)
+    const target = this.catalog.snapshot().targets.find((target) => target.id === targetId)
+    if (target?.configuration.kind !== 'emulated' || target.configuration.provider !== 'aws') {
+      throw new FlociFailure('unsupported')
+    }
     const instance = await this.controller.ensure(targetId)
     if (instance.state !== 'ready' || !(await flociHealthy(instance.port))) {
       throw new FlociFailure('not-ready')

@@ -71,9 +71,7 @@ export class CloudConnectionsState {
         (target) => target.id === result.snapshot.selection?.targetId
       )
       const runtime =
-        result.snapshot.owner === 'local' &&
-        selected?.configuration.kind === 'emulated' &&
-        selected.configuration.provider === 'aws'
+        result.snapshot.owner === 'local' && selected?.configuration.kind === 'emulated'
           ? await this.api()?.readRuntime?.({ projectId, targetId: selected.id, refresh })
           : undefined
       if (epoch !== this.epoch) {

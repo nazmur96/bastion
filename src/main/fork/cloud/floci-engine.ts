@@ -1,3 +1,8 @@
+import {
+  flociProduct,
+  flociContainerEnvironment,
+  flociApplicationArgs
+} from '../../../shared/fork-cloud/floci-products'
 import { flociPolicyPath } from './floci-network-policy'
 import { z } from 'zod'
 import { runProcess } from '@orca/process-host'
@@ -11,6 +16,7 @@ export { FLOCI_IMAGE }
 const manifestSchema = z
   .object({
     namespaceId: z.string().min(1),
+    provider: z.enum(['aws', 'azure', 'gcp', 'oci']).optional(),
     targetId: z.string().uuid(),
     id: z.string().uuid(),
     name: z.string().regex(/^bastion-[a-z0-9-]+$/),
@@ -33,12 +39,16 @@ export function flociLabels(manifest: EngineManifest): string[] {
     `bastion.instance=${manifest.id}`
   ]
 }
+export function flociContainerUser(): string {
+  return typeof process.getuid === 'function' && process.getuid() > 0
+    ? `${process.getuid()}:${process.getgid?.() ?? process.getuid()}`
+    : '1000:1000'
+}
 export function flociCreateArgs(raw: unknown): string[] {
   const m = manifestSchema.parse(raw)
-  const user =
-    typeof process.getuid === 'function'
-      ? `${process.getuid()}:${process.getgid?.() ?? process.getuid()}`
-      : '1001:1001'
+  const provider = m.provider ?? 'aws',
+    product = flociProduct(provider)
+  const user = flociContainerUser()
   return [
     'create',
     '--name',
@@ -47,7 +57,7 @@ export function flociCreateArgs(raw: unknown): string[] {
     '--network',
     m.network,
     '--publish',
-    `127.0.0.1:${m.port}:4566/tcp`,
+    `127.0.0.1:${m.port}:${product.port}/tcp`,
     '--mount',
     `type=bind,source=${m.dataPath},target=/app/data`,
     '--user',
@@ -66,15 +76,11 @@ export function flociCreateArgs(raw: unknown): string[] {
     '256',
     '--memory',
     '768m',
-    '--env',
-    'FLOCI_STORAGE_MODE=persistent',
-    '--env',
-    'AWS_EC2_METADATA_DISABLED=true',
+    ...flociContainerEnvironment(provider, m.port).flatMap((value) => ['--env', value]),
     '--entrypoint',
     '/app/application',
-    FLOCI_IMAGE,
-    '-Dquarkus.http.host=0.0.0.0',
-    '-Dfloci.security.allow-unsafe-network-exposure=true'
+    product.image,
+    ...flociApplicationArgs(provider)
   ]
 }
 export function classifyEngineFailure(stderr: string): { code: FlociCode; message: string } {

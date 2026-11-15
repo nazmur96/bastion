@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert'
 import { randomUUID } from 'node:crypto'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir, networkInterfaces } from 'node:os'
 import { join } from 'node:path'
 import { request } from 'node:http'
@@ -52,6 +52,10 @@ async function refused(host: string, port: number): Promise<void> {
 }
 async function main(): Promise<void> {
   writeFileSync('/sys/fs/cgroup/init/cgroup.procs', String(process.pid))
+  if (process.getuid?.() === 0) {
+    process.setgid?.(statSync('/var/run/docker.sock').gid)
+    process.setuid?.(1000)
+  }
   const base = mkdtempSync(join(tmpdir(), 'bastion-floci-live-'))
   const fixtures = ['Alpha', 'Beta'].map((label) => {
     const root = join(base, label)

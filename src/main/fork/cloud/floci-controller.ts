@@ -1,3 +1,4 @@
+import { flociProduct, type FlociProvider } from '../../../shared/fork-cloud/floci-products'
 import { flociEngineIdentity } from './floci-engine-identity'
 import { join, dirname } from 'node:path'
 import { lstatSync } from 'node:fs'
@@ -5,7 +6,6 @@ import { rm } from 'node:fs/promises'
 import type { ChangeLedger } from '../changes/change-ledger'
 import type { CloudTargetCatalog } from './cloud-target-catalog'
 import {
-  FLOCI_IMAGE,
   FlociFailure,
   type FlociInstance,
   type FlociReceipt,
@@ -33,8 +33,14 @@ export class FlociController {
   ) {}
   async ensure(targetId: string): Promise<FlociInstance> {
     const target = this.catalog.snapshot().targets.find((target) => target.id === targetId)
-    if (target?.configuration.kind !== 'emulated' || target.configuration.provider !== 'aws') {
+    if (target?.configuration.kind !== 'emulated') {
       throw new FlociFailure('invalid')
+    }
+    if (
+      target.configuration.provider !== 'aws' &&
+      (process.platform !== 'linux' || process.arch !== 'x64')
+    ) {
+      throw new FlociFailure('image-unavailable')
     }
     const existing = this.catalog.instances.get(targetId)
     return (
@@ -48,10 +54,17 @@ export class FlociController {
       )
     )
   }
+  private product(targetId: string): FlociProvider {
+    const target = this.catalog.snapshot().targets.find((target) => target.id === targetId)
+    if (target?.configuration.kind !== 'emulated') {
+      throw new FlociFailure('invalid')
+    }
+    return target.configuration.provider
+  }
   view(instance: FlociInstance): FlociView {
     return {
       instance,
-      imageDigest: FLOCI_IMAGE,
+      imageDigest: flociProduct(this.product(instance.targetId)).image,
       receipts: this.ledger.lifecycleReceipts(instance.targetId)
     }
   }
@@ -97,7 +110,7 @@ export class FlociController {
     }
     try {
       const run = this.runner(this.root, instance.engine)
-      await flociEngineIdentity(run, instance)
+      await flociEngineIdentity(run, instance, this.product(targetId))
       const container = await inspectContainer(run, instance.containerId ?? instance.name)
       if (!container) {
         instance.state = instance.epoch > 0 ? 'stopped' : 'not-started'
@@ -106,10 +119,17 @@ export class FlociController {
         if (!instance.imageId) {
           throw new FlociFailure('instance-conflict')
         }
-        const inspected = checkFlociInspection(container, instance, instance.imageId)
+        const inspected = checkFlociInspection(
+          container,
+          instance,
+          instance.imageId,
+          this.product(targetId)
+        )
         instance.containerId = inspected.id
         instance.state =
-          inspected.running && (await flociHealthy(instance.port)) ? 'ready' : 'unknown'
+          inspected.running && (await flociHealthy(instance.port, this.product(targetId)))
+            ? 'ready'
+            : 'unknown'
       }
       instance.code = 'complete'
     } catch (error) {
@@ -201,7 +221,7 @@ export class FlociController {
     try {
       const run = this.runner(this.root, instance.engine)
       if (receipt.operation !== 'start') {
-        await stopFloci(instance, run, assertOwner)
+        await stopFloci(instance, run, assertOwner, this.product(instance.targetId))
       }
       if (receipt.operation === 'reset') {
         assertOwner()
@@ -218,7 +238,13 @@ export class FlociController {
         privateFlociDirectory(expected)
       }
       if (receipt.operation !== 'stop') {
-        await startFloci(instance, run, assertOwner, (next) => this.save(next))
+        await startFloci(
+          instance,
+          run,
+          assertOwner,
+          (next) => this.save(next),
+          this.product(instance.targetId)
+        )
       }
       receipt.status = 'passed'
       receipt.code = 'complete'

@@ -1,3 +1,4 @@
+import { flociProduct } from '../../../../shared/fork-cloud/floci-products'
 import { useState } from 'react'
 import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { Button } from '@/components/ui/button'
@@ -17,11 +18,16 @@ export function FlociRuntimeCard({
   pending: boolean
 }): React.JSX.Element {
   const [confirmation, setConfirmation] = useState<FlociView['instance'] | null>(null)
+  const product = flociProduct(
+    target.configuration.kind === 'emulated' ? target.configuration.provider : 'aws'
+  )
   const instance = runtime.instance
   const busy = pending || Boolean(instance.operationId)
   return (
     <section className="workspace-card space-y-3" data-testid="floci-target-runtime">
-      <h2 className="text-sm font-medium">{target.label} · Floci AWS</h2>
+      <h2 className="text-sm font-medium">
+        {target.label} · {product.label}
+      </h2>
       <p className="text-sm">{instance.state === 'not-started' ? 'Not started' : instance.state}</p>
       <p className="break-all font-mono text-xs text-muted-foreground">
         127.0.0.1:{instance.port} · {instance.engine}
@@ -30,6 +36,11 @@ export function FlociRuntimeCard({
       <p className="text-xs text-muted-foreground">
         Private persistent data. Stop preserves it; Reset deletes this target’s data.
       </p>
+      {target.configuration.provider !== 'aws' && (
+        <p className="text-xs text-muted-foreground">
+          Restricted boot proven on Linux amd64 only. Other platforms are unavailable.
+        </p>
+      )}
       {instance.code !== 'complete' && (
         <p role="status" className="text-sm">
           {flociMessages[instance.code]}
@@ -72,7 +83,11 @@ export function FlociRuntimeCard({
         >
           Refresh instance
         </Button>
-        <Button variant="ghost" disabled={busy} onClick={openCloudSourceChecks}>
+        <Button
+          variant="ghost"
+          disabled={busy || target.configuration.provider !== 'aws'}
+          onClick={openCloudSourceChecks}
+        >
           Targeted source checks
         </Button>
       </div>

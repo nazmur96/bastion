@@ -1,10 +1,15 @@
+import { captureCloudWindow } from './helpers/cloud-target-capture'
 import { expect, test } from './helpers/orca-app'
 import { openBastionPage } from './helpers/bastion-workspace'
 import { clickCloudControl, expectUsableCloudControl } from './helpers/cloud-target-click'
+test.use({
+  orcaAppExtraArgs: process.env.ORCA_E2E_ISOLATED_X11 === '1' ? ['--ozone-platform=x11'] : []
+})
 for (const provider of ['azure', 'gcp', 'oci'] as const) {
   test(`MC-06 ${provider} uses the existing stopped lifecycle card, costs and Reset dialog without starting an engine`, async ({
-    orcaPage
-  }) => {
+    orcaPage,
+    electronApp
+  }, info) => {
     await orcaPage.evaluate(async (provider) => {
       const api = window.api.cloudTargets,
         projectId = window.__store?.getState().activeWorktreeId
@@ -49,5 +54,6 @@ for (const provider of ['azure', 'gcp', 'oci'] as const) {
     await expect(dialog).toContainText(`Fixture ${provider}`)
     await clickCloudControl(dialog.getByRole('button', { name: 'Cancel', exact: true }))
     await expect(dialog).toHaveCount(0)
+    await captureCloudWindow(electronApp, orcaPage, info, `floci-${provider}.png`)
   })
 }

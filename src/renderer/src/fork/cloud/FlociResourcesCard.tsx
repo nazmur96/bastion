@@ -1,3 +1,4 @@
+import { flociProduct } from '../../../../shared/fork-cloud/floci-products'
 import { useState } from 'react'
 import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { toast } from 'sonner'
@@ -22,6 +23,9 @@ export function FlociResourcesCard({
   target: CloudTarget
   runtime: FlociView
 }): React.JSX.Element {
+  const product = flociProduct(
+    target.configuration.kind === 'emulated' ? target.configuration.provider : 'aws'
+  )
   const ready = runtime.instance.state === 'ready'
   const scope = `${target.id}:${runtime.instance.id}:${runtime.instance.epoch}`
   const [listing, setListing] = useState<{ scope: string; resources: FlociResources } | null>(null)
@@ -56,7 +60,9 @@ export function FlociResourcesCard({
   return (
     <section className="workspace-card space-y-3" data-testid="floci-target-resources">
       <h2 className="text-sm font-medium">Resources · read-only</h2>
-      {!ready ? (
+      {product.resourcesUnavailableReason ? (
+        <p className="text-sm text-muted-foreground">{product.resourcesUnavailableReason}</p>
+      ) : !ready ? (
         <p className="text-sm text-muted-foreground">Start this target to list resources.</p>
       ) : (
         <div className="flex flex-wrap gap-2">
@@ -78,6 +84,14 @@ export function FlociResourcesCard({
           </Button>
         </div>
       )}
+      {product.terminalUnavailableReason && (
+        <div className="space-y-1 text-sm text-muted-foreground">
+          <Button variant="outline" disabled title={product.terminalUnavailableReason}>
+            Open terminal for this target
+          </Button>
+          <p>{product.terminalUnavailableReason}</p>
+        </div>
+      )}
       {error && (
         <p role="alert" className="text-sm text-destructive">
           {error}
@@ -91,8 +105,8 @@ export function FlociResourcesCard({
       <div className="space-y-1 border-t border-border pt-3 text-xs" data-testid="floci-costs">
         <h3 className="text-sm font-medium">Costs</h3>
         <p>
-          Emulated · No charges. This local emulator is not an AWS account, so there is no bill and
-          no billing request.
+          Emulated · No charges. This local emulator is not a real cloud account, so there is no
+          bill and no billing request.
         </p>
       </div>
     </section>

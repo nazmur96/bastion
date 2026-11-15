@@ -1,12 +1,29 @@
+import type { FlociProvider } from '../../../shared/fork-cloud/floci-products'
 import { createHash } from 'node:crypto'
 import { z } from 'zod'
 import { FlociFailure, type FlociInstance } from '../../../shared/fork-cloud/floci-contract'
 import { engineCall, type EngineRunner } from './floci-engine'
 export async function flociEngineIdentity(
   run: EngineRunner,
-  instance: FlociInstance
+  instance: FlociInstance,
+  provider: FlociProvider = 'aws'
 ): Promise<string> {
   const info: unknown = JSON.parse(await engineCall(run, ['info', '--format', '{{json .}}']))
+  if (provider !== 'aws') {
+    const supported =
+      instance.engine === 'docker'
+        ? z
+            .object({ OSType: z.literal('linux'), Architecture: z.enum(['amd64', 'x86_64']) })
+            .safeParse(info).success
+        : z
+            .object({
+              host: z.object({ os: z.literal('linux'), arch: z.enum(['amd64', 'x86_64']) })
+            })
+            .safeParse(info).success
+    if (!supported) {
+      throw new FlociFailure('image-unavailable')
+    }
+  }
   const docker = z.object({ ID: z.string().min(1) }).safeParse(info)
   const podman = z
     .object({
