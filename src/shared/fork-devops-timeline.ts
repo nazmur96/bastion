@@ -1,3 +1,5 @@
+import type { ClusterEvidence } from './fork-devops-kube-evidence'
+
 /** Fork: Release flight, Time machine and Incident mode, from git, gh and cluster events. */
 export type TimelineEvent = {
   /** Unix ms. */
@@ -8,6 +10,9 @@ export type TimelineEvent = {
   /** Commit hash, or `Kind/namespace/name` of the object the event is about. */
   ref: string
 }
+
+/** Commits and warnings, plus what the cluster read actually reached. */
+export type Timeline = { events: TimelineEvent[]; cluster: ClusterEvidence }
 
 export type PullRequest = {
   number: number

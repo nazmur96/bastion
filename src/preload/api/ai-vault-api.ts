@@ -31,7 +31,7 @@ import type {
 } from '../../shared/ai-vault-resume-preparation'
 import type { ExecutionHostId, ExecutionHostScope } from '../../shared/execution-host'
 import type { LaunchpadFiles } from '../../shared/fork-devops-launchpad'
-import type { PullRequest, TimelineEvent } from '../../shared/fork-devops-timeline'
+import type { PullRequest, Timeline } from '../../shared/fork-devops-timeline'
 import type { RepoDocs } from '../../shared/fork-devops-docs'
 import type { RadarFindings } from '../../shared/fork-devops-radar-feed'
 import type { EnvironmentsResult } from '../../shared/fork-devops-environments'
@@ -98,7 +98,7 @@ export type AiVaultApi = {
   /** Fork: the cluster as a graph, read-only, for the system map. */
   readSystemMap: (workspacePath: string) => Promise<SystemMapResult>
   /** Fork: recent commits and cluster warnings; this branch's pull request (gh). */
-  timeline: (workspacePath: string) => Promise<TimelineEvent[]>
+  timeline: (workspacePath: string) => Promise<Timeline | null>
   pullRequest: (workspacePath: string) => Promise<PullRequest | null>
   /** Fork: the repo's runbooks and tracker; ticking writes the tracker file. */
   repoDocs: (workspacePath: string) => Promise<RepoDocs>

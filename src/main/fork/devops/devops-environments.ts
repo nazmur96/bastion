@@ -1,4 +1,5 @@
 import { kubectlIn } from './devops-kubectl'
+import { KUBECTL_MESSAGES } from '../../../shared/fork-devops-kube-evidence'
 import {
   contextTone,
   envWorkloads,
@@ -44,7 +45,17 @@ export async function readEnvironments(
       )
       return result.ok
         ? { context, tone: contextTone(context), workloads: envWorkloads(result.out) }
-        : { context, tone: contextTone(context), workloads: null, error: result.out.slice(0, 160) }
+        : {
+            context,
+            tone: contextTone(context),
+            workloads: null,
+            // Unknown, with its cause; a denied or unreachable cluster is never an empty one.
+            error:
+              `${result.code === 'ok' ? KUBECTL_MESSAGES.failed : KUBECTL_MESSAGES[result.code]}: ${result.out}`.slice(
+                0,
+                160
+              )
+          }
     })
   )
   return { ok: true, current: current.ok ? current.out.trim() || null : null, columns }

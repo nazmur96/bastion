@@ -15,7 +15,7 @@ import { readPullRequest, readTimeline } from './devops-timeline'
 /** Fork: the project path's later stages (local run, cloud, harden, observe, environments). */
 export function registerDevopsDay2Handlers(): void {
   ipcMain.handle('aiVault:timeline', async (_event, workspacePath: unknown) =>
-    isLocalDirectory(workspacePath) ? readTimeline(workspacePath) : []
+    isLocalDirectory(workspacePath) ? readTimeline(workspacePath) : null
   )
   ipcMain.handle('aiVault:pullRequest', async (_event, workspacePath: unknown) =>
     isLocalDirectory(workspacePath) ? readPullRequest(workspacePath) : null

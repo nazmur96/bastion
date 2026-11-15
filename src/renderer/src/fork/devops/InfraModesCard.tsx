@@ -15,6 +15,10 @@ import {
   type StageState,
   type TimelineEvent
 } from '../../../../shared/fork-devops-timeline'
+import {
+  clusterEvidenceLine,
+  type ClusterEvidence
+} from '../../../../shared/fork-devops-kube-evidence'
 
 type Mode = 'release' | 'time' | 'incident'
 
@@ -46,6 +50,28 @@ function when(at: number, now: number): string {
 }
 
 /** Release flight, Time machine and Incident mode over the same commits, events and map. */
+/** Says what the cluster read reached; an unanswered cluster is unknown, not quiet. */
+function ClusterEvidenceNote({
+  cluster
+}: {
+  cluster: ClusterEvidence | null
+}): React.JSX.Element | null {
+  if (!cluster) {
+    return null
+  }
+  return (
+    <p
+      data-testid="cluster-evidence"
+      className={cn(
+        'mb-2 text-xs',
+        cluster.status === 'ok' ? 'text-muted-foreground' : 'text-status-warning'
+      )}
+    >
+      {clusterEvidenceLine(cluster)}
+    </p>
+  )
+}
+
 export function InfraModesCard({
   worktreeId,
   workspacePath,
@@ -60,6 +86,7 @@ export function InfraModesCard({
   shipped: boolean
 }): React.JSX.Element {
   const [events, setEvents] = useState<TimelineEvent[]>([])
+  const [cluster, setCluster] = useState<ClusterEvidence | null>(null)
   const [pr, setPr] = useState<PullRequest | null>(null)
   const [now, setNow] = useState(() => Date.now())
   const [hours, setHours] = useState(6)
@@ -74,7 +101,8 @@ export function InfraModesCard({
       window.api.aiVault.pullRequest(workspacePath)
     ]).then(([nextEvents, nextPr]) => {
       if (current) {
-        setEvents(nextEvents)
+        setEvents(nextEvents?.events ?? [])
+        setCluster(nextEvents?.cluster ?? null)
         setPr(nextPr)
         setNow(Date.now())
       }
@@ -187,9 +215,15 @@ export function InfraModesCard({
               className="flex-1 accent-primary"
             />
           </label>
+          <ClusterEvidenceNote cluster={cluster} />
           {windowed.length === 0 ? (
             <p className="text-xs text-muted-foreground">
-              {translate('components.devops.modes.quiet', 'Nothing happened in this window.')}
+              {cluster && cluster.status !== 'ok'
+                ? translate(
+                    'components.devops.modes.quietUnknown',
+                    'No commits in this window. Cluster warnings are unknown.'
+                  )
+                : translate('components.devops.modes.quiet', 'Nothing happened in this window.')}
             </p>
           ) : (
             <ol className="scrollbar-sleek max-h-72 space-y-1 overflow-y-auto border-l border-border pl-3">
@@ -222,6 +256,7 @@ export function InfraModesCard({
         </div>
       ) : null}
 
+      {mode === 'incident' ? <ClusterEvidenceNote cluster={cluster} /> : null}
       {mode === 'incident' ? (
         bad.length === 0 ? (
           <p className="text-xs text-status-success">
