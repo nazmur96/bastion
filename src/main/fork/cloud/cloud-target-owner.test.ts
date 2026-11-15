@@ -77,7 +77,7 @@ describe('cloud target project ownership', () => {
       return { executionHostId: 'local', worktree: { id: 'r::/fixture', path: '/fixture' } }
     })
     await expect(resolveCloudProjectOwner(f.store, f.runtime, 'r::/fixture')).rejects.toThrow(
-      'not available'
+      'only for now'
     )
   })
   it('refuses resolver fallback or substituted project IDs', async () => {
