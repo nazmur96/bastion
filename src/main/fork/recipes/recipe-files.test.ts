@@ -59,14 +59,37 @@ describe('recipe files', () => {
     expect(existsSync(join(r, 'infra/orders'))).toBe(false)
     expect(readFileSync(join(r, 'infra/keep.txt'), 'utf8')).toBe('KEEP')
   })
-  it('refuses paths outside one recipe directory', async () => {
+  it('refuses more than one extra directory and paths that escape the project', async () => {
     const r = root()
     await expect(
-      writeRecipeFiles(r, [...files, { path: 'other/main.tf', content: '' }])
+      writeRecipeFiles(r, [
+        ...files,
+        { path: 'config/a.env.example', content: '' },
+        { path: 'other/b.env.example', content: '' }
+      ])
     ).rejects.toThrow('invalid')
     await expect(writeRecipeFiles(r, [{ path: '../escape/main.tf', content: '' }])).rejects.toThrow(
       'invalid'
     )
+  })
+  it('adds an application config file in an existing directory alongside the new infra directory', async () => {
+    const r = root()
+    mkdirSync(join(r, 'config'))
+    writeFileSync(join(r, 'config/app.yaml'), 'KEEP')
+    const app = { path: 'config/ORDER_BUCKET.env.example', content: 'ORDER_BUCKET=orders\n' }
+    await writeRecipeFiles(r, [...files, app], 'infra/orders')
+    expect(readFileSync(join(r, app.path), 'utf8')).toBe(app.content)
+    expect(readFileSync(join(r, 'config/app.yaml'), 'utf8')).toBe('KEEP')
+  })
+  it('never overwrites an existing application file and rolls back the new infra directory', async () => {
+    const r = root()
+    mkdirSync(join(r, 'config'))
+    writeFileSync(join(r, 'config/ORDER_BUCKET.env.example'), 'MINE')
+    const app = { path: 'config/ORDER_BUCKET.env.example', content: 'ORDER_BUCKET=orders\n' }
+    await expect(writeRecipeFiles(r, [...files, app], 'infra/orders')).rejects.toThrow('exists')
+    expect(readFileSync(join(r, app.path), 'utf8')).toBe('MINE')
+    expect(existsSync(join(r, 'infra/orders'))).toBe(false)
+    expect(existsSync(join(r, 'config'))).toBe(true)
   })
   it('refuses nested module directories when reading', async () => {
     const r = root()

@@ -7,7 +7,7 @@ import { z } from 'zod'
 export const AWS_PROVIDER_CONSTRAINT = '~> 6.73'
 export type RecipeFile = { path: string; content: string }
 
-const bucketName = z
+export const bucketNameSchema = z
   .string()
   .regex(
     /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/,
@@ -21,16 +21,16 @@ export const recipeDirectorySchema = z
   .regex(/^[A-Za-z0-9_-][A-Za-z0-9._-]*(?:\/[A-Za-z0-9_-][A-Za-z0-9._-]*){0,3}$/)
   .refine((value) => value.split('/').every((part) => part !== '..' && part !== '.'))
 // No quotes, backslashes, `$` or `%`: tag text can never open an HCL template or directive.
-const tag = z
+export const recipeTagSchema = z
   .string()
   .max(128)
   .regex(/^[A-Za-z0-9 _.:/=+@-]*$/)
 export const objectStorageInputSchema = z
   .object({
-    name: bucketName,
+    name: bucketNameSchema,
     directory: recipeDirectorySchema,
     versioning: z.boolean(),
-    tags: z.object({ owner: tag, project: tag }).strict()
+    tags: z.object({ owner: recipeTagSchema, project: recipeTagSchema }).strict()
   })
   .strict()
 export type ObjectStorageInput = z.infer<typeof objectStorageInputSchema>

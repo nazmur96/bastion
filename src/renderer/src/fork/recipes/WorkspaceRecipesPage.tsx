@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
 import type { RecipeSnapshot } from '../../../../shared/fork-recipes/recipe-contract'
 import { ObjectStorageRecipeForm } from './ObjectStorageRecipeForm'
+import { ObjectStorageBindingForm } from './ObjectStorageBindingForm'
 import { RecipeDirectoryCard } from './RecipeDirectoryCard'
 
 /** Fork: Step 10.1 Recipes page. Reviewed source recipes, delivered to a local emulator. */
@@ -61,7 +62,14 @@ export function WorkspaceRecipesPage({ worktreeId }: { worktreeId: string }): Re
           onSnapshot={setSnapshot}
         />
       ) : (
-        <ObjectStorageRecipeForm projectId={worktreeId} onCreated={setSnapshot} />
+        <>
+          <ObjectStorageRecipeForm projectId={worktreeId} onCreated={setSnapshot} />
+          <ObjectStorageBindingForm
+            projectId={worktreeId}
+            target={target}
+            onCreated={setSnapshot}
+          />
+        </>
       )}
       <section className="workspace-card space-y-2">
         <h3>Open an existing recipe directory</h3>

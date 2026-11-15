@@ -3,6 +3,7 @@ import { readProjectWorkspaceContext } from '../project-workspaces/workspace-con
 import { isTrustedUIRenderer } from '../../ipc/ui'
 import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
 import { renderObjectStorageRecipe } from '../../../shared/fork-recipes/object-storage-recipe'
+import { renderObjectStorageBinding } from '../../../shared/fork-recipes/object-storage-binding'
 import {
   recipeCreateSchema,
   recipeDeliverSchema,
@@ -90,9 +91,17 @@ export function registerRecipeHandlers(
           admitChannelOperation('bastionCloud:recipeCreate', 'recipes.create')
           const { owner, assertOwner } = await provider.owner(parsed.data.projectId)
           assertOwner()
-          await writeRecipeFiles(owner.root, renderObjectStorageRecipe(parsed.data.input))
+          const { directory } = parsed.data.input
+          const files =
+            parsed.data.recipe === 'object-storage'
+              ? renderObjectStorageRecipe(parsed.data.input)
+              : renderObjectStorageBinding(parsed.data.input)
+          await writeRecipeFiles(owner.root, files, directory)
           assertCurrent()
-          return { ok: true, ...(await snapshot(owner.root, parsed.data.input.directory)) }
+          const companions = files
+            .map((file) => file.path)
+            .filter((path) => !path.startsWith(`${directory}/`))
+          return { ok: true, ...(await snapshot(owner.root, directory)), companions }
         }
         if (operation === 'recipeRead' || operation === 'recipeValidate') {
           const parsed = recipeReadSchema.safeParse(raw)

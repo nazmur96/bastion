@@ -107,6 +107,18 @@ export function RecipeDirectoryCard({
           </li>
         ))}
       </ul>
+      {snapshot.companions?.map((path) => (
+        <p key={path} className="text-xs">
+          Also created for the application:{' '}
+          <button
+            type="button"
+            className="font-mono hover:underline"
+            onClick={() => openWorkspaceFile(projectId, path, 1)}
+          >
+            {path}
+          </button>
+        </p>
+      ))}
       <p className="text-xs text-muted-foreground">
         Fingerprint {snapshot.fingerprint.slice(7, 19)} · ordinary source you own. Edit it freely,
         then refresh before applying.

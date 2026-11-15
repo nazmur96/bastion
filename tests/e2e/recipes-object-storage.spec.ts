@@ -32,6 +32,7 @@ const test = base.extend<{ terraformFixture: { data: string; log: string } }>({
     } finally {
       rmSync(join(seededRepoPath, 'mise.toml'), { force: true })
       rmSync(join(seededRepoPath, 'infra'), { recursive: true, force: true })
+      rmSync(join(seededRepoPath, 'config'), { recursive: true, force: true })
       rmSync(data, { recursive: true, force: true })
     }
   },
@@ -97,4 +98,41 @@ test('10.1 creates an object storage recipe as ordinary source and validates it 
   expect(readFileSync(join(seededRepoPath, 'infra/orders-assets/main.tf'), 'utf8')).toContain(
     '# my edit'
   )
+})
+
+test('10.2 binds an existing bucket: a scoped policy in a new infra directory plus one app config example', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  mkdirSync(join(seededRepoPath, 'config'), { recursive: true })
+  writeFileSync(join(seededRepoPath, 'config/app.yaml'), 'app: checkout\n')
+  await openBastionPage(orcaPage, 'Recipes')
+  const form = orcaPage.getByTestId('recipe-object-storage-binding')
+  await form.getByLabel('Existing bucket').fill('orders-assets')
+  await expect(form.getByLabel('Config variable')).toHaveValue('ORDERS_ASSETS_BUCKET')
+  await form.getByLabel('Config variable').fill('ORDER_BUCKET')
+  await clickCloudControl(form.getByRole('button', { name: 'Create binding files', exact: true }))
+  const dialog = orcaPage.getByRole('dialog')
+  await expect(dialog).toContainText('infra/orders-assets-access/main.tf')
+  await expect(dialog).toContainText('config/ORDER_BUCKET.env.example')
+  await clickCloudControl(dialog.getByRole('button', { name: 'Create binding files', exact: true }))
+
+  const card = orcaPage.getByTestId('recipe-directory')
+  await expect(card).toContainText(
+    'Also created for the application: config/ORDER_BUCKET.env.example'
+  )
+  expect(readFileSync(join(seededRepoPath, 'config/ORDER_BUCKET.env.example'), 'utf8')).toContain(
+    'ORDER_BUCKET=orders-assets'
+  )
+  const main = readFileSync(join(seededRepoPath, 'infra/orders-assets-access/main.tf'), 'utf8')
+  expect(main).toContain('data "aws_s3_bucket" "this"')
+  expect(main).not.toContain('resource "aws_s3_bucket"')
+  // The application's own configuration is untouched.
+  expect(readFileSync(join(seededRepoPath, 'config/app.yaml'), 'utf8')).toBe('app: checkout\n')
+  await clickCloudControl(card.getByRole('button', { name: 'Validate', exact: true }))
+  await expect(orcaPage.getByTestId('recipe-validation')).toContainText('validate: passed')
 })

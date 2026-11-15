@@ -19,14 +19,12 @@ export class RecipeFileError extends Error {
   }
 }
 
-function directoryOf(files: RecipeFile[]): string {
-  const directories = new Set(files.map((file) => file.path.split('/').slice(0, -1).join('/')))
-  const [directory] = directories
+function directoryOf(path: string): string {
+  const directory = path.split('/').slice(0, -1).join('/')
   if (
-    directories.size !== 1 ||
     !directory ||
     !recipeDirectorySchema.safeParse(directory).success ||
-    files.some((file) => !/^[A-Za-z0-9._-]+$/.test(file.path.split('/').at(-1) ?? ''))
+    !/^[A-Za-z0-9._-]+$/.test(path.split('/').at(-1) ?? '')
   ) {
     throw new RecipeFileError('invalid')
   }
@@ -34,13 +32,22 @@ function directoryOf(files: RecipeFile[]): string {
 }
 
 /**
- * Writes a recipe into a new directory under the project root. Never overwrites, refuses
- * symlinked components, and on failure removes only what this call created.
+ * Writes a recipe change. Files in `newDirectory` require that directory to be new; any other
+ * file (for example an application config example) is created exclusively in an existing or
+ * new directory. Never overwrites, refuses symlinked components, and on failure removes only
+ * what this call created.
  */
-export async function writeRecipeFiles(root: string, files: RecipeFile[]): Promise<string[]> {
-  const directory = directoryOf(files)
+export async function writeRecipeFiles(
+  root: string,
+  files: RecipeFile[],
+  newDirectory = files.length ? directoryOf(files[0].path) : ''
+): Promise<string[]> {
+  const directories = new Set(files.map((file) => directoryOf(file.path)))
+  if (!directories.has(newDirectory) || directories.size > 2) {
+    throw new RecipeFileError('invalid')
+  }
   const created: { kind: 'dir' | 'file'; path: string }[] = []
-  try {
+  const ensure = async (directory: string, mustBeNew: boolean): Promise<void> => {
     let current = root
     const parts = directory.split('/')
     for (const [index, part] of parts.entries()) {
@@ -48,7 +55,7 @@ export async function writeRecipeFiles(root: string, files: RecipeFile[]): Promi
       const last = index === parts.length - 1
       try {
         const entry = await lstat(current)
-        if (last) {
+        if (last && mustBeNew) {
           throw new RecipeFileError('exists')
         }
         if (entry.isSymbolicLink() || !entry.isDirectory()) {
@@ -62,16 +69,27 @@ export async function writeRecipeFiles(root: string, files: RecipeFile[]): Promi
         created.push({ kind: 'dir', path: current })
       }
     }
+  }
+  try {
+    await ensure(newDirectory, true)
+    for (const directory of directories) {
+      if (directory !== newDirectory) {
+        await ensure(directory, false)
+      }
+    }
     for (const file of files) {
       if (Buffer.byteLength(file.content) > MAX_BYTES) {
         throw new RecipeFileError('too-large')
       }
       const path = join(root, file.path)
-      const handle = await open(
-        path,
-        constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL,
-        0o644
-      )
+      let handle
+      try {
+        handle = await open(path, constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL, 0o644)
+      } catch (error) {
+        throw error instanceof Error && 'code' in error && error.code === 'EEXIST'
+          ? new RecipeFileError('exists')
+          : error
+      }
       created.push({ kind: 'file', path })
       try {
         await handle.writeFile(file.content)

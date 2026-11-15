@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { objectStorageInputSchema, recipeDirectorySchema } from './object-storage-recipe'
+import { objectStorageBindingSchema } from './object-storage-binding'
 
 /** Fork: Recipes page ↔ main contract (Step 10.1). */
 export type RecipeStep = {
@@ -8,9 +9,18 @@ export type RecipeStep = {
   message: string | null
 }
 const projectId = z.string().min(1).max(4096)
-export const recipeCreateSchema = z
-  .object({ projectId, recipe: z.literal('object-storage'), input: objectStorageInputSchema })
-  .strict()
+export const recipeCreateSchema = z.discriminatedUnion('recipe', [
+  z
+    .object({ projectId, recipe: z.literal('object-storage'), input: objectStorageInputSchema })
+    .strict(),
+  z
+    .object({
+      projectId,
+      recipe: z.literal('object-storage-binding'),
+      input: objectStorageBindingSchema
+    })
+    .strict()
+])
 export const recipeReadSchema = z.object({ projectId, directory: recipeDirectorySchema }).strict()
 export const recipeDeliverSchema = recipeReadSchema
   .extend({
@@ -23,6 +33,8 @@ export type RecipeSnapshot = {
   directory: string
   files: { path: string; bytes: number }[]
   fingerprint: string
+  /** New files created outside the infra directory, such as an application config example. */
+  companions?: string[]
 }
 export type RecipeResult<T> = ({ ok: true } & T) | { ok: false; code: string; message: string }
 export type RecipesApi = {
