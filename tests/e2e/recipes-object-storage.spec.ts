@@ -136,3 +136,40 @@ test('10.2 binds an existing bucket: a scoped policy in a new infra directory pl
   await clickCloudControl(card.getByRole('button', { name: 'Validate', exact: true }))
   await expect(orcaPage.getByTestId('recipe-validation')).toContainText('validate: passed')
 })
+
+test('10.3 creates a secret reference with no value and a scoped read policy', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  await openBastionPage(orcaPage, 'Recipes')
+  const form = orcaPage.getByTestId('recipe-secret-reference')
+  await form.getByLabel('Secret name').fill('checkout/db-password')
+  await expect(form.getByLabel('Config variable')).toHaveValue('CHECKOUT_DB_PASSWORD_SECRET')
+  await form.getByLabel('Recovery window (days: 0 or 7–30)').fill('3')
+  await expect(form).toContainText('recoveryWindowDays')
+  await expect(
+    form.getByRole('button', { name: 'Create secret reference files', exact: true })
+  ).toBeDisabled()
+  await form.getByLabel('Recovery window (days: 0 or 7–30)').fill('7')
+  await clickCloudControl(
+    form.getByRole('button', { name: 'Create secret reference files', exact: true })
+  )
+  const dialog = orcaPage.getByRole('dialog')
+  await expect(dialog).toContainText('infra/checkout-db-password-secret/main.tf')
+  await clickCloudControl(
+    dialog.getByRole('button', { name: 'Create secret reference files', exact: true })
+  )
+  await expect(orcaPage.getByTestId('recipe-directory')).toContainText(
+    'config/CHECKOUT_DB_PASSWORD_SECRET.env.example'
+  )
+  const main = readFileSync(
+    join(seededRepoPath, 'infra/checkout-db-password-secret/main.tf'),
+    'utf8'
+  )
+  expect(main).toContain('resource "aws_secretsmanager_secret" "this"')
+  expect(main).not.toMatch(/secret_string|aws_secretsmanager_secret_version/)
+})

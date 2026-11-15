@@ -4,6 +4,7 @@ import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-con
 import type { RecipeSnapshot } from '../../../../shared/fork-recipes/recipe-contract'
 import { ObjectStorageRecipeForm } from './ObjectStorageRecipeForm'
 import { ObjectStorageBindingForm } from './ObjectStorageBindingForm'
+import { SecretReferenceForm } from './SecretReferenceForm'
 import { RecipeDirectoryCard } from './RecipeDirectoryCard'
 
 /** Fork: Step 10.1 Recipes page. Reviewed source recipes, delivered to a local emulator. */
@@ -69,6 +70,7 @@ export function WorkspaceRecipesPage({ worktreeId }: { worktreeId: string }): Re
             target={target}
             onCreated={setSnapshot}
           />
+          <SecretReferenceForm projectId={worktreeId} onCreated={setSnapshot} />
         </>
       )}
       <section className="workspace-card space-y-2">

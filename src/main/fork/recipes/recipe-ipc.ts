@@ -2,8 +2,7 @@ import { ipcMain, type WebContents } from 'electron'
 import { readProjectWorkspaceContext } from '../project-workspaces/workspace-context'
 import { isTrustedUIRenderer } from '../../ipc/ui'
 import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
-import { renderObjectStorageRecipe } from '../../../shared/fork-recipes/object-storage-recipe'
-import { renderObjectStorageBinding } from '../../../shared/fork-recipes/object-storage-binding'
+import { renderRecipe } from '../../../shared/fork-recipes/catalog'
 import {
   recipeCreateSchema,
   recipeDeliverSchema,
@@ -91,11 +90,7 @@ export function registerRecipeHandlers(
           admitChannelOperation('bastionCloud:recipeCreate', 'recipes.create')
           const { owner, assertOwner } = await provider.owner(parsed.data.projectId)
           assertOwner()
-          const { directory } = parsed.data.input
-          const files =
-            parsed.data.recipe === 'object-storage'
-              ? renderObjectStorageRecipe(parsed.data.input)
-              : renderObjectStorageBinding(parsed.data.input)
+          const { directory, files } = renderRecipe(parsed.data)
           await writeRecipeFiles(owner.root, files, directory)
           assertCurrent()
           const companions = files
