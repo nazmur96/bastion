@@ -1,4 +1,13 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
+import {
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  symlinkSync,
+  linkSync,
+  writeFileSync
+} from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -95,3 +104,51 @@ describe('MC-03 per-provider sealed contexts, not ambient credential overlays', 
     }
   )
 })
+
+it('clears inherited auth variable names without evaluating credential values', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sealed-names-'))
+  roots.push(root)
+  const owner: NodeJS.ProcessEnv = {
+    PATH: '/fixture/bin',
+    AZURE_CONFIG_DIR: '/not-read',
+    CLOUDSDK_CORE_PROJECT: 'foreign',
+    OCI_CLI_ENDPOINT: 'https://not-used.invalid'
+  }
+  Object.defineProperty(owner, 'GOOGLE_APPLICATION_CREDENTIALS', {
+    enumerable: true,
+    get: () => {
+      throw new Error('Credential value was read')
+    }
+  })
+  const env = flociTargetEnv(root, instance(root), '', 'gcp', owner)
+  expect(env.GOOGLE_APPLICATION_CREDENTIALS).toBe('')
+  expect(env.AZURE_CONFIG_DIR).toBe('')
+  expect(env.OCI_CLI_ENDPOINT).toBe('')
+  expect(env.CLOUDSDK_CORE_PROJECT).toBe('bastion-emulated')
+  expect(env.PATH).toBe('/fixture/bin')
+  if (process.platform !== 'win32') {
+    expect(statSync(env.HOME).mode & 0o777).toBe(0o700)
+    expect(statSync(env.AWS_CONFIG_FILE).mode & 0o777).toBe(0o600)
+  }
+})
+it.each(['symlink', 'hardlink'] as const)(
+  'refuses a planted %s before truncating external content',
+  (kind) => {
+    if (process.platform === 'win32') {
+      return
+    }
+    const root = mkdtempSync(join(tmpdir(), 'sealed-links-'))
+    roots.push(root)
+    const env = flociTargetEnv(root, instance(root), '', 'gcp', {})
+    const outside = join(root, 'fixture-sentinel')
+    writeFileSync(outside, 'must-survive')
+    rmSync(env.AWS_CONFIG_FILE)
+    if (kind === 'symlink') {
+      symlinkSync(outside, env.AWS_CONFIG_FILE)
+    } else {
+      linkSync(outside, env.AWS_CONFIG_FILE)
+    }
+    expect(() => flociTargetEnv(root, instance(root), '', 'gcp', {})).toThrow()
+    expect(readFileSync(outside, 'utf8')).toBe('must-survive')
+  }
+)

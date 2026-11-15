@@ -140,7 +140,9 @@ export class FlociController {
       throw new FlociFailure('interrupted')
     }
     const observed = this.catalog.instances.observe(expected, instance)
-    this.notify()
+    if (JSON.stringify(observed) !== expected) {
+      this.notify()
+    }
     return this.view(observed)
   }
   async act(

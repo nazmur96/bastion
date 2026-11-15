@@ -124,3 +124,54 @@ Costs:
   - The period total is summed exactly from AWS's decimal strings, then shown at two decimals.
   - If any day is Estimated, the total reads "Estimated total". Otherwise it reads "Total".
   - With mixed units, no total is shown.
+
+## Slice 9.6b — emulated Azure, GCP and OCI clients and resources
+
+The existing selected-target authority now supplies Azure Storage and GCP client
+contexts. Before admission and publication it inspects the pinned container,
+loopback publish, private mount, labels and policy through the existing controller.
+Status and environment policy entries declare these loopback readiness probes; their
+operation IDs remain unchanged. A selection round trip, runtime restart,
+instance/epoch/port change, remote owner or
+closed owner invalidates an outstanding read. Unchanged inspections do not notify
+and reload the resources card. There is no new IPC channel or operation ID.
+
+Contexts use private HOME/USERPROFILE/XDG and provider config directories. Empty
+config files are private and refuse symlinks and hardlinks. Ambient cloud auth,
+profile, endpoint, proxy and credential-helper variables are neutralized without
+reading their values or the engineer's credential files. No key/token/config value
+is persisted. Azure uses `devstoreaccount1`, an in-memory dummy SharedKey and an
+explicit local Blob connection string. GCP uses `bastion-emulated`, private gcloud
+config, disabled gcloud credentials, and local Storage/PubSub emulator endpoints.
+SDK clients must explicitly use anonymous credentials/local endpoints; Azure SDK
+clients must explicitly use the dummy Storage credential, not DefaultAzureCredential.
+These settings do not retarget general ARM, other gcloud groups or arbitrary SDKs.
+A targeted terminal supplies this context, not filesystem/network confinement or
+project-tool installation. Arbitrary terminals and agents receive nothing implicitly.
+Stock Azure/GCP CLI and SDK executions remain separate unproven compatibility work.
+
+OCI's internal client profile contains only empty private config/rc files and a
+local endpoint. Its terminal action remains visibly disabled with its signing-key
+reason and main refuses that operation. No RSA key, fabricated `no_auth`, real
+profile or principal fallback is provided. The fixed readers send unsigned HTTP.
+
+One runner lists Azure Blob containers, GCS buckets, Pub/Sub topics, OCI buckets
+and compartments with fixed synthetic selectors. It uses only the admitted literal
+loopback port, GET operations and encoded continuation parameters, never response
+URLs. The existing limits remain: three pages/500 items per service, two services
+concurrently, 1 MiB response, five-second wall-clock requests and a 30-second batch
+deadline. Unknown/denied/invalid/unsupported/timeout/oversize statuses stay separate
+per service. OCI pagination reads only its bounded `opc-next-page` response header.
+The shared CloudResourcesView displays the provider and native `resourceId` with
+`arn=null`; metadata, labels, descriptions and payloads are dropped. Ownership
+remains a name hint, never inferred or adopted. AWS operation definitions and output
+shape remain compatible; no real cloud or paid cost operation is added.
+
+Proof on Linux amd64 Docker: the production owner/controller/lister ran all five
+reads against the three exact reviewed image digests in a disposable engine, with
+two namespaces per provider. Seeded local resources appeared only in their own
+namespace, survived Stop/Start and disappeared on scoped Reset. Inspect confirmed
+the existing restrictions. Inner containers and the recorded outer engine were
+removed. This is not Podman, arm64, packaged, Windows/macOS/mobile or stock-client
+proof. Component screenshots use deterministic metadata fixtures, separately from
+this live emulator evidence.

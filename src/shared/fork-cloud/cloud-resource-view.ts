@@ -1,3 +1,4 @@
+import type { FlociProvider } from './floci-products'
 import {
   FLOCI_RESOURCE_LABELS,
   FLOCI_SERVICE_STATUS_MESSAGES,
@@ -6,11 +7,12 @@ import {
 import { realAwsMessages } from './real-aws-contract'
 
 type Listing = {
+  provider?: FlociProvider
   at: number
   results: {
     service: FlociResourceService
     status: string
-    items: { name: string; arn: string | null }[]
+    items: { name: string; arn: string | null; resourceId?: string }[]
     truncated: boolean
   }[]
 }
@@ -20,10 +22,11 @@ export type CloudResourceService = {
   /** Anything other than a successful listing is unknown, never empty. */
   state: 'listed' | 'empty' | 'unknown'
   message: string | null
-  items: { name: string; arn: string | null; hint: boolean }[]
+  items: { name: string; arn: string | null; resourceId?: string; hint: boolean }[]
   truncated: boolean
 }
 export type CloudResourceListing = {
+  provider?: FlociProvider
   kind: 'emulated' | 'real'
   observedAt: number
   limits: { pages: number; items: number }
@@ -56,6 +59,7 @@ export function normalizeResourceListing(
   projectLabel: string
 ): CloudResourceListing {
   return {
+    ...(listing.provider ? { provider: listing.provider } : {}),
     kind,
     observedAt: listing.at,
     limits: RESOURCE_LISTING_LIMITS,

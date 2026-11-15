@@ -64,8 +64,8 @@ export const OPERATION_CAPABILITIES = {
     label: 'Read emulator status',
     runsOn: 'owner',
     target: 'selected-emulated',
-    effect: 'local-read',
-    egress: 'none',
+    effect: 'metadata-read',
+    egress: 'loopback',
     consent: 'none'
   },
   'floci.start': {
@@ -105,7 +105,7 @@ export const OPERATION_CAPABILITIES = {
     runsOn: 'owner',
     target: 'selected-emulated',
     effect: 'environment',
-    egress: 'none',
+    egress: 'loopback',
     consent: 'none'
   },
   'aws.verify': {

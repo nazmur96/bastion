@@ -15,7 +15,7 @@ import {
 } from './cloud-target-owner'
 import { FlociController } from './floci-controller'
 import { captureCatalogBinding, cloudSnapshotHash } from './cloud-binding-authority'
-import { flociHealthy } from './floci-health'
+import { admitFlociRead } from './floci-read-admission'
 import { flociTargetEnv } from './floci-target-env'
 import { listFlociResources } from './floci-resources'
 import type { FlociResources } from '../../../shared/fork-cloud/floci-resources-contract'
@@ -23,6 +23,7 @@ import type { CloudTargetCatalog } from './cloud-target-catalog'
 
 type OwnerStore = Pick<Store, 'getRepos' | 'getFolderWorkspaces' | 'getProjectGroups'>
 export class CloudWorkspaceProvider {
+  private closed = false
   readonly real: RealAwsController
   readonly ledger: ChangeLedger
   readonly controller: FlociController
@@ -93,6 +94,9 @@ export class CloudWorkspaceProvider {
     this.controller = new FlociController(root, namespaceId, catalog, this.ledger, notify)
   }
   async owner(projectId: string) {
+    if (this.closed) {
+      throw new FlociFailure('owner-changed')
+    }
     const registration = cloudProjectRegistration(this.store, projectId)
     const owner = await resolveCloudProjectOwner(this.store, this.runtime, projectId)
     if (!owner || !registration.local) {
@@ -185,40 +189,38 @@ export class CloudWorkspaceProvider {
   /** The selected target's admitted instance, ready and answering on its own loopback port. */
   private async readyInstance(projectId: string, targetId: string) {
     const { assertAdmission } = await this.selected(projectId, targetId)
-    const target = this.catalog.snapshot().targets.find((target) => target.id === targetId)
-    if (target?.configuration.kind !== 'emulated' || target.configuration.provider !== 'aws') {
-      throw new FlociFailure('unsupported')
-    }
-    const instance = await this.controller.ensure(targetId)
-    if (instance.state !== 'ready' || !(await flociHealthy(instance.port))) {
-      throw new FlociFailure('not-ready')
-    }
-    assertAdmission()
-    const assertSameInstance = () => {
-      assertAdmission()
-      const current = this.catalog.instances.get(targetId)
-      if (
-        current?.id !== instance.id ||
-        current.epoch !== instance.epoch ||
-        current.port !== instance.port ||
-        current.state !== 'ready'
-      ) {
-        throw new FlociFailure('owner-changed')
-      }
-    }
-    return { instance, assertSameInstance }
+    return admitFlociRead(
+      this.catalog,
+      this.controller,
+      this.namespaceId,
+      targetId,
+      assertAdmission,
+      () => this.runtime.getRuntimeId?.(),
+      () => this.closed
+    )
   }
   async targetEnv(projectId: string, targetId: string): Promise<Record<string, string>> {
-    const { instance, assertSameInstance } = await this.readyInstance(projectId, targetId)
-    const env = flociTargetEnv(this.root, instance)
-    assertSameInstance()
+    const { assertAdmission } = await this.selected(projectId, targetId)
+    const target = this.catalog.snapshot().targets.find((t) => t.id === targetId)
+    if (target?.configuration.kind === 'emulated' && target.configuration.provider === 'oci') {
+      throw new FlociFailure('unsupported')
+    }
+    assertAdmission()
+    const { instance, provider, finish } = await this.readyInstance(projectId, targetId)
+    const env = flociTargetEnv(this.root, instance, undefined, provider)
+    await finish()
     return env
   }
   async listResources(projectId: string, targetId: string): Promise<FlociResources> {
-    const { instance, assertSameInstance } = await this.readyInstance(projectId, targetId)
-    const resources = await listFlociResources(instance.port)
-    // A listing that outlived its instance or selection is discarded, never shown as current.
-    assertSameInstance()
+    const { instance, provider, assertSameInstance, finish } = await this.readyInstance(
+      projectId,
+      targetId
+    )
+    const resources = await listFlociResources(instance.port, undefined, Date.now, {
+      provider,
+      assertCurrent: assertSameInstance
+    })
+    await finish()
     return resources
   }
   async act(action: FlociAction) {
@@ -226,6 +228,10 @@ export class CloudWorkspaceProvider {
     return this.controller.act(action, assertOwner, assertAdmission)
   }
   close(): void {
+    if (this.closed) {
+      return
+    }
+    this.closed = true
     this.real.close()
     this.controller.close()
     this.ledger.close()

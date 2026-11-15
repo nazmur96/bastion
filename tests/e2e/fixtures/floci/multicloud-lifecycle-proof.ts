@@ -5,14 +5,47 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { runProcess } from '@orca/process-host'
 import { CloudTargetCatalog } from '../../../../src/main/fork/cloud/cloud-target-catalog'
-import { ChangeLedger } from '../../../../src/main/fork/changes/change-ledger'
-import { FlociController } from '../../../../src/main/fork/cloud/floci-controller'
+import { CloudWorkspaceProvider } from '../../../../src/main/fork/cloud/cloud-workspace-provider'
+import { FLOCI_OCI_TENANCY } from '../../../../src/main/fork/cloud/floci-provider-operations'
 import { ownerEngineRunner } from '../../../../src/main/fork/cloud/floci-paths'
 import { flociProduct, type FlociProvider } from '../../../../src/shared/fork-cloud/floci-products'
 import { flociHealthy } from '../../../../src/main/fork/cloud/floci-health'
 import { checkFlociInspection } from '../../../../src/main/fork/cloud/floci-inspection'
 import type { FlociAction } from '../../../../src/shared/fork-cloud/floci-contract'
 
+async function seed(provider: FlociProvider, port: number): Promise<void> {
+  const base = `http://127.0.0.1:${port}`
+  const send = async (method: string, path: string, data?: unknown) => {
+    const response = await fetch(base + path, {
+      method,
+      redirect: 'error',
+      headers: { 'Content-Type': 'application/json' },
+      body: data === undefined ? undefined : JSON.stringify(data)
+    })
+    assert(response.ok, `${method} ${path} ${response.status} ${await response.text()}`)
+  }
+  if (provider === 'azure') {
+    await send('PUT', '/devstoreaccount1/fixture-container?restype=container')
+  } else if (provider === 'gcp') {
+    await send('POST', '/storage/v1/b?project=bastion-emulated', {
+      name: 'fixture-bucket',
+      labels: { secret: 'PRIVATE_SEED_METADATA' }
+    })
+    await send('PUT', '/v1/projects/bastion-emulated/topics/fixture-topic', {
+      labels: { secret: 'PRIVATE_SEED_METADATA' }
+    })
+  } else if (provider === 'oci') {
+    await send('POST', '/n/floci-local/b', {
+      name: 'fixture-bucket',
+      compartmentId: FLOCI_OCI_TENANCY
+    })
+    await send('POST', '/20160918/compartments', {
+      name: 'fixture-compartment',
+      compartmentId: FLOCI_OCI_TENANCY,
+      description: 'PRIVATE_SEED_METADATA'
+    })
+  }
+}
 async function main(): Promise<void> {
   assert.equal(process.platform, 'linux')
   assert.equal(process.arch, 'x64')
@@ -27,8 +60,7 @@ async function main(): Promise<void> {
   function fixture(provider: FlociProvider, label: string) {
     const root = join(base, provider + label)
     mkdirSync(root, { mode: 0o700 })
-    const catalog = new CloudTargetCatalog(root),
-      ledger = new ChangeLedger(root)
+    const catalog = new CloudTargetCatalog(root)
     catalog.mutate(0, {
       kind: 'add',
       label,
@@ -41,8 +73,40 @@ async function main(): Promise<void> {
       }
     })
     const targetId = catalog.snapshot().targets[0].id
-    const controller = new FlociController(root, randomUUID(), catalog, ledger)
-    return { root, catalog, ledger, targetId, controller, provider }
+    const projectId = `repo::${root}`
+    const repo = {
+      id: 'repo',
+      path: root,
+      displayName: 'Fixture',
+      badgeColor: '',
+      addedAt: 0,
+      executionHostId: 'local'
+    }
+    const owner = new CloudWorkspaceProvider(
+      root,
+      randomUUID(),
+      catalog,
+      { getRepos: () => [repo], getFolderWorkspaces: () => [], getProjectGroups: () => [] },
+      {
+        getRuntimeId: () => 'fixture-runtime',
+        resolveRuntimeFileTarget: async () => ({
+          executionHostId: 'local',
+          worktree: { id: projectId, path: root }
+        })
+      },
+      () => {}
+    )
+    catalog.select(catalog.snapshot().revision, projectId, targetId, { hostId: 'local', root })
+    return {
+      root,
+      catalog,
+      ledger: owner.ledger,
+      targetId,
+      controller: owner.controller,
+      provider,
+      owner,
+      projectId
+    }
   }
   async function act(f: ReturnType<typeof fixture>, operation: FlociAction['operation']) {
     const before = await f.controller.ensure(f.targetId)
@@ -106,7 +170,33 @@ async function main(): Promise<void> {
           `PRODUCTION_INSPECT ${JSON.stringify({ provider, containerId: instance.containerId, image: raw.Config.Image, imageId: raw.Image, user: raw.Config.User, security: raw.HostConfig.SecurityOpt, ports: raw.HostConfig.PortBindings, mounts: raw.Mounts })}`
         )
       }
-      // This is a private-directory lifecycle sentinel, not a resource-listing proof.
+      await seed(provider, first.port)
+      const listing = await a.owner.listResources(a.projectId, a.targetId)
+      assert(
+        listing.results.every((r) => r.status === 'ok'),
+        JSON.stringify(listing)
+      )
+      assert(
+        listing.results.every((r) => r.items.some((i) => i.name.startsWith('fixture-'))),
+        JSON.stringify(listing)
+      )
+      assert(listing.results.flatMap((r) => r.items).every((i) => i.resourceId && i.arn === null))
+      assert(!JSON.stringify(listing).includes('PRIVATE_SEED_METADATA'))
+      const isolated = await b.owner.listResources(b.projectId, b.targetId)
+      assert(
+        isolated.results.every(
+          (r) => r.status === 'ok' && r.items.every((i) => !i.name.startsWith('fixture-'))
+        ),
+        JSON.stringify(isolated)
+      )
+      if (provider === 'oci') {
+        await assert.rejects(a.owner.targetEnv(a.projectId, a.targetId))
+      } else {
+        const env = await a.owner.targetEnv(a.projectId, a.targetId)
+        assert(JSON.stringify(env).includes(`127.0.0.1:${first.port}`))
+      }
+      console.log(`RESOURCE_PROOF ${JSON.stringify(listing)}`)
+      // The sentinel separately proves the private-directory lifecycle.
       const marker = join(first.dataPath, 'proof-sentinel')
       writeFileSync(marker, 'A')
       const markerB = join(second.dataPath, 'proof-sentinel')
@@ -116,9 +206,18 @@ async function main(): Promise<void> {
       const restarted = await act(a, 'start')
       assert.notEqual(restarted.containerId, first.containerId)
       assert.equal(readFileSync(marker, 'utf8'), 'A')
+      const retained = await a.owner.listResources(a.projectId, a.targetId)
+      assert.deepEqual(retained.results, listing.results)
       const reset = await act(a, 'reset')
       assert.equal(reset.state, 'ready')
       assert.equal(existsSync(marker), false)
+      const emptied = await a.owner.listResources(a.projectId, a.targetId)
+      assert(
+        emptied.results.every(
+          (r) => r.status === 'ok' && r.items.every((i) => !i.name.startsWith('fixture-'))
+        ),
+        JSON.stringify(emptied)
+      )
       assert.equal(readFileSync(markerB, 'utf8'), 'B')
       assert(await flociHealthy(second.port, provider))
       const refreshed = await b.controller.refresh(b.targetId)
@@ -135,8 +234,7 @@ async function main(): Promise<void> {
       if (instance?.containerId) {
         await act(f, 'stop')
       }
-      f.controller.close()
-      f.ledger.close()
+      f.owner.close()
       f.catalog.close()
     }
     const remaining = await runProcess({ program: 'docker', args: ['ps', '-aq'], timeoutMs: 5000 })

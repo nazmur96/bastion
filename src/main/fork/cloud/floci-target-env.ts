@@ -1,6 +1,12 @@
+import type { FlociProvider } from '../../../shared/fork-cloud/floci-products'
+import { flociClientProfile } from './floci-client-profile'
 import { chmodSync, lstatSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { FlociFailure, type FlociInstance } from '../../../shared/fork-cloud/floci-contract'
+import {
+  FlociFailure,
+  flociInstanceSchema,
+  type FlociInstance
+} from '../../../shared/fork-cloud/floci-contract'
 import { privateFlociDirectory } from './floci-paths'
 
 // The pinned image's emulated region; its account is synthetic and never a real one.
@@ -50,10 +56,22 @@ function sealedConfigPath(root: string, targetId: string): string {
 export function flociTargetEnv(
   root: string,
   instance: FlociInstance,
-  inheritedNoProxy = process.env.NO_PROXY ?? process.env.no_proxy ?? ''
+  inheritedNoProxy = process.env.NO_PROXY ?? process.env.no_proxy ?? '',
+  provider: FlociProvider = 'aws',
+  owner: NodeJS.ProcessEnv = process.env
 ): Record<string, string> {
   if (instance.state !== 'ready') {
     throw new FlociFailure('not-ready')
+  }
+  if (!['aws', 'azure', 'gcp', 'oci'].includes(provider)) {
+    throw new FlociFailure('invalid')
+  }
+  if (provider !== 'aws') {
+    const valid = flociInstanceSchema.safeParse(instance)
+    if (!valid.success) {
+      throw new FlociFailure('invalid')
+    }
+    return flociClientProfile(root, valid.data, provider, owner)
   }
   const config = sealedConfigPath(root, instance.targetId)
   const noProxy = [...new Set([...inheritedNoProxy.split(','), '127.0.0.1', 'localhost'])]

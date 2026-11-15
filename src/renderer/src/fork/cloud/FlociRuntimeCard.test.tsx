@@ -65,7 +65,7 @@ function render(provider: FlociProvider) {
   )
   return container
 }
-describe('MC-06 running runtime card and deferred clients', () => {
+describe('MC-06 running runtime card and provider clients', () => {
   it.each(['azure', 'gcp', 'oci'] as const)(
     'shows %s ready lifecycle without advertising AWS clients or other platforms',
     (provider) => {
@@ -74,15 +74,15 @@ describe('MC-06 running runtime card and deferred clients', () => {
       expect(view.textContent).toContain(flociProduct(provider).label)
       expect(view.textContent).toContain('ready')
       expect(view.textContent).toContain('Linux amd64')
-      expect(view.textContent).toContain('Resource listings are not available')
+      expect(view.textContent).not.toContain('Resource listings are not available')
       expect(view.textContent).toContain('Emulated · No charges')
       expect(buttons.find((b) => b.textContent === 'Start')?.disabled).toBe(true)
       const stop = buttons.find((b) => b.textContent === 'Stop')
       expect(stop?.disabled).toBe(false)
       expect(buttons.find((b) => b.textContent === 'Open terminal for this target')?.disabled).toBe(
-        true
+        provider === 'oci'
       )
-      expect(buttons.some((b) => b.textContent === 'List resources')).toBe(false)
+      expect(buttons.find((b) => b.textContent === 'List resources')?.disabled).toBe(false)
       act(() => stop?.click())
       expect(controls.lifecycle).toHaveBeenCalledWith('stop')
       if (provider === 'oci') {

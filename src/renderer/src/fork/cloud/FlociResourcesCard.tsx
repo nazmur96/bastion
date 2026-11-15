@@ -1,5 +1,5 @@
 import { flociProduct } from '../../../../shared/fork-cloud/floci-products'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,14 @@ import { CloudResourcesView } from './CloudResourcesView'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 
 /** Read-only listing of the selected emulator, plus a terminal pinned to it. Nothing is created. */
-export function FlociResourcesCard({
+export function FlociResourcesCard(
+  props: React.ComponentProps<typeof FlociResourcesBody>
+): React.JSX.Element {
+  const { projectId, target, runtime } = props
+  const scope = JSON.stringify([projectId, target.id, target.configRevision, runtime.instance])
+  return <FlociResourcesBody key={scope} {...props} />
+}
+function FlociResourcesBody({
   projectId,
   target,
   runtime,
@@ -27,35 +34,59 @@ export function FlociResourcesCard({
     target.configuration.kind === 'emulated' ? target.configuration.provider : 'aws'
   )
   const ready = runtime.instance.state === 'ready'
-  const scope = `${target.id}:${runtime.instance.id}:${runtime.instance.epoch}`
-  const [listing, setListing] = useState<{ scope: string; resources: FlociResources } | null>(null)
+  const [listing, setListing] = useState<FlociResources | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // A listing from another instance or epoch is never shown as current.
-  const resources = ready && listing?.scope === scope ? listing.resources : null
+  const resources = ready ? listing : null
+  const generation = useRef({ value: 0 })
+  useEffect(() => {
+    const current = generation.current
+    return () => {
+      current.value++
+    }
+  }, [])
   const ref = { projectId, targetId: target.id }
   const list = async (): Promise<void> => {
+    const request = generation.current.value
     setBusy(true)
     setError(null)
     try {
       const result = await window.api.cloudTargets?.listResources?.(ref)
+      if (request !== generation.current.value) {
+        return
+      }
       if (result?.ok) {
-        setListing({ scope, resources: result.resources })
+        setListing(result.resources)
       } else {
         setError(result?.message ?? 'Resources could not be listed.')
       }
+    } catch {
+      if (request === generation.current.value) {
+        setError('Resources could not be listed.')
+      }
     } finally {
-      setBusy(false)
+      if (request === generation.current.value) {
+        setBusy(false)
+      }
     }
   }
   const openTerminal = async (): Promise<void> => {
-    const result = await window.api.cloudTargets?.targetEnv?.(ref)
-    if (!result?.ok) {
-      toast.error(result?.message ?? 'The target is not running.')
-      return
+    const request = generation.current.value
+    try {
+      const result = await window.api.cloudTargets?.targetEnv?.(ref)
+      if (request !== generation.current.value) {
+        return
+      }
+      if (!result?.ok) {
+        toast.error(result?.message ?? 'The target is not running.')
+        return
+      }
+      runInWorkbenchTerminal(projectId, 'echo Floci target ready', result.env)
+    } catch {
+      if (request === generation.current.value) {
+        toast.error('The target environment could not be opened.')
+      }
     }
-    // The new terminal is pinned to this instance; existing terminals keep their environment.
-    runInWorkbenchTerminal(projectId, 'echo Floci target ready', result.env)
   }
   return (
     <section className="workspace-card space-y-3" data-testid="floci-target-resources">
@@ -75,9 +106,9 @@ export function FlociResourcesCard({
             {busy ? 'Listing…' : 'List resources'}
           </Button>
           <Button
-            title={capabilityNote('floci.environment')}
+            title={product.terminalUnavailableReason ?? capabilityNote('floci.environment')}
             variant="outline"
-            disabled={busy}
+            disabled={busy || Boolean(product.terminalUnavailableReason)}
             onClick={() => void openTerminal()}
           >
             Open terminal for this target
@@ -86,9 +117,11 @@ export function FlociResourcesCard({
       )}
       {product.terminalUnavailableReason && (
         <div className="space-y-1 text-sm text-muted-foreground">
-          <Button variant="outline" disabled title={product.terminalUnavailableReason}>
-            Open terminal for this target
-          </Button>
+          {!ready && (
+            <Button variant="outline" disabled title={product.terminalUnavailableReason}>
+              Open terminal for this target
+            </Button>
+          )}
           <p>{product.terminalUnavailableReason}</p>
         </div>
       )}

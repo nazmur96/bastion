@@ -120,6 +120,30 @@ describe('provider-specific engine inspection', () => {
         }
       }
       expect(checkFlociInspection(fixture, instance, 'sha256:fixture', provider).running).toBe(true)
+      for (const substituted of [
+        { ...fixture, Image: 'foreign-image' },
+        {
+          ...fixture,
+          Config: {
+            ...fixture.Config,
+            Labels: { ...fixture.Config.Labels, 'bastion.workspace': 'other-workspace' }
+          }
+        },
+        {
+          ...fixture,
+          HostConfig: {
+            ...fixture.HostConfig,
+            PortBindings: {
+              [`${p.port}/tcp`]: [{ HostIp: '0.0.0.0', HostPort: String(instance.port) }]
+            }
+          }
+        },
+        { ...fixture, Mounts: [{ ...fixture.Mounts[0], Source: '/other-workspace/data' }] }
+      ]) {
+        expect(() =>
+          checkFlociInspection(substituted, instance, 'sha256:fixture', provider)
+        ).toThrow()
+      }
       for (const config of [
         { ...fixture.Config, User: '0:0' },
         { ...fixture.Config, Image: FLOCI_IMAGE },

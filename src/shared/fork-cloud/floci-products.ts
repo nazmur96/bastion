@@ -1,6 +1,5 @@
 import { FLOCI_IMAGE } from './floci-contract'
 export type FlociProvider = 'aws' | 'azure' | 'gcp' | 'oci'
-const pendingResources = 'Resource listings are not available for this provider yet.'
 export const FLOCI_PRODUCTS: Record<
   FlociProvider,
   {
@@ -71,8 +70,8 @@ export const FLOCI_PRODUCTS: Record<
       'management-groups'
     ],
     enabled: ['blob'],
-    terminalUnavailableReason: 'Azure terminal integration is not available yet.',
-    resourcesUnavailableReason: pendingResources
+    terminalUnavailableReason: null,
+    resourcesUnavailableReason: null
   },
   gcp: {
     label: 'Floci GCP',
@@ -111,8 +110,8 @@ export const FLOCI_PRODUCTS: Record<
       'firebaseauth'
     ],
     enabled: ['gcs', 'pubsub'],
-    terminalUnavailableReason: 'GCP terminal integration is not available yet.',
-    resourcesUnavailableReason: pendingResources
+    terminalUnavailableReason: null,
+    resourcesUnavailableReason: null
   },
   oci: {
     label: 'Floci OCI',
@@ -139,7 +138,7 @@ export const FLOCI_PRODUCTS: Record<
     enabled: ['identity', 'objectstorage'],
     terminalUnavailableReason:
       'OCI CLI is unavailable: its local signing-key setup is not supported yet. No real profile or key is used.',
-    resourcesUnavailableReason: pendingResources
+    resourcesUnavailableReason: null
   }
 }
 

@@ -22,8 +22,7 @@ export const flociCodes = z.enum([
 export type FlociCode = z.infer<typeof flociCodes>
 export const flociMessages: Record<FlociCode, string> = {
   complete: 'Operation completed.',
-  unsupported:
-    'This provider supports emulator lifecycle only. Client environments and resource listings are not available yet.',
+  unsupported: 'The selected emulator does not support this operation.',
   interrupted: 'Operation interrupted; refresh to inspect the instance.',
   'engine-unavailable':
     'The selected local container engine is unavailable. Configure Docker or rootless Podman on the owner.',

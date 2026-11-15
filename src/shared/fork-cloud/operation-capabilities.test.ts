@@ -60,5 +60,9 @@ describe('one policy entry per cloud operation', () => {
     )
     expect(capabilityNote('aws.resources')).toBe('Free read · AWS · needs a verified identity')
     expect(capabilityNote('floci.start')).toBe('Local emulator · no charges · this computer')
+    for (const id of ['floci.runtime', 'floci.environment', 'floci.resources'] as const) {
+      expect(OPERATION_CAPABILITIES[id].egress).toBe('loopback')
+      expect(OPERATION_CAPABILITIES[id].target).toBe('selected-emulated')
+    }
   })
 })
