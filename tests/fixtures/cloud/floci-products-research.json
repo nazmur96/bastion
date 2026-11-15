@@ -1,0 +1,72 @@
+{
+  "observedOn": "2026-11-15",
+  "evidence": "Public source and registry metadata only; no image layers pulled or runtime checks performed. These are candidates, not tested tuples.",
+  "providers": [
+    {
+      "provider": "azure",
+      "version": "0.16.0",
+      "source": "https://github.com/floci-io/floci-az/tree/13b554cc90ca528f6c2020515d6b415bef1bc428",
+      "registry": "https://hub.docker.com/v2/repositories/floci/floci-az/tags/0.16.0",
+      "image": "floci/floci-az@sha256:f9d7552c9c02be84f12e266d6201ff52c1f23421af94943cbf687526ded89790",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:10272631bd93144520cba0141c9e71beba72b6bccc1c5266a3a2cfdc164b2225"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:98afec5b0e41c58ebb7c4f17b876fac84f51b37bea7413064dd1d4f57cce9a30"
+        }
+      ],
+      "containerPort": 4577,
+      "readyPath": "/ready",
+      "prefix": "FLOCI_AZ"
+    },
+    {
+      "provider": "gcp",
+      "version": "0.12.0",
+      "source": "https://github.com/floci-io/floci-gcp/tree/a2ff27caa7a8fb87291b83a5d172db2205246464",
+      "registry": "https://hub.docker.com/v2/repositories/floci/floci-gcp/tags/0.12.0",
+      "image": "floci/floci-gcp@sha256:d02e70407d6b37c3e24e31b5ccf100606735cba4f84fd476708b35afd052abb3",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:042c0c6d29b992691ea640bfce91554329d29004cfe4b68aa2093da23e06784f"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:2799bd4688838420a8987d13383303714bc056eb013c27de9d1e98195390523f"
+        }
+      ],
+      "containerPort": 4588,
+      "readyPath": "/_floci-gcp/init",
+      "prefix": "FLOCI_GCP"
+    },
+    {
+      "provider": "oci",
+      "version": "0.6.0",
+      "source": "https://github.com/floci-io/floci-oci/tree/b38c05181c49f01e44491af81096909c2eb18bf6",
+      "registry": "https://hub.docker.com/v2/repositories/floci/floci-oci/tags/0.6.0",
+      "image": "floci/floci-oci@sha256:7b976aabefd8a53ebf09df52b788a1b3c3cd4e71f2e0b29efe8f9d8b3954fbd3",
+      "platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "digest": "sha256:c6f3561422ff555f04c8b6673fae9d76d48b3735c1693be0e067a480a83b5a69"
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "digest": "sha256:258cd7c64ff4f3bc61ebf4075730d7e6483ba69a97daa1a55ffca158a14e9fc3"
+        }
+      ],
+      "containerPort": 4599,
+      "readyPath": "/_floci-oci/init",
+      "prefix": "FLOCI_OCI"
+    }
+  ]
+}
