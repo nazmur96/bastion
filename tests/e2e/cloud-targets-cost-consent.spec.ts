@@ -91,7 +91,8 @@ test('RA-09 full UI consent: selection, reload, focus, cache miss and cancellati
   const real = orcaPage.getByTestId('real-aws-target'),
     costs = orcaPage.getByTestId('real-aws-costs')
   await clickCloudControl(real.getByRole('button', { name: 'Verify real AWS', exact: true }))
-  await expect(real).toContainText('Observed account: 000000000000')
+  // The first verify in a cold app spawns the fake CLI twice; allow for a slow start.
+  await expect(real).toContainText('Observed account: 000000000000', { timeout: 30_000 })
   await clickCloudControl(
     real.getByRole('button', { name: 'Use this identity for this target', exact: true })
   )

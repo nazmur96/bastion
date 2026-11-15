@@ -116,6 +116,9 @@ export function flociClientProfile(
       env[name] = owner[name]
     }
   }
+  // An empty .zshrc: the engineer's own shell files stay out (they could re-export real
+  // credentials), and zsh does not open its first-run setup wizard in the target terminal.
+  emptyFile(home, '.zshrc')
   env.AWS_CONFIG_FILE = emptyFile(home, 'empty-aws-config')
   env.AWS_SHARED_CREDENTIALS_FILE = env.AWS_CONFIG_FILE
   const endpoint = `http://127.0.0.1:${instance.port}`

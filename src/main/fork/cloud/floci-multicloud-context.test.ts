@@ -129,6 +129,9 @@ it('clears inherited auth variable names without evaluating credential values', 
   if (process.platform !== 'win32') {
     expect(statSync(env.HOME).mode & 0o777).toBe(0o700)
     expect(statSync(env.AWS_CONFIG_FILE).mode & 0o777).toBe(0o600)
+    // zsh would otherwise run zsh-newuser-install in the empty private ZDOTDIR.
+    expect(env.ZDOTDIR).toBe(env.HOME)
+    expect(statSync(join(env.HOME, '.zshrc')).size).toBe(0)
   }
 })
 it.each(['symlink', 'hardlink'] as const)(
