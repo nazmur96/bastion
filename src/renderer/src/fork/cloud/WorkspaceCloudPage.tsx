@@ -91,7 +91,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           {snapshot
             ? local
               ? 'Local runtime · cloud targets'
-              : 'Cloud targets are not available on this runtime.'
+              : 'Cloud targets run on this computer only for now. Remote (SSH) projects are planned; nothing runs here with this computer’s credentials or engine.'
             : state.pending
               ? 'Loading target metadata…'
               : 'Cloud target metadata is unavailable.'}

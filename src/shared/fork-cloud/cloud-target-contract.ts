@@ -125,7 +125,8 @@ export const cloudTargetMessages: Record<CloudTargetCode, string> = {
   unavailable: 'Target is unavailable.',
   conflict: 'Cloud targets changed. Refresh and try again.',
   workspace: 'Cloud targets require a project workspace.',
-  owner: 'Cloud targets are not available on this runtime.',
+  owner:
+    'Cloud targets run on this computer only for now. Remote (SSH) projects are planned; nothing runs here with this computer’s credentials or engine.',
   limit: 'This workspace already has 200 cloud targets. Remove one before adding another.',
   storage: 'Cloud target storage is unavailable.'
 }

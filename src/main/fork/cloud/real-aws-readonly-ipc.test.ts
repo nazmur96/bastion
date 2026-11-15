@@ -187,4 +187,29 @@ describe('9.3 read-only AWS owner refusals (no AWS or mise execution)', () => {
     expect(runtime.resolveRuntimeFileTarget).not.toHaveBeenCalled()
     expect(mocks.run).not.toHaveBeenCalled()
   })
+  it('refuses an identity anchor written through the ordinary target update channel', async () => {
+    // Only a fresh, main-held observation accepted through acceptRealIdentity may anchor a target.
+    const result = await request('update', {
+      projectId,
+      revision: 2,
+      mutation: {
+        kind: 'update-real',
+        id: targetId,
+        configuration: {
+          kind: 'real',
+          provider: 'aws',
+          profileName: 'fixture-federated',
+          region: 'us-east-1',
+          expectedAccountId: '111111111111'
+        }
+      }
+    })
+    expect(result).toMatchObject({ ok: false, code: 'invalid' })
+    const listed = z
+      .object({
+        snapshot: z.object({ targets: z.array(z.object({ configuration: z.unknown() })) })
+      })
+      .parse(await request('read', { projectId }))
+    expect(JSON.stringify(listed.snapshot.targets)).not.toContain('111111111111')
+  })
 })

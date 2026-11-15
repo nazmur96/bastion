@@ -188,6 +188,11 @@ export function registerCloudTargetHandlers(
       ) {
         throw new CloudTargetRefusal('invalid')
       }
+      // An identity anchor is written only by acceptRealIdentity from a fresh main-held
+      // observation; the renderer cannot set an expected account or role directly.
+      if (args.mutation?.kind === 'update-real') {
+        throw new CloudTargetRefusal('invalid')
+      }
       let owner: CloudOwner | null = null
       try {
         const registration = cloudProjectRegistration(store, args.projectId)
