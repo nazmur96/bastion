@@ -103,3 +103,24 @@ Explicit resource, budget and Cost Explorer reads write a receipt to the namespa
 - **Limits:** history is capped at 10,000 receipts; at the cap new reads are refused while existing receipts stay readable and running reads can still finish.
 
 The opt-in live proof keeps the paid read behind its own flag (`ORCA_AWS_REAL_COST_PROOF=1`), on top of the read-only proof flag. Its log records the row count, units and status, but no amounts.
+
+## Slices 9.4 and 9.5 — one resources view, and costs
+
+Emulated and real AWS listings now share one view (`CloudResourcesView`), built from a pure normalizer, `normalizeResourceListing`. The view shows:
+
+- the kind (local emulator or real AWS) and the observation time;
+- the listing limits: up to 3 pages and 500 items per service;
+- for real AWS, that S3 buckets are global while other lists use the target region.
+
+Each service is `listed`, `empty` or `unknown`. A denied, unsupported or failed listing is unknown, carries its own message, and never hides the other services. A truncated list says that more may exist.
+
+An item whose name contains the project's folder name gets a "name matches this project · hint" badge. That badge is a hint only: no tags are read, ownership is never inferred, and nothing is adopted.
+
+Costs:
+
+- **Budget alerts on real targets:** always visible, even before any read ("not checked · a free read"). Reading them stays an explicit action.
+- **Floci targets:** they say "Emulated · No charges". Emulated targets have no billing request at all.
+- **Cost Explorer results:** they appear under "Observed cost data (not an invoice)".
+  - The period total is summed exactly from AWS's decimal strings, then shown at two decimals.
+  - If any day is Estimated, the total reads "Estimated total". Otherwise it reads "Total".
+  - With mixed units, no total is shown.

@@ -1,23 +1,23 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { getIntlLocale } from '@/i18n/i18n'
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
 import type { FlociView } from '../../../../shared/fork-cloud/floci-contract'
-import {
-  FLOCI_RESOURCE_LABELS,
-  FLOCI_SERVICE_STATUS_MESSAGES,
-  type FlociResources
-} from '../../../../shared/fork-cloud/floci-resources-contract'
+import type { FlociResources } from '../../../../shared/fork-cloud/floci-resources-contract'
+import { normalizeResourceListing } from '../../../../shared/fork-cloud/cloud-resource-view'
+import { CloudResourcesView } from './CloudResourcesView'
 import { runInWorkbenchTerminal } from '../workbench/workbench-terminals'
 
 /** Read-only listing of the selected emulator, plus a terminal pinned to it. Nothing is created. */
 export function FlociResourcesCard({
   projectId,
   target,
-  runtime
+  runtime,
+  projectLabel
 }: {
   projectId: string
+  /** Used only for name hints; ownership is never inferred. */
+  projectLabel: string
   target: CloudTarget
   runtime: FlociView
 }): React.JSX.Element {
@@ -73,39 +73,17 @@ export function FlociResourcesCard({
         </p>
       )}
       {resources && (
-        <ul className="space-y-2 text-sm" aria-label="Listed resources">
-          {resources.results.map((result) => (
-            <li key={result.service}>
-              <div className="font-medium">{FLOCI_RESOURCE_LABELS[result.service]}</div>
-              {result.status !== 'ok' && (
-                <p className="text-xs text-muted-foreground">
-                  {FLOCI_SERVICE_STATUS_MESSAGES[result.status]}
-                </p>
-              )}
-              {result.status === 'ok' && result.items.length === 0 ? (
-                <p className="text-xs text-muted-foreground">None listed.</p>
-              ) : (
-                <ul className="font-mono text-xs break-all">
-                  {result.items.map((item) => (
-                    <li key={item.arn ?? item.name}>{item.name}</li>
-                  ))}
-                </ul>
-              )}
-              {result.truncated && (
-                <p className="text-xs text-muted-foreground">
-                  More may exist beyond the listing limits.
-                </p>
-              )}
-            </li>
-          ))}
-        </ul>
+        <CloudResourcesView
+          listing={normalizeResourceListing('emulated', resources, projectLabel)}
+        />
       )}
-      {resources && (
-        <p className="text-xs text-muted-foreground">
-          Listed {new Date(resources.at).toLocaleTimeString(getIntlLocale())} from the local
-          emulator. Ownership is not inferred.
+      <div className="space-y-1 border-t border-border pt-3 text-xs" data-testid="floci-costs">
+        <h3 className="text-sm font-medium">Costs</h3>
+        <p>
+          Emulated · No charges. This local emulator is not an AWS account, so there is no bill and
+          no billing request.
         </p>
-      )}
+      </div>
     </section>
   )
 }

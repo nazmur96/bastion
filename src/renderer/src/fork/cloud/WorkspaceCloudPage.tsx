@@ -22,6 +22,10 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
     ])
   )
   const scope = `${worktreeId}:${ownerStamp}`
+  // Only for "name matches this project" hints in resource lists.
+  const projectLabel = useAppStore(
+    (s) => selectKnownWorktreeById(s, worktreeId)?.path.split(/[\\/]/).findLast(Boolean) ?? ''
+  )
   const state = useSyncExternalStore(cloudConnections.subscribe, cloudConnections.getSnapshot)
   const [editing, setEditing] = useState<CloudTarget | 'new' | null>(null)
   const [removing, setRemoving] = useState<CloudTarget | null>(null)
@@ -53,8 +57,8 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           <div className="workspace-eyebrow">Cloud</div>
           <h1>Connections</h1>
           <p>
-            Keep cloud targets inside this workspace. Start a private local Floci AWS instance; real
-            cloud access is not available yet.
+            Keep cloud targets inside this workspace. Start a private local Floci AWS emulator, or
+            verify a real AWS profile for fixed read-only checks.
           </p>
         </div>
         <Button onClick={() => setEditing('new')} disabled={pending}>
@@ -70,6 +74,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           projectId={worktreeId}
           target={selected}
           runtime={runtime}
+          projectLabel={projectLabel}
         />
       )}
       {local && selected?.configuration.kind === 'real' && (
@@ -78,6 +83,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           target={selected}
           state={state.scope === scope ? state.real : null}
           pending={pending}
+          projectLabel={projectLabel}
         />
       )}
       <section className="workspace-card space-y-4">

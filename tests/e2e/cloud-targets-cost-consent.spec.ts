@@ -120,6 +120,9 @@ test('RA-09 full UI consent: selection, reload, focus, cache miss and cancellati
   await expect(costs).toContainText('1.25')
   await expect(costs).toContainText('USD')
   await expect(costs).toContainText('Estimated')
+  // 9.5: a total that includes an estimated day is never shown as an actual total.
+  await expect(costs).toContainText('Estimated total: 1.25 USD')
+  await expect(costs).toContainText('not an invoice')
   await expect(costs).toContainText('Observed')
   expect(charges()).toBe(1)
   await orcaPage.reload()

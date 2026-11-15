@@ -74,6 +74,8 @@ test('RA-06/08 verifies, confirms and reads through a controlled installed CLI w
   })
   await openBastionPage(orcaPage, 'Cloud')
   const card = orcaPage.getByTestId('real-aws-target')
+  // 9.5: budget alerts are always shown, as a free read that has not run yet.
+  await expect(card.getByLabel('Real AWS budgets')).toContainText('Budget status: not checked')
   await clickCloudControl(card.getByRole('button', { name: 'Verify real AWS', exact: true }))
   await expect(card).toContainText('Observed account: 000000000000')
   await clickCloudControl(
@@ -85,6 +87,12 @@ test('RA-06/08 verifies, confirms and reads through a controlled installed CLI w
   await expect(card).toContainText('Expected account: 000000000000')
   await clickCloudControl(card.getByRole('button', { name: 'Read resources', exact: true }))
   await expect(card.getByLabel('Real AWS resources')).toContainText('fixture-bucket')
+  // 9.4: the shared view states its limits, scope and that ownership is not inferred.
+  const view = card.getByTestId('cloud-resources-view')
+  await expect(view).toContainText('Real AWS')
+  await expect(view).toContainText('up to 3 pages and 500 items per service')
+  await expect(view).toContainText('S3 buckets are global')
+  await expect(view).toContainText('Ownership is not inferred')
   await clickCloudControl(card.getByRole('button', { name: 'Read budgets', exact: true }))
   await expect(card.getByLabel('Real AWS budgets')).toContainText('Budget status: absent')
   // 9.3b: an anchored identity enables the paid read, but nothing is requested without a confirmation.

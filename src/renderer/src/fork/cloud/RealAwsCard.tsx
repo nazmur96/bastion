@@ -4,16 +4,20 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
-import { realAwsMessages } from '../../../../shared/fork-cloud/real-aws-contract'
 import type { RealCloudState } from './real-cloud-actions'
 import { cloudConnections } from './cloud-connections-state'
 import { RealAwsCostSection } from './RealAwsCostSection'
+import { CloudResourcesView } from './CloudResourcesView'
+import { normalizeResourceListing } from '../../../../shared/fork-cloud/cloud-resource-view'
 export function RealAwsCard({
   target,
   state,
-  pending
+  pending,
+  projectLabel
 }: {
   target: CloudTarget
+  /** Used only for name hints; ownership is never inferred. */
+  projectLabel: string
   state: RealCloudState | null | undefined
   pending: boolean
 }): React.JSX.Element | null {
@@ -97,51 +101,33 @@ export function RealAwsCard({
         </Button>
       </div>
       {state?.resources && (
-        <div className="space-y-3 text-xs" aria-label="Real AWS resources">
-          <p>
-            Observed {new Date(state.resources.at).toLocaleString(getIntlLocale())} · S3 buckets are
-            global; other lists use {config.region}.
-          </p>
-          {state.resources.results.map((result) => (
-            <div key={result.service}>
-              <p className="font-medium">
-                {result.service}:{' '}
-                {result.status === 'ok'
-                  ? result.items.length
-                    ? `${result.items.length} listed`
-                    : 'No resources found in this response'
-                  : realAwsMessages[result.status]}
-                {result.truncated ? ' · incomplete' : ''}
-              </p>
-              <ul>
-                {result.items.map((item, index) => (
-                  <li className="break-all" key={`${item.arn ?? item.name}:${index}`}>
-                    {item.name}
-                    {item.arn ? ` · ${item.arn}` : ''}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div aria-label="Real AWS resources">
+          <CloudResourcesView
+            listing={normalizeResourceListing('real', state.resources, projectLabel)}
+            region={config.region}
+          />
         </div>
       )}
-      {state?.budgets && (
-        <div className="space-y-1 text-xs" aria-label="Real AWS budgets">
-          <p>
-            Budget status: {state.budgets.status} · observed{' '}
-            {new Date(state.budgets.at).toLocaleString(getIntlLocale())}
-          </p>
-          <p>
-            {state.budgets.accountWide
-              ? 'Account-wide alert observed'
-              : 'Full account alert coverage is not confirmed'}{' '}
-            · {state.budgets.alerts} alert(s){state.budgets.truncated ? ' · incomplete' : ''}
-          </p>
-          <p>
-            A budget is not a spending cap. Missing or denied evidence does not mean zero spend.
-          </p>
-        </div>
-      )}
+      <div className="space-y-1 text-xs" aria-label="Real AWS budgets">
+        <h3 className="text-sm font-medium">Budget alerts</h3>
+        {state?.budgets ? (
+          <>
+            <p>
+              Budget status: {state.budgets.status} · observed{' '}
+              {new Date(state.budgets.at).toLocaleString(getIntlLocale())}
+            </p>
+            <p>
+              {state.budgets.accountWide
+                ? 'Account-wide alert observed'
+                : 'Full account alert coverage is not confirmed'}{' '}
+              · {state.budgets.alerts} alert(s){state.budgets.truncated ? ' · incomplete' : ''}
+            </p>
+          </>
+        ) : (
+          <p>Budget status: not checked · a free read. Use Read budgets after verifying.</p>
+        )}
+        <p>A budget is not a spending cap. Missing or denied evidence does not mean zero spend.</p>
+      </div>
       <RealAwsCostSection
         state={state}
         pending={pending}

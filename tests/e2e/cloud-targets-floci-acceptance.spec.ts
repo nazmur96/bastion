@@ -56,6 +56,8 @@ test.describe('9.2a Floci AWS target', () => {
     await expect(runtime).toContainText('127.0.0.1')
     await expect(runtime).toContainText('sha256:')
     await expect(runtime).not.toContainText(':latest')
+    // 9.5: emulated targets state plainly that nothing is billed.
+    await expect(orcaPage.getByTestId('floci-costs')).toContainText('Emulated · No charges')
     await expectUsableCloudControl(runtime.getByRole('button', { name: 'Start', exact: true }))
     await captureCloudWindow(electronApp, orcaPage, test.info(), 'floci-runtime.png')
   })

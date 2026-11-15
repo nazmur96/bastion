@@ -2,6 +2,7 @@ import { getIntlLocale } from '@/i18n/i18n'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { RealCloudState } from './real-cloud-actions'
+import { costTotal } from '../../../../shared/fork-cloud/cloud-cost-view'
 import { cloudConnections } from './cloud-connections-state'
 
 /** Cost Explorer is billed per request: nothing is fetched until a target-specific confirmation. */
@@ -15,7 +16,8 @@ export function RealAwsCostSection({
   eligible: boolean
 }): React.JSX.Element {
   const cost = state?.cost,
-    challenge = state?.challenge
+    challenge = state?.challenge,
+    total = cost?.data ? costTotal(cost.data.results) : null
   return (
     <div className="space-y-2 border-t border-border pt-3" data-testid="real-aws-costs">
       <h3>Cost Explorer</h3>
@@ -32,6 +34,15 @@ export function RealAwsCostSection({
             {cost.observedAt ? new Date(cost.observedAt).toLocaleString(getIntlLocale()) : ''} ·
             account {cost.accountId} · unblended cost, current UTC month to date
           </p>
+          <p className="font-medium">Observed cost data (not an invoice)</p>
+          {total ? (
+            <p>
+              {total.label}: {total.amount} {total.unit}
+              {total.label === 'Estimated total' ? ' · AWS may still revise estimated days' : ''}
+            </p>
+          ) : (
+            cost.data.results.length > 0 && <p>No single total: the rows use different units.</p>
+          )}
           {cost.data.results.length === 0 && <p>No cost rows were returned for this period.</p>}
           <ul>
             {cost.data.results.map((row) => (
@@ -44,7 +55,7 @@ export function RealAwsCostSection({
           {cost.data.moreAvailable && (
             <p>More data exists; another confirmed read would be needed to fetch it.</p>
           )}
-          <p>Observed AWS cost data, not an invoice and not a spending cap.</p>
+          <p>Not a spending cap.</p>
         </div>
       )}
       {cost && !cost.data && (
