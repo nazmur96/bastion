@@ -16,6 +16,12 @@ export type OperationEffect =
   | 'metadata-read'
   /** A provider read the provider may bill. */
   | 'paid-read'
+  /** Creates new files in the project; never overwrites. */
+  | 'source-write'
+  /** Formats, initializes and validates project source in a private copy. */
+  | 'validation'
+  /** Creates or destroys resources in a local emulator only. */
+  | 'emulated-write'
 export type OperationConsent =
   | 'none'
   /** A target-specific confirmation in the app. */
@@ -31,7 +37,7 @@ export type OperationCapability = {
   target: 'none' | 'selected-emulated' | 'selected-real'
   effect: OperationEffect
   /** Where data leaves the owner: nowhere, the loopback emulator, or the cloud provider. */
-  egress: 'none' | 'loopback' | 'provider'
+  egress: 'none' | 'loopback' | 'provider' | 'registry'
   consent: OperationConsent
 }
 
@@ -164,6 +170,46 @@ export const OPERATION_CAPABILITIES = {
     egress: 'provider',
     consent: 'one-use-grant'
   },
+  'recipes.create': {
+    label: 'Create recipe files',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'source-write',
+    egress: 'none',
+    consent: 'confirmation'
+  },
+  'recipes.read': {
+    label: 'Read recipe files',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'local-read',
+    egress: 'none',
+    consent: 'none'
+  },
+  'recipes.validate': {
+    label: 'Validate recipe source',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'validation',
+    egress: 'registry',
+    consent: 'none'
+  },
+  'recipes.apply-emulated': {
+    label: 'Apply recipe to the local emulator',
+    runsOn: 'owner',
+    target: 'selected-emulated',
+    effect: 'emulated-write',
+    egress: 'loopback',
+    consent: 'confirmation'
+  },
+  'recipes.destroy-emulated': {
+    label: 'Destroy recipe resources in the local emulator',
+    runsOn: 'owner',
+    target: 'selected-emulated',
+    effect: 'emulated-write',
+    egress: 'loopback',
+    consent: 'confirmation'
+  },
   'aws.cost.cached': {
     label: 'Show cached Cost Explorer data',
     runsOn: 'owner',
@@ -190,7 +236,11 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:prepareRealCost': ['aws.cost.prepare'],
   'bastionCloud:confirmRealCost': ['aws.cost.confirm'],
   'bastionCloud:readRealCost': ['aws.cost.read'],
-  'bastionCloud:cachedRealCost': ['aws.cost.cached']
+  'bastionCloud:cachedRealCost': ['aws.cost.cached'],
+  'bastionCloud:recipeCreate': ['recipes.create'],
+  'bastionCloud:recipeRead': ['recipes.read'],
+  'bastionCloud:recipeValidate': ['recipes.validate'],
+  'bastionCloud:recipeDeliver': ['recipes.apply-emulated', 'recipes.destroy-emulated']
 } as const satisfies Record<string, readonly OperationId[]>
 
 export function isOperationId(value: string): value is OperationId {
@@ -205,14 +255,19 @@ export function capabilityNote(id: OperationId): string {
       ? 'AWS'
       : capability.egress === 'loopback'
         ? 'local emulator'
-        : 'this computer'
+        : capability.egress === 'registry'
+          ? 'provider registry'
+          : 'this computer'
   const effect: Record<OperationEffect, string> = {
     'local-read': 'Reads Bastion data',
     'local-write': 'Changes Bastion data only',
     'local-lifecycle': 'Local emulator · no charges',
     environment: 'Sealed environment · no real credentials',
     'metadata-read': 'Free read',
-    'paid-read': 'Paid read · AWS may charge per request'
+    'paid-read': 'Paid read · AWS may charge per request',
+    'source-write': 'Creates new project files · never overwrites',
+    validation: 'Validates in a private copy · downloads pinned providers',
+    'emulated-write': 'Changes local emulator resources · no charges'
   }
   const consent: Record<OperationConsent, string | null> = {
     none: null,

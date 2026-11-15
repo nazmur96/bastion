@@ -1,4 +1,5 @@
 import { registerRealAwsHandlers } from './real-aws-ipc'
+import { registerRecipeHandlers } from '../recipes/recipe-ipc'
 import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
 import { z } from 'zod'
 import { CloudWorkspaceProvider } from './cloud-workspace-provider'
@@ -67,6 +68,7 @@ export function registerCloudTargetHandlers(
     return provider
   }
   registerRealAwsHandlers(requireProvider)
+  registerRecipeHandlers(requireProvider)
   setCloudBindingAuthority({
     capture: (scope) => {
       if (!provider) {

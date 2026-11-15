@@ -1,4 +1,5 @@
 import { WorkspaceEnvironmentsPage } from '../environments/WorkspaceEnvironmentsPage'
+import { WorkspaceRecipesPage } from '../recipes/WorkspaceRecipesPage'
 import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { translate } from '@/i18n/i18n'
@@ -6,7 +7,6 @@ import { setInfraView } from '../devops/infra-home-store'
 import { WorkspaceDiscoveryPage } from '../discovery/WorkspaceDiscoveryPage'
 import { WorkspaceChangesPage } from '../changes/WorkspaceChangesPage'
 import { WorkspaceCloudPage } from '../cloud/WorkspaceCloudPage'
-import { openChanges } from '../changes/change-navigation'
 import { WorkspaceHomePage } from './WorkspaceHomePage'
 import { workspaceNavigation } from './workspace-navigation'
 import { useWorkspacePage } from './workspace-desktop-state'
@@ -46,6 +46,9 @@ export function WorkspacePages(): React.JSX.Element | null {
   if (page === 'cloud') {
     return id ? <WorkspaceCloudPage key={id} worktreeId={id} /> : <ProjectRequired />
   }
+  if (page === 'recipes') {
+    return id ? <WorkspaceRecipesPage key={id} worktreeId={id} /> : <ProjectRequired />
+  }
   const title = workspaceNavigation().find((item) => item.id === page)?.label
   return (
     <div className="workspace-page scrollbar-sleek">
@@ -73,11 +76,6 @@ export function WorkspacePages(): React.JSX.Element | null {
             )}
           </p>
           <div className="workspace-card-actions">
-            {page === 'recipes' && (
-              <button type="button" className="workspace-button" onClick={() => openChanges(page)}>
-                {translate('changes.open', 'Open project change')}
-              </button>
-            )}
             <button
               type="button"
               className="workspace-button workspace-button-primary"

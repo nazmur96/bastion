@@ -211,6 +211,22 @@ export class CloudWorkspaceProvider {
     await finish()
     return env
   }
+  /** A ready Floci AWS instance for a reviewed recipe run: its sealed env and identity fence. */
+  async recipeTarget(projectId: string, targetId: string) {
+    const { assertAdmission } = await this.selected(projectId, targetId)
+    assertAdmission()
+    const ready = await this.readyInstance(projectId, targetId)
+    if (ready.provider !== 'aws') {
+      await ready.finish()
+      throw new FlociFailure('unsupported')
+    }
+    return {
+      env: flociTargetEnv(this.root, ready.instance, undefined, 'aws'),
+      instanceId: ready.instance.id,
+      assertSameInstance: ready.assertSameInstance,
+      finish: ready.finish
+    }
+  }
   async listResources(projectId: string, targetId: string): Promise<FlociResources> {
     const { instance, provider, assertSameInstance, finish } = await this.readyInstance(
       projectId,

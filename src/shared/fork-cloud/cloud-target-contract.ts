@@ -1,3 +1,4 @@
+import type { RecipesApi } from '../fork-recipes/recipe-contract'
 import type {
   RealAwsResult,
   RealAwsIdentity,
@@ -148,6 +149,8 @@ export const cloudRequestSchema = z
   .strict()
 export type CloudRequest = z.infer<typeof cloudRequestSchema>
 export type CloudTargetsApi = {
+  /** Step 10.1 recipes: create, read, validate and deliver to a local emulator. */
+  recipes?: RecipesApi
   verifyRealTarget?: (args: {
     projectId: string
     targetId: string
