@@ -1,4 +1,8 @@
 import { createPortal } from 'react-dom'
+import {
+  readMenuPaneSelection,
+  useTerminalAskAgent
+} from '@/fork/terminal-assist/TerminalAskAgentDialog'
 import { TerminalPaneFileDropOwner } from './TerminalPaneFileDropOwner'
 import { makePaneKey } from '../../../../shared/stable-pane-id'
 import TerminalSearch from '@/components/TerminalSearch'
@@ -123,6 +127,8 @@ export function TerminalPaneSurface({
     visibleTerminalError,
     worktreeId
   } = controller
+  // Fork: selected output → an unsent, redacted agent draft (Ask agent about selection).
+  const askAgent = useTerminalAskAgent(worktreeId)
   // Why: an SSH, runtime, or not-yet-known host must not be described with this client's OS/shell.
   const paneOnClient = useAppStore(
     (state) => getKnownExecutionHostIdForWorktree(state, worktreeId) === LOCAL_EXECUTION_HOST_ID
@@ -259,6 +265,7 @@ export function TerminalPaneSurface({
         paneIds={sessionRestoredBannerPaneIds}
       />
       <TerminalPaneNativeChatPortal controller={controller} />
+      {askAgent.dialog}
       <TerminalContextMenu
         open={contextMenu.open}
         onOpenChange={contextMenu.setOpen}
@@ -276,6 +283,9 @@ export function TerminalPaneSurface({
           contextMenu.menuPaneId !== null && contextMenu.menuPaneId === expandedPaneId
         }
         onCopy={() => void contextMenu.onCopy()}
+        onAskAgent={() =>
+          askAgent.ask(readMenuPaneSelection(managerRef.current, contextMenu.menuPaneId))
+        }
         onSelectAll={contextMenu.onSelectAll}
         onPaste={() => void contextMenu.onPaste()}
         onSplitRight={contextMenu.onSplitRight}

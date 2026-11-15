@@ -49,6 +49,8 @@ type TerminalContextMenuProps = {
   canExpandPane: boolean
   menuPaneIsExpanded: boolean
   onCopy: () => void
+  /** Fork: hand the selected output to an agent as an unsent, redacted draft. */
+  onAskAgent?: () => void
   onSelectAll: () => void
   onPaste: () => void
   onSplitRight: () => void
@@ -142,6 +144,7 @@ function TerminalContextMenuItems({
   canExpandPane,
   menuPaneIsExpanded,
   onCopy,
+  onAskAgent,
   onSelectAll,
   onPaste,
   onSplitRight,
@@ -201,6 +204,12 @@ function TerminalContextMenuItems({
         {translate('auto.components.terminal.pane.TerminalContextMenu.f3eeb1de13', 'Copy')}
         <DropdownMenuShortcut>{shortcuts.copy}</DropdownMenuShortcut>
       </DropdownMenuItem>
+      {onAskAgent ? (
+        <DropdownMenuItem onSelect={onAskAgent}>
+          <MessageSquare />
+          {translate('terminalAssist.menu', 'Ask agent about selection')}
+        </DropdownMenuItem>
+      ) : null}
       <DropdownMenuItem onSelect={onSelectAll}>
         <TextSelect />
         {translate('auto.components.terminal.pane.TerminalContextMenu.selectAll', 'Select All')}
