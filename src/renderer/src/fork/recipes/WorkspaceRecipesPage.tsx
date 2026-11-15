@@ -5,6 +5,8 @@ import type { RecipeSnapshot } from '../../../../shared/fork-recipes/recipe-cont
 import { ObjectStorageRecipeForm } from './ObjectStorageRecipeForm'
 import { ObjectStorageBindingForm } from './ObjectStorageBindingForm'
 import { SecretReferenceForm } from './SecretReferenceForm'
+import { PostgresDatabaseForm } from './PostgresDatabaseForm'
+import { ContainerRegistryForm, WorkloadRoleForm } from './RegistryAndRoleForms'
 import { RecipeDirectoryCard } from './RecipeDirectoryCard'
 
 /** Fork: Step 10.1 Recipes page. Reviewed source recipes, delivered to a local emulator. */
@@ -71,6 +73,9 @@ export function WorkspaceRecipesPage({ worktreeId }: { worktreeId: string }): Re
             onCreated={setSnapshot}
           />
           <SecretReferenceForm projectId={worktreeId} onCreated={setSnapshot} />
+          <PostgresDatabaseForm projectId={worktreeId} onCreated={setSnapshot} />
+          <ContainerRegistryForm projectId={worktreeId} onCreated={setSnapshot} />
+          <WorkloadRoleForm projectId={worktreeId} onCreated={setSnapshot} />
         </>
       )}
       <section className="workspace-card space-y-2">
