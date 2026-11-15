@@ -1,4 +1,5 @@
 import { getIntlLocale } from '@/i18n/i18n'
+import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -69,6 +70,7 @@ export function RealAwsCard({
       )}
       <div className="flex flex-wrap gap-2">
         <Button
+          title={capabilityNote('aws.verify')}
           disabled={pending}
           onClick={() => {
             void cloudConnections.realAction('verify')
@@ -82,6 +84,7 @@ export function RealAwsCard({
           </Button>
         )}
         <Button
+          title={capabilityNote('aws.resources')}
           variant="outline"
           disabled={pending || !identity?.anchored}
           onClick={() => {
@@ -91,6 +94,7 @@ export function RealAwsCard({
           Read resources
         </Button>
         <Button
+          title={capabilityNote('aws.budgets')}
           variant="outline"
           disabled={pending || !identity?.anchored}
           onClick={() => {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
@@ -36,6 +37,7 @@ export function FlociRuntimeCard({
       )}
       <div className="flex flex-wrap gap-2">
         <Button
+          title={capabilityNote('floci.start')}
           disabled={busy || instance.state === 'ready'}
           onClick={() => {
             void cloudConnections.lifecycle('start')
@@ -44,6 +46,7 @@ export function FlociRuntimeCard({
           Start
         </Button>
         <Button
+          title={capabilityNote('floci.stop')}
           variant="outline"
           disabled={busy}
           onClick={() => {
@@ -52,7 +55,12 @@ export function FlociRuntimeCard({
         >
           Stop
         </Button>
-        <Button variant="outline" disabled={busy} onClick={() => setConfirmation(instance)}>
+        <Button
+          title={capabilityNote('floci.reset')}
+          variant="outline"
+          disabled={busy}
+          onClick={() => setConfirmation(instance)}
+        >
           Reset data
         </Button>
         <Button

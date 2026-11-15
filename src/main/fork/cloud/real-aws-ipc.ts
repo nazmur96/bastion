@@ -13,6 +13,7 @@ import {
   type RealAwsCode
 } from '../../../shared/fork-cloud/real-aws-contract'
 import type { CloudWorkspaceProvider } from './cloud-workspace-provider'
+import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
 export function registerRealAwsHandlers(
   requireProvider: (sender: WebContents) => CloudWorkspaceProvider
 ): void {
@@ -122,6 +123,10 @@ export function registerRealAwsHandlers(
         if (parsed.data.operation === 'cost-and-usage') {
           throw new RealAwsFailure('consent-required')
         }
+        admitChannelOperation(
+          'bastionCloud:readRealTarget',
+          parsed.data.operation === 'resources' ? 'aws.resources' : 'aws.budgets'
+        )
         const value = await provider.real.read(
           parsed.data.projectId,
           parsed.data.targetId,

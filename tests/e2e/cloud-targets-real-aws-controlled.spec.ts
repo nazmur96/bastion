@@ -100,5 +100,21 @@ test('RA-06/08 verifies, confirms and reads through a controlled installed CLI w
     card.getByRole('button', { name: 'Fetch Cost Explorer data', exact: true })
   ).toBeEnabled()
   await expect(card.getByTestId('real-aws-costs')).toContainText('Not requested')
+  // Action labels come from the one operation policy registry.
+  await expect(card.getByRole('button', { name: 'Read resources', exact: true })).toHaveAttribute(
+    'title',
+    'Free read · AWS · needs a verified identity'
+  )
+  await expect(
+    card.getByRole('button', { name: 'Fetch Cost Explorer data', exact: true })
+  ).toHaveAttribute('title', /^Paid read · AWS may charge per request/)
+  // Action labels come from the one operation policy registry.
+  await expect(card.getByRole('button', { name: 'Read resources', exact: true })).toHaveAttribute(
+    'title',
+    'Free read · AWS · needs a verified identity'
+  )
+  await expect(
+    card.getByRole('button', { name: 'Fetch Cost Explorer data', exact: true })
+  ).toHaveAttribute('title', /^Paid read · AWS may charge per request/)
   await captureCloudWindow(electronApp, orcaPage, info, 'real-aws-controlled.png')
 })

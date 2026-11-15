@@ -1,4 +1,5 @@
 import { registerRealAwsHandlers } from './real-aws-ipc'
+import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
 import { z } from 'zod'
 import { CloudWorkspaceProvider } from './cloud-workspace-provider'
 import { setCloudBindingAuthority } from './cloud-binding-authority'
@@ -28,6 +29,12 @@ import {
   type CloudTargetResult,
   type CloudOwner
 } from '../../../shared/fork-cloud/cloud-target-contract'
+
+const LIFECYCLE_OPERATIONS = {
+  start: 'floci.start',
+  stop: 'floci.stop',
+  reset: 'floci.reset'
+} as const
 
 export function registerCloudTargetHandlers(
   store: Pick<Store, 'getRepos' | 'getFolderWorkspaces' | 'getProjectGroups'>,
@@ -86,6 +93,14 @@ export function registerCloudTargetHandlers(
             const parsed = flociActionSchema.safeParse(raw)
             if (!parsed.success) {
               throw new FlociFailure('invalid')
+            }
+            // The policy entry decides which lifecycle actions need a confirmation.
+            const capability = admitChannelOperation(
+              'bastionCloud:runLifecycle',
+              LIFECYCLE_OPERATIONS[parsed.data.operation]
+            )
+            if (capability.consent === 'confirmation' && !parsed.data.confirmation) {
+              throw new FlociFailure('confirmation-required')
             }
             return { ok: true, runtime: await requireProvider(event.sender).act(parsed.data) }
           }

@@ -1,4 +1,5 @@
 import { getIntlLocale } from '@/i18n/i18n'
+import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import type { RealCloudState } from './real-cloud-actions'
@@ -69,6 +70,7 @@ export function RealAwsCostSection({
         </p>
       )}
       <Button
+        title={capabilityNote('aws.cost.read')}
         variant="outline"
         disabled={pending || !eligible}
         onClick={() => {

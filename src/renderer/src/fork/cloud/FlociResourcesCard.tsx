@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
@@ -59,10 +60,20 @@ export function FlociResourcesCard({
         <p className="text-sm text-muted-foreground">Start this target to list resources.</p>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" disabled={busy} onClick={() => void list()}>
+          <Button
+            title={capabilityNote('floci.resources')}
+            variant="outline"
+            disabled={busy}
+            onClick={() => void list()}
+          >
             {busy ? 'Listing…' : 'List resources'}
           </Button>
-          <Button variant="outline" disabled={busy} onClick={() => void openTerminal()}>
+          <Button
+            title={capabilityNote('floci.environment')}
+            variant="outline"
+            disabled={busy}
+            onClick={() => void openTerminal()}
+          >
             Open terminal for this target
           </Button>
         </div>
