@@ -40,8 +40,11 @@ export function RecipeDirectoryCard({
     outputs: Record<string, string>
   } | null>(null)
   const [reviewing, setReviewing] = useState<'apply' | 'destroy' | null>(null)
+  const unsupported = snapshot.flociUnsupported ?? null
   const floci =
-    target?.configuration.kind === 'emulated' && target.configuration.provider === 'aws'
+    !unsupported &&
+    target?.configuration.kind === 'emulated' &&
+    target.configuration.provider === 'aws'
       ? target
       : null
   const run = async (action: () => Promise<void>): Promise<void> => {
@@ -161,7 +164,14 @@ export function RecipeDirectoryCard({
           Destroy from Floci…
         </Button>
       </div>
-      {!floci && (
+      {unsupported && (
+        <p className="text-xs text-muted-foreground" data-testid="recipe-floci-unsupported">
+          {unsupported} needs the local emulator&apos;s Docker backends, which Bastion does not
+          allow, so this recipe can be validated here but not applied to Floci. Apply it on a real
+          AWS target with your own tools; applying to real AWS from Bastion is not available yet.
+        </p>
+      )}
+      {!floci && !unsupported && (
         <p className="text-xs text-muted-foreground">
           Select a Floci AWS target on the Cloud page and start it to apply this recipe locally,
           free of charge. Applying to real AWS is not available from Bastion yet.

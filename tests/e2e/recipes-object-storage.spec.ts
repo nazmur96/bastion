@@ -173,3 +173,53 @@ test('10.3 creates a secret reference with no value and a scoped read policy', a
   expect(main).toContain('resource "aws_secretsmanager_secret" "this"')
   expect(main).not.toMatch(/secret_string|aws_secretsmanager_secret_version/)
 })
+
+test('10.4/10.5 recipes create files; Docker-backed resources are validate-only on Floci', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  await openBastionPage(orcaPage, 'Recipes')
+  const create = async (testId: string, fill: Record<string, string>, label: string) => {
+    const form = orcaPage.getByTestId(testId)
+    for (const [field, value] of Object.entries(fill)) {
+      await form.getByLabel(field, { exact: true }).fill(value)
+    }
+    await clickCloudControl(form.getByRole('button', { name: label, exact: true }))
+    await clickCloudControl(
+      orcaPage.getByRole('dialog').getByRole('button', { name: label, exact: true })
+    )
+    await expect(orcaPage.getByTestId('recipe-directory')).toBeVisible()
+  }
+
+  await create(
+    'recipe-container-registry',
+    { 'Repository name': 'checkout/api' },
+    'Create registry files'
+  )
+  const card = orcaPage.getByTestId('recipe-directory')
+  await expect(card.getByTestId('recipe-floci-unsupported')).toContainText('aws_ecr_repository')
+  await expect(card.getByRole('button', { name: 'Apply to Floci…', exact: true })).toBeDisabled()
+  expect(
+    readFileSync(join(seededRepoPath, 'infra/checkout-api-registry/main.tf'), 'utf8')
+  ).toContain('image_tag_mutability = "IMMUTABLE"')
+
+  await clickCloudControl(orcaPage.getByRole('button', { name: 'New recipe', exact: true }))
+  await create('recipe-workload-role', { 'Role name': 'checkout-task' }, 'Create role files')
+  expect(readFileSync(join(seededRepoPath, 'infra/checkout-task-role/main.tf'), 'utf8')).toContain(
+    'aws:SourceAccount'
+  )
+
+  await clickCloudControl(orcaPage.getByRole('button', { name: 'New recipe', exact: true }))
+  await create(
+    'recipe-postgres-database',
+    { 'Instance identifier': 'orders-db' },
+    'Create database files'
+  )
+  const main = readFileSync(join(seededRepoPath, 'infra/orders-db/main.tf'), 'utf8')
+  expect(main).toContain('data "aws_db_instance" "this"')
+  expect(main).not.toMatch(/resource "aws_db_instance"|password\s*=/)
+})

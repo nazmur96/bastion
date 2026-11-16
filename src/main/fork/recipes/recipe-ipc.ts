@@ -12,7 +12,12 @@ import {
 import type { CloudWorkspaceProvider } from '../cloud/cloud-workspace-provider'
 import { recipeFingerprint } from './recipe-fingerprint'
 import { RecipeFileError, readRecipeFiles, writeRecipeFiles } from './recipe-files'
-import { RecipeRunError, deliverRecipeToFloci, validateRecipe } from './recipe-runner'
+import {
+  RecipeRunError,
+  deliverRecipeToFloci,
+  flociUnsupportedResource,
+  validateRecipe
+} from './recipe-runner'
 import { TerraformToolError, resolveTerraform } from './terraform-tool'
 
 const MESSAGES: Record<string, string> = {
@@ -26,6 +31,8 @@ const MESSAGES: Record<string, string> = {
   'too-large': 'A recipe file is larger than 64 KiB.',
   changed: 'The files changed since you reviewed them. Review the current files again.',
   target: 'Select and start a Floci AWS target before applying.',
+  'emulator-unsupported':
+    'This recipe uses a resource the local emulator can only serve with Docker backends, which Bastion does not allow. Validate it here; apply it on a real AWS target.',
   failed: 'The recipe operation failed.'
 }
 function failure(error: unknown): { ok: false; code: string; message: string } {
@@ -51,7 +58,8 @@ async function snapshot(root: string, directory: string): Promise<RecipeSnapshot
   return {
     directory,
     files: files.map((file) => ({ path: file.path, bytes: Buffer.byteLength(file.content) })),
-    fingerprint: recipeFingerprint(files)
+    fingerprint: recipeFingerprint(files),
+    flociUnsupported: flociUnsupportedResource(files)
   }
 }
 

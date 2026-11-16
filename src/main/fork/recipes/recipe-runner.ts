@@ -19,8 +19,27 @@ provider "aws" {
 `
 export const OVERRIDE_NAME = 'zz_bastion_floci_override.tf'
 
+/**
+ * Resource types Floci serves through real Docker backends, which Bastion's restricted emulator
+ * forbids. Floci may accept their creation but cannot delete them (for example ECR's backing
+ * registry), so delivering them to Floci would leave stuck resources. Validate only; apply on a
+ * real target.
+ */
+const FLOCI_DOCKER_BACKED =
+  /resource\s+"(aws_db_instance|aws_rds_cluster|aws_ecr_repository|aws_instance|aws_launch_template|aws_ecs_[a-z_]+|aws_eks_[a-z_]+|aws_lambda_function|aws_elasticache_[a-z_]+|aws_msk_[a-z_]+|aws_memorydb_[a-z_]+|aws_neptune_[a-z_]+|aws_docdb_[a-z_]+)"/
+
+export function flociUnsupportedResource(files: RecipeFile[]): string | null {
+  for (const file of files) {
+    const match = file.content.match(FLOCI_DOCKER_BACKED)
+    if (match) {
+      return match[1]
+    }
+  }
+  return null
+}
+
 export class RecipeRunError extends Error {
-  constructor(readonly code: 'changed' | 'failed') {
+  constructor(readonly code: 'changed' | 'failed' | 'emulator-unsupported') {
     super(code)
   }
 }
@@ -167,6 +186,9 @@ export async function deliverRecipeToFloci(
 ): Promise<{ steps: RecipeStep[]; outputs: Record<string, string> }> {
   if (recipeFingerprint(request.files) !== request.reviewedFingerprint) {
     throw new RecipeRunError('changed')
+  }
+  if (flociUnsupportedResource(request.files)) {
+    throw new RecipeRunError('emulator-unsupported')
   }
   const run = context.run ?? runProcess
   const base = join(context.dataRoot, 'bastion-recipes')

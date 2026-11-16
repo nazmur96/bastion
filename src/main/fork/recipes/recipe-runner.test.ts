@@ -144,4 +144,25 @@ describe('recipe runner', () => {
     })
     expect(existsSync(join(work, '.gitignore'))).toBe(true)
   })
+  it.each(['aws_ecr_repository', 'aws_db_instance', 'aws_lambda_function', 'aws_instance'])(
+    'refuses Floci delivery of %s, which needs the emulator Docker backends Bastion forbids',
+    async (type) => {
+      const { context: c, calls } = context({})
+      const withBackend = [
+        ...files,
+        { path: 'infra/orders-assets/extra.tf', content: `resource "${type}" "this" {}\n` }
+      ]
+      await expect(
+        deliverRecipeToFloci(c, {
+          operation: 'apply',
+          directory: 'infra/orders-assets',
+          files: withBackend,
+          reviewedFingerprint: recipeFingerprint(withBackend),
+          instanceId: 'instance-a',
+          flociEnv: {}
+        })
+      ).rejects.toThrow('emulator-unsupported')
+      expect(calls).toEqual([])
+    }
+  )
 })

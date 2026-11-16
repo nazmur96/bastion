@@ -49,6 +49,8 @@ export type RecipeSnapshot = {
   fingerprint: string
   /** New files created outside the infra directory, such as an application config example. */
   companions?: string[]
+  /** A resource type the restricted local emulator cannot serve; null when Floci can. */
+  flociUnsupported?: string | null
 }
 export type RecipeResult<T> = ({ ok: true } & T) | { ok: false; code: string; message: string }
 export type RecipesApi = {
