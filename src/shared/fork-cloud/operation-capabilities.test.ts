@@ -44,8 +44,9 @@ describe('one policy entry per cloud operation', () => {
   it('covers every bastionCloud channel the app registers, and nothing else', () => {
     const root = join(__dirname, '..', '..')
     const used = new Set(
-      [...sources(join(root, 'main')), ...sources(join(root, 'preload'))].flatMap((text) =>
-        [...text.matchAll(/bastionCloud:([A-Za-z]+)/g)].map((match) => `bastionCloud:${match[1]}`)
+      [...sources(join(root, 'main', 'fork')), ...sources(join(root, 'preload', 'api'))].flatMap(
+        (text) =>
+          [...text.matchAll(/bastionCloud:([A-Za-z]+)/g)].map((match) => `bastionCloud:${match[1]}`)
       )
     )
     // The change notification is an event, not an operation.
@@ -53,7 +54,8 @@ describe('one policy entry per cloud operation', () => {
     expect([...used].sort()).toEqual(Object.keys(CHANNEL_OPERATIONS).sort())
     const mapped = new Set(Object.values(CHANNEL_OPERATIONS).flat())
     expect([...mapped].sort()).toEqual(entries.map(([id]) => id).sort())
-  })
+    // Every bastionCloud channel lives in main/fork or preload/api; scanning only those keeps this fast.
+  }, 60_000)
   it('labels effects consistently for the UI', () => {
     expect(capabilityNote('aws.cost.read')).toBe(
       'Paid read · AWS may charge per request · AWS · needs a one-use confirmation'

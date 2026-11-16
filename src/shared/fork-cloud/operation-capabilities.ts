@@ -210,6 +210,22 @@ export const OPERATION_CAPABILITIES = {
     egress: 'loopback',
     consent: 'confirmation'
   },
+  'delivery.evidence': {
+    label: 'Read delivery evidence',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'metadata-read',
+    egress: 'provider',
+    consent: 'none'
+  },
+  'delivery.promote': {
+    label: 'Pin a verified image digest in the deployment config',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'source-write',
+    egress: 'none',
+    consent: 'confirmation'
+  },
   'aws.cost.cached': {
     label: 'Show cached Cost Explorer data',
     runsOn: 'owner',
@@ -238,6 +254,8 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:readRealCost': ['aws.cost.read'],
   'bastionCloud:cachedRealCost': ['aws.cost.cached'],
   'bastionCloud:recipeCreate': ['recipes.create'],
+  'bastionCloud:deliveryChain': ['delivery.evidence'],
+  'bastionCloud:deliveryPromote': ['delivery.promote'],
   'bastionCloud:recipeRead': ['recipes.read'],
   'bastionCloud:recipeValidate': ['recipes.validate'],
   'bastionCloud:recipeDeliver': ['recipes.apply-emulated', 'recipes.destroy-emulated']

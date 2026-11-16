@@ -2,6 +2,10 @@ import { ipcRenderer } from 'electron'
 import type { CloudTargetsApi } from '../../shared/fork-cloud/cloud-target-contract'
 
 export const cloudTargetsApi: CloudTargetsApi = {
+  delivery: {
+    chain: (config) => ipcRenderer.invoke('bastionCloud:deliveryChain', config),
+    promote: (request) => ipcRenderer.invoke('bastionCloud:deliveryPromote', request)
+  },
   recipes: {
     create: (args) => ipcRenderer.invoke('bastionCloud:recipeCreate', args),
     read: (args) => ipcRenderer.invoke('bastionCloud:recipeRead', args),

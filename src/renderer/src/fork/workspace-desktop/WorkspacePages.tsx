@@ -1,4 +1,5 @@
 import { WorkspaceEnvironmentsPage } from '../environments/WorkspaceEnvironmentsPage'
+import { WorkspaceDeliveryPage } from '../delivery/WorkspaceDeliveryPage'
 import { WorkspaceRecipesPage } from '../recipes/WorkspaceRecipesPage'
 import { FileSearch } from 'lucide-react'
 import { useAppStore } from '@/store'
@@ -45,6 +46,9 @@ export function WorkspacePages(): React.JSX.Element | null {
   }
   if (page === 'cloud') {
     return id ? <WorkspaceCloudPage key={id} worktreeId={id} /> : <ProjectRequired />
+  }
+  if (page === 'delivery') {
+    return id ? <WorkspaceDeliveryPage key={id} worktreeId={id} /> : <ProjectRequired />
   }
   if (page === 'recipes') {
     return id ? <WorkspaceRecipesPage key={id} worktreeId={id} /> : <ProjectRequired />
