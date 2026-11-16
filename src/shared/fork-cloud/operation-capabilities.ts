@@ -22,6 +22,10 @@ export type OperationEffect =
   | 'validation'
   /** Creates or destroys resources in a local emulator only. */
   | 'emulated-write'
+  /** Reads data that may hold secrets (workload logs); bounded and redacted. */
+  | 'sensitive-read'
+  /** Sends one read-only request to the deployed application. */
+  | 'journey-check'
 export type OperationConsent =
   | 'none'
   /** A target-specific confirmation in the app. */
@@ -37,9 +41,11 @@ export type OperationCapability = {
   target: 'none' | 'selected-emulated' | 'selected-real'
   effect: OperationEffect
   /** Where data leaves the owner: nowhere, the loopback emulator, or the cloud provider. */
-  egress: 'none' | 'loopback' | 'provider' | 'registry'
+  egress: 'none' | 'loopback' | 'provider' | 'registry' | 'cluster' | 'delivery-sources'
   consent: OperationConsent
 }
+
+import { OPERATIONS_CAPABILITIES } from './operations-capabilities'
 
 export const OPERATION_CAPABILITIES = {
   'targets.read': {
@@ -215,7 +221,7 @@ export const OPERATION_CAPABILITIES = {
     runsOn: 'owner',
     target: 'none',
     effect: 'metadata-read',
-    egress: 'provider',
+    egress: 'delivery-sources',
     consent: 'none'
   },
   'delivery.promote': {
@@ -226,6 +232,7 @@ export const OPERATION_CAPABILITIES = {
     egress: 'none',
     consent: 'confirmation'
   },
+  ...OPERATIONS_CAPABILITIES,
   'aws.cost.cached': {
     label: 'Show cached Cost Explorer data',
     runsOn: 'owner',
@@ -256,6 +263,11 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:recipeCreate': ['recipes.create'],
   'bastionCloud:deliveryChain': ['delivery.evidence'],
   'bastionCloud:deliveryPromote': ['delivery.promote'],
+  'bastionCloud:operationsDiagnose': ['operations.diagnose', 'operations.logs'],
+  'bastionCloud:operationsVerify': ['operations.verify'],
+  'bastionCloud:operationsRuns': ['operations.runs'],
+  'bastionCloud:runbookList': ['runbooks.read'],
+  'bastionCloud:runbookCreate': ['runbooks.create'],
   'bastionCloud:recipeRead': ['recipes.read'],
   'bastionCloud:recipeValidate': ['recipes.validate'],
   'bastionCloud:recipeDeliver': ['recipes.apply-emulated', 'recipes.destroy-emulated']
@@ -275,7 +287,11 @@ export function capabilityNote(id: OperationId): string {
         ? 'local emulator'
         : capability.egress === 'registry'
           ? 'provider registry'
-          : 'this computer'
+          : capability.egress === 'cluster'
+            ? 'Kubernetes cluster'
+            : capability.egress === 'delivery-sources'
+              ? 'GitHub, registry and cluster'
+              : 'this computer'
   const effect: Record<OperationEffect, string> = {
     'local-read': 'Reads Bastion data',
     'local-write': 'Changes Bastion data only',
@@ -285,7 +301,9 @@ export function capabilityNote(id: OperationId): string {
     'paid-read': 'Paid read · AWS may charge per request',
     'source-write': 'Creates new project files · never overwrites',
     validation: 'Validates in a private copy · downloads pinned providers',
-    'emulated-write': 'Changes local emulator resources · no charges'
+    'emulated-write': 'Changes local emulator resources · no charges',
+    'sensitive-read': 'Sensitive read · bounded and redacted',
+    'journey-check': 'One read-only request to the app'
   }
   const consent: Record<OperationConsent, string | null> = {
     none: null,

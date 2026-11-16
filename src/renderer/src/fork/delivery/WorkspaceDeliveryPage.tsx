@@ -9,6 +9,9 @@ import {
   type DeliveryChain,
   type DeliveryConfig
 } from '../../../../shared/fork-delivery/delivery-contract'
+import type { WorkloadDiagnosis } from '../../../../shared/fork-delivery/operations-contract'
+import { DeliveryDiagnosisSection } from './DeliveryDiagnosisSection'
+import { DeliveryVerificationSection } from './DeliveryVerificationSection'
 
 const LABELS: Record<string, string> = {
   revision: 'Source revision',
@@ -59,6 +62,7 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
   const [error, setError] = useState<string | null>(null)
   const [promoting, setPromoting] = useState(false)
   const [promoted, setPromoted] = useState<string | null>(null)
+  const [diagnosis, setDiagnosis] = useState<WorkloadDiagnosis | null>(null)
   const parsed = deliveryConfigSchema.safeParse({
     projectId: worktreeId,
     ...values,
@@ -202,6 +206,16 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
           )}
         </section>
       )}
+      <DeliveryDiagnosisSection
+        config={parsed.success ? parsed.data : null}
+        diagnosis={diagnosis}
+        onDiagnosis={setDiagnosis}
+      />
+      <DeliveryVerificationSection
+        projectId={worktreeId}
+        config={parsed.success ? parsed.data : null}
+        diagnosis={diagnosis}
+      />
       {promoting && chain?.digest && (
         <Dialog open onOpenChange={(open) => !open && setPromoting(false)}>
           <DialogContent surface="security">

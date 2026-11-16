@@ -1,5 +1,6 @@
 import type { RecipesApi } from '../fork-recipes/recipe-contract'
 import type { DeliveryApi } from '../fork-delivery/delivery-contract'
+import type { OperationsApi } from '../fork-delivery/operations-contract'
 import type {
   RealAwsResult,
   RealAwsIdentity,
@@ -154,6 +155,7 @@ export type CloudTargetsApi = {
   recipes?: RecipesApi
   /** Step 11 delivery evidence and guarded promotion. */
   delivery?: DeliveryApi
+  operations?: OperationsApi
   verifyRealTarget?: (args: {
     projectId: string
     targetId: string

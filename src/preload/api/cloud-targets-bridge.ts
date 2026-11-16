@@ -6,6 +6,13 @@ export const cloudTargetsApi: CloudTargetsApi = {
     chain: (config) => ipcRenderer.invoke('bastionCloud:deliveryChain', config),
     promote: (request) => ipcRenderer.invoke('bastionCloud:deliveryPromote', request)
   },
+  operations: {
+    diagnose: (request) => ipcRenderer.invoke('bastionCloud:operationsDiagnose', request),
+    verify: (request) => ipcRenderer.invoke('bastionCloud:operationsVerify', request),
+    runs: (request) => ipcRenderer.invoke('bastionCloud:operationsRuns', request),
+    runbooks: (request) => ipcRenderer.invoke('bastionCloud:runbookList', request),
+    createRunbook: (request) => ipcRenderer.invoke('bastionCloud:runbookCreate', request)
+  },
   recipes: {
     create: (args) => ipcRenderer.invoke('bastionCloud:recipeCreate', args),
     read: (args) => ipcRenderer.invoke('bastionCloud:recipeRead', args),
