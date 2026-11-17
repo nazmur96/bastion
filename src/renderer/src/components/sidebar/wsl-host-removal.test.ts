@@ -52,20 +52,23 @@ describe('removeWslHost', () => {
     mocks.workspace.ownerHostId = null
   })
 
-  it('says the host keeps running when another Orca on this computer shares it', async () => {
-    stubApi({ stopped: true, keptForOtherDesktops: ['Orca Dev'] })
+  it('says the host keeps running when another Bastion on this computer shares it', async () => {
+    stubApi({ stopped: true, keptForOtherDesktops: ['Bastion Dev'] })
     await removeWslHost('wsl:ubuntu')
     expect(mocks.info).toHaveBeenCalledWith(
-      'Removed from this Orca. The host keeps running for Orca Dev.'
+      'Removed from this Bastion. The host keeps running for Bastion Dev.'
     )
     expect(mocks.warning).not.toHaveBeenCalled()
   })
 
   it('names several unnamed peers once', async () => {
-    stubApi({ stopped: true, keptForOtherDesktops: ['another Orca', 'another Orca', 'Orca Dev'] })
+    stubApi({
+      stopped: true,
+      keptForOtherDesktops: ['another Bastion', 'another Bastion', 'Bastion Dev']
+    })
     await removeWslHost('wsl:ubuntu')
     expect(mocks.info).toHaveBeenCalledWith(
-      'Removed from this Orca. The host keeps running for another Orca, Orca Dev.'
+      'Removed from this Bastion. The host keeps running for another Bastion, Bastion Dev.'
     )
   })
 
@@ -92,10 +95,13 @@ describe('removeWslHost', () => {
   })
 
   it('says what is still running in the distro, and keeps saying it until dismissed', async () => {
-    stubApi({ stopped: false, reason: '1 terminal kept running, so Orca left the server running.' })
+    stubApi({
+      stopped: false,
+      reason: '1 terminal kept running, so Bastion left the server running.'
+    })
     await removeWslHost('wsl:ubuntu')
     expect(mocks.warning).toHaveBeenCalledWith(
-      'The host was removed, but something in the distro is still running: 1 terminal kept running, so Orca left the server running.',
+      'The host was removed, but something in the distro is still running: 1 terminal kept running, so Bastion left the server running.',
       { duration: Infinity }
     )
   })
@@ -109,7 +115,7 @@ describe('removeWslHost', () => {
     })
     await removeWslHost('wsl:ubuntu')
     expect(mocks.warning).toHaveBeenCalledExactlyOnceWith(
-      'Orca didn’t remove the host yet: Start Ubuntu to finish removing it. Remove it again to retry, or connect it to keep it.',
+      'Bastion didn’t remove the host yet: Start Ubuntu to finish removing it. Remove it again to retry, or connect it to keep it.',
       { duration: Infinity }
     )
   })

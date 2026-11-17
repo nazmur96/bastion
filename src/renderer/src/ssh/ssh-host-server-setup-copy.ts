@@ -5,7 +5,7 @@ import { translate } from '@/i18n/i18n'
 export function sshHostServerReassurance(host: string): string {
   return translate(
     'auto.components.settings.sshHostServer.reassurance',
-    'Runs on {{host}}, reached over your own SSH connection. Your code and files stay where they are. Only Orca’s list of projects, tabs and terminals moves to {{host}}.',
+    'Runs on {{host}}, reached over your own SSH connection. Your code and files stay where they are. Only Bastion’s list of projects, tabs and terminals moves to {{host}}.',
     { host }
   )
 }
@@ -18,31 +18,31 @@ export function settingUpLabel(
     case 'deploying':
       return translate(
         'auto.components.settings.sshHostServer.deploying',
-        'Setting up Orca on {{host}}…',
+        'Setting up Bastion on {{host}}…',
         { host }
       )
     case 'converting':
       return translate(
         'auto.components.settings.sshHostServer.converting',
-        'Moving to Orca on {{host}}…',
+        'Moving to Bastion on {{host}}…',
         { host }
       )
     case 'connecting':
       return translate(
         'auto.components.settings.sshHostServer.connecting',
-        'Connecting to Orca on {{host}}…',
+        'Connecting to Bastion on {{host}}…',
         { host }
       )
     case 'updating':
       return translate(
         'auto.components.settings.sshHostServer.updating',
-        'Updating Orca on {{host}}…',
+        'Updating Bastion on {{host}}…',
         { host }
       )
     case 'starting':
       return translate(
         'auto.components.settings.sshHostServer.starting',
-        'Starting Orca on {{host}}…',
+        'Starting Bastion on {{host}}…',
         { host }
       )
   }

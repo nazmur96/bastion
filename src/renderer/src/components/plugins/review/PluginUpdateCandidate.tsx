@@ -221,7 +221,7 @@ export function CandidateRow({
       <p className="text-xs text-destructive">
         {translate(
           'auto.components.settings.PluginMarketplaceListingRow.blocked',
-          "Blocked by Orca's safety list: {{value0}}",
+          "Blocked by Bastion's safety list: {{value0}}",
           { value0: preview.blockedByKillList.reason }
         )}
       </p>
@@ -237,7 +237,7 @@ export function CandidateRow({
       <p className="text-xs text-status-warning-text">
         {translate(
           'auto.components.settings.PluginUpdateAllDialog.needsOrca',
-          'Needs Orca {{value0}} or later',
+          'Needs Bastion {{value0}} or later',
           { value0: needsOrca }
         )}
       </p>

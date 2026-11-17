@@ -248,7 +248,7 @@ export function WorkspaceEnvironmentsPage(): React.JSX.Element {
           <p>
             {translate(
               'workspaceEnvironments.containerAction',
-              'Connect the resulting machine over SSH, or use the repository’s existing Orca environment recipe when creating a worktree.'
+              'Connect the resulting machine over SSH, or use the repository’s existing Bastion environment recipe when creating a worktree.'
             )}
           </p>
         </section>
@@ -257,7 +257,7 @@ export function WorkspaceEnvironmentsPage(): React.JSX.Element {
           <p>
             {translate(
               'workspaceEnvironments.capabilityCopy',
-              'Opening a file activates built-in syntax support or a matching installed Orca syntax pack. Use File capabilities in the editor to inspect support and its execution owner.'
+              'Opening a file activates built-in syntax support or a matching installed Bastion syntax pack. Use File capabilities in the editor to inspect support and its execution owner.'
             )}
           </p>
           <p>

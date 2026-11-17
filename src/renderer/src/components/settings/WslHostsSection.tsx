@@ -143,7 +143,7 @@ export function WslHostsSection({
                 ? getWslHostsPausedLabel()
                 : translate(
                     'auto.components.settings.wslHosts.description',
-                    'Orca runs a server inside each distro. A stopped distro starts only when you open one of its projects or connect it here.'
+                    'Bastion runs a server inside each distro. A stopped distro starts only when you open one of its projects or connect it here.'
                   ))}
           </p>
         </div>

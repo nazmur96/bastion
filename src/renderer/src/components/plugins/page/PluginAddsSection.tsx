@@ -324,7 +324,7 @@ export function PluginAddsSection({
   }
   return (
     <DetailSection
-      title={translate('auto.components.settings.PluginDetailSections.adds', 'Adds to Orca')}
+      title={translate('auto.components.settings.PluginDetailSections.adds', 'Adds to Bastion')}
       count={String(total)}
     >
       {rows.map((row) => (

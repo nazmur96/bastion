@@ -102,7 +102,7 @@ export const createOrcaProfilesAuthActions: StateCreator<
           toast.error(
             translate(
               'auto.store.slices.orca.profiles.8b8fa73174',
-              'Orca Cloud sign-in is not configured'
+              'Bastion Cloud sign-in is not configured'
             ),
             {
               description: result.auth.setupMessage

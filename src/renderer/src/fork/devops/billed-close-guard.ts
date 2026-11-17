@@ -23,7 +23,7 @@ export function interceptCloseForBilledInfra(proceed: () => void): boolean {
     {
       description: translate(
         'components.devops.closeGuard.body',
-        '{{repos}} applied and not destroyed{{cost}}. It keeps billing after Orca closes.',
+        '{{repos}} applied and not destroyed{{cost}}. It keeps billing after Bastion closes.',
         { repos, cost: hourly > 0 ? ` (≈ $${hourly.toFixed(2)}/hour)` : '' }
       ),
       duration: SECOND_CLOSE_MS,

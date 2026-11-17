@@ -27,7 +27,7 @@ export function MobileRelaySignInPanel({
         <p className="min-w-0 flex-1 text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.MobilePairingConnectionOptions.relaySignInDetail',
-            'Signs this desktop in to Orca and routes the phone through Orca’s servers. LAN does not need an account.'
+            'Signs this desktop in to Bastion and routes the phone through Bastion’s servers. LAN does not need an account.'
           )}
         </p>
       )}

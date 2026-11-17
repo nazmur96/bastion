@@ -14,7 +14,7 @@ function ExternallyManagedNote(): React.JSX.Element {
     <p className="text-xs leading-relaxed text-muted-foreground">
       {translate(
         'auto.components.UpdateCard.7f1a4c9e02',
-        'Your system package manager installed Orca, so update it from there — Orca cannot install this release itself.'
+        'Your system package manager installed Bastion, so update it from there — Bastion cannot install this release itself.'
       )}
     </p>
   )
@@ -146,7 +146,7 @@ export function UpdateAvailableSimpleContent({
         </Button>
       </div>
       <p className="text-sm text-muted-foreground">
-        {translate('auto.components.UpdateCard.05ad78a6d1', 'Orca v{{value0}} is ready.', {
+        {translate('auto.components.UpdateCard.05ad78a6d1', 'Bastion v{{value0}} is ready.', {
           value0: version
         })}
       </p>

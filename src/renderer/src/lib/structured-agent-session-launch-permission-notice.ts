@@ -18,12 +18,12 @@ export function hostPermissionRefusedText(
   return kind === 'unverified'
     ? translate(
         'components.native-chat.hostPermission.unverified',
-        "Orca couldn't confirm the host's permissions for {{value0}}.",
+        "Bastion couldn't confirm the host's permissions for {{value0}}.",
         { value0: agentLabel }
       )
     : translate(
         'components.native-chat.hostPermission.outdatedHost',
-        'This host runs an older Orca that ignores chat permissions, so {{value0}} would run here without asking. Update Orca on this host to use {{value1}}.',
+        'This host runs an older Bastion that ignores chat permissions, so {{value0}} would run here without asking. Update Bastion on this host to use {{value1}}.',
         {
           value0: agentLabel,
           value1: nativeChatPermissionModeLabel(
@@ -38,7 +38,7 @@ export function notifyHostPermissionRefused(agent: TuiAgent, kind: 'refused' | '
   toast.error(
     translate(
       'components.native-chat.hostPermission.launchRefused',
-      'Orca did not start a {{value0}} chat',
+      'Bastion did not start a {{value0}} chat',
       { value0: agentLabel }
     ),
     {

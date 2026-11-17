@@ -70,7 +70,7 @@ export function useMobileEmulatorAgentSetupState(enabled = true): {
       toast.message(
         translate(
           'auto.components.emulator.pane.use.mobile.emulator.agent.setup.state.skillNotInstalled',
-          'The Orca CLI skill is not installed yet.'
+          'The Bastion CLI skill is not installed yet.'
         )
       )
     } catch (error) {

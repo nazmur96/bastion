@@ -179,18 +179,18 @@ function HostRemoveDialogBody({
     target.kind === 'wsl'
       ? translate(
           'auto.components.sidebar.HostRemoveDialog.wslHostEndsTerminalsUnlessShared',
-          'Removes {{value0}} from Orca. Unless another Orca that’s open on this computer is using it, this also ends its open terminals and stops Orca’s server in that distro. Files in the distro are untouched.',
+          'Removes {{value0}} from Bastion. Unless another Bastion that’s open on this computer is using it, this also ends its open terminals and stops Bastion’s server in that distro. Files in the distro are untouched.',
           { value0: label }
         )
       : target.kind === 'runtime'
         ? translate(
             'auto.components.sidebar.HostRemoveDialog.4d5e6f7a8b',
-            'This opens the Orca servers settings where you can remove this server.'
+            'This opens the Bastion servers settings where you can remove this server.'
           )
         : hasWorkspaces
           ? translate(
               'auto.components.sidebar.HostRemoveDialog.hostKeepsWorkspaces',
-              'Removes {{host}} and its credentials from this computer. Its {{count}} workspaces stay in Orca — remote files are not touched.',
+              'Removes {{host}} and its credentials from this computer. Its {{count}} workspaces stay in Bastion — remote files are not touched.',
               {
                 host: label,
                 count: workspaceCount,
@@ -205,7 +205,7 @@ function HostRemoveDialogBody({
 
   const deleteOptionLabel = translate(
     'auto.components.sidebar.HostRemoveDialog.alsoRemoveWorkspaces',
-    'Also remove these {{count}} workspaces from Orca',
+    'Also remove these {{count}} workspaces from Bastion',
     { count: workspaceCount, defaultValue_one: 'Also remove this workspace from Orca' }
   )
 
@@ -258,7 +258,7 @@ function HostRemoveDialogBody({
                   <span className="mt-0.5 block text-muted-foreground">
                     {translate(
                       'auto.components.sidebar.HostRemoveDialog.alsoForgetLocalHint',
-                      'Clears them from Orca only. Remote files, worktrees, and branches are left untouched.'
+                      'Clears them from Bastion only. Remote files, worktrees, and branches are left untouched.'
                     )}
                   </span>
                 </span>

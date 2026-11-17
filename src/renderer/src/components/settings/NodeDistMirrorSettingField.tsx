@@ -74,7 +74,7 @@ export function NodeDistMirrorSettingField({
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.AdvancedNetworkSettingsSection.nodeDistMirrorDescription',
-            'Optional. A copy of nodejs.org/dist that Orca uses first when it installs Node on SSH and WSL servers. Each file is still checked against the release Orca expects.'
+            'Optional. A copy of nodejs.org/dist that Bastion uses first when it installs Node on SSH and WSL servers. Each file is still checked against the release Bastion expects.'
           )}
         </p>
       )}

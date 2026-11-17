@@ -18,10 +18,10 @@ export function renderOrcaAccountSettingsSection(
   return model.showDesktopOnlySettings ? (
     <SettingsSection
       id="orca-account"
-      title={translate('auto.components.settings.orcaAccount.title', 'Orca Account')}
+      title={translate('auto.components.settings.orcaAccount.title', 'Bastion Account')}
       description={translate(
         'auto.components.settings.orcaAccount.description',
-        'Share work instantly and reach your desktop from Orca Mobile wherever you are.'
+        'Share work instantly and reach your desktop from Bastion Mobile wherever you are.'
       )}
       searchEntries={navigation.getSectionSearchEntries('orca-account')}
     >
@@ -188,7 +188,7 @@ export function renderSessionHistorySettingsSection(
       title={translate('sessionHistory.settings.title', 'Agent Session Search')}
       description={translate(
         'sessionHistory.settings.description',
-        'Search everything your agents have said and done, on this computer and on any paired Orca server.'
+        'Search everything your agents have said and done, on this computer and on any paired Bastion server.'
       )}
       searchEntries={navigation.getSectionSearchEntries('session-history')}
     >

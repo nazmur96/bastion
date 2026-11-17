@@ -42,7 +42,7 @@ export function BundledSkillInstallStatus(props: {
             )
           : translate(
               'auto.components.settings.BundledSkillInstallStatus.updateServer',
-              'Update Orca on the server to install its skills.'
+              'Update Bastion on the server to install its skills.'
             )}
       </p>
     )

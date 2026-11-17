@@ -225,7 +225,7 @@ export default function AiVaultSessionDropLayer({
         toast.error(
           translate(
             'auto.components.tab.group.AiVaultSessionDropLayer.oldPayload',
-            'This session was dragged from an older Orca window. Resume it from Session History instead.'
+            'This session was dragged from an older Bastion window. Resume it from Session History instead.'
           )
         )
         return true
@@ -255,11 +255,11 @@ export default function AiVaultSessionDropLayer({
               result.substituteCodexHome
                 ? translate(
                     'auto.components.tab.group.AiVaultSessionDropLayer.legacyDragCannotRetarget',
-                    'This session was dragged from an older Orca window, so Orca cannot retarget it to the selected Codex account. Resume it from the Session History panel instead.'
+                    'This session was dragged from an older Bastion window, so Bastion cannot retarget it to the selected Codex account. Resume it from the Session History panel instead.'
                   )
                 : translate(
                     'auto.components.tab.group.AiVaultSessionDropLayer.legacyDragPrepareFailed',
-                    'Orca could not prepare this legacy Codex session. Retry resume.'
+                    'Bastion could not prepare this legacy Codex session. Retry resume.'
                   )
             )
           }

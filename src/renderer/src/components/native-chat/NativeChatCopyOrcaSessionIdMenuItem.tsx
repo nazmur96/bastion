@@ -20,14 +20,14 @@ export function NativeChatCopyOrcaSessionIdMenuItem({
       toast.success(
         translate(
           'components.native-chat.contextMenu.orcaSessionIdCopied',
-          'Orca session ID copied'
+          'Bastion session ID copied'
         )
       )
     } catch {
       toast.error(
         translate(
           'components.native-chat.contextMenu.orcaSessionIdCopyFailed',
-          'Unable to copy Orca session ID'
+          'Unable to copy Bastion session ID'
         )
       )
     }
@@ -39,14 +39,14 @@ export function NativeChatCopyOrcaSessionIdMenuItem({
           <Copy />
           {translate(
             'components.native-chat.contextMenu.copyOrcaSessionId',
-            'Copy Orca Session ID'
+            'Copy Bastion Session ID'
           )}
         </DropdownMenuItem>
       </TooltipTrigger>
       <TooltipContent side="right" sideOffset={8} className="max-w-[220px]">
         {translate(
           'components.native-chat.contextMenu.orcaSessionIdTooltip',
-          "Orca's ID for this chat, separate from the agent CLI's own session ID. Agents use it to refer to each other through Orca."
+          "Bastion's ID for this chat, separate from the agent CLI's own session ID. Agents use it to refer to each other through Bastion."
         )}
       </TooltipContent>
     </Tooltip>

@@ -31,7 +31,7 @@ export function NewerDaemonHoldBanner({
           ? translate('terminal.newerDaemonBanner.failedTitle', "Couldn't reopen this terminal")
           : translate(
               'terminal.newerDaemonBanner.title',
-              'This terminal was opened in a newer version of Orca'
+              'This terminal was opened in a newer version of Bastion'
             )
       }
       body={

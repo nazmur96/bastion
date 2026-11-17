@@ -14,7 +14,7 @@ describe('showWorktreeCreateWarningToast', () => {
     )
 
     expect(warning).toHaveBeenCalledWith(
-      "Failed to create the startup terminal for /wt: The WSL distro Ubuntu is stopped, so Orca didn't start this terminal. Start the distro, then try again."
+      "Failed to create the startup terminal for /wt: The WSL distro Ubuntu is stopped, so Bastion didn't start this terminal. Start the distro, then try again."
     )
   })
 

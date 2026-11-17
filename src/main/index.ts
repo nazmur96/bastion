@@ -235,7 +235,7 @@ if (preflightReady) {
               formatProfileStateStartupFailure(error, translateMain) ??
               translateMain(
                 'startupFailure.finishFailed',
-                'Orca could not finish starting: {{detail}}',
+                'Bastion could not finish starting: {{detail}}',
                 { detail }
               ),
             ...(failureClass === 'recovery-required' || failureClass === 'ambiguous-authority'

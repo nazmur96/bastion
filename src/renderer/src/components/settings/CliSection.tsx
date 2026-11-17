@@ -150,12 +150,12 @@ export function CliSection({
     <section className="space-y-4" data-settings-section="cli">
       <div className="space-y-1">
         <h2 className="text-sm font-semibold">
-          {translate('auto.components.settings.CliSection.c5c0f2641d', 'Orca CLI')}
+          {translate('auto.components.settings.CliSection.c5c0f2641d', 'Bastion CLI')}
         </h2>
         <p className="text-xs text-muted-foreground">
           {translate(
             'auto.components.settings.CliSection.outsideOrcaDescription',
-            'Orca terminals already have `orca`. Turn this on to use `orca` from other terminals outside Orca.'
+            'Bastion terminals already have `orca`. Turn this on to use `orca` from other terminals outside Bastion.'
           )}
         </p>
       </div>
@@ -300,7 +300,7 @@ export function CliSection({
               <p className="text-xs text-muted-foreground">
                 {translate(
                   'auto.components.settings.CliSection.36a6f919ba',
-                  'Give agents Orca-aware workspace, terminal, and progress workflows.'
+                  'Give agents Bastion-aware workspace, terminal, and progress workflows.'
                 )}
               </p>
             </div>
@@ -311,7 +311,7 @@ export function CliSection({
               title={translate('auto.components.settings.CliSection.6053cf736c', 'CLI skill')}
               description={translate(
                 'auto.components.settings.CliSection.e8012c03a1',
-                'Enables agents to use Orca workspace, terminal, and progress commands.'
+                'Enables agents to use Bastion workspace, terminal, and progress commands.'
               )}
               skillNames={[ORCA_CLI_SKILL_NAME]}
               target={skillRuntime.bundledSkillTarget}

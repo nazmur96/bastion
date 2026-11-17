@@ -86,7 +86,7 @@ it('offers exactly Dismiss all and the resume action', async () => {
   ])
 })
 
-it('says under each chat what it was doing when Orca went away', async () => {
+it('says under each chat what it was doing when Bastion went away', async () => {
   rpc.mockResolvedValue({
     sessions: [
       { ...offered[0], activity: { state: 'working', prompts: [], tasks: [] } },
@@ -472,7 +472,7 @@ it('keeps a lost request unconfirmed until its viewed summary retires', async ()
   continueFails = false
   await act(async () => show?.())
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
-    'Orca couldn’t confirm the “continue” message was delivered.'
+    'Bastion couldn’t confirm the “continue” message was delivered.'
   )
   expect([...document.querySelectorAll('button')].some((row) => row.textContent === 'Retry')).toBe(
     false

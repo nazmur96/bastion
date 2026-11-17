@@ -133,7 +133,7 @@ function RuntimeRepairForm({
         <DialogDescription>
           {translate(
             'auto.components.settings.RuntimeRepairDialog.descriptionShareComputer',
-            '{{name}} no longer accepts this computer. On {{name}}, open Settings → Remote Orca Servers → Share this computer, create a link for another Orca, then paste it here.',
+            '{{name}} no longer accepts this computer. On {{name}}, open Settings → Remote Bastion Servers → Share this computer, create a link for another Bastion, then paste it here.',
             { name }
           )}
         </DialogDescription>

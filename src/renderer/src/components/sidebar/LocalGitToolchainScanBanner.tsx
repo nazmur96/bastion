@@ -23,7 +23,7 @@ const FIXES: Record<
     body: () =>
       translate(
         'auto.components.sidebar.LocalGitToolchainScanBanner.xcodeLicenseBody',
-        'macOS blocks Git until you accept it. Run this in Terminal, then switch back to Orca. It will check again automatically.'
+        'macOS blocks Git until you accept it. Run this in Terminal, then switch back to Bastion. It will check again automatically.'
       )
   },
   'developer-tools': {
@@ -36,7 +36,7 @@ const FIXES: Record<
     body: () =>
       translate(
         'auto.components.sidebar.LocalGitToolchainScanBanner.developerToolsBody',
-        "Git needs Apple's developer tools. Run this in Terminal, then switch back to Orca. It will check again automatically."
+        "Git needs Apple's developer tools. Run this in Terminal, then switch back to Bastion. It will check again automatically."
       )
   }
 }

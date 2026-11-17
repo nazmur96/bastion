@@ -37,11 +37,11 @@ export async function presentProfileStateStartupRecoveryDialog(
   const nextStep = deps.recoveryCommand
     ? deps.translate(
         'profileState.startupRecovery.copyCommandDetail',
-        'Copy the recovery command, then run it after Orca closes.'
+        'Copy the recovery command, then run it after Bastion closes.'
       )
     : deps.translate(
         'profileState.startupRecovery.quitDetail',
-        'Quit Orca and resolve the profile-state authority before retrying.'
+        'Quit Bastion and resolve the profile-state authority before retrying.'
       )
   const detail = `${deps.message}\n\n${nextStep}`
   const { response } = await deps.showMessageBox({
@@ -51,11 +51,11 @@ export async function presentProfileStateStartupRecoveryDialog(
     cancelId: buttons.length - 1,
     title: deps.translate(
       'profileState.startupRecovery.title',
-      'Orca profile state cannot be opened'
+      'Bastion profile state cannot be opened'
     ),
     message: deps.translate(
       'profileState.startupRecovery.message',
-      'Orca cannot safely open this profile.'
+      'Bastion cannot safely open this profile.'
     ),
     detail
   })
@@ -131,12 +131,12 @@ export async function chooseProfileStateCopy(
     detail: [
       deps.translate(
         'profileState.copyChoice.cause',
-        'This usually happens after opening the profile in an older version of Orca.'
+        'This usually happens after opening the profile in an older version of Bastion.'
       ),
       '',
       deps.translate(
         'profileState.copyChoice.sqliteOption',
-        'SQLite: what this version of Orca saved. Changes made in the older version are discarded.'
+        'SQLite: what this version of Bastion saved. Changes made in the older version are discarded.'
       ) + savedAt(deps.sqliteSavedAt),
       '',
       deps.translate(
@@ -146,7 +146,7 @@ export async function chooseProfileStateCopy(
       '',
       deps.translate(
         'profileState.copyChoice.archiveNote',
-        'Orca archives both copies before switching, then restarts.'
+        'Bastion archives both copies before switching, then restarts.'
       )
     ].join('\n')
   })
@@ -187,14 +187,14 @@ export async function chooseProfileStateRepair(
         ? [
             deps.translate(
               'profileState.repairChoice.projectsForgotten',
-              'Orca will forget your projects and their workspace details. Files on disk are not touched.'
+              'Bastion will forget your projects and their workspace details. Files on disk are not touched.'
             ),
             ''
           ]
         : [
             deps.translate(
               'profileState.repairChoice.newerProjectsRemoved',
-              'Projects added after that backup will be removed from Orca, along with their workspace details. Files on disk are not touched.'
+              'Projects added after that backup will be removed from Bastion, along with their workspace details. Files on disk are not touched.'
             ),
             ''
           ]
@@ -223,7 +223,7 @@ export async function chooseProfileStateRepair(
       ...projectNote,
       deps.translate(
         'profileState.repairChoice.damagedCopyKept',
-        'Orca keeps a copy of the damaged file in its data folder, then restarts.'
+        'Bastion keeps a copy of the damaged file in its data folder, then restarts.'
       )
     ].join('\n')
   })

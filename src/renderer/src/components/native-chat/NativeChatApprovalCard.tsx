@@ -160,7 +160,7 @@ export function NativeChatApprovalCard({
                   <p data-native-chat-approval-needs-newer-orca="true" className="break-words">
                     {translate(
                       'components.native-chat.approval.needsNewerOrca',
-                      'This request needs a newer version of Orca.'
+                      'This request needs a newer version of Bastion.'
                     )}
                   </p>
                 ) : null}

@@ -59,7 +59,7 @@ afterEach(() => {
     expect(screen.queryByText(/Toggle back to the terminal/)).toBeNull()
   })
 
-  it('says a damaged history cannot load in one line, without claiming Orca keeps trying', () => {
+  it('says a damaged history cannot load in one line, without claiming Bastion keeps trying', () => {
     mocks.status = 'error'
     mocks.readRefusal = journalRefusal('journalCorrupt')
     mocks.messages = []
@@ -81,7 +81,9 @@ afterEach(() => {
 
     renderPane()
 
-    expect(screen.getAllByText("Orca couldn't open this chat's history right now.")).toHaveLength(1)
+    expect(
+      screen.getAllByText("Bastion couldn't open this chat's history right now.")
+    ).toHaveLength(1)
     expect(screen.queryByText('Could not load conversation')).toBeNull()
     expect(screen.queryByText(/keeps trying/)).toBeNull()
     expect(screen.queryByText(/Try again/)).toBeNull()
@@ -115,13 +117,13 @@ afterEach(() => {
 
     expect(
       screen.getAllByText(
-        "Orca can't run this agent in a chat here. This chat's history couldn't be loaded."
+        "Bastion can't run this agent in a chat here. This chat's history couldn't be loaded."
       )
     ).toHaveLength(1)
-    expect(screen.queryByText(/isn't available|newer Orca/)).toBeNull()
+    expect(screen.queryByText(/isn't available|newer Bastion/)).toBeNull()
   })
 
-  it('says once that a newer Orca saved the chat and only an update opens it, with no composer', () => {
+  it('says once that a newer Bastion saved the chat and only an update opens it, with no composer', () => {
     mocks.status = 'error'
     mocks.readRefusal = journalRefusal('journalWrittenByNewerOrca')
     mocks.messages = []
@@ -129,7 +131,7 @@ afterEach(() => {
     renderPane()
 
     expect(
-      screen.getAllByText('This chat was saved by a newer Orca. Update Orca to open it.')
+      screen.getAllByText('This chat was saved by a newer Bastion. Update Bastion to open it.')
     ).toHaveLength(1)
     expect(screen.queryByText('Could not load conversation')).toBeNull()
     expect(screen.queryByText(/keeps trying/)).toBeNull()
@@ -164,7 +166,7 @@ afterEach(() => {
     renderPane()
 
     expect(screen.getByTestId('message-list')).toBeTruthy()
-    expect(screen.getByText("Orca couldn't open this chat's history right now.")).toBeTruthy()
+    expect(screen.getByText("Bastion couldn't open this chat's history right now.")).toBeTruthy()
   })
 }
 

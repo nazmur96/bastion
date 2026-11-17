@@ -210,7 +210,7 @@ export function getHostSetupUnavailableDetail(host: ExecutionHostRegistryEntry):
   if (host.health === 'blocked') {
     return translate(
       'auto.components.settings.RepositoryPane.hostSetupBlockedVersion',
-      'Orca server version is incompatible'
+      'Bastion server version is incompatible'
     )
   }
   if (host.kind !== 'runtime') {
@@ -228,7 +228,7 @@ export function getHostSetupUnavailableDetail(host: ExecutionHostRegistryEntry):
   ) {
     return translate(
       'auto.components.settings.RepositoryPane.hostSetupMissingCapability',
-      'Update Orca on this host to set up projects'
+      'Update Bastion on this host to set up projects'
     )
   }
   return null

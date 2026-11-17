@@ -15,7 +15,7 @@ export const getChatBehaviorEntriesByKey = createLocalizedCatalog(() => ({
     ),
     description: translate(
       'auto.components.settings.ExperimentalPane.nativeChat.resumeCopy',
-      'When Orca quits or installs an update, chats that were working are automatically resumed when Orca is reopened.'
+      'When Bastion quits or installs an update, chats that were working are automatically resumed when Bastion is reopened.'
     ),
     keywords: [
       translate('components.settings.nativeChat.resumeSearchUpdate', 'update'),
@@ -39,7 +39,7 @@ export const getChatBehaviorEntriesByKey = createLocalizedCatalog(() => ({
     title: translate('components.settings.nativeChat.linkPreviewsTitle', 'Link previews'),
     description: translate(
       'components.settings.nativeChat.linkPreviewsCopy',
-      'Hovering a web link shows a preview card. Orca fetches the page to build it, so the site can see the request.'
+      'Hovering a web link shows a preview card. Bastion fetches the page to build it, so the site can see the request.'
     ),
     keywords: [
       translate('components.settings.nativeChat.linkPreviewsSearchUnfurl', 'unfurl'),

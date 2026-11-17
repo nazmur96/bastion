@@ -104,7 +104,7 @@ export async function saveNodeDistMirrorAndRetry(
           ? error.message
           : translate(
               'auto.components.settings.nodeDistMirrorDialog.saveFailed',
-              'Orca couldn’t save the mirror.'
+              'Bastion couldn’t save the mirror.'
             )
     }
   }

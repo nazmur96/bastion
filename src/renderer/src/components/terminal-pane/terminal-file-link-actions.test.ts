@@ -81,7 +81,7 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals())
 
 describe('terminal file link actions', () => {
-  it('offers Orca and system-default actions for a local file', () => {
+  it('offers Bastion and system-default actions for a local file', () => {
     const request = vi.fn()
     expect(
       handleTerminalFileLink('/repo/src/main.ts', 12, 4, plainEvent(), deps, context(request))
@@ -114,10 +114,10 @@ describe('terminal file link actions', () => {
     const [systemFirst, orcaFirst] = request.mock.calls.map(([call]) => call)
     expect([systemFirst.primary.label, systemFirst.alternate.label]).toEqual([
       'System Browser',
-      'Orca Browser'
+      'Bastion Browser'
     ])
     expect([orcaFirst.primary.label, orcaFirst.alternate.label]).toEqual([
-      'Orca Browser',
+      'Bastion Browser',
       'System Browser'
     ])
     systemFirst.primary.run()
@@ -229,7 +229,7 @@ describe('terminal file link actions', () => {
     it('selects a folder link in its parent instead of opening it', async () => {
       const request = vi.fn()
       handleTerminalFileLink(
-        '/repo/build/Orca.app',
+        '/repo/build/Bastion.app',
         null,
         null,
         plainEvent(),
@@ -238,7 +238,7 @@ describe('terminal file link actions', () => {
       )
 
       await revealRow(request).run()
-      expect(shellApi.openInFileManager).toHaveBeenCalledWith('/repo/build/Orca.app', 'local')
+      expect(shellApi.openInFileManager).toHaveBeenCalledWith('/repo/build/Bastion.app', 'local')
       expect(shellApi.openFilePath).not.toHaveBeenCalled()
       expect(fsApi.stat).not.toHaveBeenCalled()
       expect(mocks.openDetectedFilePath).not.toHaveBeenCalled()

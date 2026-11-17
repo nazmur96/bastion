@@ -37,11 +37,11 @@ export function WslDriveUncConversionRow({
       result = await window.api.wslDriveUnc.convert({ distro, repoIds: [repo.id] })
     } catch {
       setStep({ kind: 'idle' })
-      toast.error(translate('wslDriveUnc.failed', 'Orca could not convert this project.'))
+      toast.error(translate('wslDriveUnc.failed', 'Bastion could not convert this project.'))
       return
     }
     if (result.outcome === 'restarting') {
-      toast(translate('wslDriveUnc.restarting', 'Restarting Orca to convert this project…'))
+      toast(translate('wslDriveUnc.restarting', 'Restarting Bastion to convert this project…'))
       return
     }
     setStep({ kind: 'problem', messages: wslDriveUncConversionMessages(result, drivePath) })
@@ -53,7 +53,7 @@ export function WslDriveUncConversionRow({
         alignTop
         description={translate(
           'wslDriveUnc.description',
-          'Orca opens this project through WSL. Open it at {{drivePath}} instead: Git runs on Windows, which is much faster here, and terminals and agents stay in {{distro}}.',
+          'Bastion opens this project through WSL. Open it at {{drivePath}} instead: Git runs on Windows, which is much faster here, and terminals and agents stay in {{distro}}.',
           { drivePath, distro }
         )}
         control={
@@ -81,7 +81,7 @@ export function WslDriveUncConversionRow({
           <p className="text-xs text-muted-foreground">
             {translate(
               'wslDriveUnc.review',
-              'Orca pauses this project’s terminals, restarts, and reopens it at {{drivePath}}. Tabs, terminals with their history, chats and settings come along, and paused terminals pick up where they were.',
+              'Bastion pauses this project’s terminals, restarts, and reopens it at {{drivePath}}. Tabs, terminals with their history, chats and settings come along, and paused terminals pick up where they were.',
               { drivePath }
             )}
           </p>

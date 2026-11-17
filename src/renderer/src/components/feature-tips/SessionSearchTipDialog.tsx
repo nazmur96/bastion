@@ -31,7 +31,7 @@ function stageCopy(
         title: translate('featureTips.sessionSearch.indexingTitle', 'Indexing your agent sessions'),
         description: translate(
           'featureTips.sessionSearch.indexingDescription',
-          'Orca is reading your past agent transcripts so you can search them. This can take a few minutes.'
+          'Bastion is reading your past agent transcripts so you can search them. This can take a few minutes.'
         ),
         cta: translate('featureTips.sessionSearch.continueInBackground', 'Continue in background')
       }

@@ -100,7 +100,7 @@ export function WorkspacePages(): React.JSX.Element | null {
           <p>
             {translate(
               'workspaceDesktop.capabilityScope',
-              'This view uses the existing Orca integrations. The prototype’s connected cloud inventory, shared delivery records and verification timeline are still being built.'
+              'This view uses the existing Bastion integrations. The prototype’s connected cloud inventory, shared delivery records and verification timeline are still being built.'
             )}
           </p>
           <button type="button" className="workspace-button" onClick={showWorkspaceEditor}>

@@ -76,7 +76,7 @@ export function FileCapabilitiesButton({
           <p className="text-muted-foreground">
             {translate(
               'workspaceEnvironments.syntaxScope',
-              'Syntax support does not install project tools. Language-server connections are not available through Orca syntax packs.'
+              'Syntax support does not install project tools. Language-server connections are not available through Bastion syntax packs.'
             )}
           </p>
           <button

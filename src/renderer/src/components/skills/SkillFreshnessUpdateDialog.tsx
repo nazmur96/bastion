@@ -132,11 +132,11 @@ function DialogHeadline({
         {unsupported === 'connect-host'
           ? translate(
               'auto.components.skills.SkillFreshnessUpdateDialog.connectHost',
-              'Connect to this SSH host to check its Orca skills.'
+              'Connect to this SSH host to check its Bastion skills.'
             )
           : translate(
               'auto.components.skills.SkillFreshnessUpdateDialog.updateServer',
-              'Update Orca on the server to update its Orca skills.'
+              'Update Bastion on the server to update its Bastion skills.'
             )}
       </p>
     )

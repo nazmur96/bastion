@@ -59,7 +59,7 @@ export function buildRemoteSettingsSections(
       id: 'servers',
       title: translate(
         'auto.hooks.useSettingsNavigationMetadata.de0c2907a1',
-        'Remote Orca Servers'
+        'Remote Bastion Servers'
       ),
       description: isWebClient
         ? 'Connect this browser to a saved Orca server.'
@@ -151,7 +151,7 @@ export function buildRemoteSettingsSections(
             title: translate('auto.hooks.useSettingsNavigationMetadata.pluginsTitle', 'Plugins'),
             description: translate(
               'auto.hooks.useSettingsNavigationMetadata.pluginsDescription',
-              'Install and manage Orca plugins (Alpha).'
+              'Install and manage Bastion plugins (Alpha).'
             ),
             icon: Blocks,
             searchEntries: getPluginsPaneSearchEntries(),

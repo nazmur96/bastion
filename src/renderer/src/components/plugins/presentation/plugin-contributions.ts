@@ -165,7 +165,7 @@ function languageDetail(coverage: number | undefined): Pick<PluginContribution, 
     return {
       detail: translate(
         'auto.components.settings.pluginContributions.languageIncomplete',
-        '{{value0}}% translated, too incomplete to use as Orca’s language',
+        '{{value0}}% translated, too incomplete to use as Bastion’s language',
         { value0: coverage }
       ),
       tone: 'warning'

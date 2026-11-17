@@ -35,7 +35,7 @@ export function RemoteServerUpdateStatusSegment({
         ),
         tooltip: translate(
           'auto.components.status.bar.RemoteServerUpdateStatusSegment.updatingTooltip',
-          'Remote Orca Server updates are in progress'
+          'Remote Bastion Server updates are in progress'
         )
       }
     : failed > 0
@@ -48,7 +48,7 @@ export function RemoteServerUpdateStatusSegment({
           ),
           tooltip: translate(
             'auto.components.status.bar.RemoteServerUpdateStatusSegment.failedTooltip',
-            'Open Remote Orca Server updates to review and retry'
+            'Open Remote Bastion Server updates to review and retry'
           )
         }
       : {
@@ -60,7 +60,7 @@ export function RemoteServerUpdateStatusSegment({
           ),
           tooltip: translate(
             'auto.components.status.bar.RemoteServerUpdateStatusSegment.updatedTooltip',
-            'Remote Orca Server updates completed'
+            'Remote Bastion Server updates completed'
           )
         }
 

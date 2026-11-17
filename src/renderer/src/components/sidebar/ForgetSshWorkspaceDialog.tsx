@@ -141,7 +141,7 @@ export function ForgetSshWorkspaceDialog(): React.JSX.Element | null {
             <ServerOff className="size-4 text-muted-foreground" />
             {translate(
               'auto.components.sidebar.ForgetSshWorkspaceDialog.removeTitle',
-              'Remove “{{name}}” from Orca?',
+              'Remove “{{name}}” from Bastion?',
               { name: displayName }
             )}
           </DialogTitle>
@@ -149,12 +149,12 @@ export function ForgetSshWorkspaceDialog(): React.JSX.Element | null {
             {resolution.kind === 'saved'
               ? translate(
                   'auto.components.sidebar.ForgetSshWorkspaceDialog.savedHostBody',
-                  'This workspace’s project isn’t served by Orca’s server on {{host}}, so Orca can’t delete it there. You can remove it from Orca; files, the Git worktree, and branches on {{host}} are left untouched.',
+                  'This workspace’s project isn’t served by Bastion’s server on {{host}}, so Bastion can’t delete it there. You can remove it from Bastion; files, the Git worktree, and branches on {{host}} are left untouched.',
                   { host: hostLabel }
                 )
               : translate(
                   'auto.components.sidebar.ForgetSshWorkspaceDialog.ghostBody',
-                  '{{host}} is no longer a saved SSH host, so this workspace is no longer connected to a live host. It can only be removed from Orca — files and branches on the remote are left untouched.',
+                  '{{host}} is no longer a saved SSH host, so this workspace is no longer connected to a live host. It can only be removed from Bastion — files and branches on the remote are left untouched.',
                   { host: hostLabel }
                 )}
           </DialogDescription>
@@ -175,7 +175,7 @@ export function ForgetSshWorkspaceDialog(): React.JSX.Element | null {
             {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
             {translate(
               'auto.components.sidebar.ForgetSshWorkspaceDialog.forget',
-              'Remove from Orca'
+              'Remove from Bastion'
             )}
           </Button>
         </DialogFooter>

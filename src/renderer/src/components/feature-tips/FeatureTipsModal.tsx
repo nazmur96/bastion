@@ -228,7 +228,7 @@ export default function FeatureTipsModal(): JSX.Element | null {
           toast.warning(
             translate(
               'auto.components.feature.tips.FeatureTipsModal.1da82af45b',
-              'Orca CLI needs attention'
+              'Bastion CLI needs attention'
             ),
             {
               description:
@@ -247,7 +247,7 @@ export default function FeatureTipsModal(): JSX.Element | null {
               ? error.message
               : translate(
                   'auto.components.feature.tips.FeatureTipsModal.cliInstallFailed',
-                  'Failed to install Orca CLI.'
+                  'Failed to install Bastion CLI.'
                 )
           if (
             import.meta.env.DEV &&

@@ -131,11 +131,11 @@ export function AddRepoHostSelector({
                           {onAddWslHost
                             ? translate(
                                 'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetailWithWsl',
-                                'SSH host, Orca server, or WSL distro'
+                                'SSH host, Bastion server, or WSL distro'
                               )
                             : translate(
                                 'auto.components.sidebar.AddRepoHostSelector.addRemoteHostDetail',
-                                'SSH host or Orca server'
+                                'SSH host or Bastion server'
                               )}
                         </span>
                       </span>
@@ -186,7 +186,7 @@ export function AddRepoHostSelector({
                         <span className="mt-0.5 text-[11px] text-muted-foreground">
                           {translate(
                             'auto.components.sidebar.AddRepoHostSelector.addRemoteServerDetail',
-                            'Pair with Orca running on another computer.'
+                            'Pair with Bastion running on another computer.'
                           )}
                         </span>
                       </button>
@@ -215,7 +215,7 @@ export function AddRepoHostSelector({
                         <span className="mt-0.5 text-[11px] text-muted-foreground">
                           {translate(
                             'auto.components.sidebar.AddRepoHostSelector.addWslHostDetail',
-                            'Run an Orca server inside a WSL 2 distro. Experimental.'
+                            'Run a Bastion server inside a WSL 2 distro. Experimental.'
                           )}
                         </span>
                       </button>

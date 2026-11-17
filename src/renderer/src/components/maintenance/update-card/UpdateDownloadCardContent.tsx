@@ -79,9 +79,13 @@ export function UpdateDownloadingContent({
       <p className="text-sm text-muted-foreground">
         {release
           ? release.description
-          : translate('auto.components.UpdateCard.93794ea932', 'Orca v{{value0}} is downloading.', {
-              value0: version
-            })}
+          : translate(
+              'auto.components.UpdateCard.93794ea932',
+              'Bastion v{{value0}} is downloading.',
+              {
+                value0: version
+              }
+            )}
       </p>
       {showReleaseNotes && (
         <button
@@ -143,7 +147,7 @@ export function UpdateReadyToInstallContent({
       <p className="text-sm text-muted-foreground">
         {translate(
           'auto.components.UpdateCard.6714206e5a',
-          "Orca v{{value0}} is downloaded. Restart when you're ready.",
+          "Bastion v{{value0}} is downloaded. Restart when you're ready.",
           { value0: version }
         )}
       </p>

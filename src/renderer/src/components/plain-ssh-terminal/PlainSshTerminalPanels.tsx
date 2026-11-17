@@ -16,7 +16,7 @@ import { PlainSshTerminalView, type PlainSshTerminalPhase } from './PlainSshTerm
 export function plainSshUnmanagedNotice(): string {
   return translate(
     'auto.components.plainSshTerminal.unmanaged',
-    'Plain SSH — unmanaged. Not an Orca workspace: agents and tabs here aren’t tracked, and this terminal isn’t restored. Closing it ends the SSH session.'
+    'Plain SSH — unmanaged. Not a Bastion workspace: agents and tabs here aren’t tracked, and this terminal isn’t restored. Closing it ends the SSH session.'
   )
 }
 

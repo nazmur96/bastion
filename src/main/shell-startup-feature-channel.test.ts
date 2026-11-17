@@ -179,7 +179,7 @@ describePosix('zsh launch config', () => {
   })
 
   it('does not treat another terminal’s hijacked ZDOTDIR as the user config dir', async () => {
-    // Other terminals may own ZDOTDIR; reject only positively identified Orca or empty directories.
+    // Other terminals may own ZDOTDIR; reject only positively identified Bastion or empty directories.
     const home = mkdtempSync(join(tmpdir(), 'orca-stacked-zdotdir-'))
     const foreignWrapper = join(home, 'other-terminal', 'zsh')
     mkdirSync(foreignWrapper, { recursive: true })
@@ -193,7 +193,7 @@ describePosix('zsh launch config', () => {
       // An absent original ZDOTDIR must stay absent, rather than becoming HOME.
       expect(getShellLaunchConfig('/bin/zsh', ['history']).env.ORCA_ORIG_ZDOTDIR).toBeUndefined()
 
-      // The marker identifies ownership even without an Orca-shaped path.
+      // The marker identifies ownership even without a Bastion-shaped path.
       writeFileSync(join(foreignWrapper, '.zshrc'), '')
       writeFileSync(join(foreignWrapper, ZSH_WRAPPER_DIR_MARKER_FILE), '')
       const stamped = await importFreshLocalPtyShellReady()

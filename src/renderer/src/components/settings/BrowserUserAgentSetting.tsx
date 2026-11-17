@@ -76,7 +76,7 @@ export function BrowserUserAgentSetting({
       <span className="text-xs text-muted-foreground">
         {translate(
           'settings.browser.userAgent.remoteUnsupported',
-          'Manage browser identity on the remote host with the Orca CLI.'
+          'Manage browser identity on the remote host with the Bastion CLI.'
         )}
       </span>
     )
@@ -119,7 +119,7 @@ export function BrowserUserAgentSetting({
               label: translate('settings.browser.userAgent.optionClean', 'Cleaned'),
               tooltip: translate(
                 'settings.browser.userAgent.optionCleanTooltip',
-                'Removes Orca and Electron tokens to match imported Chrome sessions.'
+                'Removes Bastion and Electron tokens to match imported Chrome sessions.'
               )
             },
             {

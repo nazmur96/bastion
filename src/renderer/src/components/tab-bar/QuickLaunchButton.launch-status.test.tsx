@@ -346,7 +346,7 @@ it.each(['chat', 'cli'] as const)(
       if (outcome === 'unconfirmed') {
         expect(toastError).toHaveBeenCalledWith(expect.stringContaining("Couldn't send to"), {
           description: expect.stringContaining(
-            "Orca couldn't confirm your message reached the agent"
+            "Bastion couldn't confirm your message reached the agent"
           )
         })
       }
@@ -615,7 +615,9 @@ describe('QuickLaunchAgentMenuItems launches', () => {
 
     await vi.waitFor(() => expect(toastError).toHaveBeenCalledOnce())
     expect(toastError).toHaveBeenCalledWith(expect.stringContaining("Couldn't send to"), {
-      description: expect.stringContaining("Orca couldn't confirm your message reached the agent")
+      description: expect.stringContaining(
+        "Bastion couldn't confirm your message reached the agent"
+      )
     })
   })
 

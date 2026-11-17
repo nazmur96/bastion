@@ -69,7 +69,7 @@ function promptDescription(request: BrowserExtensionInstallPromptRequest): strin
         'It runs in tabs that use the {{profile}} profile.',
         { profile: request.profileLabel }
       )
-    : translate('browserExtensions.install.description', 'It runs in Orca browser tabs.')
+    : translate('browserExtensions.install.description', 'It runs in Bastion browser tabs.')
 }
 
 /** Orca's confirmation for store installs and store-page removals; main waits on the answer. */

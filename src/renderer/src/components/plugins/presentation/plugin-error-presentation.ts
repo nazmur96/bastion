@@ -21,7 +21,7 @@ export function pluginInstallErrorMessage(cause: unknown): string {
   if (detail.includes('requires orca')) {
     return translate(
       'auto.components.settings.pluginError.incompatible',
-      'This plugin requires a different Orca version.'
+      'This plugin requires a different Bastion version.'
     )
   }
   if (/(symlink|outside|absolute|path traversal|drive prefix)/.test(detail)) {
@@ -33,7 +33,7 @@ export function pluginInstallErrorMessage(cause: unknown): string {
   if (/(exceeds|too many)/.test(detail)) {
     return translate(
       'auto.components.settings.pluginError.installLimit',
-      "The plugin exceeds Orca's install size or file-count limits."
+      "The plugin exceeds Bastion's install size or file-count limits."
     )
   }
   if (/(git|repository|fetch|clone|checkout|remote)/.test(detail)) {
@@ -55,7 +55,7 @@ export function invalidPluginErrorMessage(detailValue: string, installed = false
   if (installed && !detail.includes('requires orca')) {
     return translate(
       'auto.components.settings.pluginError.installedManifestUnloadable',
-      "This version can't load in this Orca. Update or reinstall it."
+      "This version can't load in this Bastion. Update or reinstall it."
     )
   }
   if (detail.includes('missing orca-plugin.json')) {
@@ -79,7 +79,7 @@ export function invalidPluginErrorMessage(detailValue: string, installed = false
   if (detail.includes('requires orca')) {
     return translate(
       'auto.components.settings.pluginError.incompatible',
-      'This plugin requires a different Orca version.'
+      'This plugin requires a different Bastion version.'
     )
   }
   return translate(

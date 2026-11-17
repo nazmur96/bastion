@@ -39,9 +39,9 @@ describe('a restored WSL bridge pane held for its distro (E9)', () => {
   })
 
   // The read gave no answer, so the card must not claim the distro stopped.
-  it("says Orca couldn't check when the read could not tell, and still offers Start", async () => {
+  it("says Bastion couldn't check when the read could not tell, and still offers Start", async () => {
     const release = holdPane('unverifiable')
-    expect(screen.getByText("Orca couldn't check whether Ubuntu is running")).toBeInTheDocument()
+    expect(screen.getByText("Bastion couldn't check whether Ubuntu is running")).toBeInTheDocument()
     expect(screen.queryByText('Ubuntu is stopped')).not.toBeInTheDocument()
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Start' }))

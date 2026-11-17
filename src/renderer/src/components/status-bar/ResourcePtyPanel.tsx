@@ -55,7 +55,7 @@ export function ResourcePtyPanel({
             ? translate('resourceManager.pty.thisComputer', 'This computer')
             : translate(
                 'resourceManager.pty.localOwnedCount',
-                '{{count}} Orca PTYs on this computer',
+                '{{count}} Bastion PTYs on this computer',
                 {
                   count: sessions.length,
                   defaultValue_one: '{{count}} Orca PTY on this computer'
@@ -102,7 +102,7 @@ export function ResourcePtyPanel({
         )}
         {inventory.observedAt !== null && sessions.length === 0 && (
           <p className="p-3 text-xs text-muted-foreground">
-            {translate('resourceManager.pty.noLocalOrcaPtys', 'No local Orca PTYs')}
+            {translate('resourceManager.pty.noLocalOrcaPtys', 'No local Bastion PTYs')}
           </p>
         )}
         <ResourcePtyList
