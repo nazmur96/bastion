@@ -9,12 +9,14 @@ import {
 import type { CloudWorkspaceProvider } from '../cloud/cloud-workspace-provider'
 import { readDeliveryChain } from './delivery-chain'
 import { PromoteError, promoteDigest } from './delivery-promote'
+import { FlociFailure } from '../../../shared/fork-cloud/floci-contract'
 import { deliverySources } from './delivery-sources'
 
 const MESSAGES: Record<string, string> = {
   invalid: 'Invalid delivery request.',
   workspace: 'Delivery requires a project workspace.',
-  owner: 'Delivery evidence runs on this computer only for now. Remote (SSH) projects are planned.',
+  owner:
+    "Promotion edits source on this computer only. For a remote (SSH) project, make the one-line digest edit in the editor and commit it; the evidence itself is read on the project's owner.",
   blocked:
     'This revision is not promotable: its CI run, published artifact and registry label must all be verified first.',
   changed: 'The deployment config changed since you reviewed it. Refresh the evidence first.',
@@ -86,9 +88,11 @@ export function registerDeliveryHandlers(
         const code =
           error instanceof PromoteError
             ? error.code
-            : error instanceof Error && error.message in MESSAGES
-              ? error.message
-              : 'failed'
+            : error instanceof FlociFailure
+              ? 'owner'
+              : error instanceof Error && error.message in MESSAGES
+                ? error.message
+                : 'failed'
         return { ok: false, code, message: MESSAGES[code] }
       }
     })

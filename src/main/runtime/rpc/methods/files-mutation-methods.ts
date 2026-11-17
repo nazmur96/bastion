@@ -1,5 +1,6 @@
 import { defineMethod } from '../core'
 import { OwnerRunExecute, OwnerRunGet } from '../../../../shared/fork-changes/owner-run-contract'
+import { CloudOperationCall } from '../../../../shared/fork-cloud/cloud-operation-contract'
 import { FILE_REPLACE_WITH_UPLOAD_METHOD } from '../../../../shared/file-bytes-write'
 import {
   FileCommitUpload,
@@ -43,6 +44,13 @@ export const FILE_MUTATION_METHODS = [
     permission: 'workspace',
     params: OwnerRunExecute,
     handler: (params, { runtime }) => runtime.ownedChanges.execute(params)
+  }),
+  defineMethod({
+    // Fork: stateless cloud operations on the project's owner (see cloud-operation-contract).
+    name: 'cloud.operation',
+    permission: 'workspace',
+    params: CloudOperationCall,
+    handler: (params, { runtime }) => runtime.ownedCloud.run(params)
   }),
   defineMethod({
     name: 'changes.get',

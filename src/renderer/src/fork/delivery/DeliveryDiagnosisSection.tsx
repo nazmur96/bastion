@@ -5,6 +5,7 @@ import { getIntlLocale } from '@/i18n/i18n'
 import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import type { DeliveryConfig } from '../../../../shared/fork-delivery/delivery-contract'
 import type { WorkloadDiagnosis } from '../../../../shared/fork-delivery/operations-contract'
+import { ownerOperation } from './operations-owner-client'
 
 const short = (value: string | null) =>
   value ? (value.startsWith('sha256:') ? `${value.slice(0, 19)}…` : value.slice(0, 12)) : 'unknown'
@@ -28,7 +29,13 @@ export function DeliveryDiagnosisSection({
     setBusy(true)
     setError(null)
     try {
-      const result = await window.api.cloudTargets?.operations?.diagnose({ ...config, logs })
+      const request = { ...config, logs }
+      const result = await ownerOperation(
+        config.projectId,
+        logs ? 'operations.logs' : 'operations.diagnose',
+        request,
+        async () => window.api.cloudTargets?.operations?.diagnose(request)
+      )
       if (result?.ok) {
         onDiagnosis(result.diagnosis)
       } else {

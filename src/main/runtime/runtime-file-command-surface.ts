@@ -37,6 +37,7 @@ type RuntimeFileCommandName =
   | 'statRuntimeFile'
   | 'stagedFileSaves'
   | 'ownedChanges'
+  | 'ownedCloud'
 
 export type RuntimeFileCommandSurface = Pick<RuntimeFileCommands, RuntimeFileCommandName>
 
@@ -80,6 +81,7 @@ export function installRuntimeFileCommandSurface(
     pathsExistRuntimeFiles: commands.pathsExistRuntimeFiles.bind(commands),
     statRuntimeFile: commands.statRuntimeFile.bind(commands),
     stagedFileSaves: commands.stagedFileSaves,
-    ownedChanges: commands.ownedChanges
+    ownedChanges: commands.ownedChanges,
+    ownedCloud: commands.ownedCloud
   } satisfies RuntimeFileCommandSurface)
 }

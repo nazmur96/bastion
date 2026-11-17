@@ -13,6 +13,7 @@ import type { CloudWorkspaceProvider } from '../cloud/cloud-workspace-provider'
 import { deliverySources } from './delivery-sources'
 import { runJourneyCheck, verificationStore } from './journey-check'
 import { RunbookError, createRunbook, listRunbooks } from './runbook-files'
+import { FlociFailure } from '../../../shared/fork-cloud/floci-contract'
 import { readWorkloadDiagnosis } from './workload-diagnosis'
 
 const MESSAGES: Record<string, string> = {
@@ -20,6 +21,8 @@ const MESSAGES: Record<string, string> = {
   workspace: 'Operations require a project workspace.',
   exists: 'A runbook with that name already exists. Nothing was changed.',
   'unsafe-path': 'The runbooks directory is a symlink or not a directory. Nothing was changed.',
+  owner:
+    "Runbooks are created on this computer only. For a remote (SSH) project, add the file under runbooks/ in the editor and commit it; diagnosis and checks run on the project's owner.",
   failed: 'The operation failed.'
 }
 const projectSchema = z.object({ projectId: z.string().min(1).max(4096) }).strict()
@@ -110,9 +113,11 @@ export function registerOperationsHandlers(
         const code =
           error instanceof RunbookError
             ? error.code
-            : error instanceof Error && error.message in MESSAGES
-              ? error.message
-              : 'failed'
+            : error instanceof FlociFailure
+              ? 'owner'
+              : error instanceof Error && error.message in MESSAGES
+                ? error.message
+                : 'failed'
         return { ok: false, code, message: MESSAGES[code] }
       }
     })

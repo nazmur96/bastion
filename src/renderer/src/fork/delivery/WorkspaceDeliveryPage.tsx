@@ -12,6 +12,7 @@ import {
 import type { WorkloadDiagnosis } from '../../../../shared/fork-delivery/operations-contract'
 import { DeliveryDiagnosisSection } from './DeliveryDiagnosisSection'
 import { DeliveryVerificationSection } from './DeliveryVerificationSection'
+import { ownerOperation } from './operations-owner-client'
 
 const LABELS: Record<string, string> = {
   revision: 'Source revision',
@@ -83,7 +84,10 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
       // Remembering the settings is a convenience only.
     }
     try {
-      const result = await window.api.cloudTargets?.delivery?.chain(parsed.data)
+      const config = parsed.data
+      const result = await ownerOperation(worktreeId, 'delivery.evidence', config, async () =>
+        window.api.cloudTargets?.delivery?.chain(config)
+      )
       if (result?.ok) {
         setChain(result.chain)
       } else {

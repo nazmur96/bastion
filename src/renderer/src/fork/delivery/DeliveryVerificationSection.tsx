@@ -12,6 +12,7 @@ import {
   type WorkloadDiagnosis
 } from '../../../../shared/fork-delivery/operations-contract'
 import { runbookDraft, runbookName } from '../../../../shared/fork-delivery/runbook-draft'
+import { ownerOperation } from './operations-owner-client'
 
 const input = 'rounded-md border border-input bg-background px-2 py-1 font-mono text-sm'
 type CheckForm = { service: string; port: string; path: string; expect: string }
@@ -43,7 +44,9 @@ export function DeliveryVerificationSection({
   const api = window.api.cloudTargets?.operations
   const refresh = useCallback(async () => {
     const [history, list] = await Promise.all([
-      api?.runs({ projectId }),
+      ownerOperation(projectId, 'operations.runs', { projectId }, async () =>
+        api?.runs({ projectId })
+      ),
       api?.runbooks({ projectId })
     ])
     if (history?.ok) {
@@ -64,12 +67,15 @@ export function DeliveryVerificationSection({
     setBusy(true)
     setMessage(null)
     try {
-      const result = await api?.verify({
+      const request = {
         ...config,
         check: parsedCheck.data,
         kind,
         runbook: kind === 'drill' ? drillRunbook || null : null
-      })
+      }
+      const result = await ownerOperation(projectId, 'operations.verify', request, async () =>
+        api?.verify(request)
+      )
       setMessage(result?.ok ? null : (result?.message ?? 'Checks are unavailable in this client.'))
       await refresh()
     } finally {
