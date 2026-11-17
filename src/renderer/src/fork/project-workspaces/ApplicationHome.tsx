@@ -5,9 +5,10 @@ import logo from '../../../../../resources/icon-source/bastion.svg'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getIntlLocale, translate } from '@/i18n/i18n'
-import type {
-  ProjectWorkspace,
-  ProjectWorkspacesApi
+import {
+  isListedWorkspace,
+  type ProjectWorkspace,
+  type ProjectWorkspacesApi
 } from '../../../../shared/fork-project-workspaces'
 import { useProjectWorkspaces } from './use-project-workspaces'
 import { IncognitoTools } from './IncognitoTools'
@@ -58,7 +59,7 @@ export function ApplicationHome(): React.JSX.Element {
   const [opening, setOpening] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const workspaces = snapshot?.workspaces ?? []
+  const workspaces = (snapshot?.workspaces ?? []).filter(isListedWorkspace)
 
   async function perform(
     action: (workspacesApi: ProjectWorkspacesApi, activeId: string) => Promise<void>

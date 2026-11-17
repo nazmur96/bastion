@@ -89,7 +89,7 @@ export function DeliveryDiagnosisSection({
                 {rollout.status}
               </Badge>{' '}
               Rollout {rollout.name}: {rollout.updated}/{rollout.desired} updated,{' '}
-              {rollout.available} available, {rollout.total} pods
+              {rollout.available} available, {rollout.total} {rollout.total === 1 ? 'pod' : 'pods'}
               {rollout.total > rollout.desired ? ' (old pods still serving)' : ''}
             </p>
           ))}

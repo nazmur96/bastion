@@ -11,7 +11,10 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { translate } from '@/i18n/i18n'
-import { PROJECT_WORKSPACE_HOME_ID } from '../../../../shared/fork-project-workspaces'
+import {
+  PROJECT_WORKSPACE_HOME_ID,
+  isListedWorkspace
+} from '../../../../shared/fork-project-workspaces'
 import { useProjectWorkspaces } from './use-project-workspaces'
 
 const NO_DRAG: React.CSSProperties & { WebkitAppRegion: 'no-drag' } = { WebkitAppRegion: 'no-drag' }
@@ -28,7 +31,9 @@ export function ProjectWorkspacePicker(): React.JSX.Element | null {
   const active =
     snapshot.activeTask?.workspace ??
     snapshot.workspaces.find((workspace) => workspace.id === snapshot.activeId)
-  const others = snapshot.workspaces.filter((workspace) => workspace.id !== snapshot.activeId)
+  const others = snapshot.workspaces.filter(
+    (workspace) => workspace.id !== snapshot.activeId && isListedWorkspace(workspace)
+  )
 
   function go(toId: string): void {
     if (busy || !api || !snapshot) {

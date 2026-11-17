@@ -25,6 +25,18 @@ export type ProjectWorkspace = {
   openedAt: number | null
 }
 
+/**
+ * The built-in workspace for upstream projects is listed only when it holds something: a fresh
+ * install records it as empty, and an empty one that was never opened is left out.
+ */
+export function isListedWorkspace(workspace: ProjectWorkspace): boolean {
+  return !(
+    workspace.kind === 'existing' &&
+    workspace.repoCount === 0 &&
+    workspace.openedAt === null
+  )
+}
+
 export type ProjectWorkspaceList = {
   // PROJECT_WORKSPACE_HOME_ID while application home is open.
   activeId: string

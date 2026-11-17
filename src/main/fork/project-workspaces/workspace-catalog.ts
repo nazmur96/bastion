@@ -61,6 +61,12 @@ function decodeWorkspace(row: Record<string, unknown> | undefined): ProjectWorks
   }
 }
 
+function hasUpstreamProfile(baseRoot: string): boolean {
+  return ['orca-data.json', 'orca-profile-index.json'].some((name) =>
+    existsSync(join(baseRoot, name))
+  )
+}
+
 function createFirstVersion(db: Database.Database): void {
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all()
   if (tables.length > 0) {
@@ -133,6 +139,12 @@ export class WorkspaceCatalog {
         }
         if (lockedVersion !== SCHEMA_VERSION) {
           upgradeIncognitoCatalog(this.db)
+        }
+        if (lockedVersion === 0 && !hasUpstreamProfile(baseRoot)) {
+          // A fresh install has no upstream projects; record that so Home can leave the card out.
+          this.db
+            .prepare("INSERT INTO summary (workspaceId, repoCount) VALUES ('existing', 0)")
+            .run()
         }
         this.list()
         this.selected()

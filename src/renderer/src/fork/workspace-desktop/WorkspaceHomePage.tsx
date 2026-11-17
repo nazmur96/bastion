@@ -49,7 +49,10 @@ export function WorkspaceHomePage(): React.JSX.Element {
       <div className="workspace-summary-strip">
         <strong>{name}</strong>
         <span>
-          {repos.length} {translate('workspaceDesktop.repositories', 'repositories')}
+          {repos.length}{' '}
+          {repos.length === 1
+            ? translate('workspaceDesktop.repository', 'repository')
+            : translate('workspaceDesktop.repositories', 'repositories')}
         </span>
         <span>
           {agentCount} {translate('workspaceDesktop.agentSessions', 'agent sessions')}

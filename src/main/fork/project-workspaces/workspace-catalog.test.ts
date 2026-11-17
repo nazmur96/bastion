@@ -8,6 +8,7 @@ import { configureProjectWorkspace, projectWorkspaceRelaunchArgs } from './works
 import { resolveProjectWorkspaceCliRoot } from '../../../cli/runtime/project-workspace-root'
 import { projectWorkspaceToolEnvironment } from './workspace-tool-environment'
 import { isOwnedWorkspaceHistoryPath } from './workspace-history-policy'
+import { isListedWorkspace } from '../../../shared/fork-project-workspaces'
 
 const roots: string[] = []
 function temporary(): string {
@@ -22,6 +23,27 @@ afterEach(() => {
 })
 
 describe('project workspace namespace', () => {
+  it('leaves the empty built-in workspace off a fresh install, but keeps it for upgraded profiles', () => {
+    const fresh = new WorkspaceCatalog(temporary())
+    const upgradedRoot = temporary()
+    writeFileSync(join(upgradedRoot, 'orca-profile-index.json'), '{}')
+    const upgraded = new WorkspaceCatalog(upgradedRoot)
+    try {
+      const existing = (catalog: WorkspaceCatalog) =>
+        catalog.list().find((workspace) => workspace.kind === 'existing')
+      expect(existing(fresh)).toMatchObject({ repoCount: 0, openedAt: null })
+      expect(isListedWorkspace(existing(fresh)!)).toBe(false)
+      expect(existing(upgraded)).toMatchObject({ repoCount: null })
+      expect(isListedWorkspace(existing(upgraded)!)).toBe(true)
+      // Opening it once lists it again, whatever it holds.
+      fresh.markOpened('existing')
+      expect(isListedWorkspace(existing(fresh)!)).toBe(true)
+    } finally {
+      fresh.close()
+      upgraded.close()
+    }
+  })
+
   it('preserves existing data and persists independent records across catalog writers', () => {
     const root = temporary()
     writeFileSync(join(root, 'legacy-marker'), 'unchanged')

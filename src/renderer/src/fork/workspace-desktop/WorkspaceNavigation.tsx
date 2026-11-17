@@ -26,7 +26,9 @@ export function WorkspaceNavigation(): React.JSX.Element {
           <ProjectWorkspacePicker />
           <p>
             {translate('workspaceDesktop.desktop', 'Project desktop')} · {repos.length}{' '}
-            {translate('workspaceDesktop.repositories', 'repositories')}
+            {repos.length === 1
+              ? translate('workspaceDesktop.repository', 'repository')
+              : translate('workspaceDesktop.repositories', 'repositories')}
           </p>
         </div>
       </div>
@@ -107,7 +109,7 @@ export function WorkspaceNavigation(): React.JSX.Element {
             onClick={() => useAppStore.getState().openMobilePage()}
           >
             <Smartphone className="size-4" aria-hidden />
-            {translate('workspaceDesktop.mobile', 'Orca Mobile')}
+            {translate('workspaceDesktop.mobile', 'Bastion Mobile')}
           </button>
           <button
             type="button"

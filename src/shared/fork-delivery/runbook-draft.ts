@@ -37,7 +37,7 @@ export function runbookDraft(input: {
     '',
     ...diagnosis.rollouts.map(
       (rollout) =>
-        `- Rollout ${rollout.name}: ${rollout.status}, ${rollout.updated}/${rollout.desired} updated, ${rollout.available} available, ${rollout.total} pods`
+        `- Rollout ${rollout.name}: ${rollout.status}, ${rollout.updated}/${rollout.desired} updated, ${rollout.available} available, ${rollout.total} ${rollout.total === 1 ? 'pod' : 'pods'}`
     ),
     ...failing.map(
       (item) =>
