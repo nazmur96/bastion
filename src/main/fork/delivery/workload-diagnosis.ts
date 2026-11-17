@@ -237,7 +237,8 @@ export async function readWorkloadDiagnosis(
   }
   if (request.logs) {
     const failing = diagnosis.containers
-      .filter((container) => !container.ready || container.restarts > 0)
+      // A ready container that restarted earlier (for example after a node reboot) has recovered.
+      .filter((container) => !container.ready)
       .slice(0, MAX_LOG_CONTAINERS)
     for (const container of failing) {
       for (const previous of container.restarts > 0 ? [false, true] : [false]) {

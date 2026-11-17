@@ -74,6 +74,9 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
     }
     setBusy(true)
     setError(null)
+    // A result for another revision must not stay on screen, or stay promotable, while reading.
+    setChain(null)
+    setPromoted(null)
     try {
       localStorage.setItem(storageKey(worktreeId), JSON.stringify(values))
     } catch {

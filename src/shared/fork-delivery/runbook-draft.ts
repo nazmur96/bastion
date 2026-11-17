@@ -26,7 +26,7 @@ export function runbookDraft(input: {
   runs: VerificationRun[]
 }): string {
   const { diagnosis } = input
-  const failing = diagnosis.containers.filter((item) => !item.ready || item.restarts > 0)
+  const failing = diagnosis.containers.filter((item) => !item.ready)
   const lines = [
     `# ${input.title}`,
     '',

@@ -31,6 +31,14 @@
             # CLIs the DevOps Toolbelt runs (e.g. floci) link against zlib
             zlib
 
+            # Host CLIs the app shells out to are linked against the host glibc; inside this
+            # FHS env /lib is this flake's glibc, and a version mismatch makes them fail to
+            # load ("symbol lookup error ... GLIBC_PRIVATE"). Ship copies built against the
+            # same glibc and put them first on PATH (see profile below). Config and auth stay
+            # the user's own (~/.config/gh, the Docker socket).
+            docker-client
+            gh
+
             # Electron runtime
             glib
             nss
@@ -69,6 +77,7 @@
           export COREPACK_HOME="$HOME/.cache/orca-dev/corepack"
           mkdir -p "$HOME/.cache/orca-dev/bin"
           corepack enable --install-directory "$HOME/.cache/orca-dev/bin" >/dev/null
+          for tool in docker gh; do ln -sf "/usr/bin/$tool" "$HOME/.cache/orca-dev/bin/$tool"; done
           export PATH="$HOME/.cache/orca-dev/bin:$PATH"
           export npm_config_store_dir="$HOME/.cache/orca-dev/pnpm-store"
         '';

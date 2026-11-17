@@ -123,6 +123,19 @@ describe('workload diagnosis', () => {
     expect(diagnosis.logs[1].text).not.toContain('abcdefghijklmnop')
     expect(diagnosis.logs[1].redactions).toBe(1)
   })
+  it('does not read logs of a ready container that restarted earlier and recovered', async () => {
+    const recovered = container('old', GOOD, false)
+    recovered.status.containerStatuses[0].restartCount = 1
+    const pods = OUTPUTS.pods
+    OUTPUTS.pods = { items: [recovered] }
+    try {
+      const diagnosis = await readWorkloadDiagnosis({ ...request, logs: true }, deps().value)
+      expect(diagnosis.containers[0]).toMatchObject({ ready: true, restarts: 1 })
+      expect(diagnosis.logs).toEqual([])
+    } finally {
+      OUTPUTS.pods = pods
+    }
+  })
   it('keeps an unreadable source unknown instead of empty', async () => {
     const denied = deps({ kubectl: async () => ({ ok: false, code: 'denied', out: '' }) })
     const diagnosis = await readWorkloadDiagnosis(request, denied.value)

@@ -20,6 +20,16 @@ import { checkFlociInspection } from './floci-inspection'
 import { ownerEngineRunner, privateFlociDirectory } from './floci-paths'
 import { flociHealthy } from './floci-health'
 
+/** A non-Floci error is shown as engine-unavailable; keep its real cause in the main log. */
+function logUnexpected(operation: string, error: unknown): void {
+  if (!(error instanceof FlociFailure)) {
+    console.warn(
+      `[bastion-floci] ${operation} failed:`,
+      error instanceof Error ? error.message : error
+    )
+  }
+}
+
 export class FlociController {
   private jobs = new Map<string, Promise<void>>()
   private closed = false
@@ -135,6 +145,7 @@ export class FlociController {
     } catch (error) {
       instance.state = 'unknown'
       instance.code = error instanceof FlociFailure ? error.code : 'engine-unavailable'
+      logUnexpected('refresh', error)
     }
     if (this.closed) {
       throw new FlociFailure('interrupted')
@@ -254,6 +265,7 @@ export class FlociController {
     } catch (error) {
       receipt.status = 'failed'
       receipt.code = error instanceof FlociFailure ? error.code : 'engine-unavailable'
+      logUnexpected(receipt.operation, error)
       instance.code = receipt.code
       instance.state = 'unknown'
     }

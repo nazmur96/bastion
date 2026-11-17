@@ -129,6 +129,11 @@ export function engineRunner(connection: EngineConnection): EngineRunner {
 export async function engineCall(run: EngineRunner, args: string[]): Promise<string> {
   const out = await run(args)
   if (out.code !== 0 || out.timedOut || out.outputTruncated) {
+    // The UI shows a fixed message; the engine's own reason goes to the main log.
+    console.warn(
+      `[bastion-floci] ${args.slice(0, 2).join(' ')} failed`,
+      out.timedOut ? '(timed out)' : out.stderr.trim().split('\n').at(-1)?.slice(0, 300)
+    )
     throw new FlociFailure(classifyEngineFailure(out.stderr).code)
   }
   return out.stdout.trim()
