@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { getIntlLocale, translate } from '@/i18n/i18n'
 import {
+  createdWorkspace,
   isListedWorkspace,
   type ProjectWorkspace,
   type ProjectWorkspacesApi
@@ -104,11 +105,11 @@ export function ApplicationHome(): React.JSX.Element {
         setForm(null)
         return
       }
-      const before = new Set(workspaces.map((workspace) => workspace.id))
+      const before = snapshot?.workspaces ?? []
       const result = await workspacesApi.create({ name })
       setSnapshot(result)
       setForm(null)
-      const created = result.workspaces.find((workspace) => !before.has(workspace.id))
+      const created = createdWorkspace(before, result.workspaces)
       if (created) {
         setOpening(created.id)
         await workspacesApi.switch({ fromId: result.activeId, toId: created.id })

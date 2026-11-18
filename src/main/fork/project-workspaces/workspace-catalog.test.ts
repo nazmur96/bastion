@@ -8,7 +8,7 @@ import { configureProjectWorkspace, projectWorkspaceRelaunchArgs } from './works
 import { resolveProjectWorkspaceCliRoot } from '../../../cli/runtime/project-workspace-root'
 import { projectWorkspaceToolEnvironment } from './workspace-tool-environment'
 import { isOwnedWorkspaceHistoryPath } from './workspace-history-policy'
-import { isListedWorkspace } from '../../../shared/fork-project-workspaces'
+import { createdWorkspace, isListedWorkspace } from '../../../shared/fork-project-workspaces'
 
 const roots: string[] = []
 function temporary(): string {
@@ -35,6 +35,10 @@ describe('project workspace namespace', () => {
       expect(isListedWorkspace(existing(fresh)!)).toBe(false)
       expect(existing(upgraded)).toMatchObject({ repoCount: null })
       expect(isListedWorkspace(existing(upgraded)!)).toBe(true)
+      // Create and open: the hidden built-in workspace is not mistaken for the new one.
+      const before = fresh.list()
+      fresh.create('Real AWS recipe')
+      expect(createdWorkspace(before, fresh.list())?.name).toBe('Real AWS recipe')
       // Opening it once lists it again, whatever it holds.
       fresh.markOpened('existing')
       expect(isListedWorkspace(existing(fresh)!)).toBe(true)

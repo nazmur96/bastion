@@ -37,6 +37,15 @@ export function isListedWorkspace(workspace: ProjectWorkspace): boolean {
   )
 }
 
+/** The workspace a create added: compared against every workspace, listed or hidden. */
+export function createdWorkspace(
+  before: readonly ProjectWorkspace[],
+  after: readonly ProjectWorkspace[]
+): ProjectWorkspace | undefined {
+  const known = new Set(before.map((workspace) => workspace.id))
+  return after.find((workspace) => !known.has(workspace.id))
+}
+
 export type ProjectWorkspaceList = {
   // PROJECT_WORKSPACE_HOME_ID while application home is open.
   activeId: string
