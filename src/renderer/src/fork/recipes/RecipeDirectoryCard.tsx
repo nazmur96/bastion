@@ -5,6 +5,7 @@ import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabili
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
 import type { RecipeSnapshot, RecipeStep } from '../../../../shared/fork-recipes/recipe-contract'
 import { openWorkspaceFile } from '../devops/open-manifest'
+import { RealRecipeActions } from './RealRecipeActions'
 
 function Steps({ steps }: { steps: RecipeStep[] }): React.JSX.Element {
   return (
@@ -168,13 +169,21 @@ export function RecipeDirectoryCard({
         <p className="text-xs text-muted-foreground" data-testid="recipe-floci-unsupported">
           {unsupported} needs the local emulator&apos;s Docker backends, which Bastion does not
           allow, so this recipe can be validated here but not applied to Floci. Apply it on a real
-          AWS target with your own tools; applying to real AWS from Bastion is not available yet.
+          AWS target instead.
         </p>
       )}
-      {!floci && !unsupported && (
+      {target?.configuration.kind === 'real' && (
+        <RealRecipeActions
+          projectId={projectId}
+          snapshot={snapshot}
+          target={target}
+          onChanged={() => void refresh()}
+        />
+      )}
+      {!floci && !unsupported && target?.configuration.kind !== 'real' && (
         <p className="text-xs text-muted-foreground">
           Select a Floci AWS target on the Cloud page and start it to apply this recipe locally,
-          free of charge. Applying to real AWS is not available from Bastion yet.
+          free of charge, or a verified real AWS target to apply it to your account.
         </p>
       )}
       {validation && (

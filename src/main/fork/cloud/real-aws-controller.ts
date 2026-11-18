@@ -208,6 +208,20 @@ export class RealAwsController {
       return { ...fresh, anchored: true }
     })
   }
+  /** For a reviewed change: a fresh identity that must match the accepted anchor. */
+  async anchored(projectId: string, targetId: string) {
+    return this.exclusive(projectId, targetId, async () => {
+      const session = await this.session(projectId, targetId)
+      if (!session.context.configuration.expectedAccountId) {
+        throw new RealAwsFailure('identity-required')
+      }
+      const identity = await session.check(false)
+      session.context.current()
+      session.tool.assertCurrent()
+      const { root, stamp, current } = session.context
+      return { identity, root, stamp, current }
+    })
+  }
   async read(
     projectId: string,
     targetId: string,

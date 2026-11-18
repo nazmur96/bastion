@@ -38,8 +38,8 @@ export function RealAwsCard({
         {config.profileName} · {config.region}
       </p>
       <p className="text-sm">
-        Real account access · fixed read-only operations. Authentication uses your own profile;
-        credentials stay with its provider.
+        Real account access · fixed reads here; changes only as reviewed recipes, one confirmation
+        each. Authentication uses your own profile; credentials stay with its provider.
       </p>
       <p className="text-sm">
         {identity

@@ -23,15 +23,21 @@ function sources(directory: string): string[] {
 }
 
 describe('one policy entry per cloud operation', () => {
-  it('has no provider write: Step 9 cloud access is read-only', () => {
+  it('writes to a real provider only through a reviewed recipe with a one-use grant', () => {
     expect(
       entries.filter(([, c]) => c.egress === 'provider' && c.effect === 'local-lifecycle')
     ).toEqual([])
-    expect(new Set(entries.map(([, c]) => c.effect))).not.toContain('provider-write')
+    const writes = entries.filter(([, c]) => c.effect === 'provider-write')
+    expect(writes.map(([id]) => id).sort()).toEqual(['recipes.apply-real', 'recipes.destroy-real'])
+    for (const [, capability] of writes) {
+      expect(capability).toMatchObject({ target: 'selected-real', consent: 'one-use-grant' })
+    }
   })
-  it('requires a one-use grant for every paid read, and only paid reads use one', () => {
+  it('requires a one-use grant for every paid read and provider write, and only those', () => {
     for (const [id, capability] of entries) {
-      expect(capability.effect === 'paid-read', id).toBe(capability.consent === 'one-use-grant')
+      expect(capability.effect === 'paid-read' || capability.effect === 'provider-write', id).toBe(
+        capability.consent === 'one-use-grant'
+      )
     }
   })
   it('never lets a real-provider read skip the identity anchor except identity checks themselves', () => {

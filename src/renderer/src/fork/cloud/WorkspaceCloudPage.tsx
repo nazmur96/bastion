@@ -58,7 +58,7 @@ export function WorkspaceCloudPage({ worktreeId }: { worktreeId: string }): Reac
           <h1>Connections</h1>
           <p>
             Keep cloud targets inside this workspace. Start a private local Floci emulator, or
-            verify a real AWS profile for fixed read-only checks.
+            verify a real AWS profile: reads here, reviewed recipe changes on the Recipes page.
           </p>
         </div>
         <Button onClick={() => setEditing('new')} disabled={pending}>

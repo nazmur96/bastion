@@ -26,6 +26,8 @@ export type OperationEffect =
   | 'sensitive-read'
   /** Sends one read-only request to the deployed application. */
   | 'journey-check'
+  /** Creates, changes or deletes real cloud resources; may incur charges. */
+  | 'provider-write'
 export type OperationConsent =
   | 'none'
   /** A target-specific confirmation in the app. */
@@ -216,22 +218,6 @@ export const OPERATION_CAPABILITIES = {
     egress: 'loopback',
     consent: 'confirmation'
   },
-  'delivery.evidence': {
-    label: 'Read delivery evidence',
-    runsOn: 'owner',
-    target: 'none',
-    effect: 'metadata-read',
-    egress: 'delivery-sources',
-    consent: 'none'
-  },
-  'delivery.promote': {
-    label: 'Pin a verified image digest in the deployment config',
-    runsOn: 'owner',
-    target: 'none',
-    effect: 'source-write',
-    egress: 'none',
-    consent: 'confirmation'
-  },
   ...OPERATIONS_CAPABILITIES,
   'aws.cost.cached': {
     label: 'Show cached Cost Explorer data',
@@ -268,6 +254,8 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:operationsRuns': ['operations.runs'],
   'bastionCloud:runbookList': ['runbooks.read'],
   'bastionCloud:runbookCreate': ['runbooks.create'],
+  'bastionCloud:recipeRealPrepare': ['recipes.prepare-real'],
+  'bastionCloud:recipeRealDeliver': ['recipes.apply-real', 'recipes.destroy-real'],
   'bastionCloud:recipeRead': ['recipes.read'],
   'bastionCloud:recipeValidate': ['recipes.validate'],
   'bastionCloud:recipeDeliver': ['recipes.apply-emulated', 'recipes.destroy-emulated']
@@ -303,7 +291,8 @@ export function capabilityNote(id: OperationId): string {
     validation: 'Validates in a private copy · downloads pinned providers',
     'emulated-write': 'Changes local emulator resources · no charges',
     'sensitive-read': 'Sensitive read · bounded and redacted',
-    'journey-check': 'One read-only request to the app'
+    'journey-check': 'One read-only request to the app',
+    'provider-write': 'Changes real cloud resources · may incur charges'
   }
   const consent: Record<OperationConsent, string | null> = {
     none: null,

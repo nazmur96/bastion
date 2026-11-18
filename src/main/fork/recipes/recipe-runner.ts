@@ -39,12 +39,12 @@ export function flociUnsupportedResource(files: RecipeFile[]): string | null {
 }
 
 export class RecipeRunError extends Error {
-  constructor(readonly code: 'changed' | 'failed' | 'emulator-unsupported') {
+  constructor(readonly code: 'changed' | 'failed' | 'emulator-unsupported' | 'grant') {
     super(code)
   }
 }
 
-function privateDirectory(path: string): string {
+export function privateDirectory(path: string): string {
   mkdirSync(path, { recursive: true, mode: 0o700 })
   if (process.platform !== 'win32') {
     chmodSync(path, 0o700)
@@ -65,7 +65,7 @@ function syncFiles(directory: string, files: RecipeFile[], override: boolean): v
     writeFileSync(join(directory, OVERRIDE_NAME), FLOCI_OVERRIDE, { mode: 0o600 })
   }
 }
-function baseEnv(owner: NodeJS.ProcessEnv, pluginCache: string): Record<string, string> {
+export function baseEnv(owner: NodeJS.ProcessEnv, pluginCache: string): Record<string, string> {
   const env: Record<string, string> = {}
   for (const name of [
     'PATH',
@@ -205,10 +205,21 @@ export async function deliverRecipeToFloci(
     ...baseEnv(context.owner, privateDirectory(join(base, 'plugin-cache'))),
     ...request.flociEnv
   }
+  return terraformChange(run, context.tool, request.operation, work, env)
+}
+
+/** init, then apply or destroy, then the non-sensitive outputs: one reviewed change in `work`. */
+export async function terraformChange(
+  run: RunTerraform,
+  tool: TerraformTool,
+  operation: 'apply' | 'destroy',
+  work: string,
+  env: Record<string, string>
+): Promise<{ steps: RecipeStep[]; outputs: Record<string, string> }> {
   const steps: RecipeStep[] = []
   const init = await step(
     run,
-    context.tool,
+    tool,
     'init',
     ['init', '-input=false', '-no-color'],
     work,
@@ -221,26 +232,18 @@ export async function deliverRecipeToFloci(
   }
   const change = await step(
     run,
-    context.tool,
-    request.operation,
-    [request.operation, '-auto-approve', '-input=false', '-no-color'],
+    tool,
+    operation,
+    [operation, '-auto-approve', '-input=false', '-no-color'],
     work,
     env,
     300000
   )
   steps.push({ step: change.step, ok: change.ok, message: change.message })
-  if (!change.ok || request.operation === 'destroy') {
+  if (!change.ok || operation === 'destroy') {
     return { steps, outputs: {} }
   }
-  const output = await step(
-    run,
-    context.tool,
-    'output',
-    ['output', '-json', '-no-color'],
-    work,
-    env,
-    30000
-  )
+  const output = await step(run, tool, 'output', ['output', '-json', '-no-color'], work, env, 30000)
   const outputs: Record<string, string> = {}
   try {
     const parsed: unknown = JSON.parse(output.stdout)

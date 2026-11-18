@@ -43,6 +43,23 @@ export const recipeDeliverSchema = recipeReadSchema
     fingerprint: z.string().regex(/^sha256:[0-9a-f]{64}$/)
   })
   .strict()
+/** Real AWS: preparation mints a one-use grant; only the grant can start the change. */
+export const recipeRealPrepareSchema = recipeDeliverSchema
+export const recipeRealDeliverSchema = z
+  .object({ grantId: z.string().uuid(), cancel: z.boolean().optional() })
+  .strict()
+export type RecipeRealChallenge = {
+  grantId: string
+  operation: 'apply' | 'destroy'
+  directory: string
+  files: string[]
+  fingerprint: string
+  accountId: string
+  principalArn: string
+  profileName: string
+  region: string
+  terraform: string
+}
 export type RecipeSnapshot = {
   directory: string
   files: { path: string; bytes: number }[]
@@ -62,4 +79,12 @@ export type RecipesApi = {
   deliver: (
     args: z.infer<typeof recipeDeliverSchema>
   ) => Promise<RecipeResult<{ steps: RecipeStep[]; outputs: Record<string, string> }>>
+  realPrepare: (
+    args: z.infer<typeof recipeRealPrepareSchema>
+  ) => Promise<RecipeResult<{ challenge: RecipeRealChallenge }>>
+  realDeliver: (
+    args: z.infer<typeof recipeRealDeliverSchema>
+  ) => Promise<
+    RecipeResult<{ steps: RecipeStep[]; outputs: Record<string, string>; receiptId: string }>
+  >
 }

@@ -17,7 +17,9 @@ export const cloudTargetsApi: CloudTargetsApi = {
     create: (args) => ipcRenderer.invoke('bastionCloud:recipeCreate', args),
     read: (args) => ipcRenderer.invoke('bastionCloud:recipeRead', args),
     validate: (args) => ipcRenderer.invoke('bastionCloud:recipeValidate', args),
-    deliver: (args) => ipcRenderer.invoke('bastionCloud:recipeDeliver', args)
+    deliver: (args) => ipcRenderer.invoke('bastionCloud:recipeDeliver', args),
+    realPrepare: (args) => ipcRenderer.invoke('bastionCloud:recipeRealPrepare', args),
+    realDeliver: (args) => ipcRenderer.invoke('bastionCloud:recipeRealDeliver', args)
   },
   verifyRealTarget: (args) => ipcRenderer.invoke('bastionCloud:verifyRealTarget', args),
   acceptRealIdentity: (args) => ipcRenderer.invoke('bastionCloud:acceptRealIdentity', args),

@@ -1,5 +1,6 @@
 import { registerRealAwsHandlers } from './real-aws-ipc'
 import { registerRecipeHandlers } from '../recipes/recipe-ipc'
+import { registerRealRecipeHandlers } from '../recipes/recipe-real-ipc'
 import { registerDeliveryHandlers } from '../delivery/delivery-ipc'
 import { registerOperationsHandlers } from '../delivery/operations-ipc'
 import { admitChannelOperation } from '../../../shared/fork-cloud/operation-capabilities'
@@ -71,6 +72,7 @@ export function registerCloudTargetHandlers(
   }
   registerRealAwsHandlers(requireProvider)
   registerRecipeHandlers(requireProvider)
+  registerRealRecipeHandlers(requireProvider)
   registerDeliveryHandlers(requireProvider)
   registerOperationsHandlers(requireProvider)
   setCloudBindingAuthority({

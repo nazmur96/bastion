@@ -1,7 +1,23 @@
 import type { OperationCapability } from './operation-capabilities'
 
-/** Fork: Step 12 verification, diagnosis and runbook operations; part of the one policy registry. */
+/** Fork: Step 11–13 delivery, operations, runbook and real-recipe entries of the one policy registry. */
 export const OPERATIONS_CAPABILITIES = {
+  'delivery.evidence': {
+    label: 'Read delivery evidence',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'metadata-read',
+    egress: 'delivery-sources',
+    consent: 'none'
+  },
+  'delivery.promote': {
+    label: 'Pin a verified image digest in the deployment config',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'source-write',
+    egress: 'none',
+    consent: 'confirmation'
+  },
   'operations.diagnose': {
     label: 'Diagnose the deployed workload',
     runsOn: 'owner',
@@ -41,6 +57,30 @@ export const OPERATIONS_CAPABILITIES = {
     effect: 'local-read',
     egress: 'none',
     consent: 'none'
+  },
+  'recipes.prepare-real': {
+    label: 'Prepare a recipe change on real AWS',
+    runsOn: 'owner',
+    target: 'selected-real',
+    effect: 'metadata-read',
+    egress: 'provider',
+    consent: 'identity-anchor'
+  },
+  'recipes.apply-real': {
+    label: 'Apply a reviewed recipe to real AWS',
+    runsOn: 'owner',
+    target: 'selected-real',
+    effect: 'provider-write',
+    egress: 'provider',
+    consent: 'one-use-grant'
+  },
+  'recipes.destroy-real': {
+    label: 'Destroy a reviewed recipe from real AWS',
+    runsOn: 'owner',
+    target: 'selected-real',
+    effect: 'provider-write',
+    egress: 'provider',
+    consent: 'one-use-grant'
   },
   'runbooks.create': {
     label: 'Create a runbook',
