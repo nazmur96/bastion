@@ -1,0 +1,3376 @@
+[
+  {
+    "filePath": "src/renderer/src/fork/changes/WorkspaceChangesPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Target: repository source with an explicit Floci AWS binding. The prepared plan records its selection and instance; no cloud operation is run.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "cmd+k",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "ctrl+k",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "haiku",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "inline edit",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "model",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "opus",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "sonnet",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/claude-editor/claude-editor-model-search.ts",
+    "kind": "object-property:keywords",
+    "text": "suggestion",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/cloud-connections-state.ts",
+    "kind": "object-property:error",
+    "text": "Cloud targets could not be loaded.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/cloud-connections-state.ts",
+    "kind": "object-property:error",
+    "text": "Cloud targets could not be updated.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/cloud-connections-state.ts",
+    "kind": "object-property:error",
+    "text": "Lifecycle request could not be confirmed. Refresh this instance before retrying.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/cloud-connections-state.ts",
+    "kind": "object-property:error",
+    "text": "Real AWS context could not be confirmed. Verify again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-text",
+    "text": "· epoch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-text",
+    "text": "· instance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-text",
+    "text": "· selection",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-text",
+    "text": "Floci AWS target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Reviewed cloud target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudBindingSummary.tsx",
+    "kind": "jsx-text",
+    "text": "Source checks only. This records the target context and makes no cloud request. Changing selection or restarting the instance requires another review.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "· incomplete, more may exist beyond the limits",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "· Local emulator",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "· observed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "· S3 buckets are global; other lists use",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "· up to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "items per service",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "listed",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Listed resources",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "Local emulator",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "name matches this project · hint",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "None listed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "Ownership is not inferred. Nothing listed here is adopted or changed.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-text",
+    "text": "pages and",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "Real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudResourcesView.tsx",
+    "kind": "jsx-expression",
+    "text": "Unknown ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-expression",
+    "text": "Add target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "AWS profile name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Check the label, region identifier and requested port.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Container engine",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Docker",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Emulated · Floci",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Emulated provider",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Metadata only. No credentials are read or stored. Saving does not sign in, verify or start an emulator.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Region",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-expression",
+    "text": "Rename target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Requested port (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Rootless Podman",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Save target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Target kind",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-text",
+    "text": "Target label",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/CloudTargetForm.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "us-east-1",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-text",
+    "text": "Costs",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-text",
+    "text": "Emulated · No charges. This local emulator is not a real cloud account, so there is no bill and no billing request.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-expression",
+    "text": "List resources",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Listing…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-text",
+    "text": "Open terminal for this target",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-text",
+    "text": "Resources · read-only",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "jsx-text",
+    "text": "Start this target to list resources.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "user-visible-call",
+    "text": "The target environment could not be opened.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociResourcesCard.tsx",
+    "kind": "user-visible-call",
+    "text": "The target is not running.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "· epoch",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Confirm reset",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Instance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Lifecycle receipts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Not started",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Private persistent data. Stop preserves it; Reset deletes this target’s data.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Refresh instance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Reset",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Reset data",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Restricted boot proven on Linux amd64 only. Other platforms are unavailable.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Start",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Stop",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "Targeted source checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/FlociRuntimeCard.tsx",
+    "kind": "jsx-text",
+    "text": "This will stop the instance and delete only this target’s private data before starting it again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": ", profile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": ", region",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": ": account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "· account anchor only",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "· credential expiration unknown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "· incomplete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "· observed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "A budget is not a spending cap. Missing or denied evidence does not mean zero spend.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Accept this real AWS identity?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Account-wide alert observed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "alert(s)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "AWS CLI",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Budget alerts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Budget status:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Budget status: not checked · a free read. Use Read budgets after verifying.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Confirm identity",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Expected account:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Full account alert coverage is not confirmed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "IAM role path not verified; accepting stores an account anchor only.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Last observed",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "No credentials are stored.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Not verified",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Observed account:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Only the account will be anchored; an IAM role path is not verified.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Read budgets",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Read resources",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Real account access · fixed reads here; changes only as reviewed recipes, one confirmation each. Authentication uses your own profile; credentials stay with its provider.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Real AWS budgets",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Real AWS resources",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Store the expectation for",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Use this identity for this target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Verify real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "· account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· AWS may still revise estimated days",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· Estimated",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "· linked account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "· profile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "· unblended cost, current UTC month to date",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "(UTC, end exclusive) · billing endpoint",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Confirm paid read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Cost Explorer",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Fetch Cost Explorer data",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-expression",
+    "text": "It may have been charged.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Make a paid Cost Explorer request?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "May incur AWS API charges. AWS bills each Cost Explorer API request; see the AWS Cost Explorer pricing page. One request is made, with no automatic retry.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "More data exists; another confirmed read would be needed to fetch it.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "No cost rows were returned for this period.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "No single total: the rows use different units.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Not a spending cap.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Not requested · May incur AWS API charges. Each confirmed read makes one Cost Explorer request; nothing is fetched automatically.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Observed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Observed cost data (not an invoice)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "only",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Real AWS costs",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "Request",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCostSection.tsx",
+    "kind": "jsx-text",
+    "text": "to",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "· Floci",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "· local runtime",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Add target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Clear selection",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Cloud",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Cloud target metadata is unavailable.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Cloud targets run on this computer only for now. Remote (SSH) projects are planned; nothing runs here with this computer’s credentials or engine.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Confirm removal",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Connections",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Emulated",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "from available targets and clear its selections. No cloud resource is changed.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Keep cloud targets inside this workspace. Start a private local Floci emulator, or verify a real AWS profile: reads here, reviewed recipe changes on the Recipes page.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Loading target metadata…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Local runtime · cloud targets",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "No cloud targets in this workspace. Add a profile reference or an emulated target.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Not verified",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Refresh targets",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Remove",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Remove target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Remove target?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Rename",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Select target",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Selected",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/WorkspaceCloudPage.tsx",
+    "kind": "jsx-text",
+    "text": "Selections apply to this project. Running work stays pinned; targeted source checks need a fresh review after selection changes.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· last exit",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· last lines only",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "· read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "(empty)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "(old pods still serving)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "→ revision",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "available,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Containers",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Current",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Diagnose",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Diagnose the workload",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Diagnose with logs",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "log ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Namespace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "not ready",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "pod",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "pods",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Previous",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Reading…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "ready",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "restarts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Rollout",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Rollout, container state, warning events and, only if you ask, the current and previous log tail (last 100 lines, secrets masked). Read-only.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "unknown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "Unknown ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-text",
+    "text": "updated,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-expression",
+    "text": "value(s) masked",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Warning events",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": ".md as a new file; an existing runbook is never overwritten. Logs in the draft are already masked, so review them anyway.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "· revision",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "A journey check sends one GET to a service through the cluster API and passes when the response contains the expected text. Every run is kept, failed ones included.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Choose a runbook",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Create runbook",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Creates runbooks/",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Draft runbook from diagnosis…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Drill runbook",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-expression",
+    "text": "failed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-expression",
+    "text": "mixed or unknown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "object-property:title",
+    "text": "New runbook",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "No runbooks in this repository yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "No runs recorded yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-expression",
+    "text": "passed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Record drill result",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Review the runbook before saving it",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Run after the runbook's recovery steps; the check result is recorded as the drill's result",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Run journey check",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Runbook content",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Runbooks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Title",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Verification runs",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryVerificationSection.tsx",
+    "kind": "jsx-text",
+    "text": "Verify and recover",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/operations-owner-client.ts",
+    "kind": "object-property:message",
+    "text": "The project owner could not run this:",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": ": CI, artifact and registry label verified. Only this one field changes; you commit and push it, and the controller deploys it.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "· image",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "app",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "Application namespace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "Argo CD application",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "argocd",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "build.yml",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "CI workflow file",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Commit and push it with Source Control; the controller deploys from Git. Then read the evidence again.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Delivery",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "deploy/kustomization.yaml",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "Deployment config",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Environments & delivery",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Follow one revision from source to running pods. Every link is read from its real source; anything that cannot be read is unknown, never assumed.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "GitHub repository",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "HEAD",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:label",
+    "text": "Image name in config",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "is not verified for this revision.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "my-app",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Not promotable:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "object-property:placeholder",
+    "text": "owner/name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Pin digest",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Pin this verified image in the deployment config?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Promote this revision…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Read delivery evidence",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-expression",
+    "text": "Reading…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Revision",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Revision (full SHA; empty for HEAD)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-text",
+    "text": "Rolling back is the same step with an earlier verified revision. It does not undo data or schema changes or external side effects, and the controller&apos;s sync policy decides when it takes effect.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-expression",
+    "text": "This digest is already pinned",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/WorkspaceDeliveryPage.tsx",
+    "kind": "jsx-expression",
+    "text": "unset",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/DevopsContextBar.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "floci (local)",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraArgoDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "argo",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraArgoDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "deploy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraArgoDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "gitops",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraCloudCard.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Cloud connections",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraCloudCard.tsx",
+    "kind": "jsx-text",
+    "text": "Manage profile references and emulated target metadata. Verification and resource access are not available yet.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraCloudCard.tsx",
+    "kind": "jsx-text",
+    "text": "Open cloud connections",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraClusterCard.tsx",
+    "kind": "user-visible-call",
+    "text": "Radar did not report its address.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHardenCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "harden",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHardenCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "scan",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHardenCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "security",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHardenCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "trivy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "cards",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "environments",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "grafana",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "launchpad",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "scan",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "settings",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHome.tsx",
+    "kind": "object-property:keywords",
+    "text": "tools",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "AWS · Floci",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Kubernetes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Kubernetes · vind",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "mise use",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraHomeCards.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Terraform",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLaunchpad.tsx",
+    "kind": "object-property:keywords",
+    "text": "install",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLaunchpad.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "mise use",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLocalDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "build",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLocalDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "deploy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLocalDeploy.tsx",
+    "kind": "object-property:keywords",
+    "text": "local",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraLocalRuns.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "floci",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraSystemMap.tsx",
+    "kind": "object-property:label",
+    "text": "describe",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraSystemMap.tsx",
+    "kind": "object-property:label",
+    "text": "logs",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraSystemMap.tsx",
+    "kind": "object-property:label",
+    "text": "source",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraWatchCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "grafana",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraWatchCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "metrics",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraWatchCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "monitoring",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraWatchCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "observability",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/devops/InfraWatchCard.tsx",
+    "kind": "object-property:keywords",
+    "text": "prometheus",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Configuration and secret references",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Datastore and recovery limits",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Dependencies",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Disk and persistence",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Network and exposure",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Ownership and criticality",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Runbook",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Runtime and entry point",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Scaling and capacity",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/discovery/service-knowledge.ts",
+    "kind": "object-property:title",
+    "text": "Startup and shutdown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/editor-context/EditorRuntimeAssistance.tsx",
+    "kind": "object-property:keywords",
+    "text": "context",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/editor-context/EditorRuntimeAssistance.tsx",
+    "kind": "object-property:keywords",
+    "text": "setup",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/editor-context/EditorRuntimeAssistance.tsx",
+    "kind": "object-property:keywords",
+    "text": "suggestion",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/editor-context/EditorRuntimeAssistance.tsx",
+    "kind": "object-property:keywords",
+    "text": "terraform",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/project-workspaces/IncognitoTools.tsx",
+    "kind": "jsx-text",
+    "text": "Claude",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/project-workspaces/IncognitoTools.tsx",
+    "kind": "jsx-text",
+    "text": "Codex",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Access",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Application dependency",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Bind object storage to this application",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-expression",
+    "text": "Check the values.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Config directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Config variable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Connects to a bucket that already exists, never creates it. Generates an IAM policy scoped to that bucket (",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Create binding files",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Create these files?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Existing bucket",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Existing IAM role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "Load buckets from",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "No buckets listed.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "none",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "objects), optionally attached to an existing role, and one config example for the application.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-expression",
+    "text": "read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "read (",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-expression",
+    "text": "read and write",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "read-write (",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageBindingForm.tsx",
+    "kind": "jsx-text",
+    "text": "The infra directory must be new and no existing file is overwritten. The application&apos;s own configuration is not edited. Nothing is provisioned.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "An S3 bucket with public access blocked, bucket-owner enforced ownership, SSE-S3 encryption, optional versioning and ownership tags. Generates ordinary Terraform you own and can edit.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Bucket name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-expression",
+    "text": "Check the values.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Create files",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Create these files?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Keep previous object versions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Object storage bucket",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-attribute:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Quick resource",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/ObjectStorageRecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "The directory must be new; existing files are never overwritten. Nothing is provisioned.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Allowed CIDRs (create)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Backup retention (days)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config prefix",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Connect to an existing instance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "Connect to an existing RDS PostgreSQL instance, or create one. RDS keeps the master password in Secrets Manager, so no password reaches your source, Terraform state or Bastion. Never publicly accessible; encrypted storage; port 5432 only from the CIDR blocks you list. Applies to real AWS only: the local emulator cannot run databases under Bastion's policy.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Create a new instance",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Database",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Database name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Deletion protection",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Existing IAM role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Instance class",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Instance identifier",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "no",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "none",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "orders-db",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "PostgreSQL database",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "PostgreSQL version",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Skip final snapshot",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Storage (GiB, 20–100)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "subnet-…, subnet-…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "Subnets, comma-separated (create)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "VPC (create)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "vpc-…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/PostgresDatabaseForm.tsx",
+    "kind": "object-property:label",
+    "text": "yes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": ". Confirming applies exactly this saved plan; Terraform refuses it if the account changed since.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "…and more",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "· profile",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "· reviewed fingerprint",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Applied to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Apply to real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Apply to real AWS…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Change real AWS resources?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Creates or deletes real, billable resources in your account. Terraform runs in this recipe directory with your own profile, so its state stays here and you can always destroy it with plain Terraform.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Destroy from real AWS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Destroy from real AWS…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Destroy real AWS resources?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Destroyed from",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "failed ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Files:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "in",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "No changes to make",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "passed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Plan:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Planned resources",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "real AWS account",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Real AWS steps",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Terraform",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "Terraform state stays in this directory (ignored by Git). Commit .terraform.lock.hcl with the recipe so later runs use the same providers.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "The confirmation is valid once, for five minutes, and only for this account.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "This creates real resources that AWS bills until they are destroyed.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "This deletes the resources this recipe manages. Data in them is lost.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "to add,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "to change,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "to destroy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-text",
+    "text": "to replace,",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RealRecipeActions.tsx",
+    "kind": "jsx-expression",
+    "text": "Verify and accept this target’s AWS identity on the Cloud page first.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": ". If the files change before this runs, it is refused.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "· local emulator · no charges",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "· ordinary source you own. Edit it freely, then refresh before applying.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Also created for the application:",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Applied to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Apply",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Apply to Floci…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Confirm apply",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Confirm destroy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Destroy",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Destroy from Floci…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Destroyed from",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "failed ·",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Fingerprint",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Local Floci emulator · no charges · reviewed fingerprint",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "needs the local emulator&apos;s Docker backends, which Bastion does not allow, so this recipe can be validated here but not applied to Floci. Apply it on a real AWS target instead.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "on",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "passed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Recipe files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Recipe source ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Recipe steps",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Refresh files",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Select a Floci AWS target on the Cloud page and start it to apply this recipe locally, free of charge, or a verified real AWS target to apply it to your account.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Validate",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-text",
+    "text": "Validated with",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeDirectoryCard.tsx",
+    "kind": "jsx-expression",
+    "text": "Working…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Cancel",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeForm.tsx",
+    "kind": "jsx-expression",
+    "text": "Check the values.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "Create these files?",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RecipeForm.tsx",
+    "kind": "jsx-text",
+    "text": "The infra directory must be new and no existing file is overwritten. Nothing is provisioned until you apply.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "An Amazon ECR repository with immutable tags, scan on push, encryption, and a rule keeping only the most recent images.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "An IAM role that only ECS tasks or Lambda functions in this account can assume. It grants nothing by itself: attach the scoped policies from the bucket, secret and database recipes by giving them this role name.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Assumed by",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "checkout-task",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "checkout/api",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Container image registry",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "ECS tasks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Images to keep",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Lambda functions",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "no",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Repository name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Role name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "Scan on push",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Workload role",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/RegistryAndRoleForms.tsx",
+    "kind": "object-property:label",
+    "text": "yes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "checkout/db-password",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config variable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Connect to an existing secret",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Create an empty secret",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "Creates an empty AWS Secrets Manager secret, or connects to an existing one, plus a read policy scoped to that secret. Bastion never writes, reads or stores the secret value; set it yourself with your own tools.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Existing IAM role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "none",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Recovery window (days: 0 or 7–30)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Secret",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "object-property:label",
+    "text": "Secret name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/SecretReferenceForm.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Secret reference",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "Environments & delivery",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "infra/orders-assets",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "New recipe",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "Open",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "Open an existing recipe directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Recipe directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "Recipes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/WorkspaceRecipesPage.tsx",
+    "kind": "jsx-text",
+    "text": "Reviewed infrastructure recipes that generate ordinary Terraform into this project. Validate on this computer, then apply to a local Floci emulator for free.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/workspace-desktop/WorkspaceDesktopChrome.tsx",
+    "kind": "jsx-text",
+    "text": "BASTION",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "Argo CD deploy needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "Inline edit needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "Needs the desktop app.",
+    "dynamic": false,
+    "count": 9
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "Radar needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "Terraform plan needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "The local sandbox needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/web/preload-api/web-ai-vault-api.ts",
+    "kind": "object-property:error",
+    "text": "The system map needs the desktop app.",
+    "dynamic": false,
+    "count": 1
+  }
+]

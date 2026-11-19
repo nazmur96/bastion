@@ -118,7 +118,10 @@ export function SkillFreshnessNudge(): null {
         : translate(
             'auto.components.skills.SkillFreshnessNudge.title',
             '{{count}} installed Bastion skills are out of date',
-            { count: names.size, defaultValue_one: '{{count}} installed Orca skill is out of date' }
+            {
+              count: names.size,
+              defaultValue_one: '{{count}} installed Bastion skill is out of date'
+            }
           ),
       {
         description: translate(

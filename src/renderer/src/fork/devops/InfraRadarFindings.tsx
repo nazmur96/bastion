@@ -37,8 +37,8 @@ export function InfraRadarFindings({
     <InfraCard
       id="infra-path-radar"
       className="mb-4"
-      title={translate('components.devops.radarFeed.title', 'Radar findings · {{context}}', {
-        context
+      title={translate('components.devops.radarFeed.title', 'Radar findings · {{name}}', {
+        name: context
       })}
       hint={translate(
         'components.devops.radarFeed.hint',

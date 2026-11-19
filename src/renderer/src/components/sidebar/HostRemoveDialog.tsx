@@ -195,7 +195,7 @@ function HostRemoveDialogBody({
                 host: label,
                 count: workspaceCount,
                 defaultValue_one:
-                  'Removes {{host}} and its credentials from this computer. Its {{count}} workspace stays in Orca — remote files are not touched.'
+                  'Removes {{host}} and its credentials from this computer. Its {{count}} workspace stays in Bastion — remote files are not touched.'
               }
             )
           : translate(
@@ -206,7 +206,7 @@ function HostRemoveDialogBody({
   const deleteOptionLabel = translate(
     'auto.components.sidebar.HostRemoveDialog.alsoRemoveWorkspaces',
     'Also remove these {{count}} workspaces from Bastion',
-    { count: workspaceCount, defaultValue_one: 'Also remove this workspace from Orca' }
+    { count: workspaceCount, defaultValue_one: 'Also remove this workspace from Bastion' }
   )
 
   return (

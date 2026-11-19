@@ -89,7 +89,7 @@ function SuggestionToastBody({
             {
               count: suggestion.behind,
               defaultValue_one:
-                'Your new worktree is current, but local {{branch}} is {{count}} commit behind, so AI diffs may compare to stale history. Let Orca keep it up to date automatically. Change this anytime in <settings>Settings › {{setting}}</settings>'
+                'Your new worktree is current, but local {{branch}} is {{count}} commit behind, so AI diffs may compare to stale history. Let Bastion keep it up to date automatically. Change this anytime in <settings>Settings › {{setting}}</settings>'
             }
           )}
           values={{

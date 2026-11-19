@@ -620,7 +620,14 @@ export async function main(root = process.cwd(), argv = process.argv.slice(2)) {
   }
 
   if (options.check) {
-    const allowlist = await readAllowlist(root, options.allowlistPath)
+    // Fork: Bastion's own pages ship English-only for the first release; that list is kept
+    // apart from the upstream allowlist so neither hides the other's new strings.
+    const allowlist = [
+      ...(await readAllowlist(root, options.allowlistPath)),
+      ...(options.allowlistPath === path.join('config', 'localization-coverage-allowlist.json')
+        ? await readAllowlist(root, path.join('config', 'bastion-english-only-allowlist.json'))
+        : [])
+    ]
     const newCandidates = findNewCandidates(reports, allowlist)
     if (newCandidates.length > 0) {
       console.error('New unlocalized UI strings were found.')

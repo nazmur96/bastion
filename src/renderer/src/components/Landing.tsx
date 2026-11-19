@@ -262,7 +262,7 @@ export default function Landing(): React.JSX.Element {
             className="size-24 drop-shadow-[0_12px_32px_rgba(150,120,255,0.35)]"
           />
           <h1 className="text-4xl font-bold text-foreground tracking-tight">
-            {translate('auto.components.Landing.6ca6ff404e', 'Bastion')}
+            {translate('auto.components.Landing.6ca6ff404e', 'BASTION')}
           </h1>
 
           {preflightIssues.length > 0 && <PreflightBanner issues={preflightIssues} repos={repos} />}

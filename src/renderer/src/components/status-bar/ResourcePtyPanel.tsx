@@ -58,7 +58,7 @@ export function ResourcePtyPanel({
                 '{{count}} Bastion PTYs on this computer',
                 {
                   count: sessions.length,
-                  defaultValue_one: '{{count}} Orca PTY on this computer'
+                  defaultValue_one: '{{count}} Bastion PTY on this computer'
                 }
               )}
           {inventory.observedAt !== null && unbound > 0 && (

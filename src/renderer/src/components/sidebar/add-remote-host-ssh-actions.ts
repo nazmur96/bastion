@@ -187,7 +187,7 @@ export async function addAllSshConfigHostsToOrca({
       translate(
         'auto.components.sidebar.AddRemoteHostDialog.sshImportSynced',
         'Added {{count}} hosts to Bastion.',
-        { count: result.targets.length, defaultValue_one: 'Added {{count}} host to Orca.' }
+        { count: result.targets.length, defaultValue_one: 'Added {{count}} host to Bastion.' }
       )
     )
     return { kind: 'added', count: result.targets.length }

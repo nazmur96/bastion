@@ -33,7 +33,7 @@ function PreservedBranchBatchToastBody({
           {
             count: branches.length,
             defaultValue_one:
-              'Git kept {{count}} local branch because it may contain unmerged commits. Kept branches do not retain workspace folders; their commits remain in the repository. Orca may continue freeing workspace disk space in the background.'
+              'Git kept {{count}} local branch because it may contain unmerged commits. Kept branches do not retain workspace folders; their commits remain in the repository. Bastion may continue freeing workspace disk space in the background.'
           }
         )}
       </p>
