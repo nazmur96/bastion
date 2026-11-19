@@ -16,7 +16,7 @@ export const realAwsMessages = {
   'too-large': 'The response exceeded the read size limit.',
   unreadable: 'The AWS response could not be read.',
   'identity-mismatch': 'The observed AWS identity does not match this target’s expectation.',
-  'identity-required': 'Verify and accept the real AWS identity before reading resources.',
+  'identity-required': 'Verify and accept this target’s real AWS identity on the Cloud page first.',
   'consent-required':
     'This Cost Explorer read needs a fresh confirmation for this target. No billing request was made.',
   'no-cost-period': 'The current UTC month has no complete day yet. No billing request was made.',
