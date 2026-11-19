@@ -3,53 +3,58 @@
 </h1>
 
 <p align="center">
-  <strong>A DevOps workbench with Claude built in.</strong><br/>
-  From "what is this repo?" to a running cluster, GitOps, hardening and the cloud, one guided step at a time,
-  with every command in a terminal you can watch and every change a file you can review.
+  <strong>A DevOps workbench for real projects, with your own agents and tools.</strong><br/>
+  Understand a repository, attach its cloud and cluster, change infrastructure through reviewed
+  recipes, follow a revision to the running pods, and diagnose and recover when it breaks.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-early%20preview-c7b8ff?style=flat" alt="Status: early preview" />
+  <img src="https://img.shields.io/badge/status-release%20candidate-c7b8ff?style=flat" alt="Status: release candidate" />
   <img src="https://img.shields.io/badge/license-MIT-a8e1ff?style=flat" alt="License: MIT" />
-  <img src="https://img.shields.io/badge/Linux%20%7C%20macOS%20%7C%20Windows-f6c4ec?style=flat" alt="Platforms: Linux, macOS, Windows" />
+  <img src="https://img.shields.io/badge/platform-Linux%20x64-f6c4ec?style=flat" alt="Platform: Linux x64" />
 </p>
 
 <p align="center">
-  <img src="docs/bastion/screenshot-workbench.png" alt="Bastion: the project path on the left, Claude chat in the middle, the side panel with the project's files on the right" width="960" />
+  <img src="docs/bastion/screenshot-home.png" alt="Bastion's application home: create or open an independent project workspace" width="960" />
 </p>
 
-## What it is
+## What it does
 
-Bastion is a desktop app for working on infrastructure projects with Claude. It keeps three things in view:
-
-- **Project path, on the left.** The steps from an unknown repo to production: _Understood → Local cluster → App
-  running → GitOps → Hardened → Cloud → Shipped_. Done steps are ticked, and the next one opens in place with the one
-  button that does it. Underneath, a live **system map** of what is running, with the command log of the current run.
-- **Claude, in the middle.** The chat is the main tab. Files, diffs and pages Claude or you open (Argo CD, Grafana,
-  the app itself) sit as tabs next to it.
-- **The side panel, on the right.** _Files · Changes · Terminal · Browser · Checks_: the file tree, git and pull
-  requests, your terminals, the project's pages and CI checks in one place.
-
-<p align="center">
-  <img src="docs/bastion/screenshot-map.png" alt="The full system map open as a tab, with Health, Metrics, Cost, Blast radius and Security views, and git changes in the side panel" width="960" />
-</p>
+- **Project workspaces.** Each workspace is an independent desktop with its own repositories,
+  agents, terminals and settings. Leave one and resume it later exactly as it was; Incognito
+  tasks leave nothing behind.
+- **Discovery.** Reads the repository's real evidence (Kubernetes, containers, Terraform, CI)
+  and lists what the code cannot tell you as open questions, instead of guessing.
+- **Cloud targets.** Local Floci emulators for AWS, Azure, GCP and OCI, free and private; real
+  AWS with your own profile, a verified identity and read-only checks. Cost Explorer reads are
+  opt-in and confirmed one at a time.
+- **Recipes.** Reviewed infrastructure (bucket, database, registry, secret, workload role)
+  generated as ordinary Terraform you own. Validate with the project's pinned Terraform, apply to
+  the emulator for free, or to real AWS after a plan preview and a one-use confirmation.
+- **Delivery.** Follows one revision from commit through CI, the published image, the
+  deployment config and Argo CD to the running pods, and marks each link verified, mismatched or
+  unknown. A failed or missing check blocks promotion; promotion and rollback are reviewed
+  one-line changes you commit.
+- **Operations.** Diagnoses a failing workload (rollout, container state, events, previous
+  logs, image → commit), runs journey checks with a kept history, and keeps runbooks as Markdown
+  in your repository.
 
 ## Principles
 
-- **Local and free first.** The path starts on a local `kind` cluster and Floci for AWS; nothing is billed until a
-  plan you approved says so.
-- **Nothing behind your back.** Every command runs in a terminal or a run log you can read; Claude's edits are files
-  you keep or undo.
-- **Real infrastructure looks different.** A real cluster or AWS account turns the frame amber, shows a running cost
-  meter in the top bar, and every apply or destroy asks first.
-- **Your tools, your versions.** Tools come from the repo's own `mise.toml` (or its dev container), never from
+- **Unknown is never healthy.** Anything Bastion cannot read is shown as unknown, with the
+  reason.
+- **Nothing behind your back.** Changes are files you review; real cloud changes show their plan
+  and run once, after you confirm.
+- **Your tools, your versions.** Tools come from the project's own `mise.toml`, never from
   the host.
+- **Your credentials stay yours.** Bastion stores no cloud keys; real AWS uses your profile's
+  own sign-in.
 
 ## Status
 
-Early preview. The local path (cluster, app, GitOps, hardening, observability) works end to end on a `kind` cluster;
-the cloud steps (EKS plan, apply and ship) are built and rehearsed against Floci, not yet against a real account.
-Expect rough edges, and please open an issue when you hit one.
+Release candidate for **Linux x64**. macOS, Windows and remote (SSH) hosts are partly supported
+or not yet validated. See the [support matrix](docs/bastion/support-matrix.md) for exactly what
+works where, and its known limits.
 
 ## Run it from source
 
@@ -68,7 +73,7 @@ Installers will be attached to [Releases](https://github.com/nazmur96/bastion/re
 
 Bastion is a fork of [Orca](https://github.com/stablyai/orca) by Lovecast Inc., used under the MIT license; Orca's
 original README is kept at [docs/orca-README.md](docs/orca-README.md). The workbench, terminals, editor and agent
-runtime are Orca's; the DevOps path, system map, side panel and Bastion's look are this fork's.
+runtime are Orca's; project workspaces, discovery, cloud targets, recipes, delivery, operations and Bastion's look are this fork's.
 
 ## License
 
