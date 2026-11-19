@@ -27,8 +27,8 @@ jobs:
             label: linux-x64
           - os: macos-15
             script: build:mac
-            # Apple Silicon only: the Intel native module variants are not installed.
-            args: --arm64 --publish never
+            # Name the targets explicitly so the default mac config cannot add Intel builds.
+            args: dmg:arm64 zip:arm64 --publish never
             label: macos-arm64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
