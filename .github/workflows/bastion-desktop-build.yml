@@ -1,10 +1,7 @@
 name: Bastion desktop build
 
-# Fork: unsigned Bastion installers for Linux and macOS on standard GitHub runners. Windows is
-# left out for now (engineer decision); upstream builds it on windows-2022.
-# Started by hand only; nothing is published. The managed server template is not bundled
-# here (it needs native prebuilds for every target), so remote hosts cannot have a managed
-# server installed from these builds.
+# Unsigned Linux and macOS desktop installers with the full managed SSH server template.
+# Windows runners qualify server slots. Only manual dispatch starts this workflow.
 on:
   workflow_dispatch:
 
@@ -16,7 +13,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  server-template:
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/qualified-orcad-template.yml
+    with:
+      ref: ${{ github.sha }}
+      fast_runners: false
+
   build:
+    needs: server-template
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +43,7 @@ jobs:
       # Unsigned builds: no signing identity is discovered or required.
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       ORCA_BACKGROUND_LAUNCH: '1'
+      ORCA_REQUIRE_ORCAD_TEMPLATE: '1'
     steps:
       - uses: actions/checkout@v6
         with:
@@ -50,6 +58,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The desktop build also bundles the mobile web client, a separate pnpm project.
       - uses: ./.github/actions/install-mobile-dependencies
+      - name: Download the qualified server template from this run
+        uses: actions/download-artifact@v8
+        with:
+          name: orcad-template
+          path: out/orcad-template
       # Never publish: electron-builder otherwise tries to create a GitHub release on CI.
       - run: pnpm run ${{ matrix.script }} ${{ matrix.args }}
       - uses: actions/upload-artifact@v7

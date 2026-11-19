@@ -188,18 +188,22 @@ jobs:
         with:
           bun-version-file: config/.bun-version
           no-cache: true
+      # Checkout authenticates the pinned revision even when the caller is a private fork.
+      - uses: actions/checkout@v6
+        if: runner.os == 'Linux'
+        with:
+          ref: f4092c06d639ee13ad446261dcabc78b27a21fbc
+          path: .build/bun-orcad-source
+          persist-credentials: false
       - name: Build the last Bun orcad for the cross-runtime tests
         id: bun-orcad
         background: true
         shell: bash
-        env:
-          BUN_ORCAD_COMMIT: f4092c06d639ee13ad446261dcabc78b27a21fbc
         run: |
           if [ "$RUNNER_OS" != Linux ]; then exit 0; fi
-          git fetch --no-tags --depth=1 origin "$BUN_ORCAD_COMMIT"
-          git worktree add --detach "$RUNNER_TEMP/bun-orcad-source" "$BUN_ORCAD_COMMIT"
-          pnpm --dir "$RUNNER_TEMP/bun-orcad-source" install --frozen-lockfile --ignore-scripts
-          node "$RUNNER_TEMP/bun-orcad-source/config/scripts/build-orcad-bun.mjs" --out-dir "$RUNNER_TEMP/bun-orcad"
+          bun_source="$GITHUB_WORKSPACE/.build/bun-orcad-source"
+          pnpm --dir "$bun_source" install --frozen-lockfile --ignore-scripts
+          node "$bun_source/config/scripts/build-orcad-bun.mjs" --out-dir "$RUNNER_TEMP/bun-orcad"
           echo "slot=$RUNNER_TEMP/bun-orcad" >> "$GITHUB_OUTPUT"
           echo "executable=$(command -v bun)" >> "$GITHUB_OUTPUT"
       # Linux release slots come from the floor and Alpine lanes; this slot serves local tests.
