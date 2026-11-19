@@ -65,13 +65,13 @@
   min-height: 0;
   flex-direction: column;
   /* Repositories and worktrees below must stay usable; navigation scrolls inside its share. */
-  max-height: 52vh;
+  max-height: 60vh;
 }
 .workspace-identity {
   display: flex;
   gap: 10px;
   align-items: center;
-  padding: 20px 16px 10px;
+  padding: 14px 16px 8px;
 }
 .workspace-avatar {
   background: color-mix(in srgb, var(--bx-accent) 12%, var(--background));
@@ -113,16 +113,16 @@
   font-size: 10px;
 }
 .workspace-navigation .workspace-eyebrow {
-  padding: 20px 12px 10px;
+  padding: 12px 12px 6px;
   font-size: 9px;
 }
 .workspace-nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 3px;
+  padding: 6px 12px;
+  margin-bottom: 1px;
   border-radius: var(--radius-md);
   color: var(--muted-foreground);
   font-size: 12px;
