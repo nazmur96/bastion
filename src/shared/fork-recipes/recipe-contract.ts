@@ -7,7 +7,7 @@ import { containerRegistrySchema, workloadRoleSchema } from './registry-and-role
 
 /** Fork: Recipes page ↔ main contract (Step 10.1). */
 export type RecipeStep = {
-  step: 'fmt' | 'init' | 'validate' | 'apply' | 'destroy' | 'output'
+  step: 'fmt' | 'init' | 'validate' | 'plan' | 'apply' | 'destroy' | 'output'
   ok: boolean
   message: string | null
 }
@@ -59,6 +59,17 @@ export type RecipeRealChallenge = {
   profileName: string
   region: string
   terraform: string
+  /** What the saved plan will do; the confirmation applies exactly this plan. */
+  plan: RecipePlanSummary
+}
+export type RecipePlanSummary = {
+  add: number
+  change: number
+  replace: number
+  destroy: number
+  /** At most 50 resources, in plan order. */
+  resources: { address: string; action: 'create' | 'update' | 'replace' | 'delete' }[]
+  truncated: boolean
 }
 export type RecipeSnapshot = {
   directory: string

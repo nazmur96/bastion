@@ -9,6 +9,11 @@ import type {
   RecipeStep
 } from '../../../../shared/fork-recipes/recipe-contract'
 
+function planTotal(challenge: RecipeRealChallenge): number {
+  const { add, change, replace, destroy } = challenge.plan
+  return add + change + replace + destroy
+}
+
 /**
  * Fork: Step 13.3. A reviewed recipe applied to, or destroyed from, the selected real AWS
  * target. The account must already be verified and accepted on the Cloud page; preparing
@@ -147,9 +152,11 @@ export function RealRecipeActions({
           <DialogContent surface="security">
             <DialogHeader>
               <DialogTitle>
-                {challenge.operation === 'apply'
-                  ? 'Create real AWS resources?'
-                  : 'Destroy real AWS resources?'}
+                {planTotal(challenge) === 0
+                  ? 'No changes to make'
+                  : challenge.operation === 'apply'
+                    ? 'Change real AWS resources?'
+                    : 'Destroy real AWS resources?'}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-1 break-all text-sm">
@@ -161,23 +168,35 @@ export function RealRecipeActions({
                 Terraform {challenge.terraform} {challenge.operation} in {challenge.directory} ·
                 reviewed fingerprint {challenge.fingerprint.slice(7, 19)}
               </p>
-              <ul className="font-mono text-xs">
-                {challenge.files.map((file) => (
-                  <li key={file}>{file}</li>
+              <p className="font-medium" data-testid="recipe-real-plan">
+                Plan: {challenge.plan.add} to add, {challenge.plan.change} to change,{' '}
+                {challenge.plan.replace} to replace, {challenge.plan.destroy} to destroy
+              </p>
+              <ul className="font-mono text-xs" aria-label="Planned resources">
+                {challenge.plan.resources.map((resource) => (
+                  <li key={resource.address}>
+                    {resource.action} · {resource.address}
+                  </li>
                 ))}
+                {challenge.plan.truncated && <li>…and more</li>}
               </ul>
+              <p className="text-xs text-muted-foreground">
+                Files: {challenge.files.map((file) => file.split('/').at(-1)).join(', ')}.
+                Confirming applies exactly this saved plan; Terraform refuses it if the account
+                changed since.
+              </p>
               <p>
                 {challenge.operation === 'apply'
                   ? 'This creates real resources that AWS bills until they are destroyed.'
                   : 'This deletes the resources this recipe manages. Data in them is lost.'}{' '}
-                The confirmation is valid once, for one minute, and only for this account.
+                The confirmation is valid once, for five minutes, and only for this account.
               </p>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="ghost" onClick={cancel}>
                 Cancel
               </Button>
-              <Button disabled={busy} onClick={() => void confirm()}>
+              <Button disabled={busy || planTotal(challenge) === 0} onClick={() => void confirm()}>
                 {challenge.operation === 'apply' ? 'Apply to real AWS' : 'Destroy from real AWS'}
               </Button>
             </div>

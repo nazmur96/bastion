@@ -39,7 +39,11 @@ export function flociUnsupportedResource(files: RecipeFile[]): string | null {
 }
 
 export class RecipeRunError extends Error {
-  constructor(readonly code: 'changed' | 'failed' | 'emulator-unsupported' | 'grant') {
+  constructor(
+    readonly code: 'changed' | 'failed' | 'emulator-unsupported' | 'grant' | 'plan',
+    /** Terraform's own first error line, for a plan that could not be made. */
+    readonly detail: string | null = null
+  ) {
     super(code)
   }
 }
@@ -97,7 +101,7 @@ function firstLine(text: string): string | null {
     .find(Boolean)
   return line ? line.slice(0, 240) : null
 }
-async function step(
+export async function step(
   run: RunTerraform,
   tool: TerraformTool,
   name: RecipeStep['step'],
@@ -244,9 +248,15 @@ export async function terraformChange(
     return { steps, outputs: {} }
   }
   const output = await step(run, tool, 'output', ['output', '-json', '-no-color'], work, env, 30000)
+  const outputs = parseOutputs(output.stdout)
+  return { steps, outputs }
+}
+
+/** Non-sensitive, short string outputs from `terraform output -json`. */
+export function parseOutputs(stdout: string): Record<string, string> {
   const outputs: Record<string, string> = {}
   try {
-    const parsed: unknown = JSON.parse(output.stdout)
+    const parsed: unknown = JSON.parse(stdout)
     if (parsed && typeof parsed === 'object') {
       for (const [key, value] of Object.entries(parsed).slice(0, 20)) {
         const inner: unknown =
@@ -260,5 +270,5 @@ export async function terraformChange(
   } catch {
     // Outputs are informational; a malformed output list does not undo the apply.
   }
-  return { steps, outputs }
+  return outputs
 }

@@ -38,6 +38,13 @@ function failure(error: unknown): { ok: false; code: string; message: string } {
   if (error instanceof RealAwsFailure) {
     return { ok: false, code: error.code, message: realAwsMessages[error.code] }
   }
+  if (error instanceof RecipeRunError && error.code === 'plan') {
+    return {
+      ok: false,
+      code: 'plan',
+      message: `Terraform could not make a plan, so nothing was changed: ${error.detail ?? 'unknown error'}`
+    }
+  }
   const code =
     error instanceof RecipeFileError || error instanceof RecipeRunError
       ? error.code
