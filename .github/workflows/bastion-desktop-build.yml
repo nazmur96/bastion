@@ -22,13 +22,17 @@ jobs:
         include:
           - os: ubuntu-24.04
             script: build:linux
+            args: --publish never
             label: linux-x64
           - os: macos-15
             script: build:mac
+            # Apple Silicon only: the Intel native module variants are not installed.
+            args: --arm64 --publish never
             label: macos-arm64
           # Upstream builds on windows-2022: its native modules do not build with Visual Studio 18.
           - os: windows-2022
             script: build:win
+            args: --publish never
             label: windows-x64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
@@ -50,7 +54,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The desktop build also bundles the mobile web client, a separate pnpm project.
       - uses: ./.github/actions/install-mobile-dependencies
-      - run: pnpm run ${{ matrix.script }}
+      # Never publish: electron-builder otherwise tries to create a GitHub release on CI.
+      - run: pnpm run ${{ matrix.script }} ${{ matrix.args }}
       - uses: actions/upload-artifact@v7
         with:
           name: bastion-${{ matrix.label }}
