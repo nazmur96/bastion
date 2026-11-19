@@ -1,6 +1,7 @@
 name: Bastion desktop build
 
-# Fork: unsigned Bastion installers for Linux, macOS and Windows on standard GitHub runners.
+# Fork: unsigned Bastion installers for Linux and macOS on standard GitHub runners. Windows is
+# left out for now (engineer decision); upstream builds it on windows-2022.
 # Started by hand only; nothing is published. The managed server template is not bundled
 # here (it needs native prebuilds for every target), so remote hosts cannot have a managed
 # server installed from these builds.
@@ -29,11 +30,6 @@ jobs:
             # Apple Silicon only: the Intel native module variants are not installed.
             args: --arm64 --publish never
             label: macos-arm64
-          # Upstream builds on windows-2022: its native modules do not build with Visual Studio 18.
-          - os: windows-2022
-            script: build:win
-            args: --publish never
-            label: windows-x64
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     env:
