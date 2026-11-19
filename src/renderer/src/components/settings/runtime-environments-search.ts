@@ -74,7 +74,7 @@ export const getRuntimeEnvironmentsSearchEntry = createLocalizedCatalog(
       ),
       ...translateSearchKeyword(
         'auto.components.settings.managedServers.search.title',
-        'Orca on your SSH hosts'
+        'Bastion on your SSH hosts'
       ),
       ...translateSearchKeyword('auto.components.settings.managedServers.search.keywordSsh', 'ssh'),
       ...translateSearchKeyword(

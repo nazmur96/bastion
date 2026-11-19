@@ -20748,7 +20748,10 @@
         "toolsHint": "Every Infra card: deploy, harden, cloud, observe, playground",
         "tools": "Tools & settings",
         "fullMap": "System map",
-        "closeView": "Close"
+        "closeView": "Close",
+        "flociSelected": "selected, not running",
+        "flociNone": "no target selected",
+        "openCloud": "Manage in Cloud"
       },
       "radar": {
         "starting": "Starting the cluster view (Radar)…",
@@ -21073,7 +21076,8 @@
         "calm": "Every workload on the map is healthy.",
         "recent": "Latest commits: {{commits}}",
         "diagnose": "Diagnose with Claude",
-        "runbooks": "Runbooks"
+        "runbooks": "Runbooks",
+        "quietUnknown": "No commits in this window. Cluster warnings are unknown."
       },
       "section": {
         "deploy": "Deploy · local cluster and GitOps",
@@ -21110,6 +21114,9 @@
         "checkTools": "Check tools in terminal",
         "reading": "Reading project stacks…",
         "stacks": "Detected stacks"
+      },
+      "floci": {
+        "notRunning": "The selected Floci target is not running. Start it in Cloud, or clear the selection."
       }
     },
     "sidePanel": {
@@ -24097,5 +24104,20 @@
     "creationFailed": "File creation failed",
     "creating": "Creating source file",
     "newChecks": "New check change"
+  },
+  "terminalAssist": {
+    "menu": "Ask agent about selection",
+    "copied": "Draft copied. Review it before sending.",
+    "copyFailed": "Could not copy the draft.",
+    "refused": "That chat is no longer available here. Pick another.",
+    "title": "Ask an agent about this output",
+    "preview": "Unsent draft",
+    "note": "Only your selection is used: secrets are redacted and only its last lines are kept. The draft is added to the chat composer unsent; nothing is run.",
+    "destination": "Draft destination",
+    "copyDestination": "Copy for any agent",
+    "cancel": "Cancel",
+    "copy": "Copy draft",
+    "append": "Add to chat draft",
+    "empty": "Select the output you want to ask about first."
   }
 }
