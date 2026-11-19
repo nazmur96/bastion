@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
-import Database from '../../main/sqlite/sync-database'
 import { isProjectWorkspaceId } from '../../shared/fork-project-workspaces'
 import { readRuntimeSourceStamp } from '../../shared/runtime-source-env'
 
@@ -27,7 +26,10 @@ export function resolveProjectWorkspaceCliRoot(baseRoot: string, env: NodeJS.Pro
   if (!existsSync(file)) {
     return baseRoot
   }
-  const db = new Database(file, { readonly: true, fileMustExist: true, timeout: 5000 })
+  // Loaded lazily from Node itself: the CLI ships as plain modules and cannot reach the
+  // desktop bundle's SQLite adapter, and the server template forbids a static node:sqlite import.
+  const { DatabaseSync } = process.getBuiltinModule('node:sqlite')
+  const db = new DatabaseSync(file, { readOnly: true, timeout: 5000 })
   try {
     const version = db.prepare('PRAGMA user_version').get()?.user_version
     if (version !== 1 && version !== 2 && version !== 3) {
