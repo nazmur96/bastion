@@ -26,7 +26,8 @@ jobs:
           - os: macos-15
             script: build:mac
             label: macos-arm64
-          - os: windows-latest
+          # Upstream builds on windows-2022: its native modules do not build with Visual Studio 18.
+          - os: windows-2022
             script: build:win
             label: windows-x64
     runs-on: ${{ matrix.os }}
@@ -47,6 +48,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y rpm
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
+      # The desktop build also bundles the mobile web client, a separate pnpm project.
+      - uses: ./.github/actions/install-mobile-dependencies
       - run: pnpm run ${{ matrix.script }}
       - uses: actions/upload-artifact@v7
         with:
