@@ -1,0 +1,62 @@
+name: Bastion desktop build
+
+# Fork: unsigned Bastion installers for Linux, macOS and Windows on standard GitHub runners.
+# Started by hand only; nothing is published. The managed server template is not bundled
+# here (it needs native prebuilds for every target), so remote hosts cannot have a managed
+# server installed from these builds.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bastion-desktop-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            script: build:linux
+            label: linux-x64
+          - os: macos-15
+            script: build:mac
+            label: macos-arm64
+          - os: windows-latest
+            script: build:win
+            label: windows-x64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120
+    env:
+      # Unsigned builds: no signing identity is discovered or required.
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      ORCA_BACKGROUND_LAUNCH: '1'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+      - name: Install rpm tooling for the .rpm package
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run ${{ matrix.script }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bastion-${{ matrix.label }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.rpm
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
