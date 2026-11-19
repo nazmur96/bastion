@@ -7,11 +7,11 @@ const step = jobs.desktop_template.steps.find(
   (item) => item.name === 'Wait for every template qualification lane'
 )
 const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor
-function lanes(prefix = 'orcad-template / qualify / ') {
+function lanes(prefix = 'orcad-template / qualify / ', persistence = 6) {
   return [
     { name: `${prefix}desktop_template`, status: 'in_progress' },
     ...Object.entries({
-      persistence: 6,
+      persistence,
       mobile_web_bundle: 1,
       linux_glibc_floor: 2,
       linux_glibc217_compat: 1,
@@ -25,7 +25,7 @@ function lanes(prefix = 'orcad-template / qualify / ') {
     )
   ]
 }
-function execute(snapshots) {
+function execute(snapshots, templateSmokeOnly = false) {
   let now = 0
   let index = 0
   const calls = []
@@ -40,7 +40,14 @@ function execute(snapshots) {
   return {
     calls,
     delays,
-    result: new AsyncFunction('github', 'context', 'Date', 'setTimeout', step.with.script)(
+    result: new AsyncFunction(
+      'github',
+      'context',
+      'Date',
+      'setTimeout',
+      'process',
+      step.with.script
+    )(
       github,
       { repo: { owner: 'owner', repo: 'repo' }, runId: 42 },
       { now: () => now },
@@ -49,12 +56,20 @@ function execute(snapshots) {
         now += delay
         index++
         resolve()
-      }
+      },
+      { env: { TEMPLATE_SMOKE_ONLY: String(templateSmokeOnly) } }
     )
   }
 }
 
 describe('early template assembly qualification gate', () => {
+  it('requires all four macOS and Windows lanes in artifact smoke mode', async () => {
+    const complete = lanes('server-template / qualify / ', 4)
+    await expect(execute([complete], true).result).resolves.toBeUndefined()
+    await expect(execute([complete.slice(0, -1)], true).result).rejects.toThrow('Timed out')
+    await expect(execute([complete], false).result).rejects.toThrow('Timed out')
+  })
+
   it.each(['', 'orcad-template / qualify / '])(
     'waits for all current-attempt jobs with prefix %s',
     async (prefix) => {

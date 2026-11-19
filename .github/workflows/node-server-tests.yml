@@ -42,6 +42,10 @@ on:
         description: Upload each lane's release slot and merge them into the orcad-template artifact
         type: boolean
         default: false
+      template_smoke_only:
+        description: Qualify the packaged native slots and pinned Node for template builds
+        type: boolean
+        default: false
       fast_runners:
         description: Use Blacksmith where the platform and architecture are available
         type: boolean
@@ -152,7 +156,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJSON(needs.changes.outputs.runners || '["ubuntu-22.04","ubuntu-24.04-arm","macos-15","macos-15-intel","windows-2022","windows-11-arm"]') }}
+        # Linux release slots are qualified by the glibc floor and Alpine jobs.
+        os: ${{ fromJSON(inputs.template_smoke_only && '["macos-15","macos-15-intel","windows-2022","windows-11-arm"]' || needs.changes.outputs.runners || '["ubuntu-22.04","ubuntu-24.04-arm","macos-15","macos-15-intel","windows-2022","windows-11-arm"]') }}
     # Keep platform keys stable for slot names and Windows cross-compilation. PR and scheduled runs use the
     # free hosted label; only explicit fast_runners callers rent Blacksmith where it has the platform.
     runs-on: >-
@@ -188,22 +193,18 @@ jobs:
         with:
           bun-version-file: config/.bun-version
           no-cache: true
-      # Checkout authenticates the pinned revision even when the caller is a private fork.
-      - uses: actions/checkout@v6
-        if: runner.os == 'Linux'
-        with:
-          ref: f4092c06d639ee13ad446261dcabc78b27a21fbc
-          path: .build/bun-orcad-source
-          persist-credentials: false
       - name: Build the last Bun orcad for the cross-runtime tests
         id: bun-orcad
         background: true
         shell: bash
+        env:
+          BUN_ORCAD_COMMIT: f4092c06d639ee13ad446261dcabc78b27a21fbc
         run: |
           if [ "$RUNNER_OS" != Linux ]; then exit 0; fi
-          bun_source="$GITHUB_WORKSPACE/.build/bun-orcad-source"
-          pnpm --dir "$bun_source" install --frozen-lockfile --ignore-scripts
-          node "$bun_source/config/scripts/build-orcad-bun.mjs" --out-dir "$RUNNER_TEMP/bun-orcad"
+          git fetch --no-tags --depth=1 origin "$BUN_ORCAD_COMMIT"
+          git worktree add --detach "$RUNNER_TEMP/bun-orcad-source" "$BUN_ORCAD_COMMIT"
+          pnpm --dir "$RUNNER_TEMP/bun-orcad-source" install --frozen-lockfile --ignore-scripts
+          node "$RUNNER_TEMP/bun-orcad-source/config/scripts/build-orcad-bun.mjs" --out-dir "$RUNNER_TEMP/bun-orcad"
           echo "slot=$RUNNER_TEMP/bun-orcad" >> "$GITHUB_OUTPUT"
           echo "executable=$(command -v bun)" >> "$GITHUB_OUTPUT"
       # Linux release slots come from the floor and Alpine lanes; this slot serves local tests.
@@ -233,9 +234,13 @@ jobs:
           ORCA_REUSE_PREPARED_WINDOWS_SECURITY: ${{ runner.os == 'Windows' && steps.dependencies.outcome == 'success' }}
       - wait: bun-orcad
       - run: pnpm test:node-server --artifact ${{ runner.os == 'Linux' && '--cross-runtime' || '' }}
+        if: ${{ !inputs.template_smoke_only }}
         env:
           ORCA_BUN_ORCAD_SLOT: ${{ steps.bun-orcad.outputs.slot }}
           BUN_EXECUTABLE: ${{ steps.bun-orcad.outputs.executable }}
+      - name: Smoke-test the packaged PTY on the pinned Node
+        if: inputs.template_smoke_only
+        run: pnpm test:node-server --artifact src/main/orcad/orcad-packaged-node-pty.integration.test.ts
       - name: Build the host-target desktop server template
         if: runner.os == 'Linux'
         run: node config/scripts/build-orcad-template.mjs --targets linux-${{ runner.arch == 'ARM64' && 'arm64' || 'x64' }}-glibc
@@ -427,7 +432,7 @@ jobs:
           name: orcad-mobile-web-bundle
           path: out/mobile-web
       - run: pnpm build:orcad
-      - run: pnpm test:node-server --artifact
+      - run: pnpm test:node-server --artifact ${{ inputs.template_smoke_only && 'src/main/orcad/orcad-packaged-node-pty.integration.test.ts' || '' }}
       - name: Keep this runner's glibc 2.28 slot for the desktop template
         if: inputs.build_template
         uses: actions/upload-artifact@v7
@@ -551,12 +556,12 @@ jobs:
         with:
           name: orcad-mobile-web-bundle
           path: out/mobile-web
-      - name: Verify native Alpine artifact and persistence
+      - name: Verify the native Alpine artifact
         run: |
           docker exec -i orcad-alpine sh -s <<'NODE_SERVER_QUALIFICATION'
           set -eu
           pnpm build:orcad
-          pnpm test:node-server --artifact
+          pnpm test:node-server --artifact ${{ inputs.template_smoke_only && 'src/main/orcad/orcad-packaged-node-pty.integration.test.ts' || '' }}
           NODE_SERVER_QUALIFICATION
       - name: Clean up the Alpine qualification container
         if: always()
@@ -588,11 +593,13 @@ jobs:
       - uses: ./.github/actions/install-node-dependencies
       - name: Wait for every template qualification lane
         uses: actions/github-script@v8
+        env:
+          TEMPLATE_SMOKE_ONLY: ${{ inputs.template_smoke_only }}
         with:
           script: |
             const deadline = Date.now() + 25 * 60_000
             const expected = {
-              persistence: 6,
+              persistence: process.env.TEMPLATE_SMOKE_ONLY === 'true' ? 4 : 6,
               mobile_web_bundle: 1,
               linux_glibc_floor: 2,
               linux_glibc217_compat: 1,

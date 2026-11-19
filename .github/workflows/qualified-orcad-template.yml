@@ -10,6 +10,10 @@ on:
         description: Qualify on Blacksmith; disable inside the SignPath signing workflow.
         type: boolean
         default: true
+      template_smoke_only:
+        description: Qualify the packaged native slots and pinned Node without the broader persistence suite.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -47,8 +51,9 @@ jobs:
         shell: bash
         env:
           RUNNER_PROFILE: ${{ inputs.fast_runners && 'fast' || 'github-hosted' }}
-        # Production must never reuse qualification from the adhoc runner pool.
-        run: echo "key=orcad-qualified-template-v2-$RUNNER_PROFILE-$(git -C .build/workflow-policy rev-parse HEAD:.github)-$(git rev-parse HEAD)-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+          QUALIFICATION_SCOPE: ${{ inputs.template_smoke_only && 'artifact-smoke' || 'full' }}
+        # Full qualification must never reuse a template from a narrower scope or another runner pool.
+        run: echo "key=orcad-qualified-template-v3-$RUNNER_PROFILE-$QUALIFICATION_SCOPE-$(git -C .build/workflow-policy rev-parse HEAD:.github)-$(git rev-parse HEAD)-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@v5
         id: restore
         continue-on-error: true
@@ -87,6 +92,7 @@ jobs:
       ref: ${{ inputs.ref }}
       build_template: true
       fast_runners: ${{ inputs.fast_runners }}
+      template_smoke_only: ${{ inputs.template_smoke_only }}
 
   save:
     needs: [cache, qualify]

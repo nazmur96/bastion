@@ -616,7 +616,7 @@ it('runs the Bun and Node cross-runtime tests on Linux against pinned inputs', (
   expect(consumer.run).toBe(
     "pnpm test:node-server --artifact ${{ runner.os == 'Linux' && '--cross-runtime' || '' }}"
   )
-  expect(consumer.if).toBeUndefined()
+  expect(consumer.if).toBe('${{ !inputs.template_smoke_only }}')
   expect(consumer.env).toEqual({
     ORCA_BUN_ORCAD_SLOT: '${{ steps.bun-orcad.outputs.slot }}',
     BUN_EXECUTABLE: '${{ steps.bun-orcad.outputs.executable }}'
