@@ -4,6 +4,8 @@ import type { RecipeCreateRequest } from './recipe-contract'
 import { renderSecretReference } from './secret-reference'
 import { renderPostgresDatabase } from './postgres-database'
 import { renderContainerRegistry, renderWorkloadRole } from './registry-and-role'
+import { renderMessageQueue, renderNotificationTopic } from './messaging-recipes'
+import { renderKeyValueTable } from './key-value-table'
 
 /** Fork: every recipe Bastion offers. Each renders new files under its own infra directory. */
 export function renderRecipe(request: RecipeCreateRequest): {
@@ -26,5 +28,11 @@ export function renderRecipe(request: RecipeCreateRequest): {
       return { directory: request.input.directory, files: renderContainerRegistry(request.input) }
     case 'workload-role':
       return { directory: request.input.directory, files: renderWorkloadRole(request.input) }
+    case 'message-queue':
+      return { directory: request.input.directory, files: renderMessageQueue(request.input) }
+    case 'notification-topic':
+      return { directory: request.input.directory, files: renderNotificationTopic(request.input) }
+    case 'key-value-table':
+      return { directory: request.input.directory, files: renderKeyValueTable(request.input) }
   }
 }

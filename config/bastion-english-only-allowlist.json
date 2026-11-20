@@ -3967,5 +3967,264 @@
     "text": "Run history is unavailable; recurring checks are paused.",
     "dynamic": false,
     "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "yes",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "no",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "string",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "number",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "binary",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Config variable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Config directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Message queue",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "An encrypted Amazon SQS queue with a dead-letter queue, TLS-only access, and separate producer and consumer policies you can attach to existing roles.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Queue name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "orders",
+    "dynamic": false,
+    "count": 2
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Visibility timeout (s)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Retention (days, 1–14)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Receives before dead-letter",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Producer role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "none",
+    "dynamic": false,
+    "count": 6
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Consumer role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Notification topic",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "An Amazon SNS topic encrypted with the AWS-managed key, TLS-only access, and a publisher policy you can attach to an existing role. Subscriptions are added by the consumers.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Topic name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "order-events",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Publisher role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Key-value table",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "An on-demand Amazon DynamoDB table with point-in-time recovery and deletion protection, plus separate reader and writer policies for existing roles.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Table name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Partition key",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:placeholder",
+    "text": "id",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Partition key type",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Sort key (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Sort key type",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Point-in-time recovery",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Deletion protection",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Reader role (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/StorageAndQueueForms.tsx",
+    "kind": "object-property:label",
+    "text": "Writer role (optional)",
+    "dynamic": false,
+    "count": 1
   }
 ]

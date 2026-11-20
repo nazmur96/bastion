@@ -223,3 +223,52 @@ test('10.4/10.5 recipes create files; Docker-backed resources are validate-only 
   expect(main).toContain('data "aws_db_instance" "this"')
   expect(main).not.toMatch(/resource "aws_db_instance"|password\s*=/)
 })
+
+test('14.7 queue, topic and table recipes create files, a config example each, and stay Floci-deliverable', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  await openBastionPage(orcaPage, 'Recipes')
+  const card = orcaPage.getByTestId('recipe-directory')
+  const create = async (testId: string, fill: Record<string, string>, label: string) => {
+    const form = orcaPage.getByTestId(testId)
+    for (const [field, value] of Object.entries(fill)) {
+      await form.getByLabel(field, { exact: true }).fill(value)
+    }
+    await clickCloudControl(form.getByRole('button', { name: label, exact: true }))
+    await clickCloudControl(
+      orcaPage.getByRole('dialog').getByRole('button', { name: label, exact: true })
+    )
+    await expect(card).toBeVisible()
+    await expect(card.getByTestId('recipe-floci-unsupported')).toHaveCount(0)
+  }
+  await create('recipe-message-queue', { 'Queue name': 'orders' }, 'Create queue files')
+  await expect(card).toContainText('config/ORDERS_QUEUE_NAME.env.example')
+  const queue = readFileSync(join(seededRepoPath, 'infra/orders-queue/main.tf'), 'utf8')
+  expect(queue).toContain('deadLetterTargetArn')
+  expect(queue).toContain('aws:SecureTransport')
+
+  await clickCloudControl(orcaPage.getByRole('button', { name: 'New recipe', exact: true }))
+  await create('recipe-notification-topic', { 'Topic name': 'order-events' }, 'Create topic files')
+  expect(
+    readFileSync(join(seededRepoPath, 'config/ORDER_EVENTS_TOPIC_NAME.env.example'), 'utf8')
+  ).toContain('ORDER_EVENTS_TOPIC_NAME=order-events')
+
+  await clickCloudControl(orcaPage.getByRole('button', { name: 'New recipe', exact: true }))
+  await create(
+    'recipe-key-value-table',
+    {
+      'Table name': 'orders',
+      'Partition key': 'id',
+      'Infra directory (new)': 'infra/orders-table'
+    },
+    'Create table files'
+  )
+  const tfvars = readFileSync(join(seededRepoPath, 'infra/orders-table/terraform.tfvars'), 'utf8')
+  expect(tfvars).toMatch(/deletion_protection\s+= true/)
+  expect(tfvars).toMatch(/sort_key\s+= null/)
+})

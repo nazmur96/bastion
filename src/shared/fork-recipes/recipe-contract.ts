@@ -4,6 +4,8 @@ import { objectStorageBindingSchema } from './object-storage-binding'
 import { secretReferenceSchema } from './secret-reference'
 import { postgresDatabaseSchema } from './postgres-database'
 import { containerRegistrySchema, workloadRoleSchema } from './registry-and-role'
+import { messageQueueSchema, notificationTopicSchema } from './messaging-recipes'
+import { keyValueTableSchema } from './key-value-table'
 
 /** Fork: Recipes page ↔ main contract (Step 10.1). */
 export type RecipeStep = {
@@ -32,7 +34,16 @@ export const recipeCreateSchema = z.discriminatedUnion('recipe', [
   z
     .object({ projectId, recipe: z.literal('container-registry'), input: containerRegistrySchema })
     .strict(),
-  z.object({ projectId, recipe: z.literal('workload-role'), input: workloadRoleSchema }).strict()
+  z.object({ projectId, recipe: z.literal('workload-role'), input: workloadRoleSchema }).strict(),
+  z.object({ projectId, recipe: z.literal('message-queue'), input: messageQueueSchema }).strict(),
+  z
+    .object({
+      projectId,
+      recipe: z.literal('notification-topic'),
+      input: notificationTopicSchema
+    })
+    .strict(),
+  z.object({ projectId, recipe: z.literal('key-value-table'), input: keyValueTableSchema }).strict()
 ])
 export type RecipeCreateRequest = z.infer<typeof recipeCreateSchema>
 export const recipeReadSchema = z.object({ projectId, directory: recipeDirectorySchema }).strict()

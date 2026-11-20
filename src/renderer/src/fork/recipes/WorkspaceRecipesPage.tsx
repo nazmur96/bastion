@@ -7,6 +7,7 @@ import { ObjectStorageBindingForm } from './ObjectStorageBindingForm'
 import { SecretReferenceForm } from './SecretReferenceForm'
 import { PostgresDatabaseForm } from './PostgresDatabaseForm'
 import { ContainerRegistryForm, WorkloadRoleForm } from './RegistryAndRoleForms'
+import { KeyValueTableForm, MessageQueueForm, NotificationTopicForm } from './StorageAndQueueForms'
 import { RecipeDirectoryCard } from './RecipeDirectoryCard'
 
 /** Fork: Step 10.1 Recipes page. Reviewed source recipes, delivered to a local emulator. */
@@ -76,6 +77,9 @@ export function WorkspaceRecipesPage({ worktreeId }: { worktreeId: string }): Re
           <PostgresDatabaseForm projectId={worktreeId} onCreated={setSnapshot} />
           <ContainerRegistryForm projectId={worktreeId} onCreated={setSnapshot} />
           <WorkloadRoleForm projectId={worktreeId} onCreated={setSnapshot} />
+          <MessageQueueForm projectId={worktreeId} onCreated={setSnapshot} />
+          <NotificationTopicForm projectId={worktreeId} onCreated={setSnapshot} />
+          <KeyValueTableForm projectId={worktreeId} onCreated={setSnapshot} />
         </>
       )}
       <section className="workspace-card space-y-2">
