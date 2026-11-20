@@ -13,6 +13,8 @@ import { readDeliveryChain } from '../../fork/delivery/delivery-chain'
 import { deliverySources } from '../../fork/delivery/delivery-sources'
 import { runJourneyCheck, verificationStore } from '../../fork/delivery/journey-check'
 import { readWorkloadDiagnosis } from '../../fork/delivery/workload-diagnosis'
+import { probeTls, readCertificateEvidence } from '../../fork/delivery/certificate-evidence'
+import { certificatesSchema } from '../../../shared/fork-delivery/certificate-contract'
 import { assertRuntimeFileMutationExpectation } from './file-mutation-expectation'
 import { requireLocalRuntimeFileRoute } from './file-target'
 import { resolveRuntimeAuthorizedPath } from './chat-scratch-file-root'
@@ -85,6 +87,16 @@ export class RuntimeOwnedCloudOperations {
         // Kept on the owner, keyed by the owner's own project identity.
         await store.append(worktreeId, run)
         return { run }
+      }
+      case 'operations.certificates': {
+        const request = certificatesSchema.parse(params.request)
+        const sources = deliverySources(root, request.repository)
+        return {
+          evidence: await readCertificateEvidence(request, {
+            kubectl: sources.kubectl,
+            probe: (host, port) => probeTls(host, port)
+          })
+        }
       }
       case 'operations.runs': {
         projectOnly.parse(params.request)

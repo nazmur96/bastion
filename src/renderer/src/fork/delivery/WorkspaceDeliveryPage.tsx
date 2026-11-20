@@ -13,6 +13,7 @@ import {
 import type { WorkloadDiagnosis } from '../../../../shared/fork-delivery/operations-contract'
 import { DeliveryDiagnosisSection } from './DeliveryDiagnosisSection'
 import { DeliveryVerificationSection } from './DeliveryVerificationSection'
+import { DeliveryCertificatesSection } from './DeliveryCertificatesSection'
 import { ownerOperation } from './operations-owner-client'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
 
@@ -238,6 +239,7 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
         onDiagnosis={(result) => setDiagnosis(result ? { scope: diagnosisScope, result } : null)}
       />
       <DeliveryVerificationSection projectId={worktreeId} config={config} diagnosis={diagnosis} />
+      <DeliveryCertificatesSection config={config} />
       {promoting && chain?.digest && (
         <Dialog open onOpenChange={(open) => !open && setPromoting(false)}>
           <DialogContent surface="security">

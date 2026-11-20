@@ -12,7 +12,8 @@ export const REMOTE_CLOUD_OPERATIONS = [
   'operations.diagnose',
   'operations.logs',
   'operations.verify',
-  'operations.runs'
+  'operations.runs',
+  'operations.certificates'
 ] as const
 export type RemoteCloudOperation = (typeof REMOTE_CLOUD_OPERATIONS)[number]
 

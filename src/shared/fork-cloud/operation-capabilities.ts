@@ -43,7 +43,14 @@ export type OperationCapability = {
   target: 'none' | 'selected-emulated' | 'selected-real'
   effect: OperationEffect
   /** Where data leaves the owner: nowhere, the loopback emulator, or the cloud provider. */
-  egress: 'none' | 'loopback' | 'provider' | 'registry' | 'cluster' | 'delivery-sources'
+  egress:
+    | 'none'
+    | 'loopback'
+    | 'provider'
+    | 'registry'
+    | 'cluster'
+    | 'delivery-sources'
+    | 'endpoints'
   consent: OperationConsent
 }
 
@@ -252,6 +259,7 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:operationsDiagnose': ['operations.diagnose', 'operations.logs'],
   'bastionCloud:operationsVerify': ['operations.verify'],
   'bastionCloud:operationsRuns': ['operations.runs'],
+  'bastionCloud:operationsCertificates': ['operations.certificates'],
   'bastionCloud:runbookList': ['runbooks.read'],
   'bastionCloud:runbookCreate': ['runbooks.create'],
   'bastionCloud:recipeRealPrepare': ['recipes.prepare-real'],
@@ -279,7 +287,9 @@ export function capabilityNote(id: OperationId): string {
             ? 'Kubernetes cluster'
             : capability.egress === 'delivery-sources'
               ? 'GitHub, registry and cluster'
-              : 'this computer'
+              : capability.egress === 'endpoints'
+                ? "the app's endpoints and cluster"
+                : 'this computer'
   const effect: Record<OperationEffect, string> = {
     'local-read': 'Reads Bastion data',
     'local-write': 'Changes Bastion data only',

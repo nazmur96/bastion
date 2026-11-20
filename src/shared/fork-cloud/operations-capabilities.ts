@@ -42,6 +42,14 @@ export const OPERATIONS_CAPABILITIES = {
     egress: 'cluster',
     consent: 'none'
   },
+  'operations.certificates': {
+    label: 'Read certificate expiry',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'metadata-read',
+    egress: 'endpoints',
+    consent: 'none'
+  },
   'operations.runs': {
     label: 'Read verification runs',
     runsOn: 'owner',

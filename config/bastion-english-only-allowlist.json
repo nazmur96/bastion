@@ -1134,6 +1134,104 @@
     "count": 1
   },
   {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· until",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "· warning window",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-attribute:placeholder",
+    "text": "app.example.com, api.example.com:8443",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "cert-manager certificates",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "Certificates",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Check certificates",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Checking…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "days",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Endpoint certificates",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "Endpoints (host or host:port, up to 10)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "One TLS handshake per endpoint from the project&apos;s owner, plus cert-manager Certificates in the application&apos;s namespace. Read-only. Expired, untrusted, mismatched or expiring within the warning window is a mismatch; unreachable is unknown.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "Read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "Unknown ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryCertificatesSection.tsx",
+    "kind": "jsx-text",
+    "text": "Warn within (days)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
     "filePath": "src/renderer/src/fork/delivery/DeliveryDiagnosisSection.tsx",
     "kind": "jsx-expression",
     "text": "· last exit",

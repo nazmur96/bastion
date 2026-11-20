@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { deliveryConfigSchema, type DeliveryResult } from './delivery-contract'
+import type { CertificateEvidence, CertificatesRequest } from './certificate-contract'
 
 /**
  * Fork: Step 12 verification, diagnosis and runbooks for the Delivery page's application.
@@ -120,6 +121,9 @@ export type OperationsApi = {
   diagnose: (request: DiagnoseRequest) => Promise<DeliveryResult<{ diagnosis: WorkloadDiagnosis }>>
   verify: (request: VerifyRequest) => Promise<DeliveryResult<{ run: VerificationRun }>>
   runs: (request: { projectId: string }) => Promise<DeliveryResult<{ runs: VerificationRun[] }>>
+  certificates: (
+    request: CertificatesRequest
+  ) => Promise<DeliveryResult<{ evidence: CertificateEvidence }>>
   runbooks: (request: {
     projectId: string
   }) => Promise<DeliveryResult<{ runbooks: RunbookSummary[] }>>
