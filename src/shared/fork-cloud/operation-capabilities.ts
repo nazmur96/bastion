@@ -51,6 +51,7 @@ export type OperationCapability = {
     | 'cluster'
     | 'delivery-sources'
     | 'endpoints'
+    | 'monitoring'
   consent: OperationConsent
 }
 
@@ -261,6 +262,7 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:operationsRuns': ['operations.runs'],
   'bastionCloud:operationsCertificates': ['operations.certificates'],
   'bastionCloud:operationsBackups': ['operations.backups'],
+  'bastionCloud:operationsMonitoring': ['operations.monitoring'],
   'bastionCloud:runbookList': ['runbooks.read'],
   'bastionCloud:runbookCreate': ['runbooks.create'],
   'bastionCloud:recipeRealPrepare': ['recipes.prepare-real'],
@@ -290,7 +292,9 @@ export function capabilityNote(id: OperationId): string {
               ? 'GitHub, registry and cluster'
               : capability.egress === 'endpoints'
                 ? "the app's endpoints and cluster"
-                : 'this computer'
+                : capability.egress === 'monitoring'
+                  ? "the project's Prometheus and Grafana"
+                  : 'this computer'
   const effect: Record<OperationEffect, string> = {
     'local-read': 'Reads Bastion data',
     'local-write': 'Changes Bastion data only',

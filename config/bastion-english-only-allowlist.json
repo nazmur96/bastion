@@ -3631,5 +3631,138 @@
     "text": "Unknown ·",
     "dynamic": false,
     "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Monitoring",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Reads the Prometheus (and optional Grafana) attached in .bastion/monitoring.json. Bastion never installs a monitoring stack or stores a token. Connector health is shown apart from the signals; a missing metric is unknown, not healthy.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Reading…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Read monitoring",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "No monitoring attached. Add .bastion/monitoring.json with a Prometheus service or URL.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "· namespace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "unknown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Monitoring connectors",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "reachable ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "auth ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "freshness ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Workload signals",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "query",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Alerts",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· since",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "open",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "No firing or pending alerts for",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryMonitoringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Unknown ·",
+    "dynamic": false,
+    "count": 1
   }
 ]

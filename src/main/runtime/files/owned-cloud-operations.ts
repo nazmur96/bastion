@@ -17,6 +17,8 @@ import { probeTls, readCertificateEvidence } from '../../fork/delivery/certifica
 import { certificatesSchema } from '../../../shared/fork-delivery/certificate-contract'
 import { readBackupEvidence } from '../../fork/delivery/backup-evidence'
 import { backupsSchema } from '../../../shared/fork-delivery/backup-contract'
+import { readMonitoringEvidence } from '../../fork/delivery/monitoring-evidence'
+import { monitoringSources } from '../../fork/delivery/monitoring-sources'
 import { assertRuntimeFileMutationExpectation } from './file-mutation-expectation'
 import { requireLocalRuntimeFileRoute } from './file-target'
 import { resolveRuntimeAuthorizedPath } from './chat-scratch-file-root'
@@ -107,6 +109,15 @@ export class RuntimeOwnedCloudOperations {
             kubectl: deliverySources(root, request.repository).kubectl,
             runs: () => store.list(worktreeId)
           })
+        }
+      }
+      case 'operations.monitoring': {
+        const request = deliveryConfigSchema.parse(params.request)
+        return {
+          evidence: await readMonitoringEvidence(
+            request,
+            monitoringSources(root, deliverySources(root, request.repository).kubectl)
+          )
         }
       }
       case 'operations.runs': {

@@ -15,6 +15,7 @@ import { DeliveryDiagnosisSection } from './DeliveryDiagnosisSection'
 import { DeliveryVerificationSection } from './DeliveryVerificationSection'
 import { DeliveryCertificatesSection } from './DeliveryCertificatesSection'
 import { DeliveryBackupsSection } from './DeliveryBackupsSection'
+import { DeliveryMonitoringSection } from './DeliveryMonitoringSection'
 import { ownerOperation } from './operations-owner-client'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
 
@@ -239,6 +240,7 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
         diagnosis={diagnosis}
         onDiagnosis={(result) => setDiagnosis(result ? { scope: diagnosisScope, result } : null)}
       />
+      <DeliveryMonitoringSection config={config} />
       <DeliveryVerificationSection projectId={worktreeId} config={config} diagnosis={diagnosis} />
       <DeliveryCertificatesSection config={config} />
       <DeliveryBackupsSection config={config} />

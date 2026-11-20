@@ -66,6 +66,14 @@ export const OPERATIONS_CAPABILITIES = {
     egress: 'cluster',
     consent: 'none'
   },
+  'operations.monitoring': {
+    label: 'Read monitoring signals',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'metadata-read',
+    egress: 'monitoring',
+    consent: 'none'
+  },
   'operations.runs': {
     label: 'Read verification runs',
     runsOn: 'owner',

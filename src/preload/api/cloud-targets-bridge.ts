@@ -12,6 +12,7 @@ export const cloudTargetsApi: CloudTargetsApi = {
     runs: (request) => ipcRenderer.invoke('bastionCloud:operationsRuns', request),
     certificates: (request) => ipcRenderer.invoke('bastionCloud:operationsCertificates', request),
     backups: (request) => ipcRenderer.invoke('bastionCloud:operationsBackups', request),
+    monitoring: (request) => ipcRenderer.invoke('bastionCloud:operationsMonitoring', request),
     runbooks: (request) => ipcRenderer.invoke('bastionCloud:runbookList', request),
     createRunbook: (request) => ipcRenderer.invoke('bastionCloud:runbookCreate', request)
   },

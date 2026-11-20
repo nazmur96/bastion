@@ -19,6 +19,9 @@ import { probeTls, readCertificateEvidence } from './certificate-evidence'
 import { certificatesSchema } from '../../../shared/fork-delivery/certificate-contract'
 import { readBackupEvidence } from './backup-evidence'
 import { backupsSchema } from '../../../shared/fork-delivery/backup-contract'
+import { deliveryConfigSchema } from '../../../shared/fork-delivery/delivery-contract'
+import { readMonitoringEvidence } from './monitoring-evidence'
+import { monitoringSources } from './monitoring-sources'
 
 const MESSAGES: Record<string, string> = {
   invalid: 'Invalid operations request.',
@@ -36,6 +39,7 @@ const OPERATIONS = [
   'operationsRuns',
   'operationsCertificates',
   'operationsBackups',
+  'operationsMonitoring',
   'runbookList',
   'runbookCreate'
 ] as const
@@ -117,6 +121,17 @@ export function registerOperationsHandlers(
             kubectl: deliverySources(owner.root, request.repository).kubectl,
             runs: () => store().list(request.projectId)
           })
+          assertCurrent()
+          return { ok: true, evidence }
+        }
+        if (operation === 'operationsMonitoring') {
+          const request = parse(deliveryConfigSchema)
+          admitChannelOperation('bastionCloud:operationsMonitoring', 'operations.monitoring')
+          const { owner } = await provider.owner(request.projectId)
+          const evidence = await readMonitoringEvidence(
+            request,
+            monitoringSources(owner.root, deliverySources(owner.root, request.repository).kubectl)
+          )
           assertCurrent()
           return { ok: true, evidence }
         }
