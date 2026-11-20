@@ -3,6 +3,7 @@ import {
   WorkspaceDesktopTopbar
 } from '@/fork/workspace-desktop/WorkspaceDesktopChrome'
 import { WorkspacePages } from '@/fork/workspace-desktop/WorkspacePages'
+import { RecurringTaskRunner } from '@/fork/delivery/RecurringTaskRunner'
 import { memo, Suspense, useCallback, useRef } from 'react'
 import { lazyWithRetry as lazy } from '@/lib/lazy-with-retry'
 import { translate } from '@/i18n/i18n'
@@ -139,6 +140,7 @@ export function AppWorkspaceShell(props: {
             : 'contents'
         }
       >
+        {isProjectDesktopWindow() && <RecurringTaskRunner />}
         {isProjectDesktopWindow() && <WorkspaceDesktopTopbar />}
         <div className="flex flex-row flex-1 min-h-0 overflow-hidden">
           {/* Keep the non-workspace titlebar from spanning the right sidebar. */}

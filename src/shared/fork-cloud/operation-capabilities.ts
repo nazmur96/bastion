@@ -263,6 +263,7 @@ export const CHANNEL_OPERATIONS = {
   'bastionCloud:operationsCertificates': ['operations.certificates'],
   'bastionCloud:operationsBackups': ['operations.backups'],
   'bastionCloud:operationsMonitoring': ['operations.monitoring'],
+  'bastionCloud:operationsRecurring': ['operations.recurring'],
   'bastionCloud:runbookList': ['runbooks.read'],
   'bastionCloud:runbookCreate': ['runbooks.create'],
   'bastionCloud:recipeRealPrepare': ['recipes.prepare-real'],
@@ -279,22 +280,16 @@ export function isOperationId(value: string): value is OperationId {
 /** A short, consistent note for buttons and tooltips. */
 export function capabilityNote(id: OperationId): string {
   const capability: OperationCapability = OPERATION_CAPABILITIES[id]
-  const where =
-    capability.egress === 'provider'
-      ? 'AWS'
-      : capability.egress === 'loopback'
-        ? 'local emulator'
-        : capability.egress === 'registry'
-          ? 'provider registry'
-          : capability.egress === 'cluster'
-            ? 'Kubernetes cluster'
-            : capability.egress === 'delivery-sources'
-              ? 'GitHub, registry and cluster'
-              : capability.egress === 'endpoints'
-                ? "the app's endpoints and cluster"
-                : capability.egress === 'monitoring'
-                  ? "the project's Prometheus and Grafana"
-                  : 'this computer'
+  const where: Record<OperationCapability['egress'], string> = {
+    none: 'this computer',
+    loopback: 'local emulator',
+    provider: 'AWS',
+    registry: 'provider registry',
+    cluster: 'Kubernetes cluster',
+    'delivery-sources': 'GitHub, registry and cluster',
+    endpoints: "the app's endpoints and cluster",
+    monitoring: "the project's Prometheus and Grafana"
+  }
   const effect: Record<OperationEffect, string> = {
     'local-read': 'Reads Bastion data',
     'local-write': 'Changes Bastion data only',
@@ -315,7 +310,9 @@ export function capabilityNote(id: OperationId): string {
     'identity-anchor': 'needs a verified identity',
     'one-use-grant': 'needs a one-use confirmation'
   }
-  return [effect[capability.effect], where, consent[capability.consent]].filter(Boolean).join(' · ')
+  return [effect[capability.effect], where[capability.egress], consent[capability.consent]]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 /**

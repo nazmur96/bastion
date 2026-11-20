@@ -13,6 +13,7 @@ import {
 } from '../../../../shared/fork-delivery/operations-contract'
 import { runbookDraft, runbookName } from '../../../../shared/fork-delivery/runbook-draft'
 import { ownerOperation } from './operations-owner-client'
+import { useRunnerState } from './recurring-tasks'
 
 const input = 'rounded-md border border-input bg-background px-2 py-1 font-mono text-sm'
 type CheckForm = { service: string; port: string; path: string; expect: string }
@@ -56,9 +57,11 @@ export function DeliveryVerificationSection({
       setRunbooks(list.runbooks)
     }
   }, [api, projectId])
+  // Recurring runs land in the same history; refresh when the runner records one.
+  const recorded = useRunnerState().revision
   useEffect(() => {
     void refresh()
-  }, [refresh])
+  }, [refresh, recorded])
 
   const verify = async (kind: 'check' | 'drill'): Promise<void> => {
     if (!config || !parsedCheck.success) {

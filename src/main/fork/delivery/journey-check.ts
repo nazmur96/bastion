@@ -61,7 +61,7 @@ export function verificationStore(directory: string) {
       await mkdir(directory, { recursive: true, mode: 0o700 })
       await appendFile(file(projectId), `${JSON.stringify(run)}\n`, { mode: 0o600 })
     },
-    list: async (projectId: string): Promise<VerificationRun[]> => {
+    list: async (projectId: string, limit = MAX_RUNS): Promise<VerificationRun[]> => {
       let text = ''
       try {
         text = await readFile(file(projectId), 'utf8')
@@ -78,7 +78,7 @@ export function verificationStore(directory: string) {
             return []
           }
         })
-        .slice(-MAX_RUNS)
+        .slice(-limit)
         .toReversed()
     }
   }

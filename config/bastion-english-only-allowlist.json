@@ -3764,5 +3764,208 @@
     "text": "Unknown ·",
     "dynamic": false,
     "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Recurring checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Journey, certificate and backup checks on an interval, only while this project&apos;s workspace is open. Read-only; every run joins the run history. Runs missed while the workspace was closed are shown as missed, never filled in.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Check",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Check type",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Journey check",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Certificates",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Task name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Every (minutes)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Add recurring check",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Running ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Recurring checks",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "· every",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "min",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Enabled",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Remove",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "passed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "failed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "last run",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Not run yet",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· next",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-expression",
+    "text": "· paused",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "Missed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "run",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "between",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "and",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "(workspace closed or task paused)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryRecurringSection.tsx",
+    "kind": "jsx-text",
+    "text": "No recurring checks.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/RecurringTaskRunner.tsx",
+    "kind": "object-property:error",
+    "text": "Run history is unavailable; recurring checks are paused.",
+    "dynamic": false,
+    "count": 1
   }
 ]

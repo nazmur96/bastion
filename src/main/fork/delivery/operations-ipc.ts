@@ -22,6 +22,8 @@ import { backupsSchema } from '../../../shared/fork-delivery/backup-contract'
 import { deliveryConfigSchema } from '../../../shared/fork-delivery/delivery-contract'
 import { readMonitoringEvidence } from './monitoring-evidence'
 import { monitoringSources } from './monitoring-sources'
+import { runRecurringCheck } from './recurring-check'
+import { recurringRunSchema } from '../../../shared/fork-delivery/recurring-contract'
 
 const MESSAGES: Record<string, string> = {
   invalid: 'Invalid operations request.',
@@ -40,6 +42,7 @@ const OPERATIONS = [
   'operationsCertificates',
   'operationsBackups',
   'operationsMonitoring',
+  'operationsRecurring',
   'runbookList',
   'runbookCreate'
 ] as const
@@ -119,7 +122,8 @@ export function registerOperationsHandlers(
           const { owner } = await provider.owner(request.projectId)
           const evidence = await readBackupEvidence(request, {
             kubectl: deliverySources(owner.root, request.repository).kubectl,
-            runs: () => store().list(request.projectId)
+            // Drills are rare; recurring runs must never push the latest one out of view.
+            runs: () => store().list(request.projectId, Number.POSITIVE_INFINITY)
           })
           assertCurrent()
           return { ok: true, evidence }
@@ -134,6 +138,24 @@ export function registerOperationsHandlers(
           )
           assertCurrent()
           return { ok: true, evidence }
+        }
+        if (operation === 'operationsRecurring') {
+          const request = parse(recurringRunSchema)
+          admitChannelOperation('bastionCloud:operationsRecurring', 'operations.recurring')
+          const { owner } = await provider.owner(request.projectId)
+          const sources = deliverySources(owner.root, request.request.repository)
+          const run = await runRecurringCheck(request, {
+            journey: sources,
+            certificates: { kubectl: sources.kubectl, probe: (host, port) => probeTls(host, port) },
+            backups: {
+              kubectl: sources.kubectl,
+              runs: () => store().list(request.projectId, Number.POSITIVE_INFINITY)
+            }
+          })
+          // Like a manual check: a run that happened is recorded even if the workspace changed.
+          await store().append(request.projectId, run)
+          assertCurrent()
+          return { ok: true, run }
         }
         if (operation === 'operationsRuns') {
           const request = parse(projectSchema)

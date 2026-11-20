@@ -3,6 +3,7 @@ import { deliveryConfigSchema, type DeliveryConfig, type DeliveryResult } from '
 import type { CertificateEvidence, CertificatesRequest } from './certificate-contract'
 import type { BackupEvidence, BackupsRequest } from './backup-contract'
 import type { MonitoringEvidence } from './monitoring-contract'
+import type { RecurringRunRequest } from './recurring-contract'
 
 /**
  * Fork: Step 12 verification, diagnosis and runbooks for the Delivery page's application.
@@ -96,7 +97,10 @@ export const verifySchema = deliveryConfigSchema
 export type VerifyRequest = z.infer<typeof verifySchema>
 export type VerificationRun = {
   id: string
-  kind: 'check' | 'drill'
+  /** Step 14.5 adds recurring certificate and backup checks to the same history. */
+  kind: 'check' | 'drill' | 'certificates' | 'backups'
+  /** Present when a recurring task ran this check; the time it was due. */
+  task?: { id: string; scheduledAt: number }
   runbook: string | null
   at: number
   passed: boolean
@@ -128,6 +132,7 @@ export type OperationsApi = {
   ) => Promise<DeliveryResult<{ evidence: CertificateEvidence }>>
   backups: (request: BackupsRequest) => Promise<DeliveryResult<{ evidence: BackupEvidence }>>
   monitoring: (request: DeliveryConfig) => Promise<DeliveryResult<{ evidence: MonitoringEvidence }>>
+  recurring: (request: RecurringRunRequest) => Promise<DeliveryResult<{ run: VerificationRun }>>
   runbooks: (request: {
     projectId: string
   }) => Promise<DeliveryResult<{ runbooks: RunbookSummary[] }>>

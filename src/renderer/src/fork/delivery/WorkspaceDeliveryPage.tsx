@@ -16,6 +16,7 @@ import { DeliveryVerificationSection } from './DeliveryVerificationSection'
 import { DeliveryCertificatesSection } from './DeliveryCertificatesSection'
 import { DeliveryBackupsSection } from './DeliveryBackupsSection'
 import { DeliveryMonitoringSection } from './DeliveryMonitoringSection'
+import { DeliveryRecurringSection } from './DeliveryRecurringSection'
 import { ownerOperation } from './operations-owner-client'
 import { startWorkspaceHost } from '../workbench/start-project-actions'
 
@@ -244,6 +245,7 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
       <DeliveryVerificationSection projectId={worktreeId} config={config} diagnosis={diagnosis} />
       <DeliveryCertificatesSection config={config} />
       <DeliveryBackupsSection config={config} />
+      <DeliveryRecurringSection projectId={worktreeId} config={config} />
       {promoting && chain?.digest && (
         <Dialog open onOpenChange={(open) => !open && setPromoting(false)}>
           <DialogContent surface="security">

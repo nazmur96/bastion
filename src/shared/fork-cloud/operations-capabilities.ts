@@ -74,6 +74,14 @@ export const OPERATIONS_CAPABILITIES = {
     egress: 'monitoring',
     consent: 'none'
   },
+  'operations.recurring': {
+    label: 'Run a recurring read-only check',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'journey-check',
+    egress: 'endpoints',
+    consent: 'none'
+  },
   'operations.runs': {
     label: 'Read verification runs',
     runsOn: 'owner',

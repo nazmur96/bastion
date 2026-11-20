@@ -19,6 +19,8 @@ import { readBackupEvidence } from '../../fork/delivery/backup-evidence'
 import { backupsSchema } from '../../../shared/fork-delivery/backup-contract'
 import { readMonitoringEvidence } from '../../fork/delivery/monitoring-evidence'
 import { monitoringSources } from '../../fork/delivery/monitoring-sources'
+import { runRecurringCheck } from '../../fork/delivery/recurring-check'
+import { recurringRunSchema } from '../../../shared/fork-delivery/recurring-contract'
 import { assertRuntimeFileMutationExpectation } from './file-mutation-expectation'
 import { requireLocalRuntimeFileRoute } from './file-target'
 import { resolveRuntimeAuthorizedPath } from './chat-scratch-file-root'
@@ -107,7 +109,7 @@ export class RuntimeOwnedCloudOperations {
         return {
           evidence: await readBackupEvidence(request, {
             kubectl: deliverySources(root, request.repository).kubectl,
-            runs: () => store.list(worktreeId)
+            runs: () => store.list(worktreeId, Number.POSITIVE_INFINITY)
           })
         }
       }
@@ -119,6 +121,20 @@ export class RuntimeOwnedCloudOperations {
             monitoringSources(root, deliverySources(root, request.repository).kubectl)
           )
         }
+      }
+      case 'operations.recurring': {
+        const request = recurringRunSchema.parse(params.request)
+        const sources = deliverySources(root, request.request.repository)
+        const run = await runRecurringCheck(request, {
+          journey: sources,
+          certificates: { kubectl: sources.kubectl, probe: (host, port) => probeTls(host, port) },
+          backups: {
+            kubectl: sources.kubectl,
+            runs: () => store.list(worktreeId, Number.POSITIVE_INFINITY)
+          }
+        })
+        await store.append(worktreeId, run)
+        return { run }
       }
       case 'operations.runs': {
         projectOnly.parse(params.request)
