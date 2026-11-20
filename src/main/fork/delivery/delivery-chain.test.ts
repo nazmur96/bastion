@@ -88,6 +88,29 @@ const statuses = (chain: Awaited<ReturnType<typeof readDeliveryChain>>) =>
   Object.fromEntries(chain.links.map((link) => [link.id, link.status]))
 
 describe('delivery evidence chain', () => {
+  it('checks the candidate digest and blocks promotion only when the configured signature gate fails', async () => {
+    const checked: (string | null)[][] = []
+    const source = deps()
+    let requireSignature = true
+    source.supplyChain = async (repository, digest) => {
+      checked.push([repository, digest])
+      return {
+        requireSignature,
+        signature: { status: 'unknown', detail: 'Cosign unavailable' },
+        sbom: { status: 'mismatch', detail: 'No matching attestation' }
+      }
+    }
+    const blocked = await readDeliveryChain(config, source)
+    expect(checked).toEqual([[REPO, DIGEST]])
+    expect(statuses(blocked)).toMatchObject({ signature: 'unknown', sbom: 'mismatch' })
+    expect(blocked).toMatchObject({ promotable: false, blockedBy: 'signature' })
+    requireSignature = false
+    expect(await readDeliveryChain(config, source)).toMatchObject({
+      promotable: true,
+      blockedBy: null
+    })
+  })
+
   it('verifies every link from revision to running pods', async () => {
     const chain = await readDeliveryChain(config, deps())
     expect(statuses(chain)).toEqual({

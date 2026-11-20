@@ -21,6 +21,8 @@ const LABELS: Record<string, string> = {
   ci: 'CI result',
   artifact: 'Published artifact',
   registry: 'Registry image',
+  signature: 'Image signature',
+  sbom: 'SBOM attestation',
   config: 'Deployment config',
   controller: 'Controller (Argo CD)',
   running: 'Running pods'

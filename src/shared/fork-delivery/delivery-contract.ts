@@ -37,6 +37,9 @@ export type DeliveryLinkId =
   | 'ci'
   | 'artifact'
   | 'registry'
+  /** Step 14.9, only when the project has a supply-chain policy. */
+  | 'signature'
+  | 'sbom'
   | 'config'
   | 'controller'
   | 'running'

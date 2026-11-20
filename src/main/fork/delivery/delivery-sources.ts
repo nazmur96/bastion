@@ -6,6 +6,7 @@ import { run } from '../devops/devops-inspect'
 import { kubectlCurrentContext, kubectlIn } from '../devops/devops-kubectl'
 import { readOwnerSource } from '../changes/owner-source-files'
 import type { DeliveryDeps } from './delivery-chain'
+import { projectSupplyChain } from './cosign-runner'
 
 const tokenSchema = z.object({ token: z.string().min(1) })
 const indexSchema = z.object({
@@ -99,6 +100,7 @@ export function deliverySources(root: string, repository: string): DeliveryDeps 
     return pinned
   }
   return {
+    supplyChain: projectSupplyChain(root),
     git: async (args) => {
       const result = await run('git', args, root, 10000)
       return { ok: result.ok, stdout: result.stdout }

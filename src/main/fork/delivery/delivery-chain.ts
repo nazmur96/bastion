@@ -6,6 +6,7 @@ import type {
   DeliveryLinkId
 } from '../../../shared/fork-delivery/delivery-contract'
 import { fileFingerprint, imageRepository, pinnedDigest } from './kustomize-digest'
+import type { SupplyChainEvidence } from './supply-chain-evidence'
 
 /** Each source is injected so every link can be tested, and swapped per runtime later. */
 export type DeliveryDeps = {
@@ -22,6 +23,8 @@ export type DeliveryDeps = {
   readProjectFile: (path: string) => Promise<string | null>
   /** kubectl with the project's kubeconfig, pinned to one context. */
   kubectl: (args: string[]) => Promise<{ ok: boolean; out: string; code: string }>
+  /** Signature and SBOM evidence for the candidate digest; null when the project has no policy. */
+  supplyChain?: (repository: string, digest: string) => Promise<SupplyChainEvidence | null>
 }
 
 const SHA = /^[0-9a-f]{40}$/
@@ -194,6 +197,18 @@ export async function readDeliveryChain(
     )
   }
 
+  // 4b. Opt-in supply chain: signature and SBOM for the exact candidate digest.
+  let requireSignature = false
+  if (deps.supplyChain && digest && repository) {
+    const evidence = await deps.supplyChain(repository, digest)
+    if (evidence) {
+      requireSignature = evidence.requireSignature
+      const source = `${repository}@${short(digest)}`
+      add('signature', evidence.signature.status, evidence.signature.detail, source)
+      add('sbom', evidence.sbom.status, evidence.sbom.detail, source)
+    }
+  }
+
   // 5. Config: the digest the controller will deploy.
   if (configError) {
     add('config', 'unknown', configError, config.configPath)
@@ -298,9 +313,9 @@ export async function readDeliveryChain(
     }
   }
 
-  const blocking = links.find(
-    (link) => ['ci', 'artifact', 'registry'].includes(link.id) && link.status !== 'verified'
-  )
+  // A required signature gates promotion; SBOM evidence stays advisory.
+  const gates = ['ci', 'artifact', 'registry', ...(requireSignature ? ['signature'] : [])]
+  const blocking = links.find((link) => gates.includes(link.id) && link.status !== 'verified')
   return {
     revision,
     digest,
