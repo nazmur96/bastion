@@ -3,6 +3,7 @@ import {
   RealAwsFailure,
   type RealAwsIdentity,
   type RealAwsResources,
+  type RealAwsBackups,
   type RealAwsBudgets
 } from '../../../shared/fork-cloud/real-aws-contract'
 import type { CloudTarget } from '../../../shared/fork-cloud/cloud-target-contract'
@@ -46,7 +47,11 @@ export class RealAwsController {
   private active = new Set<string>()
   private results = new Map<
     string,
-    { identity: RealAwsIdentity; data: RealAwsResources | RealAwsBudgets; operations: string[] }
+    {
+      identity: RealAwsIdentity
+      data: RealAwsResources | RealAwsBudgets | RealAwsBackups
+      operations: string[]
+    }
   >()
   private readonly cost: RealAwsCostDesk
   private readonly ownerRunId: string
@@ -225,7 +230,7 @@ export class RealAwsController {
   async read(
     projectId: string,
     targetId: string,
-    operation: 'resources' | 'budgets',
+    operation: 'resources' | 'budgets' | 'backups',
     requestId?: string
   ) {
     const ledger = this.dependencies.ledger

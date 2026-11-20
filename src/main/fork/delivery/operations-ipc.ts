@@ -17,6 +17,8 @@ import { FlociFailure } from '../../../shared/fork-cloud/floci-contract'
 import { readWorkloadDiagnosis } from './workload-diagnosis'
 import { probeTls, readCertificateEvidence } from './certificate-evidence'
 import { certificatesSchema } from '../../../shared/fork-delivery/certificate-contract'
+import { readBackupEvidence } from './backup-evidence'
+import { backupsSchema } from '../../../shared/fork-delivery/backup-contract'
 
 const MESSAGES: Record<string, string> = {
   invalid: 'Invalid operations request.',
@@ -33,6 +35,7 @@ const OPERATIONS = [
   'operationsVerify',
   'operationsRuns',
   'operationsCertificates',
+  'operationsBackups',
   'runbookList',
   'runbookCreate'
 ] as const
@@ -102,6 +105,17 @@ export function registerOperationsHandlers(
           const evidence = await readCertificateEvidence(request, {
             kubectl: sources.kubectl,
             probe: (host, port) => probeTls(host, port)
+          })
+          assertCurrent()
+          return { ok: true, evidence }
+        }
+        if (operation === 'operationsBackups') {
+          const request = parse(backupsSchema)
+          admitChannelOperation('bastionCloud:operationsBackups', 'operations.backups')
+          const { owner } = await provider.owner(request.projectId)
+          const evidence = await readBackupEvidence(request, {
+            kubectl: deliverySources(owner.root, request.repository).kubectl,
+            runs: () => store().list(request.projectId)
           })
           assertCurrent()
           return { ok: true, evidence }

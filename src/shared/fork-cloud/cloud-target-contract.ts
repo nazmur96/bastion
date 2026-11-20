@@ -5,6 +5,7 @@ import type {
   RealAwsResult,
   RealAwsIdentity,
   RealAwsResources,
+  RealAwsBackups,
   RealAwsBudgets,
   RealAwsCostChallenge,
   RealAwsCostGrant,
@@ -170,11 +171,11 @@ export type CloudTargetsApi = {
     projectId: string
     targetId: string
     requestId: string
-    operation: 'resources' | 'budgets' | 'cost-and-usage'
+    operation: 'resources' | 'budgets' | 'backups' | 'cost-and-usage'
   }) => Promise<
     RealAwsResult<{
       identity: RealAwsIdentity
-      data: RealAwsResources | RealAwsBudgets
+      data: RealAwsResources | RealAwsBudgets | RealAwsBackups
       operations: string[]
     }>
   >

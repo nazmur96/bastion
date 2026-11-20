@@ -36,7 +36,7 @@ export const realAwsRefSchema = z
 export const realAwsReadSchema = realAwsRefSchema
   .extend({
     requestId: z.string().uuid(),
-    operation: z.enum(['resources', 'budgets', 'cost-and-usage'])
+    operation: z.enum(['resources', 'budgets', 'backups', 'cost-and-usage'])
   })
   .strict()
 export const realAwsAcceptSchema = realAwsRefSchema
@@ -71,6 +71,22 @@ export type RealAwsBudgets = {
   accountWide: boolean
   alerts: number
   subscriberTypes: string[]
+  truncated: boolean
+}
+/** Step 14.4: RDS backup evidence per database. Identifiers and times only. */
+export type RealAwsDatabaseBackup = {
+  id: string
+  engine: string
+  status: 'verified' | 'mismatch' | 'unknown'
+  detail: string
+  retentionDays: number | null
+  latestRestorable: string | null
+  latestSnapshot: string | null
+}
+export type RealAwsBackups = {
+  at: number
+  status: 'ok' | RealAwsCode
+  databases: RealAwsDatabaseBackup[]
   truncated: boolean
 }
 export type RealAwsResult<T> =
@@ -124,7 +140,7 @@ export const realAwsReadReceiptSchema = z
     namespaceId: z.string().min(1).max(256),
     projectId: z.string().min(1).max(4096),
     targetId: z.string().uuid(),
-    operation: z.enum(['verify', 'resources', 'budgets', 'cost-and-usage']),
+    operation: z.enum(['verify', 'resources', 'budgets', 'backups', 'cost-and-usage']),
     contextFingerprint: fingerprint,
     toolFingerprint: fingerprint,
     identityFingerprint: fingerprint,

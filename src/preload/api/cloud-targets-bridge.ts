@@ -11,6 +11,7 @@ export const cloudTargetsApi: CloudTargetsApi = {
     verify: (request) => ipcRenderer.invoke('bastionCloud:operationsVerify', request),
     runs: (request) => ipcRenderer.invoke('bastionCloud:operationsRuns', request),
     certificates: (request) => ipcRenderer.invoke('bastionCloud:operationsCertificates', request),
+    backups: (request) => ipcRenderer.invoke('bastionCloud:operationsBackups', request),
     runbooks: (request) => ipcRenderer.invoke('bastionCloud:runbookList', request),
     createRunbook: (request) => ipcRenderer.invoke('bastionCloud:runbookCreate', request)
   },

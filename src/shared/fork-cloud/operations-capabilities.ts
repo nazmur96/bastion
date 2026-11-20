@@ -1,6 +1,6 @@
 import type { OperationCapability } from './operation-capabilities'
 
-/** Fork: Step 11–13 delivery, operations, runbook and real-recipe entries of the one policy registry. */
+/** Fork: Step 11–14 delivery, operations, runbook and real-recipe entries of the one policy registry. */
 export const OPERATIONS_CAPABILITIES = {
   'delivery.evidence': {
     label: 'Read delivery evidence',
@@ -48,6 +48,22 @@ export const OPERATIONS_CAPABILITIES = {
     target: 'none',
     effect: 'metadata-read',
     egress: 'endpoints',
+    consent: 'none'
+  },
+  'aws.backups': {
+    label: 'Read RDS backup evidence',
+    runsOn: 'owner',
+    target: 'selected-real',
+    effect: 'metadata-read',
+    egress: 'provider',
+    consent: 'identity-anchor'
+  },
+  'operations.backups': {
+    label: 'Read backup evidence',
+    runsOn: 'owner',
+    target: 'none',
+    effect: 'metadata-read',
+    egress: 'cluster',
     consent: 'none'
   },
   'operations.runs': {

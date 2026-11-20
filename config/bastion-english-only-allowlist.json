@@ -3470,5 +3470,166 @@
     "text": "The system map needs the desktop app.",
     "dynamic": false,
     "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Real AWS backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-text",
+    "text": "Database backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-text",
+    "text": "RDS backups: not checked · a free read. Use Read backups after verifying.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-text",
+    "text": "RDS backups: unknown ·",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-text",
+    "text": "database(s) · observed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-expression",
+    "text": "· incomplete",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-expression",
+    "text": "· last snapshot",
+    "dynamic": true,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsBackupsView.tsx",
+    "kind": "jsx-expression",
+    "text": "· no manual or automated snapshot listed",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/cloud/RealAwsCard.tsx",
+    "kind": "jsx-text",
+    "text": "Read backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Velero backups and schedules covering the application&apos;s namespace, and the latest recorded drill of a restore runbook. Read-only. A stale, failed or missing backup is a mismatch; an unreadable source is unknown. Database backups are read on the AWS target.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Velero namespace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Stale after (hours)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Drill due after (days)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Checking…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-expression",
+    "text": "Check backups",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Read",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "· namespace",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-expression",
+    "text": "unknown",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "· stale after",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "hours",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-attribute:aria-label",
+    "text": "Backup evidence",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/delivery/DeliveryBackupsSection.tsx",
+    "kind": "jsx-text",
+    "text": "Unknown ·",
+    "dynamic": false,
+    "count": 1
   }
 ]

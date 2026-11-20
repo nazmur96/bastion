@@ -115,7 +115,7 @@ export function runningReceipt(
     requestId: string
     projectId: string
     targetId: string
-    operation: 'resources' | 'budgets'
+    operation: 'resources' | 'budgets' | 'backups'
     identity: RealAwsIdentity
     ownerRunId: string
   }

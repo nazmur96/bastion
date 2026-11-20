@@ -6,6 +6,7 @@ import type {
 import type {
   RealAwsIdentity,
   RealAwsResources,
+  RealAwsBackups,
   RealAwsBudgets,
   RealAwsCode,
   RealAwsCostChallenge,
@@ -15,6 +16,7 @@ export type RealCloudState = {
   identity: RealAwsIdentity | null
   resources?: RealAwsResources
   budgets?: RealAwsBudgets
+  backups?: RealAwsBackups
   /** A pending paid-read confirmation; cancelled by dropping it, never sent. */
   challenge?: RealAwsCostChallenge
   cost?: RealAwsCostView
@@ -27,6 +29,7 @@ export type RealCloudAction =
   | 'accept'
   | 'resources'
   | 'budgets'
+  | 'backups'
   | 'cost-prepare'
   | 'cost-confirm'
   | 'cost-cancel'
@@ -129,7 +132,7 @@ export async function performRealCloudAction(
             observationId: previous.identity.observationId,
             revision: snapshot.revision
           })
-        : operation === 'resources' || operation === 'budgets'
+        : operation === 'resources' || operation === 'budgets' || operation === 'backups'
           ? await api.readRealTarget?.({ ...args, operation, requestId: createBrowserUuid() })
           : undefined
   if (!result?.ok) {
@@ -166,6 +169,8 @@ export async function performRealCloudAction(
   if ('data' in value) {
     if ('results' in value.data) {
       real.resources = value.data
+    } else if ('databases' in value.data) {
+      real.backups = value.data
     } else {
       real.budgets = value.data
     }

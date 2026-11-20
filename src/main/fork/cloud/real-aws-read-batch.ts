@@ -1,6 +1,7 @@
 import { RealAwsFailure, type RealAwsIdentity } from '../../../shared/fork-cloud/real-aws-contract'
 import type { ChangeLedger } from '../changes/change-ledger'
 import type { RealAwsSession } from './real-aws-cost'
+import { readRealAwsBackups } from './real-aws-backups'
 import { readRealAwsBudgets } from './real-aws-budgets'
 import { listRealAwsResources } from './real-aws-resources'
 import { runningReceipt, withReadReceipt } from './real-aws-read-evidence'
@@ -19,7 +20,7 @@ export async function readRealAwsBatch(
   request: {
     projectId: string
     targetId: string
-    operation: 'resources' | 'budgets'
+    operation: 'resources' | 'budgets' | 'backups'
     requestId?: string
     ledger?: ChangeLedger
     ownerRunId: string
@@ -33,7 +34,9 @@ export async function readRealAwsBatch(
     const data =
       request.operation === 'resources'
         ? await listRealAwsResources(session.call, before.accountId)
-        : await readRealAwsBudgets(session.call, before.accountId)
+        : request.operation === 'backups'
+          ? await readRealAwsBackups(session.call)
+          : await readRealAwsBudgets(session.call, before.accountId)
     const after = await session.check(false)
     if (!sameIdentity(before, after)) {
       throw new RealAwsFailure('identity-mismatch')
@@ -48,7 +51,13 @@ export async function readRealAwsBatch(
             count: item.items.length,
             truncated: item.truncated
           }))
-        : [{ code: data.status, count: data.alerts, truncated: data.truncated }]
+        : [
+            {
+              code: data.status,
+              count: 'databases' in data ? data.databases.length : data.alerts,
+              truncated: data.truncated
+            }
+          ]
     return { value, results }
   }
   const { requestId, ledger } = request

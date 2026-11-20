@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import type { CloudTarget } from '../../../../shared/fork-cloud/cloud-target-contract'
 import type { RealCloudState } from './real-cloud-actions'
 import { cloudConnections } from './cloud-connections-state'
+import { RealAwsBackupsView } from './RealAwsBackupsView'
 import { RealAwsCostSection } from './RealAwsCostSection'
 import { CloudResourcesView } from './CloudResourcesView'
 import { normalizeResourceListing } from '../../../../shared/fork-cloud/cloud-resource-view'
@@ -103,6 +104,16 @@ export function RealAwsCard({
         >
           Read budgets
         </Button>
+        <Button
+          title={capabilityNote('aws.backups')}
+          variant="outline"
+          disabled={pending || !identity?.anchored}
+          onClick={() => {
+            void cloudConnections.realAction('backups')
+          }}
+        >
+          Read backups
+        </Button>
       </div>
       {state?.resources && (
         <div aria-label="Real AWS resources">
@@ -132,6 +143,7 @@ export function RealAwsCard({
         )}
         <p>A budget is not a spending cap. Missing or denied evidence does not mean zero spend.</p>
       </div>
+      <RealAwsBackupsView backups={state?.backups} />
       <RealAwsCostSection
         state={state}
         pending={pending}

@@ -125,7 +125,11 @@ export function registerRealAwsHandlers(
         }
         admitChannelOperation(
           'bastionCloud:readRealTarget',
-          parsed.data.operation === 'resources' ? 'aws.resources' : 'aws.budgets'
+          parsed.data.operation === 'resources'
+            ? 'aws.resources'
+            : parsed.data.operation === 'backups'
+              ? 'aws.backups'
+              : 'aws.budgets'
         )
         const value = await provider.real.read(
           parsed.data.projectId,

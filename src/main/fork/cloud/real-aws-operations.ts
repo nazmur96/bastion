@@ -64,6 +64,21 @@ const operations = {
     query:
       '{Functions:Functions[].{FunctionName:FunctionName,FunctionArn:FunctionArn},NextMarker:NextMarker}'
   },
+  // Step 14.4 backup evidence: identifiers, retention and times only; no endpoints or secrets.
+  'rds-instances': {
+    service: 'rds',
+    action: 'describe-db-instances',
+    params: z.object({ MaxRecords: z.literal(100), Marker: token }).strict(),
+    query:
+      '{DBInstances:DBInstances[].{Id:DBInstanceIdentifier,Engine:Engine,Status:DBInstanceStatus,Retention:BackupRetentionPeriod,LatestRestorable:LatestRestorableTime},Marker:Marker}'
+  },
+  'rds-snapshots': {
+    service: 'rds',
+    action: 'describe-db-snapshots',
+    params: z.object({ MaxRecords: z.literal(100), Marker: token }).strict(),
+    query:
+      '{DBSnapshots:DBSnapshots[].{Instance:DBInstanceIdentifier,Id:DBSnapshotIdentifier,Created:SnapshotCreateTime,Status:Status,Type:SnapshotType},Marker:Marker}'
+  },
   budgets: {
     service: 'budgets',
     action: 'describe-budgets',
@@ -175,7 +190,9 @@ export async function callRealAwsOperation(
       'budgets',
       'notifications',
       'subscribers',
-      'cost-and-usage'
+      'cost-and-usage',
+      'rds-instances',
+      'rds-snapshots'
     ])
     .parse(rawOperation)
   const operation = operations[id],
