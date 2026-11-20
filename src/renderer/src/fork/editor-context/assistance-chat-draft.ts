@@ -32,12 +32,13 @@ export function draftAssistanceInOpenChat(
   if (!tab || !isStructuredTab(tab) || structuredAgentSessionOwnerForTab(state, tab) !== hostId) {
     return false
   }
-  const ambiguous = Object.values(state.unifiedTabsByWorktree).some((tabs) =>
+  const ambiguous = Object.entries(state.unifiedTabsByWorktree).some(([ownerWorktreeId, tabs]) =>
     tabs.some(
       (other) =>
         isStructuredTab(other) &&
         other.entityId === tab.entityId &&
-        structuredAgentSessionOwnerForTab(state, other) !== hostId
+        (ownerWorktreeId !== worktreeId ||
+          structuredAgentSessionOwnerForTab(state, other) !== hostId)
     )
   )
   if (ambiguous) {

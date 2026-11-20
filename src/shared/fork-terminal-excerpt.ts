@@ -12,13 +12,15 @@ const PATTERNS: RegExp[] = [
   /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/g,
   /\beyJ[\w-]+\.[\w-]+\.[\w-]+/g,
   /\b(?:ghp|gho|ghu|ghs|github_pat|glpat|xox[abprs])[-_][\w-]{10,}/g,
-  /\bBearer\s+[\w.~+/-]+=*/gi
+  /\bBearer\s+[\w.~+/-]+=*/gi,
+  /\bAuthorization\s*:\s*Basic\s+[A-Za-z0-9+/]+=*/gi,
+  /\b[a-z][a-z0-9+.-]*:\/\/[^\s/:@]+:[^\s/@]+@/gi
 ]
 // key=value or key: value where the key names a secret; the value is replaced, the key kept.
 const ASSIGNMENT =
-  /\b([\w.-]*(?:secret|password|passwd|token|api[_-]?key|access[_-]?key|private[_-]?key|credential)[\w.-]*)(\s*[=:]\s*)("[^"]*"|'[^']*'|\S+)/gi
+  /\b([\w.-]*(?:secret|password|passwd|token|api[_-]?key|access[_-]?key|private[_-]?key|credential)[\w.-]*)(["']?\s*[=:]\s*)("[^"]*"|'[^']*'|\S+)/gi
 
-export function terminalExcerpt(selection: string, limit = 1800): TerminalExcerpt {
+export function redactTerminalOutput(selection: string): { text: string; redactions: number } {
   let redactions = 0
   let text = selection.replace(ANSI, '').replace(/\r/g, '')
   for (const pattern of PATTERNS) {
@@ -34,6 +36,11 @@ export function terminalExcerpt(selection: string, limit = 1800): TerminalExcerp
     redactions += 1
     return `${key}${separator}${REDACTED}`
   })
+  return { text, redactions }
+}
+
+export function terminalExcerpt(selection: string, limit = 1800): TerminalExcerpt {
+  const { text, redactions } = redactTerminalOutput(selection)
   const lines = text.split('\n').map((line) => line.trimEnd())
   while (lines.length && !lines[0].trim()) {
     lines.shift()

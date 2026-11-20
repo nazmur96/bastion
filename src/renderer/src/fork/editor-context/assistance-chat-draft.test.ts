@@ -72,15 +72,18 @@ it('refuses stale context, wrong host, switched workspace, closed chat and overs
   expect(draftAssistanceInOpenChat('wt', 'tab', 'runtime:one', 'draft', () => true)).toBe(false)
   expect(m.append).not.toHaveBeenCalled()
 })
-it('refuses same conversation IDs mirrored from different hosts', () => {
-  m.state.unifiedTabsByWorktree.other = [
-    {
-      ...m.state.unifiedTabsByWorktree.wt[0],
-      id: 'other',
-      worktreeId: 'other',
-      executionHostId: 'local'
-    }
-  ]
-  expect(draftAssistanceInOpenChat('wt', 'tab', 'runtime:one', 'draft', () => true)).toBe(false)
-  expect(m.append).not.toHaveBeenCalled()
-})
+it.each(['local', 'runtime:one'])(
+  'refuses conversation IDs mirrored in another worktree on %s',
+  (executionHostId) => {
+    m.state.unifiedTabsByWorktree.other = [
+      {
+        ...m.state.unifiedTabsByWorktree.wt[0],
+        id: 'other',
+        worktreeId: 'other',
+        executionHostId
+      }
+    ]
+    expect(draftAssistanceInOpenChat('wt', 'tab', 'runtime:one', 'draft', () => true)).toBe(false)
+    expect(m.append).not.toHaveBeenCalled()
+  }
+)

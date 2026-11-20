@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { getIntlLocale } from '@/i18n/i18n'
+import { useAppStore } from '@/store'
 import { capabilityNote } from '../../../../shared/fork-cloud/operation-capabilities'
 import {
   deliveryConfigSchema,
@@ -13,6 +14,7 @@ import type { WorkloadDiagnosis } from '../../../../shared/fork-delivery/operati
 import { DeliveryDiagnosisSection } from './DeliveryDiagnosisSection'
 import { DeliveryVerificationSection } from './DeliveryVerificationSection'
 import { ownerOperation } from './operations-owner-client'
+import { startWorkspaceHost } from '../workbench/start-project-actions'
 
 const LABELS: Record<string, string> = {
   revision: 'Source revision',
@@ -63,12 +65,19 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
   const [error, setError] = useState<string | null>(null)
   const [promoting, setPromoting] = useState(false)
   const [promoted, setPromoted] = useState<string | null>(null)
-  const [diagnosis, setDiagnosis] = useState<WorkloadDiagnosis | null>(null)
+  const [diagnosisSnapshot, setDiagnosis] = useState<{
+    scope: string
+    result: WorkloadDiagnosis
+  } | null>(null)
   const parsed = deliveryConfigSchema.safeParse({
     projectId: worktreeId,
     ...values,
     revision: revision.trim() || null
   })
+  const config = parsed.success ? parsed.data : null
+  const hostId = useAppStore(() => startWorkspaceHost(worktreeId))
+  const diagnosisScope = JSON.stringify([config, hostId])
+  const diagnosis = diagnosisSnapshot?.scope === diagnosisScope ? diagnosisSnapshot.result : null
   const read = async (): Promise<void> => {
     if (!parsed.success) {
       return
@@ -144,7 +153,10 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
                 className="rounded-md border border-input bg-background px-2 py-1 font-mono text-sm"
                 value={values[field.key] ?? ''}
                 placeholder={field.placeholder}
-                onChange={(event) => setValues({ ...values, [field.key]: event.target.value })}
+                onChange={(event) => {
+                  setDiagnosis(null)
+                  setValues({ ...values, [field.key]: event.target.value })
+                }}
               />
             </label>
           ))}
@@ -154,7 +166,10 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
               className="rounded-md border border-input bg-background px-2 py-1 font-mono text-sm"
               value={revision}
               placeholder="HEAD"
-              onChange={(event) => setRevision(event.target.value)}
+              onChange={(event) => {
+                setDiagnosis(null)
+                setRevision(event.target.value)
+              }}
             />
           </label>
         </div>
@@ -214,15 +229,13 @@ export function WorkspaceDeliveryPage({ worktreeId }: { worktreeId: string }): R
         </section>
       )}
       <DeliveryDiagnosisSection
-        config={parsed.success ? parsed.data : null}
+        key={diagnosisScope}
+        config={config}
+        hostId={hostId}
         diagnosis={diagnosis}
-        onDiagnosis={setDiagnosis}
+        onDiagnosis={(result) => setDiagnosis(result ? { scope: diagnosisScope, result } : null)}
       />
-      <DeliveryVerificationSection
-        projectId={worktreeId}
-        config={parsed.success ? parsed.data : null}
-        diagnosis={diagnosis}
-      />
+      <DeliveryVerificationSection projectId={worktreeId} config={config} diagnosis={diagnosis} />
       {promoting && chain?.digest && (
         <Dialog open onOpenChange={(open) => !open && setPromoting(false)}>
           <DialogContent surface="security">

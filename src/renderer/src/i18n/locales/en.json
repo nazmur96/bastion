@@ -24000,6 +24000,14 @@
     "creating": "Creating source file",
     "newChecks": "New check change"
   },
+  "assistanceDraft": {
+    "stale": "This draft is out of date. Open a new one."
+  },
+  "deliveryDiagnosis": {
+    "askAgent": "Ask an agent…",
+    "draftTitle": "Ask an agent about this diagnosis",
+    "draftNote": "Review the redacted evidence before sharing. Adding the draft leaves it unsent."
+  },
   "terminalAssist": {
     "menu": "Ask agent about selection",
     "copied": "Draft copied. Review it before sending.",
