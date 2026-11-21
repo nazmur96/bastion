@@ -42,7 +42,7 @@ const exited = new Promise((resolve) =>
 let failure = null
 try {
   let browser = null
-  for (let attempt = 0; attempt < 90 && !browser; attempt++) {
+  for (let attempt = 0; attempt < 240 && !browser; attempt++) {
     try {
       browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`)
     } catch {
@@ -50,7 +50,7 @@ try {
     }
   }
   if (!browser) {
-    throw new Error('no CDP endpoint within 90 s')
+    throw new Error('no CDP endpoint within 240 s (a first AppImage run may unpack first)')
   }
   note('attached over CDP')
   let page = null
