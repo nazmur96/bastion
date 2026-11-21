@@ -98,6 +98,19 @@ try {
     note(`no failure evidence: ${inner.message}`)
   }
 } finally {
+  if (failure && process.platform === 'darwin') {
+    // A hung main process: keep the whole screen (system prompts are outside the window) and
+    // a stack sample of the app before it is stopped.
+    for (const [command, args] of [
+      ['screencapture', ['-x', join(out, 'screen.png')]],
+      ['sample', [String(child.pid), '3', '-file', join(out, 'main-sample.txt')]]
+    ]) {
+      await new Promise((resolve) =>
+        spawn(command, args, { stdio: 'ignore' }).on('exit', resolve).on('error', resolve)
+      )
+    }
+    note('kept screen.png and main-sample.txt')
+  }
   child.kill('SIGTERM')
   const result = await Promise.race([
     exited,
