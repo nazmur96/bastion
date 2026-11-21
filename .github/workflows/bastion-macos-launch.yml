@@ -1,0 +1,54 @@
+name: Bastion macOS launch check
+
+# Launch an unsigned Apple Silicon build from a finished desktop build run on a disposable
+# profile and prove Home renders. Only manual dispatch starts this workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Desktop build run whose bastion-macos-arm64 artifact is checked
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  macos-launch:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+      # Only the CDP client is needed to drive the packaged app.
+      - run: npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/smoke" playwright-core@1.64.1
+      - uses: actions/download-artifact@v8
+        with:
+          name: bastion-macos-arm64
+          path: artifacts
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: Unpack the app
+        run: |
+          zip=$(ls artifacts/*.zip | head -1)
+          shasum -a 256 artifacts/*.zip artifacts/*.dmg
+          ditto -x -k "$zip" "$RUNNER_TEMP/app"
+      - name: Launch on a disposable profile
+        run: |
+          app=$(ls -d "$RUNNER_TEMP"/app/*.app | head -1)
+          exe="$app/Contents/MacOS/$(defaults read "$app/Contents/Info" CFBundleExecutable)"
+          echo "app: $app"
+          cp config/scripts/bastion-packaged-launch-smoke.mjs "$RUNNER_TEMP/smoke/"
+          node "$RUNNER_TEMP/smoke/bastion-packaged-launch-smoke.mjs" "$exe" "$RUNNER_TEMP/launch"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: bastion-macos-launch
+          if-no-files-found: warn
+          retention-days: 14
+          path: ${{ runner.temp }}/launch
