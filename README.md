@@ -11,7 +11,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/status-release%20candidate-c7b8ff?style=flat" alt="Status: release candidate" />
   <img src="https://img.shields.io/badge/license-MIT-a8e1ff?style=flat" alt="License: MIT" />
-  <img src="https://img.shields.io/badge/platform-Linux%20x64-f6c4ec?style=flat" alt="Platform: Linux x64" />
+  <img src="https://img.shields.io/badge/platform-Linux%20x64%20%C2%B7%20macOS%20Apple%20Silicon-f6c4ec?style=flat" alt="Platform: Linux x64 and macOS Apple Silicon" />
 </p>
 
 <p align="center">
@@ -52,9 +52,20 @@
 
 ## Status
 
-Release candidate for **Linux x64**. macOS, Windows and remote (SSH) hosts are partly supported
-or not yet validated. See the [support matrix](docs/bastion/support-matrix.md) for exactly what
+Release candidate for **Linux x64** and **macOS Apple Silicon** (unsigned). Windows and Intel
+Macs are not built yet; remote (SSH) hosts are partly supported. See the [support matrix](docs/bastion/support-matrix.md) for exactly what
 works where, and its known limits.
+
+## Download
+
+Get the latest installer from [Releases](https://github.com/nazmur96/bastion/releases/latest).
+
+- **Linux x64:** `bastion-linux.AppImage` (make it executable, then run it), or the `.deb` /
+  `.rpm` package for your distribution.
+- **macOS Apple Silicon:** `bastion-macos-arm64.dmg`. Drag Bastion to Applications. The build
+  is not signed or notarized yet, so macOS blocks the first launch: open **System Settings →
+  Privacy & Security** and choose **Open Anyway**, or run
+  `xattr -dr com.apple.quarantine /Applications/Bastion.app` once.
 
 ## Run it from source
 
@@ -66,8 +77,6 @@ cd bastion
 pnpm install
 pnpm dev
 ```
-
-Installers will be attached to [Releases](https://github.com/nazmur96/bastion/releases) once the first one is cut.
 
 ## Credits
 
