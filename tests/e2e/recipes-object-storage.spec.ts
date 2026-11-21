@@ -296,3 +296,31 @@ test('14.6 domain and HTTPS recipe connects to a zone and creates a DNS-validate
   expect(main).toContain('data "aws_route53_zone" "this"')
   expect(main).toContain('aws_acm_certificate_validation')
 })
+
+test('14.8 secret rotation: managed rotation is validate-only on Floci; manual writes a runbook', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  await openBastionPage(orcaPage, 'Recipes')
+  const card = orcaPage.getByTestId('recipe-directory')
+  const form = orcaPage.getByTestId('recipe-secret-rotation')
+  await form.getByLabel('Secret name', { exact: true }).fill('checkout/db-password')
+  await form
+    .getByLabel('Rotation function (managed only)', { exact: true })
+    .fill('checkout-rotation')
+  await clickCloudControl(form.getByRole('button', { name: 'Create rotation files', exact: true }))
+  await clickCloudControl(
+    orcaPage.getByRole('dialog').getByRole('button', { name: 'Create rotation files', exact: true })
+  )
+  await expect(card.getByTestId('recipe-floci-unsupported')).toContainText(
+    'aws_secretsmanager_secret_rotation'
+  )
+  await expect(card).toContainText('runbooks/rotate-checkout-db-password.md')
+  const book = readFileSync(join(seededRepoPath, 'runbooks/rotate-checkout-db-password.md'), 'utf8')
+  expect(book).toContain('rotate-secret --secret-id "checkout/db-password"')
+  rmSync(join(seededRepoPath, 'runbooks'), { recursive: true, force: true })
+})

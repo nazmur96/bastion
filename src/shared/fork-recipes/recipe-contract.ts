@@ -7,6 +7,7 @@ import { containerRegistrySchema, workloadRoleSchema } from './registry-and-role
 import { messageQueueSchema, notificationTopicSchema } from './messaging-recipes'
 import { keyValueTableSchema } from './key-value-table'
 import { domainHttpsSchema } from './domain-and-https'
+import { secretRotationSchema } from './secret-rotation'
 
 /** Fork: Recipes page ↔ main contract (Step 10.1). */
 export type RecipeStep = {
@@ -47,7 +48,10 @@ export const recipeCreateSchema = z.discriminatedUnion('recipe', [
   z
     .object({ projectId, recipe: z.literal('key-value-table'), input: keyValueTableSchema })
     .strict(),
-  z.object({ projectId, recipe: z.literal('domain-https'), input: domainHttpsSchema }).strict()
+  z.object({ projectId, recipe: z.literal('domain-https'), input: domainHttpsSchema }).strict(),
+  z
+    .object({ projectId, recipe: z.literal('secret-rotation'), input: secretRotationSchema })
+    .strict()
 ])
 export type RecipeCreateRequest = z.infer<typeof recipeCreateSchema>
 export const recipeReadSchema = z.object({ projectId, directory: recipeDirectorySchema }).strict()

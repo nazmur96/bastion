@@ -7,6 +7,7 @@ import { renderContainerRegistry, renderWorkloadRole } from './registry-and-role
 import { renderMessageQueue, renderNotificationTopic } from './messaging-recipes'
 import { renderKeyValueTable } from './key-value-table'
 import { renderDomainHttps } from './domain-and-https'
+import { renderSecretRotation } from './secret-rotation'
 
 /** Fork: every recipe Bastion offers. Each renders new files under its own infra directory. */
 export function renderRecipe(request: RecipeCreateRequest): {
@@ -37,5 +38,7 @@ export function renderRecipe(request: RecipeCreateRequest): {
       return { directory: request.input.directory, files: renderKeyValueTable(request.input) }
     case 'domain-https':
       return { directory: request.input.directory, files: renderDomainHttps(request.input) }
+    case 'secret-rotation':
+      return { directory: request.input.directory, files: renderSecretRotation(request.input) }
   }
 }

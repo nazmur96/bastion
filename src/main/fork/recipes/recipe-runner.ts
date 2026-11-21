@@ -23,10 +23,10 @@ export const OVERRIDE_NAME = 'zz_bastion_floci_override.tf'
  * Resource types Floci serves through real Docker backends, which Bastion's restricted emulator
  * forbids. Floci may accept their creation but cannot delete them (for example ECR's backing
  * registry), so delivering them to Floci would leave stuck resources. Validate only; apply on a
- * real target.
+ * real target. A rotation schedule is included: it invokes a Lambda, which Floci runs in Docker.
  */
 const FLOCI_DOCKER_BACKED =
-  /resource\s+"(aws_db_instance|aws_rds_cluster|aws_ecr_repository|aws_instance|aws_launch_template|aws_ecs_[a-z_]+|aws_eks_[a-z_]+|aws_lambda_function|aws_elasticache_[a-z_]+|aws_msk_[a-z_]+|aws_memorydb_[a-z_]+|aws_neptune_[a-z_]+|aws_docdb_[a-z_]+)"/
+  /resource\s+"(aws_secretsmanager_secret_rotation|aws_db_instance|aws_rds_cluster|aws_ecr_repository|aws_instance|aws_launch_template|aws_ecs_[a-z_]+|aws_eks_[a-z_]+|aws_lambda_function|aws_elasticache_[a-z_]+|aws_msk_[a-z_]+|aws_memorydb_[a-z_]+|aws_neptune_[a-z_]+|aws_docdb_[a-z_]+)"/
 
 export function flociUnsupportedResource(files: RecipeFile[]): string | null {
   for (const file of files) {
