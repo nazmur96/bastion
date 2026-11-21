@@ -80,6 +80,23 @@ try {
 } catch (error) {
   failure = error
   note(`FAILED: ${error.message}`)
+  // Evidence for a failed launch: every window's URL and title, then the first one's screen and text.
+  try {
+    const browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`)
+    const pages = browser.contexts().flatMap((context) => context.pages())
+    for (const item of pages) {
+      note(`window: ${item.url()} · ${await item.title().catch(() => '?')}`)
+    }
+    const first = pages.find((item) => item.url().startsWith('file:')) ?? pages[0]
+    if (first) {
+      await first.screenshot({ path: join(out, 'failure.png') }).catch(() => {})
+      const text = await first.evaluate(() => document.body?.innerText ?? '').catch(() => '')
+      note(`visible text: ${text.slice(0, 1500).replace(/\s+/g, ' ')}`)
+    }
+    await browser.close()
+  } catch (inner) {
+    note(`no failure evidence: ${inner.message}`)
+  }
 } finally {
   child.kill('SIGTERM')
   const result = await Promise.race([
