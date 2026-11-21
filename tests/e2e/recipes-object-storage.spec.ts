@@ -272,3 +272,27 @@ test('14.7 queue, topic and table recipes create files, a config example each, a
   expect(tfvars).toMatch(/deletion_protection\s+= true/)
   expect(tfvars).toMatch(/sort_key\s+= null/)
 })
+
+test('14.6 domain and HTTPS recipe connects to a zone and creates a DNS-validated certificate', async ({
+  orcaPage,
+  seededRepoPath
+}) => {
+  test.skip(process.platform === 'win32', 'POSIX controlled Terraform fixture')
+  writeFileSync(join(seededRepoPath, 'mise.toml'), '[tools]\nterraform = "1.16.5"\n', {
+    flag: 'wx'
+  })
+  await openBastionPage(orcaPage, 'Recipes')
+  const form = orcaPage.getByTestId('recipe-domain-https')
+  await form.getByLabel('Hosted zone', { exact: true }).fill('example.com')
+  await form.getByLabel('Application name', { exact: true }).fill('app.example.com')
+  await form.getByLabel('Target hostname', { exact: true }).fill('lb.example.net')
+  await clickCloudControl(form.getByRole('button', { name: 'Create domain files', exact: true }))
+  await clickCloudControl(
+    orcaPage.getByRole('dialog').getByRole('button', { name: 'Create domain files', exact: true })
+  )
+  const card = orcaPage.getByTestId('recipe-directory')
+  await expect(card).toContainText('config/APP_PUBLIC_URL.env.example')
+  const main = readFileSync(join(seededRepoPath, 'infra/app-example-com-https/main.tf'), 'utf8')
+  expect(main).toContain('data "aws_route53_zone" "this"')
+  expect(main).toContain('aws_acm_certificate_validation')
+})

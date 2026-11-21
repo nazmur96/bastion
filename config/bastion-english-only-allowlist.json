@@ -4226,5 +4226,166 @@
     "text": "Writer role (optional)",
     "dynamic": false,
     "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "jsx-attribute:title",
+    "text": "Domain and HTTPS",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "jsx-attribute:description",
+    "text": "Adds a DNS record for the application in an existing Route 53 hosted zone and an ACM certificate validated through DNS records in that zone. Apply waits until the certificate is issued. The zone itself is never created or changed, and existing records are never overwritten.",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Hosted zone",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "example.com",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Application name",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "app.example.com",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Points to",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "a hostname (CNAME)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "an AWS load balancer or CloudFront (alias)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Target hostname",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "my-lb.elb.amazonaws.com",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Target hosted zone id (alias only)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "Z…",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Extra certificate names (optional)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:placeholder",
+    "text": "www.example.com",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Certificate for",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "a load balancer or API (this region)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "CloudFront (us-east-1)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config variable",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Config directory",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Infra directory (new)",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Owner tag",
+    "dynamic": false,
+    "count": 1
+  },
+  {
+    "filePath": "src/renderer/src/fork/recipes/DomainHttpsForm.tsx",
+    "kind": "object-property:label",
+    "text": "Project tag",
+    "dynamic": false,
+    "count": 1
   }
 ]

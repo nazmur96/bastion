@@ -8,6 +8,7 @@ import { SecretReferenceForm } from './SecretReferenceForm'
 import { PostgresDatabaseForm } from './PostgresDatabaseForm'
 import { ContainerRegistryForm, WorkloadRoleForm } from './RegistryAndRoleForms'
 import { KeyValueTableForm, MessageQueueForm, NotificationTopicForm } from './StorageAndQueueForms'
+import { DomainHttpsForm } from './DomainHttpsForm'
 import { RecipeDirectoryCard } from './RecipeDirectoryCard'
 
 /** Fork: Step 10.1 Recipes page. Reviewed source recipes, delivered to a local emulator. */
@@ -80,6 +81,7 @@ export function WorkspaceRecipesPage({ worktreeId }: { worktreeId: string }): Re
           <MessageQueueForm projectId={worktreeId} onCreated={setSnapshot} />
           <NotificationTopicForm projectId={worktreeId} onCreated={setSnapshot} />
           <KeyValueTableForm projectId={worktreeId} onCreated={setSnapshot} />
+          <DomainHttpsForm projectId={worktreeId} onCreated={setSnapshot} />
         </>
       )}
       <section className="workspace-card space-y-2">

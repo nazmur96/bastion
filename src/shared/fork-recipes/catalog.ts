@@ -6,6 +6,7 @@ import { renderPostgresDatabase } from './postgres-database'
 import { renderContainerRegistry, renderWorkloadRole } from './registry-and-role'
 import { renderMessageQueue, renderNotificationTopic } from './messaging-recipes'
 import { renderKeyValueTable } from './key-value-table'
+import { renderDomainHttps } from './domain-and-https'
 
 /** Fork: every recipe Bastion offers. Each renders new files under its own infra directory. */
 export function renderRecipe(request: RecipeCreateRequest): {
@@ -34,5 +35,7 @@ export function renderRecipe(request: RecipeCreateRequest): {
       return { directory: request.input.directory, files: renderNotificationTopic(request.input) }
     case 'key-value-table':
       return { directory: request.input.directory, files: renderKeyValueTable(request.input) }
+    case 'domain-https':
+      return { directory: request.input.directory, files: renderDomainHttps(request.input) }
   }
 }
