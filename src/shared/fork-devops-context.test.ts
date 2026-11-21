@@ -15,7 +15,7 @@ contexts:
 - context:
     cluster: eks
     user: eks
-  name: arn:aws:eks:eu-central-1:750702271569:cluster/prod
+  name: arn:aws:eks:eu-central-1:123456789012:cluster/prod
 current-context: kind-dev
 kind: Config
 users: []
@@ -29,10 +29,10 @@ describe('parseKubeContext', () => {
   it('handles a context without a namespace, and no context at all', () => {
     const eks = KUBECONFIG.replace(
       'current-context: kind-dev',
-      'current-context: arn:aws:eks:eu-central-1:750702271569:cluster/prod'
+      'current-context: arn:aws:eks:eu-central-1:123456789012:cluster/prod'
     )
     expect(parseKubeContext(eks)).toEqual({
-      context: 'arn:aws:eks:eu-central-1:750702271569:cluster/prod'
+      context: 'arn:aws:eks:eu-central-1:123456789012:cluster/prod'
     })
     expect(parseKubeContext('apiVersion: v1\n')).toBeNull()
   })
