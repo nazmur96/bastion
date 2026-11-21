@@ -23,13 +23,19 @@ const note = (line) => {
   log.push(line)
   console.log(line)
 }
-const env = {
-  ...process.env,
-  HOME: home,
-  XDG_CONFIG_HOME: join(home, '.config'),
-  XDG_DATA_HOME: join(home, '.local/share'),
-  XDG_CACHE_HOME: join(home, '.cache')
-}
+// macOS keeps the real HOME: Electron's safeStorage needs the user's login keychain, and an
+// empty HOME makes macOS block startup on a "Keychain Not Found" prompt. The disposable
+// --user-data-dir still isolates every Bastion file.
+const env =
+  process.platform === 'darwin'
+    ? { ...process.env }
+    : {
+        ...process.env,
+        HOME: home,
+        XDG_CONFIG_HOME: join(home, '.config'),
+        XDG_DATA_HOME: join(home, '.local/share'),
+        XDG_CACHE_HOME: join(home, '.cache')
+      }
 const child = spawn(executable, [`--user-data-dir=${profile}`, `--remote-debugging-port=${port}`], {
   env,
   stdio: ['ignore', 'pipe', 'pipe']
